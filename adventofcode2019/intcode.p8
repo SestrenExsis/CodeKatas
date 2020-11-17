@@ -948,13 +948,16 @@ function intcode:new(
 	t, --table of str numbers
 	f  --function for numbers
 	)
+	local obj={
+		pc=0,      -- program counter
+		cy=0,      -- cycles
+		hlt=false, -- halted?
+		ram={},    -- memory
+		cmd="",    -- last command
+	}
 	if f==nil then
 		f=df_double
 	end
-	local obj={
-		pc=0,
-		ram={},
-	}
 	local idx=0
 	for s in all(t) do
 		obj.ram[idx]=f(s)
@@ -974,47 +977,96 @@ function intcode:addr(f)
 	return res
 end
 
-function intcode:run()
-	while true do
-		local n0=self.ram[self.pc]
-		local n1=self.ram[self.pc+1]
-		local n2=self.ram[self.pc+2]
-		local n3=self.ram[self.pc+3]
-		local op=tonum(fstr(n0))
-		if op==1 then
-			local a=self:addr(n1)
-			local b=self:addr(n2)
-			local c=self:addr(n3)
-			self.ram[c.k]=fadd(a.v,b.v)
-			self.pc+=4
-			--?"add "..a.k.." "..b.k.." "..c.k
-		elseif op==2 then
-			local a=self:addr(n1)
-			local b=self:addr(n2)
-			local c=self:addr(n3)
-			self.ram[c.k]=fmul(a.v,b.v)
-			self.pc+=4
-			--?"add "..a.k.." "..b.k.." "..c.k
-		else --op==99
-			--?"hlt"
-			break
-		end
+function intcode:tick()
+	if self.hlt then
+		return false
 	end
+	local n0=self.ram[self.pc]
+	local n1=self.ram[self.pc+1]
+	local n2=self.ram[self.pc+2]
+	local n3=self.ram[self.pc+3]
+	local op=tonum(fstr(n0))
+	if op==1 then
+		local a=self:addr(n1)
+		local b=self:addr(n2)
+		local c=self:addr(n3)
+		self.ram[c.k]=fadd(a.v,b.v)
+		self.pc+=4
+		self.cmd="add "..a.k.." "..b.k.." "..c.k
+	elseif op==2 then
+		local a=self:addr(n1)
+		local b=self:addr(n2)
+		local c=self:addr(n3)
+		self.ram[c.k]=fmul(a.v,b.v)
+		self.pc+=4
+		self.cmd="mul "..a.k.." "..b.k.." "..c.k
+	else --op==99
+		self.cmd="hlt"
+		self.hlt=true
+	end
+	self.cy+=1
+	return true
+end
+
+function intcode:run()
+	while not self.hlt do
+		self:tick()
+	end
+end
+
+function intcode:draw(
+	x,
+	y
+	)
+	print(self.pc,x,y)
+	print(self.cy,x,y+6)
+	print(fstr(self.ram[0]),x,y+18)
 end
 -->8
 -- main
-local f=df_double
-_vm=intcode:new(_code,f)
-_vm.ram[1]=f("12")
-_vm.ram[2]=f("2")
-_vm:run()
-?fstr(_vm.ram[0])
-_vm2=intcode:new(_code,f)
-_vm2.ram[1]=f("23")
-_vm2.ram[2]=f("47")
-_vm2:run()
-?fstr(_vm2.ram[0])
 
+function _init()
+	_f=df_double
+	-- part one
+	_vm1=intcode:new(_code,_f)
+	_vm1.ram[1]=_f("12")
+	_vm1.ram[2]=_f("2")
+	-- part two
+	_vm2=intcode:new(_code,_f)
+	_vm2.ram[1]=_f("23")
+	_vm2.ram[2]=_f("47")
+	-- command histories
+	_cmds={{},{}}
+end
+
+function _update()
+	if _vm1:tick() then
+		add(_cmds[1],_vm1.cmd)
+	end
+	if _vm2:tick() then
+		add(_cmds[2],_vm2.cmd)
+	end
+end
+
+function _draw()
+	cls()
+	_vm1:draw(0,0)
+	for i=1,8 do
+		local idx=#_cmds[1]-i+1
+		if idx<1 then
+			break
+		end
+		print(_cmds[1][idx],0,6*i+30)
+	end
+	_vm2:draw(64,0)
+	for i=1,8 do
+		local idx=#_cmds[2]-i+1
+		if idx<1 then
+			break
+		end
+		print(_cmds[2][idx],64,6*i+30)
+	end
+end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
