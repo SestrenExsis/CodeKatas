@@ -5,9 +5,7 @@ __lua__
 -- by sestrenexsis
 
 -- https://creativecommons.org/licenses/by-nc-sa/4.0/
-_code={"3","0","4","0","99"}
-
-_code2={
+_code={
 	"3",
 	"225",
 	"1",
@@ -1488,58 +1486,109 @@ function intcode:tick()
 	local f0=self.ram[self.pc]
 	local n0=tonum(fstr(f0))
 	local op=n0%100
+	local pr={}
+	add(pr,(n0\100)%10)
+	add(pr,(n0\1000)%10)
+	add(pr,(n0\10000)%10)
 	if op==1 then
 		-- 01: add
-		local i1=self.pc+1
-		local i2=self.pc+2
-		local i3=self.pc+3
-		local f1=self.ram[i1]
-		local f2=self.ram[i2]
-		local f3=self.ram[i3]
-		local a1=self:addr(f1)
-		local a2=self:addr(f2)
-		local a3=self:addr(f3)
-		self.ram[a3.k]=fadd(a1.v,a2.v)
+		local cmd="mul "
+		-- 1st parameter
+		local f1=self.ram[self.pc+1]
+		local p1=nil
+		local c1=fstr(f1)
+		if pr[1]==0 then
+			p1=self:addr(f1).v
+		else
+			p1=f1
+			cmd=cmd.."#"
+		end
+		cmd=cmd..c1.." "
+		-- 2nd parameter
+		local f2=self.ram[self.pc+2]
+		local p2=nil
+		local c2=fstr(f2)
+		if pr[2]==0 then
+			p2=self:addr(f2).v
+		else
+			p2=f2
+			cmd=cmd.."#"
+		end
+		cmd=cmd..c2.." "
+		-- 3rd parameter
+		local f3=self.ram[self.pc+3]
+		local p3=tonum(fstr(f3))
+		local c3=fstr(f3)
+		cmd=cmd..c3
+		-- operation
+		self.ram[p3]=fadd(p1,p2)
 		self.pc+=4
-		self.cmd="add "..a1.k.." "..b1.k.." "..c1.k
+		self.cmd=cmd
 	elseif op==2 then
 		-- 02: multiply
-		local i1=self.pc+1
-		local i2=self.pc+2
-		local i3=self.pc+3
-		local f1=self.ram[i1]
-		local f2=self.ram[i2]
-		local f3=self.ram[i3]
-		local a1=self:addr(f1)
-		local a2=self:addr(f2)
-		local a3=self:addr(f3)
-		self.ram[a3.k]=fmul(a1.v,a2.v)
+		local cmd="mul "
+		-- 1st parameter
+		local f1=self.ram[self.pc+1]
+		local p1=nil
+		local c1=fstr(f1)
+		if pr[1]==0 then
+			p1=self:addr(f1).v
+		else
+			p1=f1
+			cmd=cmd.."#"
+		end
+		cmd=cmd..c1.." "
+		-- 2nd parameter
+		local f2=self.ram[self.pc+2]
+		local p2=nil
+		local c2=fstr(f2)
+		if pr[2]==0 then
+			p2=self:addr(f2).v
+		else
+			p2=f2
+			cmd=cmd.."#"
+		end
+		cmd=cmd..c2.." "
+		-- 3rd parameter
+		local f3=self.ram[self.pc+3]
+		local p3=tonum(fstr(f3))
+		local c3=fstr(f3)
+		cmd=cmd..c3
+		-- operation
+		self.ram[p3]=fmul(p1,p2)
 		self.pc+=4
-		self.cmd="mul "..a1.k.." "..b1.k.." "..c1.k
+		self.cmd=cmd
 	elseif op==3 then
 		-- 03: receive input
-		local i1=self.pc+1
-		local f1=self.ram[i1]
-		local a1=self:addr(f1)
+		-- 1st parameter
+		if pr[1]!=0 then
+			?"wrong param mode for rcv!"
+			stop()
+		end
+		local f1=self.ram[self.pc+1]
+		local p1=tonum(fstr(f1))
+		local c1=p1
+		-- operation
 		if #self.inp>0 then
 			local cinp=deli(self.inp,1)
-			self.ram[a1.k]=cinp
+			self.ram[p1]=cinp
 			self.linp=cinp
 			self.st="active"
 			self.pc+=2
-			self.cmd="inp "..a1.k
+			self.cmd="inp "..c1
 		else
 			self.st="reading"
 			self.cmd="..."
 		end
 	elseif op==4 then
 		-- 04: send output
-		local i1=self.pc+1
-		local f1=self.ram[i1]
+		-- 1st parameter
+		local f1=self.ram[self.pc+1]
 		local a1=self:addr(f1)
-		add(self.out,a1.v) -- !!!
+		local c1=a1.k
+		add(self.out,a1.v)
 		self.pc+=2
-		self.cmd="out "..a1.k
+		self.cmd="out "..c1
 	else
 		-- 99: halt
 		self.cmd="hlt"
@@ -1589,7 +1638,7 @@ function _init()
 	_f=df_double
 	-- part one
 	_vm=intcode:new(_code,_f)
-	_vm:input(_f("76"))
+	_vm:input(_f("1"))
 	-- command history
 	_cmds={}
 	_output=nil
