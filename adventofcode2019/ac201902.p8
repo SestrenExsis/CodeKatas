@@ -1,7 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 29
 __lua__
--- intcode vm
+-- advent of code, 2019 day 2
 -- by sestrenexsis
 
 -- https://creativecommons.org/licenses/by-nc-sa/4.0/
@@ -1032,26 +1032,49 @@ function _init()
 	_vm1.ram[1]=_f("12")
 	_vm1.ram[2]=_f("2")
 	-- part two
+	_iter=2300
 	_vm2=intcode:new(_code,_f)
-	_vm2.ram[1]=_f("23")
-	_vm2.ram[2]=_f("47")
+	_vm2.ram[1]=_f("0")
+	_vm2.ram[2]=_f("0")
 	-- command histories
 	_cmds={{},{}}
+	_target=_f("19690720")
 end
 
 function _update()
 	if _vm1:tick() then
 		add(_cmds[1],_vm1.cmd)
 	end
-	if _vm2:tick() then
-		add(_cmds[2],_vm2.cmd)
+	local halt=true
+	for i=1,256 do
+		halt=_vm2:tick()
+		if halt then
+			add(_cmds[2],_vm2.cmd)
+		end
+	end
+	if not halt then
+		if df_eq(
+			_vm2.ram[0],
+			_target
+			) then
+			return
+		end
+		_iter+=1
+		if _iter<10000 then
+			_vm2=intcode:new(_code,_f)
+			local noun=_iter\100
+			local verb=_iter%100
+			_vm2.ram[1]=_f(tostr(noun))
+			_vm2.ram[2]=_f(tostr(verb))
+			_cmds[2]={}
+		end
 	end
 end
 
 function _draw()
 	cls()
 	_vm1:draw(0,0)
-	for i=1,8 do
+	for i=1,12 do
 		local idx=#_cmds[1]-i+1
 		if idx<1 then
 			break
@@ -1059,13 +1082,14 @@ function _draw()
 		print(_cmds[1][idx],0,6*i+30)
 	end
 	_vm2:draw(64,0)
-	for i=1,8 do
+	for i=1,12 do
 		local idx=#_cmds[2]-i+1
 		if idx<1 then
 			break
 		end
 		print(_cmds[2][idx],64,6*i+30)
 	end
+	print(_iter,64,122)
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
