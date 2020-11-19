@@ -5,6 +5,24 @@ __lua__
 -- by sestrenexsis
 
 -- https://creativecommons.org/licenses/by-nc-sa/4.0/
+_code2={
+	"3","21",
+	"1008","21","8","20",
+	"1005","20","22",
+	"107","8","21","20",
+	"1006","20","31",
+	"1106","0","36",
+	"98","0","0",
+	"1002","21","125","20",
+	"4","20",
+	"1105","1","46",
+	"104","999",
+	"1105","1","46",
+	"1101","1000","1","20",
+	"4","20",
+	"1105","1","46","98",
+	"99",
+}
 _code={
 	"3",
 	"225",
@@ -1491,8 +1509,9 @@ function intcode:tick()
 	add(pr,(n0\1000)%10)
 	add(pr,(n0\10000)%10)
 	if op==1 then
+		-- ==========================
 		-- 01: add
-		local cmd="mul "
+		local cmd="add "
 		-- 1st parameter
 		local f1=self.ram[self.pc+1]
 		local p1=nil
@@ -1525,6 +1544,7 @@ function intcode:tick()
 		self.pc+=4
 		self.cmd=cmd
 	elseif op==2 then
+		-- ==========================
 		-- 02: multiply
 		local cmd="mul "
 		-- 1st parameter
@@ -1559,6 +1579,7 @@ function intcode:tick()
 		self.pc+=4
 		self.cmd=cmd
 	elseif op==3 then
+		-- ==========================
 		-- 03: receive input
 		-- 1st parameter
 		if pr[1]!=0 then
@@ -1581,15 +1602,170 @@ function intcode:tick()
 			self.cmd="..."
 		end
 	elseif op==4 then
+		-- ==========================
 		-- 04: send output
+		local cmd="out "
 		-- 1st parameter
 		local f1=self.ram[self.pc+1]
-		local a1=self:addr(f1)
-		local c1=a1.k
-		add(self.out,a1.v)
+		local p1=nil
+		local c1=fstr(f1)
+		if pr[1]==0 then
+			p1=self:addr(f1).v
+		else
+			p1=f1
+			cmd=cmd.."#"
+		end
+		cmd=cmd..c1
+		-- operation
+		add(self.out,p1)
 		self.pc+=2
 		self.cmd="out "..c1
+	elseif op==5 then
+		-- ==========================
+		-- 05: jump if true
+		local cmd="jpt "
+		-- 1st parameter
+		local f1=self.ram[self.pc+1]
+		local p1=nil
+		local c1=fstr(f1)
+		if pr[1]==0 then
+			p1=self:addr(f1).v
+		else
+			p1=f1
+			cmd=cmd.."#"
+		end
+		cmd=cmd..c1.." "
+		-- 2nd parameter
+		local f2=self.ram[self.pc+2]
+		local p2=nil
+		local c2=fstr(f2)
+		if pr[2]==0 then
+			p2=self:addr(f2).v
+		else
+			p2=f2
+			cmd=cmd.."#"
+		end
+		cmd=cmd..c2.." "
+		-- operation
+		if fequ(p1,_f("0")) then
+			self.pc+=3
+		else
+			self.pc=tonum(fstr(p2))
+		end
+		self.cmd=cmd
+	elseif op==6 then
+		-- ==========================
+		-- 06: jump if false
+		local cmd="jpf "
+		-- 1st parameter
+		local f1=self.ram[self.pc+1]
+		local p1=nil
+		local c1=fstr(f1)
+		if pr[1]==0 then
+			p1=self:addr(f1).v
+		else
+			p1=f1
+			cmd=cmd.."#"
+		end
+		cmd=cmd..c1.." "
+		-- 2nd parameter
+		local f2=self.ram[self.pc+2]
+		local p2=nil
+		local c2=fstr(f2)
+		if pr[2]==0 then
+			p2=self:addr(f2).v
+		else
+			p2=f2
+			cmd=cmd.."#"
+		end
+		cmd=cmd..c2.." "
+		-- operation
+		if fequ(p1,_f("0")) then
+			self.pc=tonum(fstr(p2))
+		else
+			self.pc+=3
+		end
+		self.cmd=cmd
+	elseif op==7 then
+		-- ==========================
+		-- 07: less than
+		local cmd="lst "
+		-- 1st parameter
+		local f1=self.ram[self.pc+1]
+		local p1=nil
+		local c1=fstr(f1)
+		if pr[1]==0 then
+			p1=self:addr(f1).v
+		else
+			p1=f1
+			cmd=cmd.."#"
+		end
+		cmd=cmd..c1.." "
+		-- 2nd parameter
+		local f2=self.ram[self.pc+2]
+		local p2=nil
+		local c2=fstr(f2)
+		if pr[2]==0 then
+			p2=self:addr(f2).v
+		else
+			p2=f2
+			cmd=cmd.."#"
+		end
+		cmd=cmd..c2.." "
+		-- 3rd parameter
+		local f3=self.ram[self.pc+3]
+		local p3=tonum(fstr(f3))
+		local c3=fstr(f3)
+		cmd=cmd..c3
+		-- operation
+		if flst(p1,p2) then
+			self.ram[p3]=_f("1")
+		else
+			self.ram[p3]=_f("0")
+		end
+		self.pc+=4
+		self.cmd=cmd
+	elseif op==8 then
+		-- ==========================
+		-- 08: equals
+		local cmd="equ "
+		-- 1st parameter
+		local f1=self.ram[self.pc+1]
+		local p1=nil
+		local c1=fstr(f1)
+		if pr[1]==0 then
+			p1=self:addr(f1).v
+		else
+			p1=f1
+			cmd=cmd.."#"
+		end
+		cmd=cmd..c1.." "
+		-- 2nd parameter
+		local f2=self.ram[self.pc+2]
+		local p2=nil
+		local c2=fstr(f2)
+		if pr[2]==0 then
+			p2=self:addr(f2).v
+		else
+			p2=f2
+			cmd=cmd.."#"
+		end
+		cmd=cmd..c2.." "
+		-- 3rd parameter
+		local f3=self.ram[self.pc+3]
+		local p3=tonum(fstr(f3))
+		local c3=fstr(f3)
+		cmd=cmd..c3
+		-- operation
+		if fequ(p1,p2) then
+			self.ram[p3]=_f("1")
+		else
+			self.ram[p3]=_f("0")
+		end
+		self.pc+=4
+		self.cmd=cmd
 	else
+		-- ==========================
 		-- 99: halt
 		self.cmd="hlt"
 		self.st="halted"
@@ -1638,7 +1814,7 @@ function _init()
 	_f=df_double
 	-- part one
 	_vm=intcode:new(_code,_f)
-	_vm:input(_f("1"))
+	_vm:input(_f("5"))
 	-- command history
 	_cmds={}
 	_output=nil
@@ -1646,7 +1822,12 @@ end
 
 function _update()
 	while true do
-		_vm:run()
+		while _vm.st=="active" do
+			if _vm:tick() then
+				add(_cmds,_vm.cmd)
+			end
+		end
+		--_vm:run()
 		local cout=_vm:output()
 		if cout==nil then
 			break
@@ -1665,7 +1846,11 @@ function _draw()
 		end
 		print(_cmds[idx],0,6*i+36)
 	end
-	print(fstr(_output),0,122)
+	local out="--"
+	if _output~=nil then
+		out=fstr(_output)
+	end
+	print(out,0,122)
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
