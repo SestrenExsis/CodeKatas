@@ -1500,6 +1500,7 @@ function intcode:tick()
 	if self.st=="halted" then
 		return false
 	end
+	local f=df_double
 	-- calc opcode and parm modes
 	local f0=self.ram[self.pc]
 	local n0=tonum(fstr(f0))
@@ -1647,7 +1648,7 @@ function intcode:tick()
 		end
 		cmd=cmd..c2.." "
 		-- operation
-		if fequ(p1,_f("0")) then
+		if fequ(p1,f("0")) then
 			self.pc+=3
 		else
 			self.pc=tonum(fstr(p2))
@@ -1680,7 +1681,7 @@ function intcode:tick()
 		end
 		cmd=cmd..c2.." "
 		-- operation
-		if fequ(p1,_f("0")) then
+		if fequ(p1,f("0")) then
 			self.pc=tonum(fstr(p2))
 		else
 			self.pc+=3
@@ -1719,9 +1720,9 @@ function intcode:tick()
 		cmd=cmd..c3
 		-- operation
 		if flst(p1,p2) then
-			self.ram[p3]=_f("1")
+			self.ram[p3]=f("1")
 		else
-			self.ram[p3]=_f("0")
+			self.ram[p3]=f("0")
 		end
 		self.pc+=4
 		self.cmd=cmd
@@ -1758,9 +1759,9 @@ function intcode:tick()
 		cmd=cmd..c3
 		-- operation
 		if fequ(p1,p2) then
-			self.ram[p3]=_f("1")
+			self.ram[p3]=f("1")
 		else
-			self.ram[p3]=_f("0")
+			self.ram[p3]=f("0")
 		end
 		self.pc+=4
 		self.cmd=cmd
@@ -1810,47 +1811,82 @@ end
 -->8
 -- main
 
+vm={}
+
+function vm:new(_code)
+	local f=df_double
+	local obj={
+		mpu=intcode:new(_code,f),
+		cmds={},
+		lout=nil,
+	}
+	return setmetatable(
+		obj,{__index=self}
+	)
+end
+
+function vm:draw(x,y)
+	self.mpu:draw(x,y)
+	for i=1,12 do
+		local idx=#self.cmds-i+1
+		if idx<1 then
+			break
+		end
+		local cmd=self.cmds[idx]
+		print(cmd,x,y+6*i+36)
+	end
+	local lout="--"
+	if self.lout~=nil then
+		lout=fstr(self.lout)
+	end
+	print(lout,x,y+122)
+end
+
 function _init()
-	_f=df_double
+	local f=df_double
 	-- part one
-	_vm=intcode:new(_code,_f)
-	_vm:input(_f("5"))
-	-- command history
-	_cmds={}
-	_output=nil
+	_vm1=vm:new(_code)
+	_vm1.mpu:input(f("1"))
+	-- part two
+	_vm2=vm:new(_code)
+	_vm2.mpu:input(f("5"))
 end
 
 function _update()
-	while true do
-		while _vm.st=="active" do
-			if _vm:tick() then
-				add(_cmds,_vm.cmd)
+	while _vm1.mpu.st=="active" do
+		if _vm1.mpu:tick() then
+			add(_vm1.cmds,_vm1.mpu.cmd)
+		end
+		local lout=nil
+		while true do
+			lout=_vm1.mpu:output()
+			if lout~=nil then
+				_vm1.lout=lout
+			else
+				break
 			end
 		end
-		--_vm:run()
-		local cout=_vm:output()
-		if cout==nil then
-			break
+	end
+	while _vm2.mpu.st=="active" do
+		if _vm2.mpu:tick() then
+			add(_vm2.cmds,_vm2.mpu.cmd)
 		end
-		_output=cout
+		local lout=nil
+		while true do
+			lout=_vm2.mpu:output()
+			if lout~=nil then
+				_vm2.lout=lout
+			else
+				break
+			end
+		end
 	end
 end
 
 function _draw()
 	cls()
-	_vm:draw(0,0)
-	for i=1,12 do
-		local idx=#_cmds-i+1
-		if idx<1 then
-			break
-		end
-		print(_cmds[idx],0,6*i+36)
-	end
-	local out="--"
-	if _output~=nil then
-		out=fstr(_output)
-	end
-	print(out,0,122)
+	_vm1:draw(0,0)
+	_vm2:draw(64,0)
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
