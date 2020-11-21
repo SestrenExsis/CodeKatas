@@ -1572,68 +1572,34 @@ function intcode:tick()
 	elseif op==5 then
 		-- ==========================
 		-- 05: jump if true
-		local cmd="jpt "
-		-- 1st parameter
-		local f1=self.ram[self.pc+1]
-		local p1=nil
-		local c1=fstr(f1)
-		if pr[1]==0 then
-			p1=self:addr(f1).v
-		else
-			p1=f1
-			cmd=cmd.."#"
-		end
-		cmd=cmd..c1.." "
-		-- 2nd parameter
-		local f2=self.ram[self.pc+2]
-		local p2=nil
-		local c2=fstr(f2)
-		if pr[2]==0 then
-			p2=self:addr(f2).v
-		else
-			p2=f2
-			cmd=cmd.."#"
-		end
-		cmd=cmd..c2.." "
+		local a=self:addrt(pc+1,pr[1])
+		local b=self:addrt(pc+2,pr[2])
 		-- operation
-		if fequ(p1,f("0")) then
+		if fequ(a.flt,f("0")) then
 			self.pc+=3
 		else
-			self.pc=tonum(fstr(p2))
+			self.pc=tonum(fstr(b.flt))
 		end
+		local cmd="jpt "
+		cmd=cmd..a.str.." "
+		cmd=cmd..b.str
 		self.cmd=cmd
 	elseif op==6 then
 		-- ==========================
 		-- 06: jump if false
-		local cmd="jpf "
-		-- 1st parameter
-		local f1=self.ram[self.pc+1]
-		local p1=nil
-		local c1=fstr(f1)
-		if pr[1]==0 then
-			p1=self:addr(f1).v
-		else
-			p1=f1
-			cmd=cmd.."#"
-		end
-		cmd=cmd..c1.." "
-		-- 2nd parameter
-		local f2=self.ram[self.pc+2]
-		local p2=nil
-		local c2=fstr(f2)
-		if pr[2]==0 then
-			p2=self:addr(f2).v
-		else
-			p2=f2
-			cmd=cmd.."#"
-		end
-		cmd=cmd..c2.." "
+		local a=self:addrt(pc+1,pr[1])
+		local b=self:addrt(pc+2,pr[2])
 		-- operation
-		if fequ(p1,f("0")) then
-			self.pc=tonum(fstr(p2))
+		if fequ(a.flt,f("0")) then
+			self.pc=tonum(fstr(b.flt))
 		else
 			self.pc+=3
 		end
+		local cmd="jpf "
+		cmd=cmd..a.str.." "
+		cmd=cmd..b.str
+		self.cmd=cmd
+		-- operation
 		self.cmd=cmd
 	elseif op==7 then
 		-- ==========================
