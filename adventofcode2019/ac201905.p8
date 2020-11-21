@@ -1543,13 +1543,11 @@ function intcode:tick()
 	elseif op==3 then
 		-- ==========================
 		-- 03: receive input
-		-- 1st parameter
 		if pr[1]!=0 then
 			?"wrong param mode for rcv!"
 			stop()
 		end
 		local a=self:addrt(pc+1,pr[1])
-		-- operation
 		if #self.inp>0 then
 			local cinp=deli(self.inp,1)
 			self.ram[a.idx]=cinp
@@ -1565,7 +1563,6 @@ function intcode:tick()
 		-- ==========================
 		-- 04: send output
 		local a=self:addrt(pc+1,pr[1])
-		-- operation
 		add(self.out,a.flt)
 		self.pc+=2
 		self.cmd="out "..a.str
@@ -1574,7 +1571,6 @@ function intcode:tick()
 		-- 05: jump if true
 		local a=self:addrt(pc+1,pr[1])
 		local b=self:addrt(pc+2,pr[2])
-		-- operation
 		if fequ(a.flt,f("0")) then
 			self.pc+=3
 		else
@@ -1589,7 +1585,6 @@ function intcode:tick()
 		-- 06: jump if false
 		local a=self:addrt(pc+1,pr[1])
 		local b=self:addrt(pc+2,pr[2])
-		-- operation
 		if fequ(a.flt,f("0")) then
 			self.pc=tonum(fstr(b.flt))
 		else
@@ -1599,85 +1594,39 @@ function intcode:tick()
 		cmd=cmd..a.str.." "
 		cmd=cmd..b.str
 		self.cmd=cmd
-		-- operation
-		self.cmd=cmd
 	elseif op==7 then
 		-- ==========================
 		-- 07: less than
-		local cmd="lst "
-		-- 1st parameter
-		local f1=self.ram[self.pc+1]
-		local p1=nil
-		local c1=fstr(f1)
-		if pr[1]==0 then
-			p1=self:addr(f1).v
+		local a=self:addrt(pc+1,pr[1])
+		local b=self:addrt(pc+2,pr[2])
+		local c=self:addrt(pc+3,pr[3])
+		if flst(a.flt,b.flt) then
+			self.ram[c.idx]=f("1")
 		else
-			p1=f1
-			cmd=cmd.."#"
-		end
-		cmd=cmd..c1.." "
-		-- 2nd parameter
-		local f2=self.ram[self.pc+2]
-		local p2=nil
-		local c2=fstr(f2)
-		if pr[2]==0 then
-			p2=self:addr(f2).v
-		else
-			p2=f2
-			cmd=cmd.."#"
-		end
-		cmd=cmd..c2.." "
-		-- 3rd parameter
-		local f3=self.ram[self.pc+3]
-		local p3=tonum(fstr(f3))
-		local c3=fstr(f3)
-		cmd=cmd..c3
-		-- operation
-		if flst(p1,p2) then
-			self.ram[p3]=f("1")
-		else
-			self.ram[p3]=f("0")
+			self.ram[c.idx]=f("0")
 		end
 		self.pc+=4
+		local cmd="lst "
+		cmd=cmd..a.str.." "
+		cmd=cmd..b.str.." "
+		cmd=cmd..c.str
 		self.cmd=cmd
 	elseif op==8 then
 		-- ==========================
 		-- 08: equals
-		local cmd="equ "
-		-- 1st parameter
-		local f1=self.ram[self.pc+1]
-		local p1=nil
-		local c1=fstr(f1)
-		if pr[1]==0 then
-			p1=self:addr(f1).v
+		local a=self:addrt(pc+1,pr[1])
+		local b=self:addrt(pc+2,pr[2])
+		local c=self:addrt(pc+3,pr[3])
+		if fequ(a.flt,b.flt) then
+			self.ram[c.idx]=f("1")
 		else
-			p1=f1
-			cmd=cmd.."#"
-		end
-		cmd=cmd..c1.." "
-		-- 2nd parameter
-		local f2=self.ram[self.pc+2]
-		local p2=nil
-		local c2=fstr(f2)
-		if pr[2]==0 then
-			p2=self:addr(f2).v
-		else
-			p2=f2
-			cmd=cmd.."#"
-		end
-		cmd=cmd..c2.." "
-		-- 3rd parameter
-		local f3=self.ram[self.pc+3]
-		local p3=tonum(fstr(f3))
-		local c3=fstr(f3)
-		cmd=cmd..c3
-		-- operation
-		if fequ(p1,p2) then
-			self.ram[p3]=f("1")
-		else
-			self.ram[p3]=f("0")
+			self.ram[c.idx]=f("0")
 		end
 		self.pc+=4
+		local cmd="equ "
+		cmd=cmd..a.str.." "
+		cmd=cmd..b.str.." "
+		cmd=cmd..c.str
 		self.cmd=cmd
 	else
 		-- ==========================
