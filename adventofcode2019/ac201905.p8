@@ -1548,17 +1548,15 @@ function intcode:tick()
 			?"wrong param mode for rcv!"
 			stop()
 		end
-		local f1=self.ram[self.pc+1]
-		local p1=tonum(fstr(f1))
-		local c1=p1
+		local a=self:addrt(pc+1,pr[1])
 		-- operation
 		if #self.inp>0 then
 			local cinp=deli(self.inp,1)
-			self.ram[p1]=cinp
+			self.ram[a.idx]=cinp
 			self.linp=cinp
 			self.st="active"
 			self.pc+=2
-			self.cmd="inp "..c1
+			self.cmd="inp "..a.str
 		else
 			self.st="reading"
 			self.cmd="..."
@@ -1566,22 +1564,11 @@ function intcode:tick()
 	elseif op==4 then
 		-- ==========================
 		-- 04: send output
-		local cmd="out "
-		-- 1st parameter
-		local f1=self.ram[self.pc+1]
-		local p1=nil
-		local c1=fstr(f1)
-		if pr[1]==0 then
-			p1=self:addr(f1).v
-		else
-			p1=f1
-			cmd=cmd.."#"
-		end
-		cmd=cmd..c1
+		local a=self:addrt(pc+1,pr[1])
 		-- operation
-		add(self.out,p1)
+		add(self.out,a.flt)
 		self.pc+=2
-		self.cmd="out "..c1
+		self.cmd="out "..a.str
 	elseif op==5 then
 		-- ==========================
 		-- 05: jump if true
