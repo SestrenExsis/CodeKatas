@@ -1466,19 +1466,7 @@ function intcode:new(
 	)
 end
 
-function intcode:addr(f)
-	if f==nil then
-		return nil
-	end
-	local idx=tonum(fstr(f))
-	local res={
-		k=idx,
-		v=self.ram[idx],
-		}
-	return res
-end
-
-function intcode:addrt(
+function intcode:addr(
 	i, -- memory address : number
 	m  -- param mode     : number
 	) -- returns         : table
@@ -1515,9 +1503,9 @@ function intcode:tick()
 	if op==1 then
 		-- ==========================
 		-- 01: add
-		local a=self:addrt(pc+1,pr[1])
-		local b=self:addrt(pc+2,pr[2])
-		local c=self:addrt(pc+3,pr[3])
+		local a=self:addr(pc+1,pr[1])
+		local b=self:addr(pc+2,pr[2])
+		local c=self:addr(pc+3,pr[3])
 		self.ram[c.idx]=fadd(
 			a.flt,b.flt)
 		self.pc+=4
@@ -1529,9 +1517,9 @@ function intcode:tick()
 	elseif op==2 then
 		-- ==========================
 		-- 02: multiply
-		local a=self:addrt(pc+1,pr[1])
-		local b=self:addrt(pc+2,pr[2])
-		local c=self:addrt(pc+3,pr[3])
+		local a=self:addr(pc+1,pr[1])
+		local b=self:addr(pc+2,pr[2])
+		local c=self:addr(pc+3,pr[3])
 		self.ram[c.idx]=fmul(
 			a.flt,b.flt)
 		self.pc+=4
@@ -1547,7 +1535,7 @@ function intcode:tick()
 			?"wrong param mode for rcv!"
 			stop()
 		end
-		local a=self:addrt(pc+1,pr[1])
+		local a=self:addr(pc+1,pr[1])
 		if #self.inp>0 then
 			local cinp=deli(self.inp,1)
 			self.ram[a.idx]=cinp
@@ -1562,15 +1550,15 @@ function intcode:tick()
 	elseif op==4 then
 		-- ==========================
 		-- 04: send output
-		local a=self:addrt(pc+1,pr[1])
+		local a=self:addr(pc+1,pr[1])
 		add(self.out,a.flt)
 		self.pc+=2
 		self.cmd="out "..a.str
 	elseif op==5 then
 		-- ==========================
 		-- 05: jump if true
-		local a=self:addrt(pc+1,pr[1])
-		local b=self:addrt(pc+2,pr[2])
+		local a=self:addr(pc+1,pr[1])
+		local b=self:addr(pc+2,pr[2])
 		if fequ(a.flt,f("0")) then
 			self.pc+=3
 		else
@@ -1583,8 +1571,8 @@ function intcode:tick()
 	elseif op==6 then
 		-- ==========================
 		-- 06: jump if false
-		local a=self:addrt(pc+1,pr[1])
-		local b=self:addrt(pc+2,pr[2])
+		local a=self:addr(pc+1,pr[1])
+		local b=self:addr(pc+2,pr[2])
 		if fequ(a.flt,f("0")) then
 			self.pc=tonum(fstr(b.flt))
 		else
@@ -1597,9 +1585,9 @@ function intcode:tick()
 	elseif op==7 then
 		-- ==========================
 		-- 07: less than
-		local a=self:addrt(pc+1,pr[1])
-		local b=self:addrt(pc+2,pr[2])
-		local c=self:addrt(pc+3,pr[3])
+		local a=self:addr(pc+1,pr[1])
+		local b=self:addr(pc+2,pr[2])
+		local c=self:addr(pc+3,pr[3])
 		if flst(a.flt,b.flt) then
 			self.ram[c.idx]=f("1")
 		else
@@ -1614,9 +1602,9 @@ function intcode:tick()
 	elseif op==8 then
 		-- ==========================
 		-- 08: equals
-		local a=self:addrt(pc+1,pr[1])
-		local b=self:addrt(pc+2,pr[2])
-		local c=self:addrt(pc+3,pr[3])
+		local a=self:addr(pc+1,pr[1])
+		local b=self:addr(pc+2,pr[2])
+		local c=self:addr(pc+3,pr[3])
 		if fequ(a.flt,b.flt) then
 			self.ram[c.idx]=f("1")
 		else
