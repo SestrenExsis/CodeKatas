@@ -5,24 +5,6 @@ __lua__
 -- by sestrenexsis
 
 -- https://creativecommons.org/licenses/by-nc-sa/4.0/
-_code2={
-	"3","21",
-	"1008","21","8","20",
-	"1005","20","22",
-	"107","8","21","20",
-	"1006","20","31",
-	"1106","0","36",
-	"98","0","0",
-	"1002","21","125","20",
-	"4","20",
-	"1105","1","46",
-	"104","999",
-	"1105","1","46",
-	"1101","1000","1","20",
-	"4","20",
-	"1105","1","46","98",
-	"99",
-}
 _code={
 	"3",
 	"225",
@@ -1447,7 +1429,7 @@ end
 
 --]]
 -->8
--- virtual machine
+-- intcode virtual machine
 fadd=df_add
 fmul=df_multiply
 fstr=df_tostr
@@ -1496,6 +1478,35 @@ function intcode:addr(f)
 	return res
 end
 
+function intcode:addrt(
+	i, -- memory address : number
+	m  -- param mode     : number
+	) -- returns         : table
+	local flt=self.ram[i]
+	local num=nil
+	local str=fstr(flt)
+	if m==0 then
+		local idx=tonum(fstr(flt))
+		flt=self.ram[idx]
+	else
+		str="#"..str
+	end
+	local strflt=fstr(flt)
+	num=tonum(strflt)
+	if (
+		num==-32768 and
+		strflt~="-32768"
+		) then
+		num=nil
+	end
+	local res={
+		flt=flt,
+		num=num,
+		str=str,
+	}
+	return res
+end
+
 function intcode:tick()
 	if self.st=="halted" then
 		return false
@@ -1509,9 +1520,24 @@ function intcode:tick()
 	add(pr,(n0\100)%10)
 	add(pr,(n0\1000)%10)
 	add(pr,(n0\10000)%10)
+	local pc=self.pc
 	if op==1 then
 		-- ==========================
 		-- 01: add
+		local a=self:addrt(pc+1,pr[1])
+		local b=self:addrt(pc+2,pr[2])
+		local c=self:addrt(pc+3,pr[3])
+		self.ram[c.num]=fadd(
+			a.flt,
+			b.flt
+			)
+		self.pc+=4
+		local cmd="add "
+		cmd=cmd..a.str.." "
+		cmd=cmd..b.str.." "
+		cmd=cmd..c.str
+		self.cmd=cmd
+		--[[
 		local cmd="add "
 		-- 1st parameter
 		local f1=self.ram[self.pc+1]
@@ -1544,6 +1570,7 @@ function intcode:tick()
 		self.ram[p3]=fadd(p1,p2)
 		self.pc+=4
 		self.cmd=cmd
+		--]]
 	elseif op==2 then
 		-- ==========================
 		-- 02: multiply
