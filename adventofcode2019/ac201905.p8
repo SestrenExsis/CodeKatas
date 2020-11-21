@@ -1483,26 +1483,17 @@ function intcode:addrt(
 	m  -- param mode     : number
 	) -- returns         : table
 	local flt=self.ram[i]
-	local num=nil
 	local str=fstr(flt)
-	if m==0 then
-		local idx=tonum(fstr(flt))
+	local idx=tonum(str)
+	if m==0 and idx>=0 then
 		flt=self.ram[idx]
 	else
 		str="#"..str
 	end
-	local strflt=fstr(flt)
-	num=tonum(strflt)
-	if (
-		num==-32768 and
-		strflt~="-32768"
-		) then
-		num=nil
-	end
 	local res={
 		flt=flt,
-		num=num,
 		str=str,
+		idx=idx,
 	}
 	return res
 end
@@ -1527,84 +1518,27 @@ function intcode:tick()
 		local a=self:addrt(pc+1,pr[1])
 		local b=self:addrt(pc+2,pr[2])
 		local c=self:addrt(pc+3,pr[3])
-		self.ram[c.num]=fadd(
-			a.flt,
-			b.flt
-			)
+		self.ram[c.idx]=fadd(
+			a.flt,b.flt)
 		self.pc+=4
 		local cmd="add "
 		cmd=cmd..a.str.." "
 		cmd=cmd..b.str.." "
 		cmd=cmd..c.str
 		self.cmd=cmd
-		--[[
-		local cmd="add "
-		-- 1st parameter
-		local f1=self.ram[self.pc+1]
-		local p1=nil
-		local c1=fstr(f1)
-		if pr[1]==0 then
-			p1=self:addr(f1).v
-		else
-			p1=f1
-			cmd=cmd.."#"
-		end
-		cmd=cmd..c1.." "
-		-- 2nd parameter
-		local f2=self.ram[self.pc+2]
-		local p2=nil
-		local c2=fstr(f2)
-		if pr[2]==0 then
-			p2=self:addr(f2).v
-		else
-			p2=f2
-			cmd=cmd.."#"
-		end
-		cmd=cmd..c2.." "
-		-- 3rd parameter
-		local f3=self.ram[self.pc+3]
-		local p3=tonum(fstr(f3))
-		local c3=fstr(f3)
-		cmd=cmd..c3
-		-- operation
-		self.ram[p3]=fadd(p1,p2)
-		self.pc+=4
-		self.cmd=cmd
-		--]]
 	elseif op==2 then
 		-- ==========================
 		-- 02: multiply
-		local cmd="mul "
-		-- 1st parameter
-		local f1=self.ram[self.pc+1]
-		local p1=nil
-		local c1=fstr(f1)
-		if pr[1]==0 then
-			p1=self:addr(f1).v
-		else
-			p1=f1
-			cmd=cmd.."#"
-		end
-		cmd=cmd..c1.." "
-		-- 2nd parameter
-		local f2=self.ram[self.pc+2]
-		local p2=nil
-		local c2=fstr(f2)
-		if pr[2]==0 then
-			p2=self:addr(f2).v
-		else
-			p2=f2
-			cmd=cmd.."#"
-		end
-		cmd=cmd..c2.." "
-		-- 3rd parameter
-		local f3=self.ram[self.pc+3]
-		local p3=tonum(fstr(f3))
-		local c3=fstr(f3)
-		cmd=cmd..c3
-		-- operation
-		self.ram[p3]=fmul(p1,p2)
+		local a=self:addrt(pc+1,pr[1])
+		local b=self:addrt(pc+2,pr[2])
+		local c=self:addrt(pc+3,pr[3])
+		self.ram[c.idx]=fmul(
+			a.flt,b.flt)
 		self.pc+=4
+		local cmd="mul "
+		cmd=cmd..a.str.." "
+		cmd=cmd..b.str.." "
+		cmd=cmd..c.str
 		self.cmd=cmd
 	elseif op==3 then
 		-- ==========================
