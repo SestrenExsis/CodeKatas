@@ -1547,66 +1547,87 @@ end
 -->8
 -- main
 
+function exec(n1,n2,n3,n4,n5)
+	local f=df_double
+	cls()
+	print(n1..n2..n3..n4..n5)
+	print("maxsig: "..fstr(_maxsig))
+	flip()
+	local sig=f("0")
+	local n=f("0")
+	-- amp #1
+	_amp1=vm:new(_code)
+	n=f(tostr(n1))
+	_amp1.mpu:input(n)
+	_amp1.mpu:input(sig)
+	_amp1.mpu:run()
+	sig=_amp1.mpu:output()
+	--_maxsig=fmax(_maxsig,sig)
+	-- amp #2
+	_amp2=vm:new(_code)
+	n=f(tostr(n2))
+	_amp2.mpu:input(n)
+	_amp2.mpu:input(sig)
+	_amp2.mpu:run()
+	sig=_amp2.mpu:output()
+	--_maxsig=fmax(_maxsig,sig)
+	-- amp #3
+	_amp3=vm:new(_code)
+	n=f(tostr(n3))
+	_amp3.mpu:input(n)
+	_amp3.mpu:input(sig)
+	_amp3.mpu:run()
+	sig=_amp3.mpu:output()
+	--_maxsig=fmax(_maxsig,sig)
+	-- amp #4
+	_amp4=vm:new(_code)
+	n=f(tostr(n4))
+	_amp4.mpu:input(n)
+	_amp4.mpu:input(sig)
+	_amp4.mpu:run()
+	sig=_amp4.mpu:output()
+	--_maxsig=fmax(_maxsig,sig)
+	-- amp #5
+	_amp5=vm:new(_code)
+	n=f(tostr(n5))
+	_amp5.mpu:input(n)
+	_amp5.mpu:input(sig)
+	_amp5.mpu:run()
+	sig=_amp5.mpu:output()
+	_maxsig=fmax(_maxsig,sig)
+end
+
 function _init()
 	local f=df_double
 	-- part one
 	_maxsig=f("0")
+	---[[
 	for n1=0,4 do
 		for n2=0,4 do
+			if n2==n1 then goto _2 end
 			for n3=0,4 do
+				if n3==n1 then goto _3 end
+				if n3==n2 then goto _3 end
 				for n4=0,4 do
+					if n4==n1 then goto _4 end
+					if n4==n2 then goto _4 end
+					if n4==n3 then goto _4 end
 					for n5=0,4 do
-						cls()
-						print(n1..n2..n3..n4..n5)
-						print("maxsig: "..fstr(_maxsig))
-						flip()
-						local sig=f("0")
-						local n=f("0")
-						-- amp #1
-						_amp1=vm:new(_code)
-						n=f(tostr(n1))
-						_amp1.mpu:input(n)
-						_amp1.mpu:input(sig)
-						_amp1.mpu:run()
-						sig=_amp1.mpu:output()
-						--_maxsig=fmax(_maxsig,sig)
-						-- amp #2
-						_amp2=vm:new(_code)
-						n=f(tostr(n2))
-						_amp2.mpu:input(n)
-						_amp2.mpu:input(sig)
-						_amp2.mpu:run()
-						sig=_amp2.mpu:output()
-						--_maxsig=fmax(_maxsig,sig)
-						-- amp #3
-						_amp3=vm:new(_code)
-						n=f(tostr(n3))
-						_amp3.mpu:input(n)
-						_amp3.mpu:input(sig)
-						_amp3.mpu:run()
-						sig=_amp3.mpu:output()
-						--_maxsig=fmax(_maxsig,sig)
-						-- amp #4
-						_amp4=vm:new(_code)
-						n=f(tostr(n4))
-						_amp4.mpu:input(n)
-						_amp4.mpu:input(sig)
-						_amp4.mpu:run()
-						sig=_amp4.mpu:output()
-						--_maxsig=fmax(_maxsig,sig)
-						-- amp #5
-						_amp5=vm:new(_code)
-						n=f(tostr(n5))
-						_amp5.mpu:input(n)
-						_amp5.mpu:input(sig)
-						_amp5.mpu:run()
-						sig=_amp5.mpu:output()
-						_maxsig=fmax(_maxsig,sig)
+						if n5==n1 then goto _5 end
+						if n5==n2 then goto _5 end
+						if n5==n3 then goto _5 end
+						if n5==n4 then goto _5 end
+						exec(n1,n2,n3,n4,n5)
+						::_5::
 					end
+					::_4::
 				end
+				::_3::
 			end
+			::_2::
 		end
 	end
+	--]]
 end
 
 function _update()
@@ -1617,6 +1638,7 @@ function _draw()
 	cls()
 	_amp1:draw(0,0)
 	_amp5:draw(64,0)
+	print("maxsig: "..fstr(_maxsig))
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
