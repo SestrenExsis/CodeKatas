@@ -1547,60 +1547,74 @@ end
 -->8
 -- main
 
-function exec(n1,n2,n3,n4,n5)
+amps={}
+
+function amps:init(
+	n1,n2,n3,n4,n5
+	)
 	local f=df_double
+	local a=vm:new(_code)
+	a.mpu:input(f(tostr(n1)))
+	local b=vm:new(_code)
+	b.mpu:input(f(tostr(n2)))
+	local c=vm:new(_code)
+	c.mpu:input(f(tostr(n3)))
+	local d=vm:new(_code)
+	d.mpu:input(f(tostr(n4)))
+	local e=vm:new(_code)
+	e.mpu:input(f(tostr(n5)))
+	local obj={
+		config={n1,n2,n3,n4,n5},
+		a=a,
+		b=b,
+		c=c,
+		d=d,
+		e=e,
+	}
+	return setmetatable(
+		obj,{__index=self}
+	)
+end
+
+function amps:exec()
+	local f=df_double
+	local n1=self.config[1]
+	local n2=self.config[2]
+	local n3=self.config[3]
+	local n4=self.config[4]
+	local n5=self.config[5]
 	cls()
 	print(n1..n2..n3..n4..n5)
 	print("maxsig: "..fstr(_maxsig))
 	flip()
 	local sig=f("0")
-	local n=f("0")
 	-- amp #1
-	_amp1=vm:new(_code)
-	n=f(tostr(n1))
-	_amp1.mpu:input(n)
-	_amp1.mpu:input(sig)
-	_amp1.mpu:run()
-	sig=_amp1.mpu:output()
-	--_maxsig=fmax(_maxsig,sig)
+	self.a.mpu:input(sig)
+	self.a.mpu:run()
+	sig=self.a.mpu:output()
 	-- amp #2
-	_amp2=vm:new(_code)
-	n=f(tostr(n2))
-	_amp2.mpu:input(n)
-	_amp2.mpu:input(sig)
-	_amp2.mpu:run()
-	sig=_amp2.mpu:output()
-	--_maxsig=fmax(_maxsig,sig)
+	self.b.mpu:input(sig)
+	self.b.mpu:run()
+	sig=self.b.mpu:output()
 	-- amp #3
-	_amp3=vm:new(_code)
-	n=f(tostr(n3))
-	_amp3.mpu:input(n)
-	_amp3.mpu:input(sig)
-	_amp3.mpu:run()
-	sig=_amp3.mpu:output()
-	--_maxsig=fmax(_maxsig,sig)
+	self.c.mpu:input(sig)
+	self.c.mpu:run()
+	sig=self.c.mpu:output()
 	-- amp #4
-	_amp4=vm:new(_code)
-	n=f(tostr(n4))
-	_amp4.mpu:input(n)
-	_amp4.mpu:input(sig)
-	_amp4.mpu:run()
-	sig=_amp4.mpu:output()
-	--_maxsig=fmax(_maxsig,sig)
+	self.d.mpu:input(sig)
+	self.d.mpu:run()
+	sig=self.d.mpu:output()
 	-- amp #5
-	_amp5=vm:new(_code)
-	n=f(tostr(n5))
-	_amp5.mpu:input(n)
-	_amp5.mpu:input(sig)
-	_amp5.mpu:run()
-	sig=_amp5.mpu:output()
+	self.e.mpu:input(sig)
+	self.e.mpu:run()
+	sig=self.e.mpu:output()
 	_maxsig=fmax(_maxsig,sig)
 end
 
 function _init()
 	local f=df_double
-	-- part one
 	_maxsig=f("0")
+	-- part one
 	---[[
 	for n1=0,4 do
 		for n2=0,4 do
@@ -1617,7 +1631,10 @@ function _init()
 						if n5==n2 then goto _5 end
 						if n5==n3 then goto _5 end
 						if n5==n4 then goto _5 end
-						exec(n1,n2,n3,n4,n5)
+						local amps=amps:init(
+							n1,n2,n3,n4,n5
+							)
+						amps:exec()
 						::_5::
 					end
 					::_4::
@@ -1636,8 +1653,6 @@ end
 
 function _draw()
 	cls()
-	_amp1:draw(0,0)
-	_amp5:draw(64,0)
 	print("maxsig: "..fstr(_maxsig))
 end
 __gfx__
