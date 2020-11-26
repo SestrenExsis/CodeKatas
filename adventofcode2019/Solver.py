@@ -48,6 +48,124 @@ class Template: # Template
         result = solutions
         return result
 
+class Day03:
+    '''
+    Crossed Wires
+    https://adventofcode.com/2019/day/3
+    '''
+    def get_parsed_input(self, raw_input_lines: 'List'):
+        wires = []
+        for raw_input_line in raw_input_lines:
+            wires.append(raw_input_line.split(','))
+        return wires
+    
+    def solve(self, wires: 'List'):
+        lines = [set(), set()]
+        for i, wire in enumerate(wires):
+            c = (0, 0)
+            for move in wire:
+                direction, distance = move[:1], int(move[1:])
+                if direction == 'R':
+                    d = (c[0] + distance, c[1])
+                    lines[i].add((c, d))
+                elif direction == 'D':
+                    d = (c[0], c[1] + distance)
+                    lines[i].add((c, d))
+                elif direction == 'L':
+                    d = (c[0] - distance, c[1])
+                    lines[i].add((c, d))
+                elif direction == 'U':
+                    d = (c[0], c[1] - distance)
+                    lines[i].add((c, d))
+                c = d
+        intersections = set()
+        for a in lines[0]:
+            for b in lines[1]:
+                if a[0][0] == a[1][0] and b[0][1] == b[1][1]:
+                    intersection = (a[0][0], b[0][1])
+                    if (((b[0][0] <= intersection[0] <= b[1][0]) or 
+                        (b[1][0] <= intersection[0] <= b[0][0])) and
+                        ((a[0][1] <= intersection[1] <= a[1][1]) or
+                         (a[1][1] <= intersection[1] <= a[0][1]))
+                        ):
+                        intersections.add(intersection)
+                elif b[0][0] == b[1][0] and a[0][1] == a[1][1]:
+                    intersection = (b[0][0], a[0][1])
+                    if (((b[0][1] <= intersection[1] <= b[1][1]) or 
+                        (b[1][1] <= intersection[1] <= b[0][1])) and
+                        ((a[0][0] <= intersection[0] <= a[1][0]) or
+                         (a[1][0] <= intersection[0] <= a[0][0]))
+                        ):
+                        intersections.add(intersection)
+        closest_distance = None
+        for intersection in intersections:
+            distance = abs(intersection[0]) + abs(intersection[1])
+            if closest_distance is None or distance < closest_distance:
+                closest_distance = distance
+        result = closest_distance
+        return result
+    
+    def solve2(self, wires: 'List'):
+        lines = [set(), set()]
+        directions = {
+            'R': (1, 0),
+            'D': (0, 1),
+            'L': (-1, 0),
+            'U': (0, -1),
+            }
+        for i, wire in enumerate(wires):
+            begin = (0, 0)
+            total_distance = 0
+            for move in wire:
+                direction, distance = move[:1], int(move[1:])
+                end = (
+                    begin[0] + distance * directions[direction][0],
+                    begin[1] + distance * directions[direction][1],
+                    )
+                lines[i].add((total_distance, begin, end))
+                total_distance += distance
+                begin = end
+        intersections = set()
+        for a in lines[0]:
+            for b in lines[1]:
+                if a[1][0] == a[2][0] and b[1][1] == b[2][1]:
+                    intersection = ((a[1][0], b[1][1]), (a, b))
+                    if (((b[1][0] <= intersection[0][0] <= b[2][0]) or 
+                        (b[2][0] <= intersection[0][0] <= b[1][0])) and
+                        ((a[1][1] <= intersection[0][1] <= a[2][1]) or
+                         (a[2][1] <= intersection[0][1] <= a[1][1]))
+                        ):
+                        intersections.add(intersection)
+                elif b[1][0] == b[2][0] and a[1][1] == a[2][1]:
+                    intersection = ((b[1][0], a[1][1]), (a, b))
+                    if (((b[1][1] <= intersection[0][1] <= b[2][1]) or 
+                        (b[2][1] <= intersection[0][1] <= b[1][1])) and
+                        ((a[1][0] <= intersection[0][0] <= a[2][0]) or
+                         (a[2][0] <= intersection[0][0] <= a[1][0]))
+                        ):
+                        intersections.add(intersection)
+        fewest_steps = None
+        for intersection in intersections:
+            point, (a, b) = intersection
+            steps = a[0] + b[0]
+            a_start, b_start = a[1], b[1]
+            steps += abs(a_start[0] - point[0]) + abs(a_start[1] - point[1])
+            steps += abs(b_start[0] - point[0]) + abs(b_start[1] - point[1])
+            if fewest_steps is None or steps < fewest_steps:
+                fewest_steps = steps
+        result = fewest_steps
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        wires = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(wires),
+            self.solve2(wires),
+            )
+        result = solutions
+        return result
+
 class Day01:
     '''
     The Tyranny of the Rocket Equation
@@ -97,7 +215,7 @@ if __name__ == '__main__':
     solvers = {
         1: (Day01, 'The Tyranny of the Rocket Equation'),
     #     2: (Day02, '1202 Program Alarm'),
-    #     3: (Day03, 'Crossed Wires'),
+        3: (Day03, 'Crossed Wires'),
     #     4: (Day04, 'Secure Container'),
     #     5: (Day05, 'Sunny with a Chance of Asteroids'),
     #     6: (Day06, 'Universal Orbit Map'),
