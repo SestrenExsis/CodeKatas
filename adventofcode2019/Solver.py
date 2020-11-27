@@ -48,6 +48,69 @@ class Template: # Template
         result = solutions
         return result
 
+class Day04:
+    '''
+    Secure Container
+    https://adventofcode.com/2019/day/4
+    '''
+    def get_parsed_input(self, raw_input_lines: 'List'):
+        lower, upper = map(int, raw_input_lines[0].split('-'))
+        return (lower, upper)
+    
+    def solve(self, lower: int, upper: int):
+        valid_count = 0
+        for password in range(lower, upper + 1):
+            chars = str(password)
+            n = len(chars)
+            if n != 6:
+                continue
+            repeat_found = False
+            valid = True
+            for i in range(1, n):
+                if int(chars[i]) < int(chars[i - 1]):
+                    valid = False
+                    break
+                if chars[i] == chars[i - 1]:
+                    repeat_found = True
+            if not valid or not repeat_found:
+                continue
+            valid_count += 1
+        result = valid_count
+        return result
+    
+    def solve2(self, lower: int, upper: int):
+        valid_count = 0
+        for password in range(lower, upper + 1):
+            chars = str(password)
+            n = len(chars)
+            if n != 6:
+                continue
+            valid = True
+            streaks = [1]
+            for i in range(1, n):
+                if int(chars[i]) < int(chars[i - 1]):
+                    valid = False
+                    break
+                if chars[i] == chars[i - 1]:
+                    streaks[-1] += 1
+                else:
+                    streaks.append(1)
+            if not valid or 2 not in streaks:
+                continue
+            valid_count += 1
+        result = valid_count
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(*parsed_input),
+            self.solve2(*parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day03:
     '''
     Crossed Wires
@@ -216,7 +279,7 @@ if __name__ == '__main__':
         1: (Day01, 'The Tyranny of the Rocket Equation'),
     #     2: (Day02, '1202 Program Alarm'),
         3: (Day03, 'Crossed Wires'),
-    #     4: (Day04, 'Secure Container'),
+        4: (Day04, 'Secure Container'),
     #     5: (Day05, 'Sunny with a Chance of Asteroids'),
     #     6: (Day06, 'Universal Orbit Map'),
     #     7: (Day07, 'Amplification Circuit'),
