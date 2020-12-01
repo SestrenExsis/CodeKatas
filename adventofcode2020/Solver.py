@@ -79,22 +79,41 @@ class Day02:
 
 class Day01:
     '''
-    ???
+    Report Repair
     https://adventofcode.com/2020/day/1
     '''
     def get_parsed_input(self, raw_input_lines: 'List'):
         result = []
         for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
+            result.append(int(raw_input_line))
         return result
     
     def solve(self, parsed_input: 'List'):
-        result = len(parsed_input)
+        result = -1
+        seen = set()
+        for num in parsed_input:
+            target = 2020 - num
+            if target in seen:
+                result = num * target
+            else:
+                seen.add(num)
         return result
     
     def solve2(self, parsed_input: 'List'):
-        result = len(parsed_input)
-        return result
+        nums = sorted(parsed_input)
+        N = len(nums)
+        for i in range(N):
+            target = 2020 - nums[i]
+            j = i + 1
+            k = N - 1
+            while j < k:
+                total = nums[j] + nums[k]
+                if total == target:
+                    return nums[i] * nums[j] * nums[k]
+                elif total < target:
+                    j += 1
+                elif total > target:
+                    k -= 1
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
@@ -112,7 +131,7 @@ if __name__ == '__main__':
     python Solver.py 1 < day01.in
     '''
     solvers = {
-        1: (Day01, 'Day 1'),
+        1: (Day01, 'Report Repair'),
     #     2: (Day02, '???'),
     #     3: (Day03, '???'),
     #     4: (Day04, '???'),
