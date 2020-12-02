@@ -50,21 +50,39 @@ class Template: # Template
 
 class Day02:
     '''
-    ???
+    Password Philosophy
     https://adventofcode.com/2020/day/2
     '''
     def get_parsed_input(self, raw_input_lines: 'List'):
         result = []
         for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
+            a, b, c = raw_input_line.split(' ')
+            num_a, num_b = map(int, a.split('-'))
+            char = b[0]
+            password = c
+            result.append((num_a, num_b, char, password))
         return result
     
     def solve(self, parsed_input: 'List'):
-        result = len(parsed_input)
+        valid_password_count = 0
+        for min_count, max_count, char, password in parsed_input:
+            char_count = password.count(char)
+            if min_count <= char_count <= max_count:
+                valid_password_count += 1
+        result = valid_password_count
         return result
     
     def solve2(self, parsed_input: 'List'):
-        result = len(parsed_input)
+        valid_password_count = 0
+        for i, j, char, password in parsed_input:
+            check = 0
+            if password[i - 1] == char:
+                check += 1
+            if password[j - 1] == char:
+                check += 1
+            if check == 1:
+                valid_password_count += 1
+        result = valid_password_count
         return result
     
     def main(self):
@@ -128,11 +146,11 @@ class Day01:
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 1 < day01.in
+    python Solver.py 2 < day02.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
-    #     2: (Day02, '???'),
+        2: (Day02, '???'),
     #     3: (Day03, '???'),
     #     4: (Day04, '???'),
     #     5: (Day05, '???'),
