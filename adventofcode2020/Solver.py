@@ -50,7 +50,7 @@ class Template: # Template
 
 class Day03:
     '''
-    ???
+    Toboggan Trajectory
     https://adventofcode.com/2020/day/3
     '''
     def get_parsed_input(self, raw_input_lines: List[str]) -> List[str]:
@@ -59,12 +59,29 @@ class Day03:
             result.append(raw_input_line)
         return result
     
+    def get_hit_count(self, trees: List[str], right: int, down: int) -> int:
+        row, col = 0, 0
+        hit_count = 0
+        rows = len(trees)
+        cols = len(trees[0])
+        while row < rows:
+            if trees[row][col % cols] == '#':
+                hit_count += 1
+            col += right
+            row += down
+        result = hit_count
+        return result
+    
     def solve(self, parsed_input: List[str]) -> int:
-        result = len(parsed_input)
+        result = self.get_hit_count(parsed_input, 3, 1)
         return result
     
     def solve2(self, parsed_input: List[str]) -> str:
-        result = len(parsed_input)
+        result = self.get_hit_count(parsed_input, 1, 1)
+        result *= self.get_hit_count(parsed_input, 3, 1)
+        result *= self.get_hit_count(parsed_input, 5, 1)
+        result *= self.get_hit_count(parsed_input, 7, 1)
+        result *= self.get_hit_count(parsed_input, 1, 2)
         return result
     
     def main(self):
@@ -180,7 +197,7 @@ if __name__ == '__main__':
     solvers = {
         1: (Day01, 'Report Repair'),
         2: (Day02, 'Password Philosophy'),
-        3: (Day03, '???'),
+        3: (Day03, 'Toboggan Trajectory'),
     #     4: (Day04, '???'),
     #     5: (Day05, '???'),
     #     6: (Day06, '???'),
