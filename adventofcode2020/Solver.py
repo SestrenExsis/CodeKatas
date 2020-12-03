@@ -48,6 +48,35 @@ class Template: # Template
         result = solutions
         return result
 
+class Day03:
+    '''
+    ???
+    https://adventofcode.com/2020/day/3
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]) -> List[str]:
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input: List[str]) -> int:
+        result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input: List[str]) -> str:
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day02:
     '''
     Password Philosophy
@@ -146,12 +175,12 @@ class Day01:
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 2 < day02.in
+    python Solver.py 3 < day03.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
-        2: (Day02, '???'),
-    #     3: (Day03, '???'),
+        2: (Day02, 'Password Philosophy'),
+        3: (Day03, '???'),
     #     4: (Day04, '???'),
     #     5: (Day05, '???'),
     #     6: (Day06, '???'),
