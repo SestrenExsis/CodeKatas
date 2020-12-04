@@ -48,6 +48,105 @@ class Template: # Template
         result = solutions
         return result
 
+class Day04:
+    '''
+    Passport Processing
+    https://adventofcode.com/2020/day/4
+    '''
+    def get_passports(self, raw_input_lines: List[str]) -> List[str]:
+        passports = []
+        passport = {}
+        for raw_input_line in raw_input_lines:
+            if len(raw_input_line) < 1:
+                passports.append(passport)
+                passport = {}
+            else:
+                pairs = raw_input_line.split(' ')
+                for pair in pairs:
+                    key, val = pair.split(':')
+                    passport[key] = val
+        passports.append(passport)
+        result = passports
+        return result
+    
+    def solve(self, passports: List[str]) -> int:
+        valid_passport_count = 0
+        for passport in passports:
+            if all(key in passport for key in (
+                'byr',
+                'iyr',
+                'eyr',
+                'hgt',
+                'hcl',
+                'ecl',
+                'pid',
+                )):
+                valid_passport_count += 1
+        result = valid_passport_count
+        return result
+    
+    def solve2(self, passports: List[str]) -> str:
+        valid_passport_count = 0
+        for passport in passports:
+            try:
+                # Validate birth year
+                birth_year = int(passport['byr'])
+                assert 1920 <= birth_year <= 2002
+                # Validate issue year
+                issue_year = int(passport['iyr'])
+                assert 2010 <= issue_year <= 2020
+                # Validate expiration year
+                expiration_year = int(passport['eyr'])
+                assert 2020 <= expiration_year <= 2030
+                # Validate height
+                height_unit = passport['hgt'][-2:]
+                height_amt = int(passport['hgt'][:-2])
+                assert (
+                    height_unit == 'cm' and 150 <= height_amt <= 193 or
+                    height_unit == 'in' and 59 <= height_amt <= 76
+                    )
+                # Validate hair color
+                hair_color = passport['hcl']
+                assert hair_color[0] == '#'
+                assert all(
+                    digit in '0123456789abcdef' for 
+                    digit in hair_color[1:]
+                    )
+                # Validate eye color
+                eye_color = passport['ecl']
+                assert eye_color in (
+                    'amb',
+                    'blu',
+                    'brn',
+                    'gry',
+                    'grn',
+                    'hzl',
+                    'oth',
+                    )
+                # Validate passport ID
+                passport_id = passport['pid']
+                assert len(passport_id) == 9
+                assert all(
+                    digit in '0123456789' for 
+                    digit in passport_id
+                    )
+                # All validations passed
+                valid_passport_count += 1
+            except (AssertionError, KeyError, ValueError):
+                continue
+        result = valid_passport_count
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        passports = self.get_passports(raw_input_lines)
+        solutions = (
+            self.solve(passports),
+            self.solve2(passports),
+            )
+        result = solutions
+        return result
+
 class Day03:
     '''
     Toboggan Trajectory
@@ -192,13 +291,13 @@ class Day01:
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 3 < day03.in
+    python Solver.py 4 < day04.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
         2: (Day02, 'Password Philosophy'),
         3: (Day03, 'Toboggan Trajectory'),
-    #     4: (Day04, '???'),
+        4: (Day04, 'Passport Processing'),
     #     5: (Day05, '???'),
     #     6: (Day06, '???'),
     #     7: (Day07, '???'),
