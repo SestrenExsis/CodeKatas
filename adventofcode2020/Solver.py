@@ -31,11 +31,79 @@ class Template: # Template
         return result
     
     def solve(self, parsed_input: List[str]) -> int:
-        result = 0
+        result = len(parsed_input)
         return result
     
     def solve2(self, parsed_input: List[str]) -> str:
-        result = 0
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day05:
+    '''
+    Binary Boarding
+    https://adventofcode.com/2020/day/5
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]) -> List[str]:
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input: List[str]) -> int:
+        seat_ids = []
+        for code in parsed_input:
+            row = 0
+            row_val = 64
+            for char in code[:7]:
+                if char == 'B':
+                    row += row_val
+                row_val //= 2
+            col = 0
+            col_val = 4
+            for char in code[7:]:
+                if char == 'R':
+                    col += col_val
+                col_val //= 2
+            seat_id = 8 * row + col
+            seat_ids.append(seat_id)
+        result = max(seat_ids)
+        return result
+    
+    def solve2(self, parsed_input: List[str]) -> str:
+        seat_ids = set()
+        for code in parsed_input:
+            row = 0
+            row_val = 64
+            for char in code[:7]:
+                if char == 'B':
+                    row += row_val
+                row_val //= 2
+            col = 0
+            col_val = 4
+            for char in code[7:]:
+                if char == 'R':
+                    col += col_val
+                col_val //= 2
+            seat_id = 8 * row + col
+            seat_ids.add(seat_id)
+        for middle_seat in range(min(seat_ids), max(seat_ids)):
+            if all([
+                middle_seat - 1 in seat_ids,
+                middle_seat not in seat_ids,
+                middle_seat + 1 in seat_ids,
+            ]):
+                result = middle_seat
+                break
         return result
     
     def main(self):
@@ -291,14 +359,14 @@ class Day01:
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 4 < day04.in
+    python Solver.py 5 < day05.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
         2: (Day02, 'Password Philosophy'),
         3: (Day03, 'Toboggan Trajectory'),
         4: (Day04, 'Passport Processing'),
-    #     5: (Day05, '???'),
+        5: (Day05, 'Binary Boarding'),
     #     6: (Day06, '???'),
     #     7: (Day07, '???'),
     #     8: (Day08, '???'),
