@@ -4,6 +4,7 @@ Created on Nov 24, 2020
 @author: Sestren
 '''
 import argparse
+import collections
 from typing import List
     
 def get_raw_input_lines() -> list:
@@ -44,6 +45,59 @@ class Template: # Template
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day06:
+    '''
+    Custom Customs
+    https://adventofcode.com/2020/day/6
+    '''
+    def get_groups(self, raw_input_lines: List[str]) -> List[List[str]]:
+        groups = []
+        group = []
+        for raw_input_line in raw_input_lines:
+            if len(raw_input_line) < 1:
+                groups.append(group)
+                group = []
+            else:
+                group.append(raw_input_line)
+        groups.append(group)
+        result = groups
+        return result
+    
+    def solve(self, groups: List[List[str]]) -> int:
+        answer_count = 0
+        for group in groups:
+            answers = set()
+            for person in group:
+                for answer in person:
+                    answers.add(answer)
+            answer_count += len(answers)
+        result = answer_count
+        return result
+    
+    def solve2(self, groups: List[List[str]]) -> str:
+        answer_count = 0
+        for group in groups:
+            person_count = len(group)
+            answers = collections.defaultdict(int)
+            for person in group:
+                for answer in person:
+                    answers[answer] += 1
+            for answer, count in answers.items():
+                if count == person_count:
+                    answer_count += 1
+        result = answer_count
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        groups = self.get_groups(raw_input_lines)
+        solutions = (
+            self.solve(groups),
+            self.solve2(groups),
             )
         result = solutions
         return result
@@ -359,7 +413,7 @@ class Day01:
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 5 < day05.in
+    python Solver.py 6 < day06.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
@@ -367,7 +421,7 @@ if __name__ == '__main__':
         3: (Day03, 'Toboggan Trajectory'),
         4: (Day04, 'Passport Processing'),
         5: (Day05, 'Binary Boarding'),
-    #     6: (Day06, '???'),
+        6: (Day06, 'Custom Customs'),
     #     7: (Day07, '???'),
     #     8: (Day08, '???'),
     #     9: (Day09, '???'),
