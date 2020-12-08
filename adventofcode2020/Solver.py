@@ -64,11 +64,58 @@ class Day08: # Handheld Halting
         return result
     
     def solve(self, instructions: List[Tuple[str, int]]) -> int:
-        result = len(instructions)
+        acc = 0
+        pc = 0
+        seen = set()
+        while True:
+            if pc in seen or pc >= len(instructions):
+                break
+            seen.add(pc)
+            operation, argument = instructions[pc]
+            if operation == 'nop':
+                pc += 1
+            elif operation == 'acc':
+                acc += argument
+                pc += 1
+            elif operation == 'jmp':
+                pc += argument
+        result = acc
         return result
     
     def solve2(self, instructions: List[Tuple[str, int]]) -> int:
-        result = len(instructions)
+        swapped = {
+            'acc': 'acc',
+            'nop': 'jmp',
+            'jmp': 'nop',
+        }
+        acc = 0
+        for i in range(len(instructions)):
+            if instructions[i][0] not in ('nop', 'jmp'):
+                continue
+            acc = 0
+            pc = 0
+            seen = set()
+            halted = False
+            while True:
+                if pc >= len(instructions):
+                    halted = True
+                    break
+                if pc in seen:
+                    break
+                seen.add(pc)
+                operation, argument = instructions[pc]
+                if pc == i:
+                    operation = swapped[operation]
+                if operation == 'nop':
+                    pc += 1
+                elif operation == 'acc':
+                    acc += argument
+                    pc += 1
+                elif operation == 'jmp':
+                    pc += argument
+            if halted:
+                break
+        result = acc
         return result
     
     def main(self):
