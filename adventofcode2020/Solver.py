@@ -49,7 +49,64 @@ class Template: # Template
         result = solutions
         return result
 
-class Day06:
+class Day07: # Handy Haversacks
+    '''
+    Handy Haversacks
+    https://adventofcode.com/2020/day/7
+    '''
+    def get_bags(self, raw_input_lines: List[str]) -> List[str]:
+        bags = {}
+        for raw_input_line in raw_input_lines:
+            bag, raw_contents = raw_input_line.split(' bags contain ')
+            contents = {}
+            if raw_contents != 'no other bags.':
+                raw_contents = raw_contents.split(', ')
+                for raw_content in raw_contents:
+                    (raw_content)
+                    words = raw_content.split(' ')
+                    contents[' '.join(words[1:3])] = int(words[0])
+            bags[bag] = contents
+        result = bags
+        return result
+
+    def solve(self, bags: List[str]) -> int:
+        containing_bags = set()
+        work = ['shiny gold']
+        while len(work) > 0:
+            curr_bag = work.pop()
+            for bag, contents in bags.items():
+                for content in contents:
+                    if content == curr_bag:
+                        if bag not in containing_bags:
+                            work.append(bag)
+                        containing_bags.add(bag)
+        result = len(containing_bags)
+        return result
+    
+    def solve2(self, bags: List[str]) -> str:
+        # 12000 too low
+        bag_count = 0
+        work = [(1, 'shiny gold')]
+        while len(work) > 0:
+            curr_count, curr_bag = work.pop()
+            contents = bags[curr_bag]
+            for next_bag, next_count in contents.items():
+                work.append((curr_count * next_count, next_bag))
+            bag_count += curr_count
+        result = bag_count - 1
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        bags = self.get_bags(raw_input_lines)
+        solutions = (
+            self.solve(bags),
+            self.solve2(bags),
+            )
+        result = solutions
+        return result
+
+class Day06: # Custom Customs
     '''
     Custom Customs
     https://adventofcode.com/2020/day/6
@@ -102,7 +159,7 @@ class Day06:
         result = solutions
         return result
 
-class Day05:
+class Day05: # Binary Boarding
     '''
     Binary Boarding
     https://adventofcode.com/2020/day/5
@@ -170,7 +227,7 @@ class Day05:
         result = solutions
         return result
 
-class Day04:
+class Day04: # Passport Processing
     '''
     Passport Processing
     https://adventofcode.com/2020/day/4
@@ -269,7 +326,7 @@ class Day04:
         result = solutions
         return result
 
-class Day03:
+class Day03: # Toboggan Trajectory
     '''
     Toboggan Trajectory
     https://adventofcode.com/2020/day/3
@@ -315,7 +372,7 @@ class Day03:
         result = solutions
         return result
 
-class Day02:
+class Day02: # Password Philosophy
     '''
     Password Philosophy
     https://adventofcode.com/2020/day/2
@@ -362,7 +419,7 @@ class Day02:
         result = solutions
         return result
 
-class Day01:
+class Day01: # Report Repair
     '''
     Report Repair
     https://adventofcode.com/2020/day/1
@@ -413,7 +470,7 @@ class Day01:
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 6 < day06.in
+    python Solver.py 7 < day07.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
@@ -422,7 +479,7 @@ if __name__ == '__main__':
         4: (Day04, 'Passport Processing'),
         5: (Day05, 'Binary Boarding'),
         6: (Day06, 'Custom Customs'),
-    #     7: (Day07, '???'),
+        7: (Day07, 'Handy Haversacks'),
     #     8: (Day08, '???'),
     #     9: (Day09, '???'),
     #    10: (Day10, '???'),
