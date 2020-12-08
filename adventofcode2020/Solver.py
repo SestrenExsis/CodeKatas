@@ -5,7 +5,7 @@ Created on Nov 24, 2020
 '''
 import argparse
 import collections
-from typing import List
+from typing import List, Tuple
     
 def get_raw_input_lines() -> list:
     raw_input_lines = []
@@ -35,7 +35,7 @@ class Template: # Template
         result = len(parsed_input)
         return result
     
-    def solve2(self, parsed_input: List[str]) -> str:
+    def solve2(self, parsed_input: List[str]) -> int:
         result = len(parsed_input)
         return result
     
@@ -45,6 +45,38 @@ class Template: # Template
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day08: # Handheld Halting
+    '''
+    Handheld Halting
+    https://adventofcode.com/2020/day/8
+    '''
+    def get_instructions(self, raw_input_lines: List[str]) -> List[str]:
+        instructions = []
+        for raw_input_line in raw_input_lines:
+            operation, raw_argument = raw_input_line.split(' ')
+            instruction = (operation, int(raw_argument))
+            instructions.append(instruction)
+        result = instructions
+        return result
+    
+    def solve(self, instructions: List[Tuple[str, int]]) -> int:
+        result = len(instructions)
+        return result
+    
+    def solve2(self, instructions: List[Tuple[str, int]]) -> int:
+        result = len(instructions)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        instructions = self.get_instructions(raw_input_lines)
+        solutions = (
+            self.solve(instructions),
+            self.solve2(instructions),
             )
         result = solutions
         return result
@@ -83,8 +115,7 @@ class Day07: # Handy Haversacks
         result = len(containing_bags)
         return result
     
-    def solve2(self, bags: List[str]) -> str:
-        # 12000 too low
+    def solve2(self, bags: List[str]) -> int:
         bag_count = 0
         work = [(1, 'shiny gold')]
         while len(work) > 0:
@@ -135,7 +166,7 @@ class Day06: # Custom Customs
         result = answer_count
         return result
     
-    def solve2(self, groups: List[List[str]]) -> str:
+    def solve2(self, groups: List[List[str]]) -> int:
         answer_count = 0
         for group in groups:
             person_count = len(group)
@@ -190,7 +221,7 @@ class Day05: # Binary Boarding
         result = max(seat_ids)
         return result
     
-    def solve2(self, parsed_input: List[str]) -> str:
+    def solve2(self, parsed_input: List[str]) -> int:
         seat_ids = set()
         for code in parsed_input:
             row = 0
@@ -264,7 +295,7 @@ class Day04: # Passport Processing
         result = valid_passport_count
         return result
     
-    def solve2(self, passports: List[str]) -> str:
+    def solve2(self, passports: List[str]) -> int:
         valid_passport_count = 0
         for passport in passports:
             try:
@@ -354,7 +385,7 @@ class Day03: # Toboggan Trajectory
         result = self.get_hit_count(parsed_input, 3, 1)
         return result
     
-    def solve2(self, parsed_input: List[str]) -> str:
+    def solve2(self, parsed_input: List[str]) -> int:
         result = self.get_hit_count(parsed_input, 1, 1)
         result *= self.get_hit_count(parsed_input, 3, 1)
         result *= self.get_hit_count(parsed_input, 5, 1)
@@ -377,7 +408,7 @@ class Day02: # Password Philosophy
     Password Philosophy
     https://adventofcode.com/2020/day/2
     '''
-    def get_parsed_input(self, raw_input_lines: 'List'):
+    def get_parsed_input(self, raw_input_lines: List[str]):
         result = []
         for raw_input_line in raw_input_lines:
             a, b, c = raw_input_line.split(' ')
@@ -387,7 +418,7 @@ class Day02: # Password Philosophy
             result.append((num_a, num_b, char, password))
         return result
     
-    def solve(self, parsed_input: 'List'):
+    def solve(self, parsed_input: List[str]) -> int:
         valid_password_count = 0
         for min_count, max_count, char, password in parsed_input:
             char_count = password.count(char)
@@ -396,7 +427,7 @@ class Day02: # Password Philosophy
         result = valid_password_count
         return result
     
-    def solve2(self, parsed_input: 'List'):
+    def solve2(self, parsed_input: List[str]) -> int:
         valid_password_count = 0
         for i, j, char, password in parsed_input:
             check = 0
@@ -424,13 +455,13 @@ class Day01: # Report Repair
     Report Repair
     https://adventofcode.com/2020/day/1
     '''
-    def get_parsed_input(self, raw_input_lines: 'List'):
+    def get_parsed_input(self, raw_input_lines: List[str]):
         result = []
         for raw_input_line in raw_input_lines:
             result.append(int(raw_input_line))
         return result
     
-    def solve(self, parsed_input: 'List'):
+    def solve(self, parsed_input: List[str]) -> int:
         result = -1
         seen = set()
         for num in parsed_input:
@@ -441,7 +472,7 @@ class Day01: # Report Repair
                 seen.add(num)
         return result
     
-    def solve2(self, parsed_input: 'List'):
+    def solve2(self, parsed_input: List[str]) -> int:
         nums = sorted(parsed_input)
         N = len(nums)
         for i in range(N):
@@ -480,7 +511,7 @@ if __name__ == '__main__':
         5: (Day05, 'Binary Boarding'),
         6: (Day06, 'Custom Customs'),
         7: (Day07, 'Handy Haversacks'),
-    #     8: (Day08, '???'),
+        8: (Day08, 'Handheld Halting'),
     #     9: (Day09, '???'),
     #    10: (Day10, '???'),
     #    11: (Day11, '???'),
