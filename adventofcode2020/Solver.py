@@ -49,6 +49,61 @@ class Template: # Template
         result = solutions
         return result
 
+class Day09: # Encoding Error
+    '''
+    Encoding Error
+    https://adventofcode.com/2020/day/9
+    '''
+    def get_numbers(self, raw_input_lines: List[str]) -> List[int]:
+        numbers = []
+        for raw_input_line in raw_input_lines:
+            numbers.append(int(raw_input_line))
+        result = numbers
+        return result
+    
+    def solve(self, numbers: List[int], span: int=25) -> int:
+        invalid_num = None
+        for i in range(span, len(numbers)):
+            complements = set()
+            for offset in range(1, span + 1):
+                complement = numbers[i] - numbers[i - offset]
+                if numbers[i - offset] in complements:
+                    break
+                complements.add(complement)
+            else:
+                invalid_num = numbers[i]
+                break
+        result = invalid_num
+        return result
+    
+    def solve2(self, numbers: List[int], target: int) -> int:
+        queue = collections.deque()
+        left = 0
+        right = 0
+        queue.append(numbers[0])
+        while True:
+            if sum(queue) == target:
+                break
+            while right < len(numbers) and sum(queue) < target:
+                right += 1
+                queue.append(numbers[right])
+            while left < right and sum(queue) > target:
+                left += 1
+                queue.popleft()
+        result = min(queue) + max(queue)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        numbers = self.get_numbers(raw_input_lines)
+        target = self.solve(numbers, 25)
+        solutions = (
+            target,
+            self.solve2(numbers, target),
+            )
+        result = solutions
+        return result
+
 class Day08: # Handheld Halting
     '''
     Handheld Halting
@@ -548,7 +603,7 @@ class Day01: # Report Repair
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 7 < day07.in
+    python Solver.py 9 < day09.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
@@ -559,7 +614,7 @@ if __name__ == '__main__':
         6: (Day06, 'Custom Customs'),
         7: (Day07, 'Handy Haversacks'),
         8: (Day08, 'Handheld Halting'),
-    #     9: (Day09, '???'),
+        9: (Day09, 'Encoding Error'),
     #    10: (Day10, '???'),
     #    11: (Day11, '???'),
     #    12: (Day12, '???'),
