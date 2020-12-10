@@ -5,7 +5,7 @@ Created on Nov 24, 2020
 '''
 import argparse
 import collections
-from typing import List, Tuple
+from typing import List, Set, Tuple
     
 def get_raw_input_lines() -> list:
     raw_input_lines = []
@@ -25,17 +25,17 @@ class Template: # Template
     '''
     https://adventofcode.com/2020/day/?
     '''
-    def get_parsed_input(self, raw_input_lines: List[str]) -> List[str]:
+    def get_parsed_input(self, raw_input_lines: List[str]):
         result = []
         for raw_input_line in raw_input_lines:
             result.append(raw_input_line)
         return result
     
-    def solve(self, parsed_input: List[str]) -> int:
+    def solve(self, parsed_input):
         result = len(parsed_input)
         return result
     
-    def solve2(self, parsed_input: List[str]) -> int:
+    def solve2(self, parsed_input):
         result = len(parsed_input)
         return result
     
@@ -45,6 +45,47 @@ class Template: # Template
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day10: # Adapter Array
+    '''
+    https://adventofcode.com/2020/day/10
+    '''
+    def get_adapters(self, raw_input_lines: List[str]) -> Set[int]:
+        result = set()
+        for raw_input_line in raw_input_lines:
+            result.add(int(raw_input_line))
+        return result
+    
+    def solve(self, adapters: Set[int]) -> int:
+        connected = set()
+        chain = [0]
+        while len(connected) < len(adapters):
+            adapter = min(adapters)
+            adapters.remove(adapter)
+            chain.append(adapter)
+        chain.append(chain[-1] + 3)
+        diffs = [0, 0, 0, 0]
+        for i in range(1, len(chain)):
+            diff = chain[i] - chain[i - 1]
+            assert 1 <= diff <= 3
+            diffs[diff] += 1
+        # sum of 1-jolt differences multiplied by sum of 3-jolt differences
+        result = diffs[1] * diffs[3]
+        return result
+    
+    def solve2(self, adapters: Set[int]) -> int:
+        result = len(adapters)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        adapters = self.get_adapters(raw_input_lines)
+        solutions = (
+            self.solve(adapters),
+            self.solve2(adapters),
             )
         result = solutions
         return result
@@ -603,7 +644,7 @@ class Day01: # Report Repair
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 9 < day09.in
+    python Solver.py 10 < day10.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
@@ -615,7 +656,7 @@ if __name__ == '__main__':
         7: (Day07, 'Handy Haversacks'),
         8: (Day08, 'Handheld Halting'),
         9: (Day09, 'Encoding Error'),
-    #    10: (Day10, '???'),
+       10: (Day10, 'Adapter Array'),
     #    11: (Day11, '???'),
     #    12: (Day12, '???'),
     #    13: (Day13, '???'),
