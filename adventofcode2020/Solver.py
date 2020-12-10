@@ -60,11 +60,11 @@ class Day10: # Adapter Array
         return result
     
     def solve(self, adapters: Set[int]) -> int:
-        connected = set()
+        adapters_left = set(adapters)
         chain = [0]
-        while len(connected) < len(adapters):
-            adapter = min(adapters)
-            adapters.remove(adapter)
+        while len(adapters_left) > 0:
+            adapter = min(adapters_left)
+            adapters_left.remove(adapter)
             chain.append(adapter)
         chain.append(chain[-1] + 3)
         diffs = [0, 0, 0, 0]
@@ -77,7 +77,15 @@ class Day10: # Adapter Array
         return result
     
     def solve2(self, adapters: Set[int]) -> int:
-        result = len(adapters)
+        dp = [1] + [0] * max(adapters)
+        for adapter in sorted(adapters):
+            if adapter >= 1:
+                dp[adapter] += dp[adapter - 1]
+            if adapter >= 2:
+                dp[adapter] += dp[adapter - 2]
+            if adapter >= 3:
+                dp[adapter] += dp[adapter - 3]
+        result = dp[-1]
         return result
     
     def main(self):
