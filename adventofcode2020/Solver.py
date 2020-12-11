@@ -49,6 +49,132 @@ class Template: # Template
         result = solutions
         return result
 
+class Day11: # Seating System
+    '''
+    Seating System
+    https://adventofcode.com/2020/day/11
+    '''
+    def get_seats(self, raw_input_lines: List[List[str]]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            rowdata = []
+            for seat in raw_input_line:
+                rowdata.append(seat)
+            result.append(rowdata)
+        return result
+    
+    def solve(self, seats):
+        rows = len(seats)
+        cols = len(seats[0])
+        seats = [row[:] for row in seats]
+        next_seats = [row[:] for row in seats]
+        change_ind = True
+        while change_ind:
+            change_ind = False
+            for row in range(rows):
+                for col in range(cols):
+                    occupied_count = 0
+                    for (r, c) in (
+                        (row - 1, col - 1),
+                        (row - 1, col + 0),
+                        (row - 1, col + 1),
+                        (row + 0, col - 1),
+                        (row + 0, col + 1),
+                        (row + 1, col - 1),
+                        (row + 1, col + 0),
+                        (row + 1, col + 1),
+                    ):
+                        if (
+                            0 <= r < rows and
+                            0 <= c < cols and
+                            seats[r][c] == '#'
+                        ):
+                            occupied_count += 1
+                    if seats[row][col] == 'L':
+                        if occupied_count == 0:
+                            next_seats[row][col] = '#'
+                            change_ind = True
+                    elif seats[row][col] == '#':
+                        if occupied_count >= 4:
+                            next_seats[row][col] = 'L'
+                            change_ind = True
+            for row in range(rows):
+                for col in range(cols):
+                    seats[row][col] = next_seats[row][col]
+        occupied_count = 0
+        for row in range(rows):
+            for col in range(cols):
+                if seats[row][col] == '#':
+                    occupied_count += 1
+        result = occupied_count
+        return result
+    
+    def solve2(self, seats):
+        rows = len(seats)
+        cols = len(seats[0])
+        seats = [row[:] for row in seats]
+        next_seats = [row[:] for row in seats]
+        change_ind = True
+        while change_ind:
+            change_ind = False
+            for row in range(rows):
+                for col in range(cols):
+                    occupied_count = 0
+                    for (dr, dc) in (
+                        (-1, -1),
+                        (-1,  0),
+                        (-1,  1),
+                        ( 0, -1),
+                        ( 0,  1),
+                        ( 1, -1),
+                        ( 1,  0),
+                        ( 1,  1),
+                    ):
+                        dist = 1
+                        while True:
+                            if (
+                                (row + dist * dr) < 0 or
+                                (row + dist * dr) >= rows or
+                                (col + dist * dc) < 0 or
+                                (col + dist * dc) >= cols
+                            ):
+                                break
+                            seat = seats[row + dist * dr][col + dist * dc]
+                            if seat == '#':
+                                occupied_count += 1
+                                break
+                            elif seat == 'L':
+                                break
+                            dist += 1
+                    if seats[row][col] == 'L':
+                        if occupied_count == 0:
+                            next_seats[row][col] = '#'
+                            change_ind = True
+                    elif seats[row][col] == '#':
+                        if occupied_count >= 5:
+                            next_seats[row][col] = 'L'
+                            change_ind = True
+            for row in range(rows):
+                for col in range(cols):
+                    seats[row][col] = next_seats[row][col]
+        occupied_count = 0
+        for row in range(rows):
+            for col in range(cols):
+                if seats[row][col] == '#':
+                    occupied_count += 1
+        result = occupied_count
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        seats = self.get_seats(raw_input_lines)
+        solutions = (
+            self.solve(seats),
+            self.solve2(seats),
+            )
+        result = solutions
+        return result
+
 class Day10: # Adapter Array
     '''
     https://adventofcode.com/2020/day/10
@@ -652,7 +778,7 @@ class Day01: # Report Repair
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 10 < day10.in
+    python Solver.py 11 < day11.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
@@ -665,7 +791,7 @@ if __name__ == '__main__':
         8: (Day08, 'Handheld Halting'),
         9: (Day09, 'Encoding Error'),
        10: (Day10, 'Adapter Array'),
-    #    11: (Day11, '???'),
+       11: (Day11, 'Seating System'),
     #    12: (Day12, '???'),
     #    13: (Day13, '???'),
     #    14: (Day14, '???'),
