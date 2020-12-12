@@ -49,6 +49,35 @@ class Template: # Template
         result = solutions
         return result
 
+class Day12: # ???
+    '''
+    ???
+    https://adventofcode.com/2020/day/12
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day11: # Seating System
     '''
     Seating System
@@ -792,7 +821,7 @@ if __name__ == '__main__':
         9: (Day09, 'Encoding Error'),
        10: (Day10, 'Adapter Array'),
        11: (Day11, 'Seating System'),
-    #    12: (Day12, '???'),
+       12: (Day12, '???'),
     #    13: (Day13, '???'),
     #    14: (Day14, '???'),
     #    15: (Day15, '???'),
