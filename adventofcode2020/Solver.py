@@ -49,31 +49,85 @@ class Template: # Template
         result = solutions
         return result
 
-class Day12: # ???
+class Day12: # Rain Risk
     '''
-    ???
+    Rain Risk
     https://adventofcode.com/2020/day/12
     '''
-    def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
+    def get_instructions(self, raw_input_lines: List[str]):
+        instructions = []
         for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
+            instruction = (raw_input_line[0], int(raw_input_line[1:]))
+            instructions.append(instruction)
+        result = instructions
         return result
     
-    def solve(self, parsed_input):
-        result = len(parsed_input)
+    def solve(self, instructions):
+        facings = ['N', 'E', 'S', 'W']
+        facing = 1 # ship
+        offsets = {
+            'N': (-1, 0),
+            'S': ( 1, 0),
+            'W': ( 0,-1),
+            'E': ( 0, 1),
+        }
+        position = (0, 0) # NS, WE
+        for instruction, amount in instructions:
+            offset = None
+            if instruction == 'F':
+                offset = offsets[facings[facing]]
+            elif instruction == 'L':
+                facing = (facing - amount // 90) % len(facings)
+            elif instruction == 'R':
+                facing = (facing + amount // 90) % len(facings)
+            elif instruction in offsets:
+                offset = offsets[instruction]
+            if offset is not None:
+                position = (
+                    position[0] + amount * offset[0],
+                    position[1] + amount * offset[1],
+                )
+        result = sum(map(abs, position))
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, instructions):
+        offsets = {
+            'N': (-1, 0),
+            'S': ( 1, 0),
+            'W': ( 0,-1),
+            'E': ( 0, 1),
+        }
+        waypoint = (-1, 10) # NS, WE
+        ship = (0, 0) # NS, WE
+        for instruction, amount in instructions:
+            if instruction == 'F':
+                ship = (
+                    ship[0] + amount * waypoint[0],
+                    ship[1] + amount * waypoint[1],
+                )
+            elif instruction == 'L':
+                rotation_count = amount // 90
+                for _ in range(rotation_count):
+                    waypoint = (-waypoint[1], waypoint[0])
+            elif instruction == 'R':
+                rotation_count = amount // 90
+                for _ in range(rotation_count):
+                    waypoint = (waypoint[1], -waypoint[0])
+            elif instruction in offsets:
+                offset = offsets[instruction]
+                waypoint = (
+                    waypoint[0] + amount * offset[0],
+                    waypoint[1] + amount * offset[1],
+                )
+        result = sum(map(abs, ship))
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        instructions = self.get_instructions(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(instructions),
+            self.solve2(instructions),
             )
         result = solutions
         return result
@@ -807,7 +861,7 @@ class Day01: # Report Repair
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 11 < day11.in
+    python Solver.py 12 < day12.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
@@ -821,7 +875,7 @@ if __name__ == '__main__':
         9: (Day09, 'Encoding Error'),
        10: (Day10, 'Adapter Array'),
        11: (Day11, 'Seating System'),
-       12: (Day12, '???'),
+       12: (Day12, 'Rain Risk'),
     #    13: (Day13, '???'),
     #    14: (Day14, '???'),
     #    15: (Day15, '???'),
