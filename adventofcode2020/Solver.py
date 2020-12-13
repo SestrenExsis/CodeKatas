@@ -49,6 +49,35 @@ class Template: # Template
         result = solutions
         return result
 
+class Day13: # >>>
+    '''
+    ???
+    https://adventofcode.com/2020/day/13
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day12: # Rain Risk
     '''
     Rain Risk
@@ -861,7 +890,7 @@ class Day01: # Report Repair
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 12 < day12.in
+    python Solver.py 13 < day13.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
@@ -876,7 +905,7 @@ if __name__ == '__main__':
        10: (Day10, 'Adapter Array'),
        11: (Day11, 'Seating System'),
        12: (Day12, 'Rain Risk'),
-    #    13: (Day13, '???'),
+       13: (Day13, '???'),
     #    14: (Day14, '???'),
     #    15: (Day15, '???'),
     #    16: (Day16, '???'),
