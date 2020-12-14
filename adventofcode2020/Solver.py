@@ -49,6 +49,54 @@ class Template: # Template
         result = solutions
         return result
 
+class Day14: # Docking Data
+    '''
+    Docking Data
+    https://adventofcode.com/2020/day/14
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            a, b = raw_input_line.split(' = ')
+            if a == 'mask':
+                result.append((a, b))
+            else:
+                c = a.split('[')[1][:-1]
+                result.append(('mem', int(c), int(b)))
+        return result
+    
+    def solve(self, parsed_input):
+        mem = collections.defaultdict(int)
+        mask = 'X' * 36
+        for row in parsed_input:
+            if row[0] == 'mask':
+                mask = row[1]
+            elif row[0] == 'mem':
+                num = row[2]
+                value = 0
+                for i in range(36):
+                    power = 2 ** (36 - i - 1)
+                    if mask[i] == '1' or mask[i] == 'X' and num & power > 0:
+                        value += power
+                    value += 0
+                mem[row[1]] = value
+        result = sum(mem.values())
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day13: # Shuttle Search
     '''
     Shuttle Search
@@ -907,7 +955,7 @@ class Day01: # Report Repair
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 13 < day13.in
+    python Solver.py 14 < day14.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
@@ -923,7 +971,7 @@ if __name__ == '__main__':
        11: (Day11, 'Seating System'),
        12: (Day12, 'Rain Risk'),
        13: (Day13, 'Shuttle Search'),
-    #    14: (Day14, '???'),
+       14: (Day14, 'Docking Data'),
     #    15: (Day15, '???'),
     #    16: (Day16, '???'),
     #    17: (Day17, '???'),
