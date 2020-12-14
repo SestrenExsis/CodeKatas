@@ -56,17 +56,18 @@ class Day13: # Shuttle Search
     '''
     def get_parsed_input(self, raw_input_lines: List[str]):
         earliest_departure_time = int(raw_input_lines[0])
-        bus_ids = set()
-        for bus_id in raw_input_lines[1].split(','):
+        buses = set()
+        for i, bus_id in enumerate(raw_input_lines[1].split(',')):
             if bus_id != 'x':
-                bus_ids.add(int(bus_id))
-        result = (earliest_departure_time, bus_ids)
+                bus_id = int(bus_id)
+                buses.add((bus_id, (bus_id - (i % bus_id)) % bus_id))
+        result = (earliest_departure_time, buses)
         return result
     
-    def solve(self, earliest_departure_time, bus_ids):
+    def solve(self, earliest_departure_time, buses):
         min_wait_time = float('inf')
         earliest_bus_id = 0
-        for bus_id in bus_ids:
+        for bus_id, _ in buses:
             wait_time = bus_id - (earliest_departure_time % bus_id)
             if wait_time < min_wait_time:
                 min_wait_time = wait_time
@@ -74,16 +75,22 @@ class Day13: # Shuttle Search
         result = earliest_bus_id * min_wait_time
         return result
     
-    def solve2(self, earliest_departure_time, bus_ids):
-        result = earliest_departure_time
+    def solve2(self, earliest_departure_time, buses):
+        modulo, remainder = buses.pop()
+        while len(buses) > 0:
+            next_modulo, next_remainder = buses.pop()
+            while remainder % next_modulo != next_remainder:
+                remainder += modulo
+            modulo *= next_modulo
+        result = remainder
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        earliest_departure_time, bus_ids = self.get_parsed_input(raw_input_lines)
+        earliest_departure_time, buses = self.get_parsed_input(raw_input_lines)
         solutions = (
-            self.solve(earliest_departure_time, bus_ids),
-            self.solve2(earliest_departure_time, bus_ids),
+            self.solve(earliest_departure_time, buses),
+            self.solve2(earliest_departure_time, buses),
             )
         result = solutions
         return result
