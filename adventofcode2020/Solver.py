@@ -78,13 +78,37 @@ class Day14: # Docking Data
                     power = 2 ** (36 - i - 1)
                     if mask[i] == '1' or mask[i] == 'X' and num & power > 0:
                         value += power
-                    value += 0
                 mem[row[1]] = value
         result = sum(mem.values())
         return result
+
+    def gen_addresses(self, mask):
+        if 'X' in mask:
+            for char in ('0', '1'):
+                yield from self.gen_addresses(mask.replace('X', char, 1))
+        else:
+            yield mask
     
     def solve2(self, parsed_input):
-        result = len(parsed_input)
+        mem = collections.defaultdict(int)
+        mask = 'X' * 36
+        for row in parsed_input:
+            if row[0] == 'mask':
+                mask = row[1]
+            elif row[0] == 'mem':
+                masked_address = []
+                for i in range(len(mask)):
+                    if mask[i] == '0':
+                        power = 2 ** (35 - i)
+                        bit = 1 if row[1] & power > 0 else 0
+                        masked_address.append(str(bit))
+                    else:
+                        masked_address.append(mask[i])
+                masked_address = ''.join(masked_address)
+                for address_str in self.gen_addresses(masked_address):
+                    address = int(address_str, 2)
+                    mem[address] = row[2]
+        result = sum(mem.values())
         return result
     
     def main(self):
