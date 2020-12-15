@@ -49,6 +49,49 @@ class Template: # Template
         result = solutions
         return result
 
+class Day15: # Rambunctious Recitation
+    '''
+    Rambunctious Recitation
+    https://adventofcode.com/2020/day/15
+    '''
+    def get_starting_numbers(self, raw_input_lines: List[str]):
+        result = list(map(int, raw_input_lines[0].split(',')))
+        return result
+    
+    def bruteforce(self, starting_numbers, turns):
+        spoken = starting_numbers[0]
+        prev_spoken = None
+        last_spoken = collections.defaultdict(collections.deque)
+        for i in range(turns):
+            if i < len(starting_numbers):
+                spoken = starting_numbers[i]
+            else:
+                if len(last_spoken[prev_spoken]) == 1:
+                    spoken = 0
+                else:
+                    times = last_spoken[prev_spoken]
+                    spoken = times[-1] - times[-2]
+            last_spoken[spoken].append(i)
+            while len(last_spoken[spoken]) > 2:
+                last_spoken[spoken].popleft()
+            prev_spoken = spoken
+        result = spoken
+        return result
+    
+    def solve(self, starting_numbers, turns):
+        result = len(starting_numbers)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        starting_numbers = self.get_starting_numbers(raw_input_lines)
+        solutions = (
+            self.bruteforce(starting_numbers, 2_020),
+            self.bruteforce(starting_numbers, 30_000_000),
+            )
+        result = solutions
+        return result
+
 class Day14: # Docking Data
     '''
     Docking Data
@@ -979,7 +1022,7 @@ class Day01: # Report Repair
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 14 < day14.in
+    python Solver.py 15 < day15.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
@@ -996,7 +1039,7 @@ if __name__ == '__main__':
        12: (Day12, 'Rain Risk'),
        13: (Day13, 'Shuttle Search'),
        14: (Day14, 'Docking Data'),
-    #    15: (Day15, '???'),
+       15: (Day15, 'Rambunctious Recitation'),
     #    16: (Day16, '???'),
     #    17: (Day17, '???'),
     #    18: (Day18, '???'),
