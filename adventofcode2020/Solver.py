@@ -49,6 +49,79 @@ class Template: # Template
         result = solutions
         return result
 
+class Day16: # Ticket Translation
+    '''
+    Ticket Translation
+    https://adventofcode.com/2020/day/16
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        rules = {}
+        your_ticket = []
+        nearby_tickets = []
+        mode = 'rules'
+        for raw_input_line in raw_input_lines:
+            if ': ' in raw_input_line:
+                field, raw_suffix = raw_input_line.split(': ')
+                rules[field] = []
+                valid_ranges = raw_suffix.split(' or ')
+                for valid_range in valid_ranges:
+                    rule = tuple(map(int, valid_range.split('-')))
+                    rules[field].append(rule)
+            else:
+                if len(raw_input_line) == 0:
+                    continue
+                if raw_input_line in (
+                    'your ticket:',
+                    'nearby tickets:',
+                    ):
+                    mode = raw_input_line[:-1]
+                elif mode == 'your ticket':
+                    your_ticket = list(map(int, raw_input_line.split(',')))
+                elif mode == 'nearby tickets':
+                    nearby_tickets.append(
+                        list(map(int, raw_input_line.split(',')))
+                        )
+        result = (
+            rules,
+            your_ticket,
+            nearby_tickets,
+        )
+        return result
+    
+    def solve(self, rules, nearby_tickets):
+        errors = []
+        for ticket in nearby_tickets:
+            for value in ticket:
+                valid_ind = False
+                for valid_ranges in rules.values():
+                    for valid_range in valid_ranges:
+                        min_val, max_val = valid_range
+                        if min_val <= value <= max_val:
+                            valid_ind = True
+                            break
+                    if valid_ind:
+                        break
+                if not valid_ind:
+                    print(value)
+                    errors.append(value)
+        result = sum(errors)
+        return result
+    
+    def solve2(self, rules, your_ticket, nearby_tickets):
+        result = len(nearby_tickets)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        rules, your_ticket, nearby_tickets = parsed_input
+        solutions = (
+            self.solve(rules, nearby_tickets),
+            self.solve2(rules, your_ticket, nearby_tickets),
+            )
+        result = solutions
+        return result
+
 class Day15: # Rambunctious Recitation
     '''
     Rambunctious Recitation
@@ -76,10 +149,6 @@ class Day15: # Rambunctious Recitation
                 last_spoken[spoken].popleft()
             prev_spoken = spoken
         result = spoken
-        return result
-    
-    def solve(self, starting_numbers, turns):
-        result = len(starting_numbers)
         return result
     
     def main(self):
@@ -1022,7 +1091,7 @@ class Day01: # Report Repair
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 15 < day15.in
+    python Solver.py 16 < day16.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
@@ -1040,7 +1109,7 @@ if __name__ == '__main__':
        13: (Day13, 'Shuttle Search'),
        14: (Day14, 'Docking Data'),
        15: (Day15, 'Rambunctious Recitation'),
-    #    16: (Day16, '???'),
+       16: (Day16, 'Ticket Translation'),
     #    17: (Day17, '???'),
     #    18: (Day18, '???'),
     #    19: (Day19, '???'),
