@@ -5,7 +5,9 @@ Created on Nov 24, 2020
 '''
 import argparse
 import collections
-from typing import List, Set, Tuple
+import functools
+import operator
+from typing import Dict, List, Set, Tuple
     
 def get_raw_input_lines() -> list:
     raw_input_lines = []
@@ -88,27 +90,85 @@ class Day16: # Ticket Translation
         )
         return result
     
-    def solve(self, rules, nearby_tickets):
+    def ticket_errors(self,
+        ticket: List[int],
+        rules: Dict[str, List[Tuple[int]]],
+        ):
+        errors = []
+        for value in ticket:
+            valid_ind = False
+            for valid_ranges in rules.values():
+                for valid_range in valid_ranges:
+                    min_val, max_val = valid_range
+                    if min_val <= value <= max_val:
+                        valid_ind = True
+                        break
+                if valid_ind:
+                    break
+            if not valid_ind:
+                errors.append(value)
+        result = errors
+        return result
+    
+    def solve(self,
+        rules: Dict[str, List[Tuple[int]]],
+        nearby_tickets: List[List[int]],
+        ):
         errors = []
         for ticket in nearby_tickets:
-            for value in ticket:
-                valid_ind = False
-                for valid_ranges in rules.values():
-                    for valid_range in valid_ranges:
-                        min_val, max_val = valid_range
-                        if min_val <= value <= max_val:
-                            valid_ind = True
-                            break
-                    if valid_ind:
-                        break
-                if not valid_ind:
-                    print(value)
-                    errors.append(value)
+            errors.extend(self.ticket_errors(ticket, rules))
         result = sum(errors)
         return result
     
-    def solve2(self, rules, your_ticket, nearby_tickets):
-        result = len(nearby_tickets)
+    def solve2(self,
+        rules: Dict[str, List[Tuple[int]]],
+        your_ticket: List[int],
+        nearby_tickets: List[List[int]],
+        ):
+        valid_tickets = list(
+            ticket for
+            ticket in nearby_tickets if
+            len(self.ticket_errors(ticket, rules)) == 0
+            )
+        fields = {}
+        for field in rules:
+            fields[field] = set(range(len(your_ticket)))
+        for field in fields:
+            valid_ranges = rules[field]
+            for field_id in range(len(your_ticket)):
+                possible_ind = True
+                for ticket in valid_tickets:
+                    valid_ind = False
+                    for valid_range in valid_ranges:
+                        min_val, max_val = valid_range
+                        if min_val <= ticket[field_id] <= max_val:
+                            valid_ind = True
+                            break
+                    if not valid_ind:
+                        possible_ind = False
+                        break
+                if not possible_ind:
+                    fields[field].remove(field_id)
+        fixed_fields = {}
+        while len(fixed_fields) < len(your_ticket):
+            fixed_field_id = -1
+            for field, possible_ids in fields.items():
+                if len(possible_ids) == 1:
+                    fixed_field_id = next(iter(possible_ids))
+                    break
+            if fixed_field_id >= 0:
+                fixed_fields[field] = fixed_field_id
+                for field in fields:
+                    if fixed_field_id in fields[field]:
+                        fields[field].remove(fixed_field_id)
+        result = functools.reduce(operator.mul,(
+            your_ticket[fixed_fields['departure location']],
+            your_ticket[fixed_fields['departure station']],
+            your_ticket[fixed_fields['departure platform']],
+            your_ticket[fixed_fields['departure track']],
+            your_ticket[fixed_fields['departure date']],
+            your_ticket[fixed_fields['departure time']],
+            ), 1)
         return result
     
     def main(self):
