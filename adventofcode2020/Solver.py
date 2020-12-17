@@ -51,6 +51,183 @@ class Template: # Template
         result = solutions
         return result
 
+class Day17: # Conway Cubes
+    '''
+    Conway Cubes
+    https://adventofcode.com/2020/day/17
+    '''
+    def get_initial_state(self, raw_input_lines: List[str]):
+        initial_state = set()
+        for y, raw_input_line in enumerate(raw_input_lines):
+            for x, cell in enumerate(raw_input_line):
+                if cell == '#':
+                    initial_state.add((x, y, 0))
+        result = initial_state
+        return result
+    
+    def solve(self, initial_state):
+        curr_state = set(initial_state)
+        for _ in range(6):
+            neighbors = collections.defaultdict(int)
+            for x, y, z in curr_state:
+                for (dx, dy, dz) in (
+                    (-1, -1, -1),
+                    (-1, -1,  0),
+                    (-1, -1,  1),
+                    (-1,  0, -1),
+                    (-1,  0,  0),
+                    (-1,  0,  1),
+                    (-1,  1, -1),
+                    (-1,  1,  0),
+                    (-1,  1,  1),
+                    ( 0, -1, -1),
+                    ( 0, -1,  0),
+                    ( 0, -1,  1),
+                    ( 0,  0, -1),
+                    # ( 0,  0,  0),
+                    ( 0,  0,  1),
+                    ( 0,  1, -1),
+                    ( 0,  1,  0),
+                    ( 0,  1,  1),
+                    ( 1, -1, -1),
+                    ( 1, -1,  0),
+                    ( 1, -1,  1),
+                    ( 1,  0, -1),
+                    ( 1,  0,  0),
+                    ( 1,  0,  1),
+                    ( 1,  1, -1),
+                    ( 1,  1,  0),
+                    ( 1,  1,  1),
+                    ):
+                    neighbors[(x + dx, y + dy, z + dz)] += 1
+            next_state = set()
+            for x, y, z in curr_state:
+                if 2 <= neighbors[(x, y, z)] <= 3:
+                    next_state.add((x, y, z))
+            for x, y, z in neighbors:
+                if neighbors[(x, y, z)] == 3 and (x, y, z) not in curr_state:
+                    next_state.add((x, y, z))
+            curr_state = next_state
+        result = len(curr_state)
+        return result
+    
+    def solve2(self, initial_state):
+        curr_state = set()
+        for (x, y, z) in initial_state:
+            curr_state.add((x, y, z, 0))
+        for _ in range(6):
+            neighbors = collections.defaultdict(int)
+            for x, y, z, w in curr_state:
+                for (dx, dy, dz, dw) in (
+                    (-1, -1, -1, -1),
+                    (-1, -1,  0, -1),
+                    (-1, -1,  1, -1),
+                    (-1,  0, -1, -1),
+                    (-1,  0,  0, -1),
+                    (-1,  0,  1, -1),
+                    (-1,  1, -1, -1),
+                    (-1,  1,  0, -1),
+                    (-1,  1,  1, -1),
+                    ( 0, -1, -1, -1),
+                    ( 0, -1,  0, -1),
+                    ( 0, -1,  1, -1),
+                    ( 0,  0, -1, -1),
+                    ( 0,  0,  0, -1),
+                    ( 0,  0,  1, -1),
+                    ( 0,  1, -1, -1),
+                    ( 0,  1,  0, -1),
+                    ( 0,  1,  1, -1),
+                    ( 1, -1, -1, -1),
+                    ( 1, -1,  0, -1),
+                    ( 1, -1,  1, -1),
+                    ( 1,  0, -1, -1),
+                    ( 1,  0,  0, -1),
+                    ( 1,  0,  1, -1),
+                    ( 1,  1, -1, -1),
+                    ( 1,  1,  0, -1),
+                    ( 1,  1,  1, -1),
+                    
+                    (-1, -1, -1,  0),
+                    (-1, -1,  0,  0),
+                    (-1, -1,  1,  0),
+                    (-1,  0, -1,  0),
+                    (-1,  0,  0,  0),
+                    (-1,  0,  1,  0),
+                    (-1,  1, -1,  0),
+                    (-1,  1,  0,  0),
+                    (-1,  1,  1,  0),
+                    ( 0, -1, -1,  0),
+                    ( 0, -1,  0,  0),
+                    ( 0, -1,  1,  0),
+                    ( 0,  0, -1,  0),
+                    # ( 0,  0,  0,  0),
+                    ( 0,  0,  1,  0),
+                    ( 0,  1, -1,  0),
+                    ( 0,  1,  0,  0),
+                    ( 0,  1,  1,  0),
+                    ( 1, -1, -1,  0),
+                    ( 1, -1,  0,  0),
+                    ( 1, -1,  1,  0),
+                    ( 1,  0, -1,  0),
+                    ( 1,  0,  0,  0),
+                    ( 1,  0,  1,  0),
+                    ( 1,  1, -1,  0),
+                    ( 1,  1,  0,  0),
+                    ( 1,  1,  1,  0),
+                    
+                    (-1, -1, -1,  1),
+                    (-1, -1,  0,  1),
+                    (-1, -1,  1,  1),
+                    (-1,  0, -1,  1),
+                    (-1,  0,  0,  1),
+                    (-1,  0,  1,  1),
+                    (-1,  1, -1,  1),
+                    (-1,  1,  0,  1),
+                    (-1,  1,  1,  1),
+                    ( 0, -1, -1,  1),
+                    ( 0, -1,  0,  1),
+                    ( 0, -1,  1,  1),
+                    ( 0,  0, -1,  1),
+                    ( 0,  0,  0,  1),
+                    ( 0,  0,  1,  1),
+                    ( 0,  1, -1,  1),
+                    ( 0,  1,  0,  1),
+                    ( 0,  1,  1,  1),
+                    ( 1, -1, -1,  1),
+                    ( 1, -1,  0,  1),
+                    ( 1, -1,  1,  1),
+                    ( 1,  0, -1,  1),
+                    ( 1,  0,  0,  1),
+                    ( 1,  0,  1,  1),
+                    ( 1,  1, -1,  1),
+                    ( 1,  1,  0,  1),
+                    ( 1,  1,  1,  1),
+                    ):
+                    neighbors[(x + dx, y + dy, z + dz, w + dw)] += 1
+            next_state = set()
+            for x, y, z, w in curr_state:
+                if 2 <= neighbors[(x, y, z, w)] <= 3:
+                    next_state.add((x, y, z, w))
+            for x, y, z, w in neighbors:
+                if (
+                    neighbors[(x, y, z, w)] == 3 and
+                    (x, y, z, w) not in curr_state
+                ):
+                    next_state.add((x, y, z, w))
+            curr_state = next_state
+        result = len(curr_state)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        initial_state = self.get_initial_state(raw_input_lines)
+        solutions = (
+            self.solve(initial_state),
+            self.solve2(initial_state),
+            )
+        result = solutions
+        return result
+
 class Day16: # Ticket Translation
     '''
     Ticket Translation
@@ -1151,7 +1328,7 @@ class Day01: # Report Repair
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 16 < day16.in
+    python Solver.py 17 < day17.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
@@ -1170,7 +1347,7 @@ if __name__ == '__main__':
        14: (Day14, 'Docking Data'),
        15: (Day15, 'Rambunctious Recitation'),
        16: (Day16, 'Ticket Translation'),
-    #    17: (Day17, '???'),
+       17: (Day17, 'Conway Cubes'),
     #    18: (Day18, '???'),
     #    19: (Day19, '???'),
     #    20: (Day20, '???'),
