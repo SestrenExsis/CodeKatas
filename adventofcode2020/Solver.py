@@ -51,6 +51,126 @@ class Template: # Template
         result = solutions
         return result
 
+class Day18: # Operation Order
+    '''
+    Operation Order
+    https://adventofcode.com/2020/day/18
+    '''
+    def tokenize(self, chars):
+        tokens = []
+        num = 0
+        for i, char in enumerate(chars + ' '):
+            if char not in '0123456789':
+                if i > 0 and chars[i - 1] in '0123456789':
+                    tokens.append(num)
+                    num = 0
+            if char == ' ':
+                continue
+            elif char in '0123456789':
+                num = 10 * num + int(char)
+            else:
+                tokens.append(char)
+        result = tokens
+        return result
+
+    def get_parsed_input(self, raw_input_lines):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(self.tokenize(raw_input_line))
+        return result
+    
+    def solve(self, parsed_input):
+        # Use Shunting-Yard Algorithm
+        # https://en.wikipedia.org/wiki/Shunting-yard_algorithm
+        totals = []
+        for tokens in parsed_input:
+            output = []
+            operators = []
+            for token in tokens:
+                if type(token) is int:
+                    output.append(token)
+                elif token in '+*':
+                    while (
+                        len(operators) > 0 and
+                        operators[-1] + token in ('++', '**', '*+', '+*')
+                        ):
+                        output.append(operators.pop())
+                    operators.append(token)
+                elif token == '(':
+                    operators.append(token)
+                elif token == ')':
+                    while operators[-1] != '(':
+                        output.append(operators.pop())
+                    if operators[-1] == '(':
+                        operators.pop()
+            while len(operators) > 0:
+                output.append(operators.pop())
+            stack = []
+            for el in output:
+                stack.append(el)
+                if type(stack[-1]) is str and stack[-1] in '+*':
+                    operator = stack.pop()
+                    a = stack.pop()
+                    b = stack.pop()
+                    if operator == '+':
+                        stack.append(a + b)
+                    elif operator == '*':
+                        stack.append(a * b)
+            totals.append(sum(stack))
+        result = sum(totals)
+        return result
+    
+    def solve2(self, parsed_input):
+        # Use Shunting-Yard Algorithm
+        # https://en.wikipedia.org/wiki/Shunting-yard_algorithm
+        totals = []
+        for tokens in parsed_input:
+            output = []
+            operators = []
+            for token in tokens:
+                if type(token) is int:
+                    output.append(token)
+                elif token in '+*':
+                    while (
+                        len(operators) > 0 and
+                        operators[-1] + token in ('++', '**', '+*')
+                        ):
+                        output.append(operators.pop())
+                    operators.append(token)
+                elif token == '(':
+                    operators.append(token)
+                elif token == ')':
+                    while operators[-1] != '(':
+                        output.append(operators.pop())
+                    if operators[-1] == '(':
+                        operators.pop()
+            while len(operators) > 0:
+                output.append(operators.pop())
+            stack = []
+            for el in output:
+                stack.append(el)
+                if type(stack[-1]) is str and stack[-1] in '+*':
+                    operator = stack.pop()
+                    a = stack.pop()
+                    b = stack.pop()
+                    if operator == '+':
+                        stack.append(a + b)
+                    elif operator == '*':
+                        stack.append(a * b)
+            totals.append(sum(stack))
+        result = sum(totals)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day17: # Conway Cubes
     '''
     Conway Cubes
@@ -1328,7 +1448,7 @@ class Day01: # Report Repair
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 17 < day17.in
+    python Solver.py 18 < day18.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
@@ -1348,7 +1468,7 @@ if __name__ == '__main__':
        15: (Day15, 'Rambunctious Recitation'),
        16: (Day16, 'Ticket Translation'),
        17: (Day17, 'Conway Cubes'),
-    #    18: (Day18, '???'),
+       18: (Day18, 'Operation Order'),
     #    19: (Day19, '???'),
     #    20: (Day20, '???'),
     #    21: (Day21, '???'),
