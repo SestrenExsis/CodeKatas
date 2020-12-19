@@ -51,6 +51,85 @@ class Template: # Template
         result = solutions
         return result
 
+class Day19: # Monster Messages
+    '''
+    Monster Messages
+    https://adventofcode.com/2020/day/19
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        rules = {}
+        messages = []
+        for raw_input_line in raw_input_lines:
+            if ':' in raw_input_line:
+                rule_id, raw_rule = raw_input_line.split(': ')
+                rule_id = int(rule_id)
+                if '"' in raw_rule:
+                    rules[rule_id] = [raw_rule[1]]
+                else:
+                    rule = []
+                    for raw_elem in raw_rule.split(' | '):
+                        rule.append(list(map(int, raw_elem.split(' '))))
+                    rules[rule_id] = rule
+            elif len(raw_input_line) > 0:
+                messages.append(raw_input_line)
+        result = rules, messages
+        return result
+    
+    def get_matches(self, message, rules, rule_index, start=0):
+        matches = []
+        for attempt in rules[rule_index]:
+            cursors = [start]
+            for val in attempt:
+                next_cursors = []
+                for cursor in cursors:
+                    if type(val) == str:
+                        if start < len(message) and message[start] == val:
+                            next_cursors.append(cursor + 1)
+                    else:
+                        next_matches = self.get_matches(
+                            message,
+                            rules,
+                            val,
+                            cursor,
+                            )
+                        for match in next_matches:
+                            next_cursors.append(match)
+                cursors = next_cursors
+            for cursor in cursors:
+                matches.append(cursor)
+        result = matches
+        return result
+    
+    def solve(self, rules, messages):
+        valid_message_count = 0
+        for message in messages:
+            matches = self.get_matches(message, rules, 0, 0)
+            if len(message) in matches:
+                valid_message_count += 1
+        result = valid_message_count
+        return result
+    
+    def solve2(self, rules, messages):
+        rules[8] = [[42], [42, 8]]
+        rules[11] = [[42, 31], [42, 11, 31]]
+        valid_message_count = 0
+        for message in messages:
+            matches = self.get_matches(message, rules, 0, 0)
+            if len(message) in matches:
+                valid_message_count += 1
+        result = valid_message_count
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        rules, messages = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(rules, messages),
+            self.solve2(rules, messages),
+            )
+        result = solutions
+        return result
+
 class Day18: # Operation Order
     '''
     Operation Order
@@ -1448,7 +1527,7 @@ class Day01: # Report Repair
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 18 < day18.in
+    python Solver.py 19 < day19.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
@@ -1469,7 +1548,7 @@ if __name__ == '__main__':
        16: (Day16, 'Ticket Translation'),
        17: (Day17, 'Conway Cubes'),
        18: (Day18, 'Operation Order'),
-    #    19: (Day19, '???'),
+       19: (Day19, 'Monster Messages'),
     #    20: (Day20, '???'),
     #    21: (Day21, '???'),
     #    22: (Day22, '???'),
