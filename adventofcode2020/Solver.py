@@ -51,6 +51,82 @@ class Template: # Template
         result = solutions
         return result
 
+class Day20: # Jurassic Jigsaw
+    '''
+    Jurassic Jigsaw
+    https://adventofcode.com/2020/day/20
+    '''
+    def get_tiles(self, raw_input_lines: List[str]):
+        tiles = {}
+        tile_id = None
+        tile = []
+        for raw_input_line in raw_input_lines:
+            if len(raw_input_line) < 1:
+                tiles[tile_id] = tile
+                tile = []
+                continue
+            elif 'Tile' in raw_input_line:
+                tile_id = int(raw_input_line.split(' ')[1][:-1])
+            else:
+                tile.append(raw_input_line)
+        tiles[tile_id] = tile
+        result = tiles
+        return result
+    
+    def get_edges(self, tile: List[str]) -> List[str]:
+        rows = len(tile)
+        cols = len(tile[0])
+        top = tile[0]
+        bottom = tile[-1]
+        left = ''.join(tile[i][0] for i in range(rows))
+        right = ''.join(tile[i][cols - 1] for i in range(rows))
+        result = [top, bottom, left, right]
+        return result
+    
+    def solve(self, tiles):
+        connections = {}
+        for tile_id, tile in tiles.items():
+            connections[tile_id] = set()
+            edges = self.get_edges(tile)
+            for other_tile_id, other_tile in tiles.items():
+                if other_tile_id == tile_id:
+                    continue
+                connected_ind = False
+                other_edges = self.get_edges(other_tile)
+                for edge in edges:
+                    for other_edge in other_edges:
+                        if edge in (other_edge, other_edge[::-1]):
+                            connected_ind = True
+                            break
+                    if connected_ind:
+                        break
+                if connected_ind:
+                    connections[tile_id].add(other_tile_id)
+        # Based on the instructions, a corner tile is assumed to be a tile that
+        # connects with exactly two other tiles.
+        corner_tiles = []
+        for tile_id, other_tile_ids in connections.items():
+            if len(other_tile_ids) == 2:
+                corner_tiles.append(tile_id)
+        result = 1
+        for tile_id in corner_tiles:
+            result *= tile_id
+        return result
+    
+    def solve2(self, tiles):
+        result = len(tiles)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        tiles = self.get_tiles(raw_input_lines)
+        solutions = (
+            self.solve(tiles),
+            self.solve2(tiles),
+            )
+        result = solutions
+        return result
+
 class Day19: # Monster Messages
     '''
     Monster Messages
@@ -1527,7 +1603,7 @@ class Day01: # Report Repair
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 19 < day19.in
+    python Solver.py 20 < day20.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
@@ -1549,7 +1625,7 @@ if __name__ == '__main__':
        17: (Day17, 'Conway Cubes'),
        18: (Day18, 'Operation Order'),
        19: (Day19, 'Monster Messages'),
-    #    20: (Day20, '???'),
+       20: (Day20, 'Jurassic Jigsaw'),
     #    21: (Day21, '???'),
     #    22: (Day22, '???'),
     #    23: (Day23, '???'),
