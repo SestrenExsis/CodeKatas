@@ -83,7 +83,7 @@ class Day20: # Jurassic Jigsaw
         result = [top, bottom, left, right]
         return result
     
-    def solve(self, tiles):
+    def get_connections(self, tiles):
         connections = {}
         for tile_id, tile in tiles.items():
             connections[tile_id] = set()
@@ -102,6 +102,11 @@ class Day20: # Jurassic Jigsaw
                         break
                 if connected_ind:
                     connections[tile_id].add(other_tile_id)
+        result = connections
+        return result
+    
+    def solve(self, tiles):
+        connections = self.get_connections(tiles)
         # Based on the instructions, a corner tile is assumed to be a tile that
         # connects with exactly two other tiles.
         corner_tiles = []
@@ -113,8 +118,34 @@ class Day20: # Jurassic Jigsaw
             result *= tile_id
         return result
     
+    def get_image(self, tiles):
+        connections = self.get_connections(tiles)
+        image = []
+        for tile_id, tile_connections in connections.items():
+            if len(tile_connections) == 2:
+                # assemble from the first corner image you find
+                # don't forget to dedupe the edges
+                break
+        result = image
+        return result
+    
+    def get_water_roughness(self, image):
+        # analyze the image in 8 different orientations
+        monster_count = 0 # monster weight = 15
+        water_roughness = 0
+        result = water_roughness
+        return result
+    
     def solve2(self, tiles):
-        result = len(tiles)
+        # For every corner tile, ...
+        # - Treat that tile as the upper-left tile
+        # For both "open" sides of the chosen corner tile, ...
+        # - Treat that side as the left-hand side
+        # For each scan, ...
+        # - Scan top-to-bottom, left-to-right
+        image = self.get_image(tiles)
+        water_roughness = self.get_water_roughness(image)
+        result = water_roughness
         return result
     
     def main(self):
