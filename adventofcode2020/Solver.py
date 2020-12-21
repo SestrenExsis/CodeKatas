@@ -68,7 +68,7 @@ class Day21: # Allergen Assessment
         result = foods
         return result
     
-    def solve(self, foods):
+    def identify_allergens(self, foods):
         ingredients = set()
         allergens = {}
         for food_ingredients, food_allergens in foods:
@@ -84,22 +84,32 @@ class Day21: # Allergen Assessment
                         food_ingredients,
                         )
         identified = set()
+        identities = {}
         while len(identified) < len(allergens):
             for allergen, possible_ingredients in allergens.items():
                 if len(possible_ingredients) == 1:
-                    identified.add(next(iter(possible_ingredients)))
+                    ingredient = next(iter(possible_ingredients))
+                    identified.add(ingredient)
+                    identities[ingredient] = allergen
                 elif len(possible_ingredients) > 1:
                     possible_ingredients -= identified
+        result = identities
+        return result
+    
+    def solve(self, foods):
+        identities = self.identify_allergens(foods)
         safe_ingredient_count = 0
-        for food_ingredients, food_allergens in foods:
+        for food_ingredients, _ in foods:
              for food_ingredient in food_ingredients:
-                if food_ingredient not in identified:
+                if food_ingredient not in identities:
                     safe_ingredient_count += 1
         result = safe_ingredient_count
         return result
     
     def solve2(self, foods):
-        result = len(foods)
+        identities = self.identify_allergens(foods)
+        dangerous_ingredients = sorted(identities.keys(), key=identities.get)
+        result = ','.join(dangerous_ingredients)
         return result
     
     def main(self):
