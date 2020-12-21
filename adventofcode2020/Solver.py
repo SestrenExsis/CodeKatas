@@ -51,6 +51,67 @@ class Template: # Template
         result = solutions
         return result
 
+class Day21: # Allergen Assessment
+    '''
+    Allergen Assessment
+    https://adventofcode.com/2020/day/21
+    '''
+    def get_foods(self, raw_input_lines: List[str]):
+        foods = []
+        for raw_input_line in raw_input_lines:
+            a, b = raw_input_line.split(' (contains ')
+            # Assume each ingredient appears only once per food
+            food_ingredients = set(a.split(' '))
+            # Assume each allergen appears only once per food
+            food_allergens = set(b[:-1].split(', '))
+            foods.append((food_ingredients, food_allergens))
+        result = foods
+        return result
+    
+    def solve(self, foods):
+        ingredients = set()
+        allergens = {}
+        for food_ingredients, food_allergens in foods:
+            for food_ingredient in food_ingredients:
+                ingredients.add(food_ingredient)
+            for food_allergen in food_allergens:
+                if food_allergen not in allergens:
+                    allergens[food_allergen] = set(food_ingredients)
+                else:
+                    current_ingredients = allergens[food_allergen]
+                    allergens[food_allergen] = set.intersection(
+                        current_ingredients,
+                        food_ingredients,
+                        )
+        identified = set()
+        while len(identified) < len(allergens):
+            for allergen, possible_ingredients in allergens.items():
+                if len(possible_ingredients) == 1:
+                    identified.add(next(iter(possible_ingredients)))
+                elif len(possible_ingredients) > 1:
+                    possible_ingredients -= identified
+        safe_ingredient_count = 0
+        for food_ingredients, food_allergens in foods:
+             for food_ingredient in food_ingredients:
+                if food_ingredient not in identified:
+                    safe_ingredient_count += 1
+        result = safe_ingredient_count
+        return result
+    
+    def solve2(self, foods):
+        result = len(foods)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        foods = self.get_foods(raw_input_lines)
+        solutions = (
+            self.solve(foods),
+            self.solve2(foods),
+            )
+        result = solutions
+        return result
+
 class Day20: # Jurassic Jigsaw
     '''
     Jurassic Jigsaw
@@ -1657,7 +1718,7 @@ if __name__ == '__main__':
        18: (Day18, 'Operation Order'),
        19: (Day19, 'Monster Messages'),
        20: (Day20, 'Jurassic Jigsaw'),
-    #    21: (Day21, '???'),
+       21: (Day21, 'Allergen Assessment'),
     #    22: (Day22, '???'),
     #    23: (Day23, '???'),
     #    24: (Day24, '???'),
