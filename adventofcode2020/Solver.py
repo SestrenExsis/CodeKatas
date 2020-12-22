@@ -51,6 +51,60 @@ class Template: # Template
         result = solutions
         return result
 
+class Day22: # Crab Combat
+    '''
+    Crab Combat
+    https://adventofcode.com/2020/day/22
+    '''
+    def get_decks(self, raw_input_lines: List[str]):
+        decks = {}
+        for raw_input_line in raw_input_lines:
+            if 'Player' in raw_input_line:
+                deck_id = int(raw_input_line[7]) - 1
+                decks[deck_id] = collections.deque()
+            elif len(raw_input_line) > 0:
+                decks[deck_id].append(int(raw_input_line))
+        result = decks
+        return result
+    
+    def solve(self, decks):
+        result = len(decks)
+        while len(decks[0]) > 0 and len(decks[1]) > 0:
+            top_card0 = decks[0].popleft()
+            top_card1 = decks[1].popleft()
+            if top_card0 > top_card1:
+                decks[0].append(top_card0)
+                decks[0].append(top_card1)
+            elif top_card1 > top_card0:
+                decks[1].append(top_card1)
+                decks[1].append(top_card0)
+        score = 0
+        multiplier = 1
+        if len(decks[0]) > 0:
+            winning_deck = decks[0]
+        else:
+            winning_deck = decks[1]
+        while len(winning_deck) > 0:
+            top_card = winning_deck.pop()
+            score += multiplier * top_card
+            multiplier += 1
+        result = score
+        return result
+    
+    def solve2(self, decks):
+        result = len(decks)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        decks = self.get_decks(raw_input_lines)
+        solutions = (
+            self.solve(decks),
+            self.solve2(decks),
+            )
+        result = solutions
+        return result
+
 class Day21: # Allergen Assessment
     '''
     Allergen Assessment
@@ -1705,7 +1759,7 @@ class Day01: # Report Repair
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 20 < day20.in
+    python Solver.py 22 < day22.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
@@ -1729,7 +1783,7 @@ if __name__ == '__main__':
        19: (Day19, 'Monster Messages'),
        20: (Day20, 'Jurassic Jigsaw'),
        21: (Day21, 'Allergen Assessment'),
-    #    22: (Day22, '???'),
+       22: (Day22, 'Crab Combat'),
     #    23: (Day23, '???'),
     #    24: (Day24, '???'),
     #    25: (Day25, '???'),
