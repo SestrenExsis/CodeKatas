@@ -5,6 +5,7 @@ Created on Nov 24, 2020
 '''
 import argparse
 import collections
+import copy
 import functools
 import operator
 from typing import Dict, List, Set, Tuple
@@ -60,30 +61,39 @@ class Day22: # Crab Combat
         decks = {}
         for raw_input_line in raw_input_lines:
             if 'Player' in raw_input_line:
-                deck_id = int(raw_input_line[7]) - 1
+                deck_id = int(raw_input_line[7])
                 decks[deck_id] = collections.deque()
             elif len(raw_input_line) > 0:
                 decks[deck_id].append(int(raw_input_line))
         result = decks
         return result
     
-    def solve(self, decks):
-        result = len(decks)
-        while len(decks[0]) > 0 and len(decks[1]) > 0:
-            top_card0 = decks[0].popleft()
-            top_card1 = decks[1].popleft()
-            if top_card0 > top_card1:
-                decks[0].append(top_card0)
-                decks[0].append(top_card1)
-            elif top_card1 > top_card0:
-                decks[1].append(top_card1)
-                decks[1].append(top_card0)
+    def play(self, deck1, deck2) -> int:
+        winner = -1
+        while len(deck1) > 0 and len(deck2) > 0:
+            card1 = deck1.popleft()
+            card2 = deck2.popleft()
+            if card1 > card2:
+                deck1.append(card1)
+                deck1.append(card2)
+            elif card2 > card1:
+                deck2.append(card2)
+                deck2.append(card1)
+        if len(deck1) > 0:
+            winner = 1
+        else:
+            winner = 2
+        result = winner
+        return result
+    
+    def solve(self, deck1, deck2):
         score = 0
         multiplier = 1
-        if len(decks[0]) > 0:
-            winning_deck = decks[0]
+        winner = self.play(deck1, deck2)
+        if winner == 2:
+            winning_deck = deck2
         else:
-            winning_deck = decks[1]
+            winning_deck = deck1
         while len(winning_deck) > 0:
             top_card = winning_deck.pop()
             score += multiplier * top_card
@@ -91,16 +101,64 @@ class Day22: # Crab Combat
         result = score
         return result
     
-    def solve2(self, decks):
-        result = len(decks)
+    def play2(self, deck1, deck2) -> int:
+        keys = set()
+        winner = -1
+        while len(deck1) > 0 and len(deck2) > 0:
+            key = (tuple(deck1), tuple(deck2))
+            if key in keys:
+                # First player wins by default
+                return 1
+            keys.add(key)
+            card1 = deck1.popleft()
+            card2 = deck2.popleft()
+            round_winner = -1
+            if card1 <= len(deck1) and card2 <= len(deck2):
+                subdeck1 = copy.deepcopy(deck1)
+                while len(subdeck1) > card1:
+                    subdeck1.pop()
+                subdeck2 = copy.deepcopy(deck2)
+                while len(subdeck2) > card2:
+                    subdeck2.pop()
+                round_winner = self.play2(subdeck1, subdeck2)
+            elif card1 > card2:
+                round_winner = 1
+            elif card2 > card1:
+                round_winner = 2
+            if round_winner == 1:
+                deck1.append(card1)
+                deck1.append(card2)
+            elif round_winner == 2:
+                deck2.append(card2)
+                deck2.append(card1)
+        if len(deck1) > 0:
+            winner = 1
+        else:
+            winner = 2
+        result = winner
+        return result
+    
+    def solve2(self, deck1, deck2):
+        score = 0
+        multiplier = 1
+        winner = self.play2(deck1, deck2)
+        if winner == 2:
+            winning_deck = deck2
+        else:
+            winning_deck = deck1
+        while len(winning_deck) > 0:
+            card = winning_deck.pop()
+            score += multiplier * card
+            multiplier += 1
+        result = score
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         decks = self.get_decks(raw_input_lines)
         solutions = (
-            self.solve(decks),
-            self.solve2(decks),
+            self.solve(copy.deepcopy(decks[1]), copy.deepcopy(decks[2])),
+            self.solve2(copy.deepcopy(decks[1]), copy.deepcopy(decks[2])),
             )
         result = solutions
         return result
