@@ -52,6 +52,53 @@ class Template: # Template
         result = solutions
         return result
 
+class Day23: # Crab Cups
+    '''
+    Crab Cups
+    https://adventofcode.com/2020/day/23
+    '''
+    def get_cups(self, raw_input_lines: List[str]):
+        result = list(map(int, list(raw_input_lines[0])))
+        return result
+    
+    def solve(self, cups):
+        curr_cup = cups[0]
+        for _ in range(100):
+            cursor = cups.index(curr_cup)
+            pickup = []
+            for _ in range(3):
+                if cursor + 1 < len(cups):
+                    pickup.append(cups.pop(cursor + 1))
+                else:
+                    pickup.append(cups.pop(0))
+            dest_val = 9 if curr_cup == 1 else curr_cup - 1
+            while True:
+                try:
+                    dest_idx = cups.index(dest_val)
+                    cups = cups[:dest_idx + 1] + pickup + cups[dest_idx + 1:]
+                    break
+                except ValueError:
+                    dest_val = 9 if dest_val == 1 else dest_val - 1
+            cursor = (cups.index(curr_cup) + 1) % len(cups)
+            curr_cup = cups[cursor]
+        index = cups.index(1)
+        result = ''.join(map(str, cups[index + 1:] + cups[:index]))
+        return result
+    
+    def solve2(self, cups):
+        result = len(cups)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        cups = self.get_cups(raw_input_lines)
+        solutions = (
+            self.solve(cups[:]),
+            self.solve2(cups[:]),
+            )
+        result = solutions
+        return result
+
 class Day22: # Crab Combat
     '''
     Crab Combat
@@ -1817,7 +1864,7 @@ class Day01: # Report Repair
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 22 < day22.in
+    python Solver.py 23 < day23.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
@@ -1842,7 +1889,7 @@ if __name__ == '__main__':
        20: (Day20, 'Jurassic Jigsaw'),
        21: (Day21, 'Allergen Assessment'),
        22: (Day22, 'Crab Combat'),
-    #    23: (Day23, '???'),
+       23: (Day23, 'Crab Cups'),
     #    24: (Day24, '???'),
     #    25: (Day25, '???'),
         }
