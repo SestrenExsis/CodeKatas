@@ -88,22 +88,23 @@ class Day24: # Lobby Layout
     Lobby Layout
     https://adventofcode.com/2020/day/24
     '''
+    directions = {
+        # (x, y, z) in a hex coordinate system
+        'e':  (+1, -1, +0),
+        'se': (+0, -1, +1),
+        'sw': (-1, +0, +1),
+        'w':  (-1, +1, +0),
+        'nw': (+0, +1, -1),
+        'ne': (+1, +0, -1),
+    }
+
     def get_parsed_input(self, raw_input_lines: List[str]):
         result = []
         for raw_input_line in raw_input_lines:
             result.append(raw_input_line)
         return result
     
-    def solve(self, parsed_input):
-        directions = {
-            # (x, y, z) in a hex coordinate system
-            'e':  (+1, -1, +0),
-            'se': (+0, -1, +1),
-            'sw': (-1, +0, +1),
-            'w':  (-1, +1, +0),
-            'nw': (+0, +1, -1),
-            'ne': (+1, +0, -1),
-        }
+    def get_black_tiles(self, parsed_input):
         black_tiles = set()
         for chars in parsed_input:
             tile = (0, 0, 0)
@@ -115,7 +116,7 @@ class Day24: # Lobby Layout
                     direction = ''.join(stack) + char
                     while len(stack) > 0:
                         stack.pop()
-                    offset = directions[direction]
+                    offset = self.directions[direction]
                     tile = (
                         tile[0] + offset[0],
                         tile[1] + offset[1],
@@ -125,11 +126,74 @@ class Day24: # Lobby Layout
                 black_tiles.remove(tile)
             else:
                 black_tiles.add(tile)
+        result = black_tiles
+        return result
+    
+    def solve(self, parsed_input):
+        black_tiles = self.get_black_tiles(parsed_input)
         result = len(black_tiles)
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def visualize(self, black_tiles, distance: int=3):
+        '''
+        start from (0, 0, 0) and draw up to 3 hexes away in all directions
+
+         . # o o o . 
+        . o o o o o .
+         o o o # # o 
+        o # o # o # o
+         o o o o # o 
+        . o # o o # .
+         . o o o # . 
+        '''
+        grid = ['']
+        for z in range(-distance, distance + 1):
+            row = collections.deque()
+            for y in range(-distance, distance + 1):
+                x = -(z + y)
+                if -distance <= x <= distance:
+                    cell = 'o '
+                    if (x, y, z) in black_tiles:
+                        cell = '# '
+                    row.append(cell)
+            buffer = '. ' * distance
+            left_buffer: str = '' if z == 0 else buffer[-abs(z):]
+            row.appendleft(left_buffer)
+            right_buffer: str = left_buffer[::-1][1:]
+            row.append(right_buffer)
+            grid.append(''.join(row))
+        result = grid
+        return result
+    
+    def solve2(self, parsed_input, day_count: int=100):
+        black_tiles = self.get_black_tiles(parsed_input)
+        for _ in range(day_count):
+            black_tile_neighbors = collections.defaultdict(int)
+            white_tile_neighbors = collections.defaultdict(int)
+            for tile in black_tiles:
+                if tile not in black_tile_neighbors:
+                    black_tile_neighbors[tile] = 0
+                for offset in self.directions.values():
+                    neighbor_tile = (
+                        tile[0] + offset[0],
+                        tile[1] + offset[1],
+                        tile[2] + offset[2],
+                        )
+                    if neighbor_tile in black_tiles:
+                        black_tile_neighbors[tile] += 1
+                    else:
+                        white_tile_neighbors[neighbor_tile] += 1
+            next_black_tiles = set()
+            for tile in black_tile_neighbors:
+                if black_tile_neighbors[tile] in (1, 2):
+                    next_black_tiles.add(tile)
+            for tile in white_tile_neighbors:
+                if white_tile_neighbors[tile] == 2:
+                    next_black_tiles.add(tile)
+            black_tiles = next_black_tiles
+            # grid = self.visualize(black_tiles, 4)
+            # print('\n'.join(grid))
+        result = len(black_tiles)
         return result
     
     def main(self):
