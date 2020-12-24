@@ -24,6 +24,37 @@ def get_raw_input_lines() -> list:
             break
     return raw_input_lines
 
+class NodeRing:
+    class Node:
+        def __init__(self, value: int):
+            self.value = value
+            self.next = None
+
+    def __init__(self, nums: List[int]):
+        self.nodes = {}
+        self.head = self.Node(None)
+        curr_node = self.head
+        for num in nums:
+            curr_node.next = self.Node(num)
+            curr_node = curr_node.next
+            self.nodes[num] = curr_node
+        curr_node.next = self.head.next
+        self.head = self.head.next
+        self.min_value = min(self.nodes)
+        self.max_value = max(self.nodes)
+
+    def pop3(self, node):
+        curr_node = node.next
+        node.next = curr_node.next.next.next
+        result = curr_node
+        return result
+
+    def insert3(self, target, node):
+        target_node = self.nodes[target]
+        next_node = target_node.next
+        target_node.next = node
+        node.next.next.next = next_node
+
 class Template: # Template
     '''
     https://adventofcode.com/2020/day/?
@@ -85,8 +116,57 @@ class Day23: # Crab Cups
         result = ''.join(map(str, cups[index + 1:] + cups[:index]))
         return result
     
-    def solve2(self, cups):
-        result = len(cups)
+    def solve2slow(self, cups, cup_count: int=1_000_000, rounds: int=10_000_000):
+        last_cup = cups[-1] + cup_count - len(cups)
+        cups += list(range(cups[-1] + 1, last_cup + 1))
+        curr_cup = cups[0]
+        for i in range(rounds):
+            if i % 500 == 0:
+                print(i)
+            cursor = cups.index(curr_cup)
+            pickup = []
+            for _ in range(3):
+                if cursor + 1 < len(cups):
+                    pickup.append(cups.pop(cursor + 1))
+                else:
+                    pickup.append(cups.pop(0))
+            dest_val = 9 if curr_cup == 1 else curr_cup - 1
+            while True:
+                try:
+                    dest_idx = cups.index(dest_val)
+                    cups = cups[:dest_idx + 1] + pickup + cups[dest_idx + 1:]
+                    break
+                except ValueError:
+                    dest_val = 9 if dest_val == 1 else dest_val - 1
+            cursor = (cups.index(curr_cup) + 1) % len(cups)
+            curr_cup = cups[cursor]
+        index = cups.index(1)
+        cup1 = cups[(index + 1) % len(cups)]
+        cup2 = cups[(index + 2) % len(cups)]
+        result = cup1 * cup2
+        return result
+    
+    def play(self, ring, curr_cup):
+        pickup = ring.pop3(curr_cup)
+        a, b, c = pickup.value, pickup.next.value, pickup.next.next.value
+        target = curr_cup.value - 1
+        while target in (a, b, c, 0):
+            target -= 1
+            if target < ring.min_value:
+                target = ring.max_value
+        ring.insert3(target, pickup)
+
+    def solve2(self, cups, cup_count: int=1_000_000, rounds: int=10_000_000):
+        cups.extend(list(range(max(cups) + 1, cup_count + 1)))
+        ring = NodeRing(cups)
+        curr_cup = ring.head
+        for _ in range(rounds):
+            self.play(ring, curr_cup)
+            curr_cup = curr_cup.next
+        curr_cup = ring.nodes[1]
+        cup1 = curr_cup.next.value
+        cup2 = curr_cup.next.next.value
+        result = cup1 * cup2
         return result
     
     def main(self):
