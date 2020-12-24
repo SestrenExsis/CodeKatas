@@ -136,8 +136,7 @@ class Day24: # Lobby Layout
     
     def visualize(self, black_tiles, distance: int=3):
         '''
-        start from (0, 0, 0) and draw up to 3 hexes away in all directions
-
+        start from (0, 0, 0) and draw a number of hexes away in all directions
          . # o o o . 
         . o o o o o .
          o o o # # o 
