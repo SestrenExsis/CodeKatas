@@ -83,6 +83,65 @@ class Template: # Template
         result = solutions
         return result
 
+class Day24: # Lobby Layout
+    '''
+    Lobby Layout
+    https://adventofcode.com/2020/day/24
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        directions = {
+            # (x, y, z) in a hex coordinate system
+            'e':  (+1, -1, +0),
+            'se': (+0, -1, +1),
+            'sw': (-1, +0, +1),
+            'w':  (-1, +1, +0),
+            'nw': (+0, +1, -1),
+            'ne': (+1, +0, -1),
+        }
+        black_tiles = set()
+        for chars in parsed_input:
+            tile = (0, 0, 0)
+            stack = []
+            for char in chars:
+                if char in 'sn':
+                    stack.append(char)
+                else:
+                    direction = ''.join(stack) + char
+                    while len(stack) > 0:
+                        stack.pop()
+                    offset = directions[direction]
+                    tile = (
+                        tile[0] + offset[0],
+                        tile[1] + offset[1],
+                        tile[2] + offset[2],
+                        )
+            if tile in black_tiles:
+                black_tiles.remove(tile)
+            else:
+                black_tiles.add(tile)
+        result = len(black_tiles)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day23: # Crab Cups
     '''
     Crab Cups
@@ -1970,7 +2029,7 @@ if __name__ == '__main__':
        21: (Day21, 'Allergen Assessment'),
        22: (Day22, 'Crab Combat'),
        23: (Day23, 'Crab Cups'),
-    #    24: (Day24, '???'),
+       24: (Day24, 'Lobby Layout'),
     #    25: (Day25, '???'),
         }
     parser = argparse.ArgumentParser()
