@@ -83,6 +83,53 @@ class Template: # Template
         result = solutions
         return result
 
+class Day25: # Combo Breaker
+    '''
+    Combo Breaker
+    https://adventofcode.com/2020/day/25
+    '''
+    def get_public_keys(self, raw_input_lines: List[str]):
+        public_keys = []
+        for raw_input_line in raw_input_lines:
+            public_keys.append(int(raw_input_line))
+        result = public_keys
+        return result
+    
+    def solve(self, public_keys):
+        MODULO = 20_201_227
+        loop_sizes = {}
+        prev_key = 1
+        for loop_size in range(1, MODULO):
+            candidate_public_key = (7 * prev_key) % MODULO
+            prev_key = candidate_public_key
+            for i in range(len(public_keys)):
+                if candidate_public_key == public_keys[i]:
+                    if candidate_public_key not in loop_sizes:
+                        loop_sizes[candidate_public_key] = loop_size
+            if len(loop_sizes) > 1:
+                break
+        public_key_a = max(loop_sizes.keys())
+        public_keys.remove(public_key_a)
+        public_key_b = public_keys[0]
+        loop_size_b = loop_sizes[public_key_b]
+        encryption_key = (public_key_a ** loop_size_b) % MODULO
+        result = encryption_key
+        return result
+    
+    def solve2(self, public_keys):
+        result = len(public_keys)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        public_keys = self.get_public_keys(raw_input_lines)
+        solutions = (
+            self.solve(public_keys),
+            self.solve2(public_keys),
+            )
+        result = solutions
+        return result
+
 class Day24: # Lobby Layout
     '''
     Lobby Layout
@@ -2066,7 +2113,7 @@ class Day01: # Report Repair
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 23 < day23.in
+    python Solver.py 25 < day25.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
@@ -2093,7 +2140,7 @@ if __name__ == '__main__':
        22: (Day22, 'Crab Combat'),
        23: (Day23, 'Crab Cups'),
        24: (Day24, 'Lobby Layout'),
-    #    25: (Day25, '???'),
+       25: (Day25, 'Combo Breaker'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('day', help='Solve for a given day', type=int)
