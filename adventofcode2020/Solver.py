@@ -597,21 +597,152 @@ class Day20: # Jurassic Jigsaw
             result *= tile_id
         return result
     
+    # Consider caching this if it's too slow using functools.lru_cache
+    # Use tile_id instead of tile, if you do
+    def get_rotations(self, tile):
+        rows = len(tile)
+        cols = len(tile[0])
+        assert rows == cols
+        rotations =[
+            list(['+' for col in range(cols)] for row in range(rows)),
+            list(['+' for col in range(cols)] for row in range(rows)),
+            list(['+' for col in range(cols)] for row in range(rows)),
+            list(['+' for col in range(cols)] for row in range(rows)),
+            list(['+' for col in range(cols)] for row in range(rows)),
+            list(['+' for col in range(cols)] for row in range(rows)),
+            list(['+' for col in range(cols)] for row in range(rows)),
+            list(['+' for col in range(cols)] for row in range(rows)),
+        ]
+        for row in range(rows):
+            for col in range(cols):
+                # 0: rows go top-to-bottom
+                #    cols go left-to-right
+                rotations[0][row][col] = tile[row][col]
+                # 1: rows go top-to-bottom
+                #    cols go right-to-left
+                rotations[1][row][cols - col - 1] = tile[row][col]
+                # 2: rows go bottom-to-top
+                #    cols go left-to-right
+                rotations[2][rows - row - 1][col] = tile[row][col]
+                # 3: rows go bottom-to-top
+                #    cols go right-to-left
+                rotations[3][rows - row - 1][cols - col - 1] = tile[row][col]
+                # 4: rows go left-to-right
+                #    cols go top-to-bottom
+                rotations[4][col][row] = tile[row][col]
+                # 5: rows go left-to-right
+                #    cols go bottom-to-top
+                rotations[5][col][rows - row - 1] = tile[row][col]
+                # 6: rows go right-to-left
+                #    cols go top-to-bottom
+                rotations[6][cols - col - 1][row] = tile[row][col]
+                # 7: rows go right-to-left
+                #    cols go bottom-to-top
+                rotations[7][cols - col - 1][rows - row - 1] = tile[row][col]
+        for i in range(8):
+            for row in range(rows):
+                rotations[i][row] = ''.join(rotations[i][row])
+        result = rotations
+        return result
+    
     def get_image(self, tiles):
-        connections = self.get_connections(tiles)
+        placed_tiles = {} # (row, col) : reoriented_tile
+        # grab an arbitrary tile to start placing, call that the "center"
+        tiles_left = set(tiles.keys())
+        starting_tile_id = next(iter(tiles_left))
+        starting_tile = tiles[starting_tile_id]
+        seen = set()
+        work = [(0, 0, starting_tile_id, starting_tile)]
+        while len(tiles_left) > 0 and len(work) > 0:
+            tile_row, tile_col, tile_id, tile = work.pop()
+            placed_tiles[(tile_row, tile_col)] = tile
+            tiles_left.remove(tile_id)
+            edges = self.get_edges(tile) # [top, bottom, left, right]
+            # check for neighboring tiles that fit an edge
+            for next_tile_row, next_tile_col, edge, next_edge_id in (
+                (tile_row - 1, tile_col    , edges[0], 1),
+                (tile_row + 1, tile_col    , edges[1], 0),
+                (tile_row    , tile_col - 1, edges[2], 3),
+                (tile_row    , tile_col + 1, edges[3], 2),
+                ):
+                for next_tile_id in tiles_left:
+                    next_tile = tiles[next_tile_id]
+                    match_found_ind = False
+                    # check all possible rotations of neighboring tile
+                    for rotated_tile in self.get_rotations(next_tile):
+                        next_edge = self.get_edges(rotated_tile)[next_edge_id]
+                        if next_edge == edge and next_tile_id not in seen:
+                            work.append((
+                                next_tile_row,
+                                next_tile_col,
+                                next_tile_id,
+                                rotated_tile,
+                                ))
+                            seen.add(next_tile_id)
+                            match_found_ind = True
+                            break
+                    if match_found_ind:
+                        break
+        assert len(tiles_left) == 0
+        assert len(work) == 0
+        # assemble the placed tiles into a larger image grid
         image = []
-        for tile_id, tile_connections in connections.items():
-            if len(tile_connections) == 2:
-                # assemble from the first corner image you find
-                # don't forget to dedupe the edges
-                break
+        min_row, min_col = min(placed_tiles.keys())
+        max_row, max_col = max(placed_tiles.keys())
+        rows = len(starting_tile)
+        for tile_row in range(min_row, max_row + 1):
+            for row in range(1, rows - 1):
+                line = []
+                for tile_col in range(min_col, max_col + 1):
+                    tile = placed_tiles[(tile_row, tile_col)]
+                    line.append(''.join(tile[row][1:-1]))
+                image.append(''.join(''.join(line)))
         result = image
         return result
     
     def get_water_roughness(self, image):
         # analyze the image in 8 different orientations
-        monster_count = 0 # monster weight = 15
-        water_roughness = 0
+        SEA_SERPENT = [
+            '                  # ',
+            '#    ##    ##    ###',
+            ' #  #  #  #  #  #   ',
+            ]
+        SERPENT_HEIGHT = len(SEA_SERPENT)
+        SERPENT_WIDTH = len(SEA_SERPENT[0])
+        MONSTER_WEIGHT = 15
+        findings = []
+        for rotated_image in self.get_rotations(image):
+            findings.append([0, 0])
+            rows = len(rotated_image)
+            cols = len(rotated_image[0])
+            for row in range(rows):
+                for col in range(cols):
+                    if rotated_image[row][col] == '#':
+                        findings[-1][0] += 1
+                    if (
+                        row >= rows - SERPENT_HEIGHT or
+                        col >= cols - SERPENT_WIDTH
+                        ):
+                        continue
+                    falsified_ind = False
+                    for srow in range(SERPENT_HEIGHT):
+                        for scol in range(SERPENT_WIDTH):
+                            if (
+                                SEA_SERPENT[srow][scol] == '#' and
+                                rotated_image[row + srow][col + scol] != '#'
+                                ):
+                                falsified_ind = True
+                                break
+                        if falsified_ind:
+                            break
+                    if not falsified_ind:
+                        findings[-1][1] += 1
+        finding = [0, 0]
+        for i in range(len(findings)):
+            if findings[i][1] > 0:
+                finding = findings[i]
+                break
+        water_roughness = finding[0] - MONSTER_WEIGHT * finding[1]
         result = water_roughness
         return result
     
