@@ -584,19 +584,6 @@ class Day20: # Jurassic Jigsaw
         result = connections
         return result
     
-    def solve(self, tiles):
-        connections = self.get_connections(tiles)
-        # Based on the instructions, a corner tile is assumed to be a tile that
-        # connects with exactly two other tiles.
-        corner_tiles = []
-        for tile_id, other_tile_ids in connections.items():
-            if len(other_tile_ids) == 2:
-                corner_tiles.append(tile_id)
-        result = 1
-        for tile_id in corner_tiles:
-            result *= tile_id
-        return result
-    
     # Consider caching this if it's too slow using functools.lru_cache
     # Use tile_id instead of tile, if you do
     def get_rotations(self, tile):
@@ -645,9 +632,22 @@ class Day20: # Jurassic Jigsaw
         result = rotations
         return result
     
-    def get_image(self, tiles):
-        placed_tiles = {} # (row, col) : reoriented_tile
+    def solve(self, tiles):
+        connections = self.get_connections(tiles)
+        # Based on the instructions, a corner tile is assumed to be a tile that
+        # connects with exactly two other tiles.
+        corner_tiles = []
+        for tile_id, other_tile_ids in connections.items():
+            if len(other_tile_ids) == 2:
+                corner_tiles.append(tile_id)
+        result = 1
+        for tile_id in corner_tiles:
+            result *= tile_id
+        return result
+    
+    def solve2(self, tiles):
         # grab an arbitrary tile to start placing, call that the "center"
+        placed_tiles = {} # (row, col) : reoriented_tile
         tiles_left = set(tiles.keys())
         starting_tile_id = next(iter(tiles_left))
         starting_tile = tiles[starting_tile_id]
@@ -697,11 +697,7 @@ class Day20: # Jurassic Jigsaw
                     tile = placed_tiles[(tile_row, tile_col)]
                     line.append(''.join(tile[row][1:-1]))
                 image.append(''.join(''.join(line)))
-        result = image
-        return result
-    
-    def get_water_roughness(self, image):
-        # analyze the image in 8 different orientations
+        # Calculate water roughness
         SEA_SERPENT = [
             '                  # ',
             '#    ##    ##    ###',
@@ -711,6 +707,7 @@ class Day20: # Jurassic Jigsaw
         SERPENT_WIDTH = len(SEA_SERPENT[0])
         MONSTER_WEIGHT = 15
         findings = []
+        # analyze the image in 8 different orientations
         for rotated_image in self.get_rotations(image):
             findings.append([0, 0])
             rows = len(rotated_image)
@@ -743,18 +740,6 @@ class Day20: # Jurassic Jigsaw
                 finding = findings[i]
                 break
         water_roughness = finding[0] - MONSTER_WEIGHT * finding[1]
-        result = water_roughness
-        return result
-    
-    def solve2(self, tiles):
-        # For every corner tile, ...
-        # - Treat that tile as the upper-left tile
-        # For both "open" sides of the chosen corner tile, ...
-        # - Treat that side as the left-hand side
-        # For each scan, ...
-        # - Scan top-to-bottom, left-to-right
-        image = self.get_image(tiles)
-        water_roughness = self.get_water_roughness(image)
         result = water_roughness
         return result
     
