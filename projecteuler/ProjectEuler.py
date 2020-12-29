@@ -9,7 +9,11 @@ import heapq
 import itertools
 import math
 
-class MultiplesOf3And5:
+class Problem_1: # Multiples of 3 and 5
+    '''
+    Multiples of 3 and 5
+    https://projecteuler.net/problem=1
+    '''
     def main(self, max_num: int=1_000) -> int:
         result = sum(
             n for n in
@@ -18,7 +22,11 @@ class MultiplesOf3And5:
             )
         return result
 
-class EvenFibonacciNumbers:
+class Problem_2: # Even Fibonacci numbers
+    '''
+    Even Fibonacci numbers
+    https://projecteuler.net/problem=2
+    '''
     def gen_fibonacci(self, max_num: int) -> int:
         a, b = 0, 1
         for _ in range(max_num):
@@ -35,7 +43,11 @@ class EvenFibonacciNumbers:
             )
         return result
 
-class LargestPrimeFactor:
+class Problem_3: # Largest prime factor
+    '''
+    Largest prime factor
+    https://projecteuler.net/problem=3
+    '''
     def get_largest_prime_factor(self, target: int) -> int:
         i = 2
         largest_prime_factor = 1
@@ -51,27 +63,54 @@ class LargestPrimeFactor:
         result = self.get_largest_prime_factor(target)
         return result
 
+class Problem_4: # Largest palindrome product
+    '''
+    Largest palindrome product
+    https://projecteuler.net/problem=4
+    '''
+    def gen_palindrome_products(self, digits: int) -> int:
+        min_num = 10 ** (digits - 1)
+        max_num = 10 ** digits - 1
+        for a in range(min_num, max_num + 1):
+            for b in range(min_num, max_num + 1):
+                num = a * b
+                str_num = str(num)
+                N = len(str_num)
+                palindrome_ind = True
+                for i in range(N // 2):
+                    if str_num[i] != str_num[-i - 1]:
+                        palindrome_ind = False
+                        break
+                if palindrome_ind:
+                    yield num
+    
+    def main(self) -> int:
+        result = max(self.gen_palindrome_products(3))
+        return result
+
 if __name__ == '__main__':
     '''
     Usage
-    python ProjectEuler.py 2
+    python ProjectEuler.py 4
     '''
     solvers = {
         1: (
-            MultiplesOf3And5,
-            'Multiples of 3 and 5',
+            Problem_1, 'Multiples of 3 and 5',
             'What is the sum of all the multiples of 3 or 5 below 1000?',
             ),
         2: (
-            EvenFibonacciNumbers,
-            'Even Fibonacci Numbers',
+            Problem_2, 'Even Fibonacci numbers',
             'What is the sum of all even Fibonacci numbers whose values do '\
             'not exceed four million?',
             ),
         3: (
-            LargestPrimeFactor,
-            'Largest Prime Factor',
+            Problem_3, 'Largest prime factor',
             'What is the largest prime factor of the number 600851475143?',
+            ),
+        4: (
+            Problem_4, 'Largest palindrome product',
+            'What is the largest palindrome made from the product of two '\
+            '3-digit numbers?',
             ),
         }
     parser = argparse.ArgumentParser()
