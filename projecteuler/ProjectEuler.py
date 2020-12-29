@@ -88,6 +88,43 @@ class Problem_4: # Largest palindrome product
         result = max(self.gen_palindrome_products(3))
         return result
 
+class Problem_5: # Smallest multiple
+    '''
+    Smallest multiple
+    https://projecteuler.net/problem=5
+    '''
+    def solve(self, max_num: int=20) -> int:
+        lcm = 1
+        for factor in range(2, max_num + 1):
+            lcm *= factor
+        for candidate in range(max_num, lcm + 1, max_num):
+            # if candidate % 10_000 == 0:
+            #     print(candidate)
+            for factor in range(1, max_num):
+                if candidate % factor != 0:
+                    break
+            else:
+                lcm = candidate
+                break
+        result = lcm
+        return result
+    
+    def main(self) -> int:
+        result = self.solve(20)
+        return result
+
+class Template: # Template
+    '''
+    Template
+    https://projecteuler.net/problem=?
+    '''
+    def solve(self) -> int:
+        return -1
+    
+    def main(self) -> int:
+        result = self.solve()
+        return result
+
 if __name__ == '__main__':
     '''
     Usage
@@ -111,6 +148,11 @@ if __name__ == '__main__':
             Problem_4, 'Largest palindrome product',
             'What is the largest palindrome made from the product of two '\
             '3-digit numbers?',
+            ),
+        5: (
+            Problem_5, 'Smallest multiple',
+            'What is the smallest positive number that is evenly divisible '\
+            'by all of the numbers from 1 to 20?',
             ),
         }
     parser = argparse.ArgumentParser()
