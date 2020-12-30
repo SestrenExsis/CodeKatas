@@ -53,6 +53,54 @@ class Template: # Template
         result = solutions
         return result
 
+class Day02: # Inventory Management System
+    '''
+    Inventory Management System
+    https://adventofcode.com/2018/day/2
+    '''
+    def get_box_ids(self, raw_input_lines: List[str]):
+        box_ids = []
+        for raw_input_line in raw_input_lines:
+            box_ids.append(raw_input_line)
+        result = box_ids
+        return result
+    
+    def solve(self, box_ids):
+        counts = collections.defaultdict(set)
+        for box_id in box_ids:
+            chars = collections.Counter(box_id)
+            for count in chars.values():
+                counts[count].add(box_id)
+        result = len(counts[2]) * len(counts[3])
+        return result
+    
+    def solve2(self, box_ids):
+        for i in range(len(box_ids)):
+            box_id_1 = box_ids[i]
+            for j in range(i + 1, len(box_ids)):
+                box_id_2 = box_ids[j]
+                idx = -1
+                for k in range(len(box_id_1)):
+                    if box_id_1[k] != box_id_2[k]:
+                        if idx >= 0:
+                            break
+                        idx = k
+                else:
+                    if idx >= 0:
+                        result = box_id_1[:idx] + box_id_1[idx + 1:]
+                        return result
+        return 'Solution not found!'
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        box_ids = self.get_box_ids(raw_input_lines)
+        solutions = (
+            self.solve(box_ids),
+            self.solve2(box_ids),
+            )
+        result = solutions
+        return result
+
 class Day01: # Chronal Calibration
     '''
     Chronal Calibration
@@ -95,11 +143,11 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 1 < inputs/2018day01.in
+    python AdventOfCode2018.py 2 < inputs/2018day02.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
-    #     2: (Day02, '???'),
+        2: (Day02, 'Inventory Management System'),
     #     3: (Day03, '???'),
     #     4: (Day04, '???'),
     #     5: (Day05, '???'),
