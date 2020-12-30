@@ -2229,7 +2229,7 @@ class Day01: # Report Repair
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 25 < day25.in
+    python AdventOfCode2020.py 25 < 2020day25.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),

@@ -273,7 +273,7 @@ class Day01:
 if __name__ == '__main__':
     '''
     Usage
-    python Solver.py 4 < day04.in
+    python AdventOfCode2019.py 4 < inputs/2019day04.in
     '''
     solvers = {
         1: (Day01, 'The Tyranny of the Rocket Equation'),
