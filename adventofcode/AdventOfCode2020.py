@@ -116,8 +116,8 @@ class Day25: # Combo Breaker
         result = encryption_key
         return result
     
-    def solve2(self, public_keys):
-        result = len(public_keys)
+    def solve2(self):
+        result = 'MERRY CHRISTMAS!'
         return result
     
     def main(self):
@@ -125,7 +125,7 @@ class Day25: # Combo Breaker
         public_keys = self.get_public_keys(raw_input_lines)
         solutions = (
             self.solve(public_keys),
-            self.solve2(public_keys),
+            self.solve2(),
             )
         result = solutions
         return result
@@ -2229,7 +2229,7 @@ class Day01: # Report Repair
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2020.py 25 < 2020day25.in
+    python AdventOfCode2020.py 25 < inputs/2020day25.in
     '''
     solvers = {
         1: (Day01, 'Report Repair'),
