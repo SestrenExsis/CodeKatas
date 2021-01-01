@@ -53,6 +53,68 @@ class Template: # Template
         result = solutions
         return result
 
+class Day03: # No Matter How You Slice It
+    '''
+    No Matter How You Slice It
+    https://adventofcode.com/2018/day/3
+    '''
+    def get_claims(self, raw_input_lines: List[str]):
+        claims = {}
+        for raw_input_line in raw_input_lines:
+            parts = raw_input_line.split(' ')
+            claim_id = int(parts[0][1:])
+            left, top = tuple(map(int, parts[2][:-1].split(',')))
+            width, height = tuple(map(int, parts[3].split('x')))
+            claims[claim_id] = (left, top, width, height)
+        result = claims
+        return result
+    
+    def solve(self, claims):
+        claimed_fabric = collections.defaultdict(set)
+        for claim_id, (left, top, width, height) in claims.items():
+            for row in range(top, top + height):
+                for col in range(left, left + width):
+                    claimed_fabric[(row, col)].add(claim_id)
+        result = sum(
+            1 for
+            _, claims in
+            claimed_fabric.items() if
+            len(claims) >= 2
+            )
+        return result
+    
+    def solve2(self, claims):
+        claimed_fabric = collections.defaultdict(set)
+        for claim_id, (left, top, width, height) in claims.items():
+            for row in range(top, top + height):
+                for col in range(left, left + width):
+                    claimed_fabric[(row, col)].add(claim_id)
+        result = -1
+        for claim_id, (left, top, width, height) in claims.items():
+            overlap_ind = False
+            for row in range(top, top + height):
+                for col in range(left, left + width):
+                    claims = claimed_fabric[(row, col)]
+                    if len(claims) > 1:
+                        overlap_ind = True
+                        break
+                if overlap_ind:
+                    break
+            if not overlap_ind:
+                result = claim_id
+                break
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        claims = self.get_claims(raw_input_lines)
+        solutions = (
+            self.solve(claims),
+            self.solve2(claims),
+            )
+        result = solutions
+        return result
+
 class Day02: # Inventory Management System
     '''
     Inventory Management System
@@ -148,7 +210,7 @@ if __name__ == '__main__':
     solvers = {
         1: (Day01, 'Chronal Calibration'),
         2: (Day02, 'Inventory Management System'),
-    #     3: (Day03, '???'),
+        3: (Day03, 'No Matter How You Slice It'),
     #     4: (Day04, '???'),
     #     5: (Day05, '???'),
     #     6: (Day06, '???'),
