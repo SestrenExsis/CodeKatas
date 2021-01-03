@@ -4,6 +4,7 @@ Created on Nov 14, 2020
 @author: Sestren
 '''
 import argparse
+import collections
 from typing import List
     
 def get_raw_input_lines() -> list:
@@ -44,6 +45,65 @@ class Template: # Template
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day06: # Universal Orbit Map
+    '''
+    Universal Orbit Map
+    https://adventofcode.com/2019/day/6
+    '''
+    def get_orbits(self, raw_input_lines: List[str]) -> List[str]:
+        orbits = {}
+        for raw_input_line in raw_input_lines:
+            target, source = raw_input_line.split(')')
+            orbits[source] = target
+        result = orbits
+        return result
+    
+    def solve(self, orbits):
+        depths = collections.defaultdict(int)
+        depths['COM'] = 0
+        work = collections.deque()
+        work.append('COM')
+        while len(work) > 0:
+            current_source = work.pop()
+            for source, target in orbits.items():
+                if target == current_source:
+                    work.appendleft(source)
+                    depths[source] = depths[target] + 1
+        result = sum(depths.values())
+        return result
+    
+    def solve2(self, orbits):
+        your_path = []
+        current_orbit = 'YOU'
+        while len(your_path) == 0 or current_orbit != 'COM':
+            current_orbit = orbits[current_orbit]
+            your_path.append(current_orbit)
+        santas_path = []
+        current_orbit = 'SAN'
+        while len(santas_path) == 0 or current_orbit != 'COM':
+            current_orbit = orbits[current_orbit]
+            santas_path.append(current_orbit)
+        result = -1
+        for i in range(len(your_path)):
+            current_orbit = your_path[i]
+            try:
+                j = santas_path.index(current_orbit)
+                result = i + j
+                break
+            except (ValueError) as e:
+                continue
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        orbits = self.get_orbits(raw_input_lines)
+        solutions = (
+            self.solve(orbits),
+            self.solve2(orbits),
             )
         result = solutions
         return result
@@ -273,7 +333,7 @@ class Day01:
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2019.py 4 < inputs/2019day04.in
+    python AdventOfCode2019.py 6 < inputs/2019day06.in
     '''
     solvers = {
         1: (Day01, 'The Tyranny of the Rocket Equation'),
@@ -281,7 +341,7 @@ if __name__ == '__main__':
         3: (Day03, 'Crossed Wires'),
         4: (Day04, 'Secure Container'),
     #     5: (Day05, 'Sunny with a Chance of Asteroids'),
-    #     6: (Day06, 'Universal Orbit Map'),
+        6: (Day06, 'Universal Orbit Map'),
     #     7: (Day07, 'Amplification Circuit'),
     #     8: (Day08, 'Space Image Format'),
     #     9: (Day09, 'Sensor Boost'),
