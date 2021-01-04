@@ -6,6 +6,7 @@ Created on Dec 30, 2020
 import argparse
 import collections
 import copy
+import datetime
 import functools
 import operator
 from typing import Dict, List, Set, Tuple
@@ -49,6 +50,71 @@ class Template: # Template
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day04: # Repose Record
+    '''
+    Repose Record
+    https://adventofcode.com/2018/day/4
+    '''
+    def get_sleep_times(self, raw_input_lines: List[str]):
+        raw_records = []
+        for raw_input_line in raw_input_lines:
+            (a, b) = raw_input_line.split('] ')
+            datetime_str = a[1:]
+            year = int(datetime_str[:4])
+            month = int(datetime_str[5:7])
+            day = int(datetime_str[8:10])
+            hour = int(datetime_str[11:13])
+            minute = int(datetime_str[14:16])
+            ordinal_day = datetime.date(year, month, day).toordinal()
+            if hour == 23:
+                ordinal_day += 1
+                minute = 0
+            raw_records.append((ordinal_day, minute, b))
+        raw_records.sort()
+        sleep_times = set()
+        guard_id = -1
+        for i in range(len(raw_records) - 1):
+            day0, minute0, event0 = raw_records[i]
+            day1, minute1, event1 = raw_records[i + 1]
+            if '#' in event0:
+                guard_id = int(event0.split(' ')[1][1:])
+            elif event0 == 'falls asleep':
+                start = minute0
+                end = minute1
+                if '#' in event1:
+                    end = 60
+                for minute_id in range(start, end):
+                    sleep_times.add((day0, minute_id, guard_id))
+        result = sleep_times
+        return result
+    
+    def solve(self, sleep_times):
+        guards = collections.defaultdict(int)
+        for _, minute_id, guard_id in sorted(sleep_times):
+            guards[guard_id] += 1
+        best_guard_id = max(guards, key=guards.get)
+        minutes = collections.defaultdict(int)
+        for _, minute_id, guard_id in sleep_times:
+            if guard_id == best_guard_id:
+                minutes[minute_id] += 1
+        best_minute_id = max(minutes, key=minutes.get)
+        result = best_guard_id * best_minute_id
+        return result
+    
+    def solve2(self, sleep_times):
+        result = len(sleep_times)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        sleep_times = self.get_sleep_times(raw_input_lines)
+        solutions = (
+            self.solve(sleep_times),
+            self.solve2(sleep_times),
             )
         result = solutions
         return result
@@ -205,13 +271,13 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 2 < inputs/2018day02.in
+    python AdventOfCode2018.py 4 < inputs/2018day04.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
         2: (Day02, 'Inventory Management System'),
         3: (Day03, 'No Matter How You Slice It'),
-    #     4: (Day04, '???'),
+        4: (Day04, 'Repose Record'),
     #     5: (Day05, '???'),
     #     6: (Day06, '???'),
     #     7: (Day07, '???'),
