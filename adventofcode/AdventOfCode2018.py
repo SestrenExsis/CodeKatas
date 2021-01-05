@@ -59,12 +59,12 @@ class Day05: # Alchemical Reduction
     Alchemical Reduction
     https://adventofcode.com/2018/day/5
     '''
-    def get_parsed_input(self, raw_input_lines: List[str]):
-        result = raw_input_lines[0]
+    def get_polymer(self, raw_input_lines: List[str]):
+        polymer = list(raw_input_lines[0])
+        result = polymer
         return result
     
-    def solve(self, initial_polymer):
-        polymer = list(initial_polymer)
+    def get_fully_reacted_polymer(self, polymer):
         reaction_ind = True
         prev_polymer = polymer
         while reaction_ind:
@@ -82,19 +82,35 @@ class Day05: # Alchemical Reduction
                     reaction_ind = True
                 i -= 1
             prev_polymer = polymer
-        result = len(polymer)
+        result = polymer
+        return result
+    
+    def solve(self, polymer):
+        fully_reacted_polymer = self.get_fully_reacted_polymer(polymer)
+        result = len(fully_reacted_polymer)
         return result
     
     def solve2(self, initial_polymer):
-        result = len(initial_polymer)
+        shortest_polymer = initial_polymer
+        for char in 'abcdefghijklmnopqrstuvwxyz':
+            polymer = []
+            for unit in initial_polymer:
+                if unit == char or unit.lower() == char:
+                    continue
+                else:
+                    polymer.append(unit)
+            fully_reacted_polymer = self.get_fully_reacted_polymer(polymer)
+            if len(fully_reacted_polymer) < len(shortest_polymer):
+                shortest_polymer = fully_reacted_polymer
+        result = len(shortest_polymer)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        polymer = self.get_polymer(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(polymer),
+            self.solve2(polymer),
             )
         result = solutions
         return result
