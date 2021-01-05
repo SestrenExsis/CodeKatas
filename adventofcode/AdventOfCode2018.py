@@ -54,6 +54,51 @@ class Template: # Template
         result = solutions
         return result
 
+class Day05: # Alchemical Reduction
+    '''
+    Alchemical Reduction
+    https://adventofcode.com/2018/day/5
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = raw_input_lines[0]
+        return result
+    
+    def solve(self, initial_polymer):
+        polymer = list(initial_polymer)
+        reaction_ind = True
+        prev_polymer = polymer
+        while reaction_ind:
+            reaction_ind = False
+            polymer = prev_polymer[:]
+            i = len(polymer) - 1
+            while i > 0:
+                if (
+                    prev_polymer[i] != prev_polymer[i - 1] and
+                    prev_polymer[i].upper() == prev_polymer[i - 1].upper()
+                    ):
+                    polymer.pop(i)
+                    polymer.pop(i - 1)
+                    i -= 1
+                    reaction_ind = True
+                i -= 1
+            prev_polymer = polymer
+        result = len(polymer)
+        return result
+    
+    def solve2(self, initial_polymer):
+        result = len(initial_polymer)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day04: # Repose Record
     '''
     Repose Record
@@ -275,14 +320,14 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 4 < inputs/2018day04.in
+    python AdventOfCode2018.py 5 < inputs/2018day05.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
         2: (Day02, 'Inventory Management System'),
         3: (Day03, 'No Matter How You Slice It'),
         4: (Day04, 'Repose Record'),
-    #     5: (Day05, '???'),
+        5: (Day05, 'Alchemical Reduction'),
     #     6: (Day06, '???'),
     #     7: (Day07, '???'),
     #     8: (Day08, '???'),
