@@ -106,7 +106,11 @@ class Day04: # Repose Record
         return result
     
     def solve2(self, sleep_times):
-        result = len(sleep_times)
+        guards = collections.defaultdict(int)
+        for _, minute_id, guard_id in sorted(sleep_times):
+            guards[(guard_id, minute_id)] += 1
+        best_guard_id, best_minute_id = max(guards, key=guards.get)
+        result = best_guard_id * best_minute_id
         return result
     
     def main(self):
