@@ -54,6 +54,89 @@ class Template: # Template
         result = solutions
         return result
 
+class Day06: # Chronal Coordinates
+    '''
+    Chronal Coordinates
+    https://adventofcode.com/2018/day/6
+    '''
+    def get_coordinates(self, raw_input_lines: List[str]):
+        coordinates = []
+        for raw_input_line in raw_input_lines:
+            coordinates.append(tuple(map(int, raw_input_line.split(', '))))
+        result = coordinates
+        return result
+    
+    def solve(self, coordinates):
+        BUFFER = 1
+        left, right, top, bottom = (
+            min(coord[0] for coord in coordinates),
+            max(coord[0] for coord in coordinates),
+            min(coord[1] for coord in coordinates),
+            max(coord[1] for coord in coordinates),
+        )
+        print('locations ...')
+        locations = dict()
+        for y in range(top - BUFFER, bottom + BUFFER + 1):
+            for x in range(left - BUFFER, right + BUFFER + 1):
+                perimeter_ind = False
+                if (
+                    y == top - BUFFER or 
+                    y == bottom + BUFFER or
+                    x == left - BUFFER or 
+                    x == right + BUFFER
+                ):
+                    perimeter_ind = True
+                locations[(x, y)] = perimeter_ind
+        print('distances ...')
+        distances = dict()
+        for loc in locations:
+            for coord in coordinates:
+                key = (loc[0], loc[1], coord[0], coord[1])
+                distance = abs(loc[0] - coord[0]) + abs(loc[1] - coord[1])
+                distances[key] = distance
+        print('areas ...')
+        # TODO: Improve performance of this part of the solver, in particular
+        areas = collections.defaultdict(list)
+        for location in (set(key[0:2] for key in distances.keys())):
+            closest_distance = min(
+                value 
+                for key, value in distances.items() 
+                if key[0:2] == location
+                )
+            closest_coords = list(
+                key[2:4] 
+                for key, value in distances.items() 
+                if key[0:2] == location and value == closest_distance
+                )
+            if len(closest_coords) == 1:
+                # On perimeter, so don't bother tracking the area, 
+                # since it would grow to infinity
+                if locations[location]:
+                    areas[closest_coords[0]] = []
+                else:
+                    areas[closest_coords[0]].append(location)
+        print('largest_area ...')
+        largest_area = max(
+            len(locations) 
+            for locations in areas.values()
+            )
+        result = largest_area
+        return result
+    
+    def solve2(self, coordinates):
+        result = len(coordinates)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        coordinates = self.get_coordinates(raw_input_lines)
+        solutions = (
+            self.solve(coordinates),
+            self.solve2(coordinates),
+            )
+        result = solutions
+        return result
+
 class Day05: # Alchemical Reduction
     '''
     Alchemical Reduction
@@ -336,7 +419,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 5 < inputs/2018day05.in
+    python AdventOfCode2018.py 6 < inputs/2018day06.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -344,7 +427,7 @@ if __name__ == '__main__':
         3: (Day03, 'No Matter How You Slice It'),
         4: (Day04, 'Repose Record'),
         5: (Day05, 'Alchemical Reduction'),
-    #     6: (Day06, '???'),
+        6: (Day06, 'Chronal Coordinates'),
     #     7: (Day07, '???'),
     #     8: (Day08, '???'),
     #     9: (Day09, '???'),
