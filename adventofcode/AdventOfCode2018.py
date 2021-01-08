@@ -66,7 +66,7 @@ class Day06: # Chronal Coordinates
         result = coordinates
         return result
     
-    def solve(self, coordinates):
+    def solve_slow(self, coordinates):
         BUFFER = 1
         left, right, top, bottom = (
             min(coord[0] for coord in coordinates),
@@ -121,6 +121,80 @@ class Day06: # Chronal Coordinates
             for locations in areas.values()
             )
         result = largest_area
+        return result
+    
+    def print_grid(self, bounds, grid, tied):
+        (left, right, top, bottom) = bounds
+        for y in range(top, bottom + 1):
+            row_data = []
+            for x in range(left, right + 1):
+                cell = '.'
+                if (x, y) in tied:
+                    cell = '_'
+                elif (x, y) in grid:
+                    cell = str(grid[(x, y)][1])
+                row_data.append(cell)
+            print(''.join(row_data))
+
+    def solve(self, coordinates):
+        left = float('inf')
+        right = float('-inf')
+        top = float('inf')
+        bottom = float('-inf')
+        for x, y in coordinates:
+            left = min(left, x)
+            right = max(right, x)
+            top = min(top, y)
+            bottom = max(bottom, y)
+        # cells that are closest to more than one coordinate are tied
+        tied = set()
+        grid = {}
+        work = collections.deque()
+        for i, coordinate in enumerate(coordinates):
+            work.append((0, i, coordinate))
+        # Use BFS to fill the grid
+        while len(work) > 0:
+            step_count = len(work)
+            for _ in range(step_count):
+                (distance, index, coordinate) = work.pop()
+                if coordinate in grid:
+                    other_distance = grid[coordinate][0]
+                    other_index = grid[coordinate][1]
+                    if index != other_index and distance == other_distance:
+                        tied.add(coordinate)
+                    continue
+                grid[coordinate] = (distance, index)
+                for (x, y) in (
+                    (coordinate[0] + 1, coordinate[1]    ),
+                    (coordinate[0] - 1, coordinate[1]    ),
+                    (coordinate[0]    , coordinate[1] + 1),
+                    (coordinate[0]    , coordinate[1] - 1),
+                    ):
+                    if (
+                        x < left or
+                        x > right or
+                        y < top or
+                        y > bottom
+                    ):
+                        continue
+                    work.appendleft((distance + 1, index, (x, y)))
+        infinite = set()
+        area = collections.defaultdict(int)
+        for (x, y), (distance, index) in grid.items():
+            if (x, y) not in tied:
+                area[index] += 1
+            # cells along the border are guaranteed to go on infinitely
+            if (
+                x <= left or
+                x >= right or
+                y <= top or
+                y >= bottom
+                ):
+                infinite.add(index)
+        for index in infinite:
+            del area[index]
+        # self.print_grid((left, right, top, bottom), grid, tied)
+        result = max(area.values())
         return result
     
     def solve2(self, coordinates):
