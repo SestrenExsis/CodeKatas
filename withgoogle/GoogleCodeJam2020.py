@@ -14,8 +14,46 @@ import random
 import sys
 from typing import Dict, List, Set, Tuple
 
-class Vestigium:
+
+# Template for Submission page
+'''
+import collections
+
+class Solver:
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+if __name__ == '__main__':
+    solver = Solver()
+    solver.main()
+'''
+
+# Usage for Interactive Problems
+'''
+-- python judges/DatBae.py 0 python solvers/DatBae.py
+
+import os
+os.system('python filename.py')
+'''
+
+class Vestigium: # 2020.Q.1
     '''
+    2020.Q.1
     https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/000000000020993c
     '''
     def solve(self, matrix):
@@ -58,13 +96,74 @@ class Vestigium:
             print(output_row)
         return output
 
+class NestingDepth: # 2020.Q.2
+    '''
+    2020.Q.2
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
+    '''
+    def solve(self, raw_input):
+        chars = []
+        depth = 0
+        for char in raw_input:
+            target_depth = int(char)
+            while depth < target_depth:
+                chars.append('(')
+                depth += 1
+            while depth > target_depth:
+                chars.append(')')
+                depth -= 1
+            chars.append(char)
+        while depth > 0:
+            chars.append(')')
+            depth -= 1
+        result = ''.join(chars)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class ParentingPartneringReturns: # 2020.Q.3
+    '''
+    2020.Q.3
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
+    '''
+    def solve(self, activities):
+        result = len(activities)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            activity_count = int(input())
+            activities = []
+            for _ in range(activity_count):
+                activity = tuple(map(int, input().split(' ')))
+                activities.append(activity)
+            solution = self.solve(activities)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
 class Solver:
     '''
-import collections
-
-if __name__ == '__main__':
-    solver = Solver()
-    solver.main()
+    2020.Q.2
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
     '''
     def solve(self, raw_input):
         result = len(raw_input)
@@ -84,31 +183,15 @@ if __name__ == '__main__':
             print(output_row)
         return output
 
-'''
-Usage for Interactive Problems
--- python judges/DatBae.py 0 python solvers/DatBae.py
-
-import os
-os.system('python filename.py')
-
-import collections
-
-class Solver:
-
-if __name__ == '__main__':
-    solver = Solver()
-    solver.main()
-'''
-
 if __name__ == '__main__':
     '''
     Usage
     python GoogleCodeJam2020.py Template < inputs/Template.in
     '''
     solvers = {
-        '2020.Q.1': (Vestigium2, 'Vestigium'),
-        # '2020.Q.2': (NestingDepth, 'Nesting Depth'),
-        # '2020.Q.3': (ParentingPartneringReturns, 'Parenting Partnering Returns'),
+        '2020.Q.1': (Vestigium, 'Vestigium'),
+        '2020.Q.2': (NestingDepth, 'Nesting Depth'),
+        '2020.Q.3': (ParentingPartneringReturns, 'Parenting Partnering Returns'),
         # '2020.Q.4': (ESAbATAd, 'ESAbATAd'),
         # '2020.Q.5': (Indicium, 'Indicium'),
         # '2020.1A.1': (PatternMatching, 'Pattern Matching'),
