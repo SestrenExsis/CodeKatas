@@ -66,63 +66,6 @@ class Day06: # Chronal Coordinates
         result = coordinates
         return result
     
-    def solve_slow(self, coordinates):
-        BUFFER = 1
-        left, right, top, bottom = (
-            min(coord[0] for coord in coordinates),
-            max(coord[0] for coord in coordinates),
-            min(coord[1] for coord in coordinates),
-            max(coord[1] for coord in coordinates),
-        )
-        print('locations ...')
-        locations = dict()
-        for y in range(top - BUFFER, bottom + BUFFER + 1):
-            for x in range(left - BUFFER, right + BUFFER + 1):
-                perimeter_ind = False
-                if (
-                    y == top - BUFFER or 
-                    y == bottom + BUFFER or
-                    x == left - BUFFER or 
-                    x == right + BUFFER
-                ):
-                    perimeter_ind = True
-                locations[(x, y)] = perimeter_ind
-        print('distances ...')
-        distances = dict()
-        for loc in locations:
-            for coord in coordinates:
-                key = (loc[0], loc[1], coord[0], coord[1])
-                distance = abs(loc[0] - coord[0]) + abs(loc[1] - coord[1])
-                distances[key] = distance
-        print('areas ...')
-        # TODO: Improve performance of this part of the solver, in particular
-        areas = collections.defaultdict(list)
-        for location in (set(key[0:2] for key in distances.keys())):
-            closest_distance = min(
-                value 
-                for key, value in distances.items() 
-                if key[0:2] == location
-                )
-            closest_coords = list(
-                key[2:4] 
-                for key, value in distances.items() 
-                if key[0:2] == location and value == closest_distance
-                )
-            if len(closest_coords) == 1:
-                # On perimeter, so don't bother tracking the area, 
-                # since it would grow to infinity
-                if locations[location]:
-                    areas[closest_coords[0]] = []
-                else:
-                    areas[closest_coords[0]].append(location)
-        print('largest_area ...')
-        largest_area = max(
-            len(locations) 
-            for locations in areas.values()
-            )
-        result = largest_area
-        return result
-    
     def print_grid(self, bounds, grid, tied):
         (left, right, top, bottom) = bounds
         for y in range(top, bottom + 1):
@@ -183,22 +126,56 @@ class Day06: # Chronal Coordinates
         for (x, y), (distance, index) in grid.items():
             if (x, y) not in tied:
                 area[index] += 1
-            # cells along the border are guaranteed to go on infinitely
-            if (
-                x <= left or
-                x >= right or
-                y <= top or
-                y >= bottom
-                ):
-                infinite.add(index)
+                # cells along the border that aren't tied
+                # are guaranteed to go on infinitely
+                if (
+                    x <= left or
+                    x >= right or
+                    y <= top or
+                    y >= bottom
+                    ):
+                    infinite.add(index)
         for index in infinite:
             del area[index]
         # self.print_grid((left, right, top, bottom), grid, tied)
         result = max(area.values())
         return result
     
-    def solve2(self, coordinates):
-        result = len(coordinates)
+    def solve2(self, coordinates, max_distance: int=10_000):
+        left = float('inf')
+        right = float('-inf')
+        top = float('inf')
+        bottom = float('-inf')
+        for x, y in coordinates:
+            left = min(left, x)
+            right = max(right, x)
+            top = min(top, y)
+            bottom = max(bottom, y)
+        N = len(coordinates)
+        # Calculate distances horizontally
+        cols = collections.defaultdict(int)
+        for col in range(
+            left - (1 + max_distance // N),
+            right + (1 + max_distance // N),
+            ):
+            for coordinate in coordinates:
+                cols[col] += abs(coordinate[0] - col)
+        # Calculate distances vertically
+        rows = collections.defaultdict(int)
+        for row in range(
+            top - (1 + max_distance // N),
+            bottom + (1 + max_distance // N),
+            ):
+            for coordinate in coordinates:
+                rows[row] += abs(coordinate[1] - row)
+        # Combine horizontal and vertical distances to find cells
+        # within the target distance
+        count = 0
+        for row, row_distance in rows.items():
+            for col, col_distance in cols.items():
+                if row_distance + col_distance < max_distance:
+                    count += 1
+        result = count
         return result
     
     def main(self):
@@ -206,7 +183,7 @@ class Day06: # Chronal Coordinates
         coordinates = self.get_coordinates(raw_input_lines)
         solutions = (
             self.solve(coordinates),
-            self.solve2(coordinates),
+            self.solve2(coordinates, 10_000),
             )
         result = solutions
         return result
