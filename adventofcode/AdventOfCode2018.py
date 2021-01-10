@@ -54,6 +54,35 @@ class Template: # Template
         result = solutions
         return result
 
+class Day07: # The Sum of Its Parts
+    '''
+    The Sum of Its Parts
+    https://adventofcode.com/2018/day/7
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day06: # Chronal Coordinates
     '''
     Chronal Coordinates
@@ -274,7 +303,7 @@ class Day04: # Repose Record
         guard_id = -1
         for i in range(len(raw_records) - 1):
             day0, minute0, event0 = raw_records[i]
-            day1, minute1, event1 = raw_records[i + 1]
+            _, minute1, event1 = raw_records[i + 1]
             if '#' in event0:
                 guard_id = int(event0.split(' ')[1][1:])
             elif event0 == 'falls asleep':
@@ -470,7 +499,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 6 < inputs/2018day06.in
+    python AdventOfCode2018.py 7 < inputs/2018day07.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -479,7 +508,7 @@ if __name__ == '__main__':
         4: (Day04, 'Repose Record'),
         5: (Day05, 'Alchemical Reduction'),
         6: (Day06, 'Chronal Coordinates'),
-    #     7: (Day07, '???'),
+        7: (Day07, 'The Sum of Its Parts'),
     #     8: (Day08, '???'),
     #     9: (Day09, '???'),
     #    10: (Day10, '???'),
