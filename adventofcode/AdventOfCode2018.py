@@ -54,6 +54,45 @@ class Template: # Template
         result = solutions
         return result
 
+class Day08: # Memory Maneuver
+    '''
+    Memory Maneuver
+    https://adventofcode.com/2018/day/8
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = collections.deque(map(int, raw_input_lines[0].split(' ')))
+        return result
+    
+    def get_metadata_entries(self, nums):
+        child_node_count = nums.popleft()
+        metadata_entry_count = nums.popleft()
+        metadata_entries = []
+        for _ in range(child_node_count):
+            metadata_entries.extend(self.get_metadata_entries(nums))
+        for _ in range(metadata_entry_count):
+            metadata_entries.append(nums.popleft())
+        result = metadata_entries
+        return result
+    
+    def solve(self, nums):
+        metadata_entries = self.get_metadata_entries(nums)
+        result = sum(metadata_entries)
+        return result
+    
+    def solve2(self, nums):
+        result = len(nums)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(copy.deepcopy(parsed_input)),
+            self.solve2(copy.deepcopy(parsed_input)),
+            )
+        result = solutions
+        return result
+
 class Day07: # The Sum of Its Parts
     '''
     The Sum of Its Parts
@@ -552,7 +591,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 7 < inputs/2018day07.in
+    python AdventOfCode2018.py 8 < inputs/2018day08.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -562,7 +601,7 @@ if __name__ == '__main__':
         5: (Day05, 'Alchemical Reduction'),
         6: (Day06, 'Chronal Coordinates'),
         7: (Day07, 'The Sum of Its Parts'),
-    #     8: (Day08, '???'),
+        8: (Day08, 'Memory Maneuver'),
     #     9: (Day09, '???'),
     #    10: (Day10, '???'),
     #    11: (Day11, '???'),
