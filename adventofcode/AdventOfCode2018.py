@@ -90,8 +90,40 @@ class Day07: # The Sum of Its Parts
         result = ''.join(instructions)
         return result
     
-    def solve2(self, dependencies):
-        result = len(dependencies)
+    def solve2(self, dependencies, worker_count: int=5, min_cost: int=60):
+        tasks = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        costs = {
+            task: min_cost + tasks.index(task) + 1 for task in tasks
+            }
+        workers = [(0, None)] * worker_count
+        finished_steps = set()
+        time = 0
+        instructions = []
+        while len(finished_steps) < len(dependencies):
+            for worker_id in range(len(workers)):
+                if workers[worker_id][0] > time:
+                    continue
+                try:
+                    next_step = next(iter(sorted(
+                        step for step, required_steps in
+                        dependencies.items() if
+                        len(required_steps) == 0 and
+                        step not in finished_steps and
+                        step not in instructions
+                    )))
+                    instructions.append(next_step)
+                    workers[worker_id] = (time + costs[next_step], next_step)
+                except StopIteration:
+                    pass
+            time += 1
+            for worker_id in range(len(workers)):
+                work_end, step = workers[worker_id]
+                if time >= work_end and step is not None:
+                    finished_steps.add(step)
+                    for instruction in dependencies:
+                        if step in dependencies[instruction]:
+                            dependencies[instruction].remove(step)
+        result = time
         return result
     
     def main(self):
