@@ -59,26 +59,47 @@ class Day07: # The Sum of Its Parts
     The Sum of Its Parts
     https://adventofcode.com/2018/day/7
     '''
-    def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
+    def get_dependencies(self, raw_input_lines: List[str]):
+        dependencies = {}
         for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
+            a = raw_input_line[36]
+            b = raw_input_line[5]
+            if a not in dependencies:
+                dependencies[a] = set()
+            if b not in dependencies:
+                dependencies[b] = set()
+            dependencies[a].add(b)
+        result = dependencies
         return result
     
-    def solve(self, parsed_input):
-        result = len(parsed_input)
+    def solve(self, dependencies):
+        finished_steps = set()
+        instructions = []
+        while len(instructions) < len(dependencies):
+            next_step = min(
+                step for step, required_steps in
+                dependencies.items() if
+                len(required_steps) == 0 and
+                step not in finished_steps
+            )
+            for instruction in dependencies:
+                if next_step in dependencies[instruction]:
+                    dependencies[instruction].remove(next_step)
+            instructions.append(next_step)
+            finished_steps.add(next_step)
+        result = ''.join(instructions)
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, dependencies):
+        result = len(dependencies)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        dependencies = self.get_dependencies(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(copy.deepcopy(dependencies)),
+            self.solve2(copy.deepcopy(dependencies)),
             )
         result = solutions
         return result
