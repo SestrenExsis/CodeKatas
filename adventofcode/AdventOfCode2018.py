@@ -63,24 +63,38 @@ class Day08: # Memory Maneuver
         result = collections.deque(map(int, raw_input_lines[0].split(' ')))
         return result
     
-    def get_metadata_entries(self, nums):
+    def solve(self, nums):
         child_node_count = nums.popleft()
         metadata_entry_count = nums.popleft()
-        metadata_entries = []
+        metadata_entry_sum = 0
         for _ in range(child_node_count):
-            metadata_entries.extend(self.get_metadata_entries(nums))
+            metadata_entry_sum += self.solve(nums)
         for _ in range(metadata_entry_count):
-            metadata_entries.append(nums.popleft())
-        result = metadata_entries
-        return result
-    
-    def solve(self, nums):
-        metadata_entries = self.get_metadata_entries(nums)
-        result = sum(metadata_entries)
+            metadata_entry_sum += nums.popleft()
+        result = metadata_entry_sum
         return result
     
     def solve2(self, nums):
-        result = len(nums)
+        child_node_count = nums.popleft()
+        metadata_entry_count = nums.popleft()
+        values = [
+            self.solve2(nums) for _ in
+            range(child_node_count)
+            ]
+        metadata_entries = [
+            nums.popleft() for _ in
+            range(metadata_entry_count)
+            ]
+        total_value = 0
+        if child_node_count == 0:
+            total_value = sum(metadata_entries)
+        else:
+            total_value = sum(
+                values[i - 1] for 
+                i in metadata_entries if 
+                i - 1 in range(child_node_count)
+                )
+        result = total_value
         return result
     
     def main(self):
