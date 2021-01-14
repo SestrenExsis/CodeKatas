@@ -54,6 +54,50 @@ class Template: # Template
         result = solutions
         return result
 
+class Day09: # Marble Mania
+    '''
+    Marble Mania
+    https://adventofcode.com/2018/day/9
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        parts = raw_input_lines[0].split(' ')
+        player_count = int(parts[0])
+        marble_count = int(parts[6])
+        result = (player_count, marble_count)
+        return result
+    
+    def solve(self, player_count, marble_count):
+        scores = [0] * player_count
+        marbles = collections.deque()
+        marbles.append(0)
+        player_id = 0
+        for marble in range(1, marble_count + 1):
+            if marble % 23 == 0:
+                scores[player_id] += marble
+                marbles.rotate(7)
+                captured = marbles.popleft()
+                scores[player_id] += captured
+            else:
+                marbles.rotate(-2)
+                marbles.appendleft(marble)
+            player_id = (player_id + 1) % player_count
+        result = max(scores)
+        return result
+    
+    def solve2(self, player_count, marble_count):
+        result = self.solve(player_count, 100 * marble_count)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        player_count, marble_count = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(player_count, marble_count),
+            self.solve2(player_count, marble_count),
+            )
+        result = solutions
+        return result
+
 class Day08: # Memory Maneuver
     '''
     Memory Maneuver
@@ -605,7 +649,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 8 < inputs/2018day08.in
+    python AdventOfCode2018.py 9 < inputs/2018day09.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -616,7 +660,7 @@ if __name__ == '__main__':
         6: (Day06, 'Chronal Coordinates'),
         7: (Day07, 'The Sum of Its Parts'),
         8: (Day08, 'Memory Maneuver'),
-    #     9: (Day09, '???'),
+        9: (Day09, 'Marble Mania'),
     #    10: (Day10, '???'),
     #    11: (Day11, '???'),
     #    12: (Day12, '???'),
