@@ -71,12 +71,14 @@ class Day10: # The Stars Align
         result = stars
         return result
     
-    def solve(self, stars):
+    def wait_for_message(self, stars):
         min_pos_y = float('inf')
         max_pos_y = float('-inf')
         min_pos_x = float('inf')
         max_pos_x = float('-inf')
+        wait_time = 0
         while True:
+            wait_time += 1
             min_pos_y = float('inf')
             max_pos_y = float('-inf')
             min_pos_x = float('inf')
@@ -91,9 +93,9 @@ class Day10: # The Stars Align
                 max_pos_y = max(max_pos_y, y)
                 min_pos_x = min(min_pos_x, x)
                 max_pos_x = max(max_pos_x, x)
-            if max_pos_y - min_pos_y <= 8:
+            height = max_pos_y - min_pos_y
+            if height <= 10:
                 break
-        print('BLAH')
         cells = set()
         for pos_x, pos_y, _, _ in stars:
             cells.add((pos_x, pos_y))
@@ -106,19 +108,26 @@ class Day10: # The Stars Align
                     cell = '#'
                 row_data.append(cell)
             display.append(''.join(row_data))
-        result = '\n' + '\n'.join(display)
+        message = '\n' + '\n'.join(display)
+        result = (message, wait_time)
+        return result
+    
+    def solve(self, stars):
+        (message, _) = self.wait_for_message(stars)
+        result = message
         return result
     
     def solve2(self, stars):
-        result = len(stars)
+        (_, wait_time) = self.wait_for_message(stars)
+        result = wait_time
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         stars = self.get_stars(raw_input_lines)
         solutions = (
-            self.solve(stars),
-            self.solve2(stars),
+            self.solve(stars[:]),
+            self.solve2(stars[:]),
             )
         result = solutions
         return result
