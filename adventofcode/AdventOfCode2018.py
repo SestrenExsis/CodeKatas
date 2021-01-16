@@ -54,6 +54,75 @@ class Template: # Template
         result = solutions
         return result
 
+class Day10: # The Stars Align
+    '''
+    The Stars Align
+    https://adventofcode.com/2018/day/10
+    '''
+    def get_stars(self, raw_input_lines: List[str]):
+        stars = []
+        for raw_input_line in raw_input_lines:
+            parts = raw_input_line.split('> velocity=<')
+            a = parts[0].split('<')[1].split(', ')
+            b = parts[1][:-1].split(', ')
+            pos_x, pos_y = tuple(map(int, a))
+            vel_x, vel_y = tuple(map(int, b))
+            stars.append((pos_x, pos_y, vel_x, vel_y))
+        result = stars
+        return result
+    
+    def solve(self, stars):
+        min_pos_y = float('inf')
+        max_pos_y = float('-inf')
+        min_pos_x = float('inf')
+        max_pos_x = float('-inf')
+        while True:
+            min_pos_y = float('inf')
+            max_pos_y = float('-inf')
+            min_pos_x = float('inf')
+            max_pos_x = float('-inf')
+            for i in range(len(stars)):
+                vx = stars[i][2]
+                vy = stars[i][3]
+                x = stars[i][0] + vx
+                y = stars[i][1] + vy
+                stars[i] = (x, y, vx, vy)
+                min_pos_y = min(min_pos_y, y)
+                max_pos_y = max(max_pos_y, y)
+                min_pos_x = min(min_pos_x, x)
+                max_pos_x = max(max_pos_x, x)
+            if max_pos_y - min_pos_y <= 8:
+                break
+        print('BLAH')
+        cells = set()
+        for pos_x, pos_y, _, _ in stars:
+            cells.add((pos_x, pos_y))
+        display = []
+        for y in range(min_pos_y, max_pos_y + 1, 1):
+            row_data = []
+            for x in range(min_pos_x, max_pos_x + 1, 1):
+                cell = '.'
+                if (x, y) in cells:
+                    cell = '#'
+                row_data.append(cell)
+            display.append(''.join(row_data))
+        result = '\n' + '\n'.join(display)
+        return result
+    
+    def solve2(self, stars):
+        result = len(stars)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        stars = self.get_stars(raw_input_lines)
+        solutions = (
+            self.solve(stars),
+            self.solve2(stars),
+            )
+        result = solutions
+        return result
+
 class Day09: # Marble Mania
     '''
     Marble Mania
@@ -649,7 +718,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 9 < inputs/2018day09.in
+    python AdventOfCode2018.py 10 < inputs/2018day10.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -661,7 +730,7 @@ if __name__ == '__main__':
         7: (Day07, 'The Sum of Its Parts'),
         8: (Day08, 'Memory Maneuver'),
         9: (Day09, 'Marble Mania'),
-    #    10: (Day10, '???'),
+       10: (Day10, 'The Stars Align'),
     #    11: (Day11, '???'),
     #    12: (Day12, '???'),
     #    13: (Day13, '???'),
