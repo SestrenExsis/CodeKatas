@@ -136,10 +136,35 @@ class NestingDepth: # 2020.Q.2
 class ParentingPartneringReturns: # 2020.Q.3
     '''
     2020.Q.3
-    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/000000000020bdf9
     '''
     def solve(self, activities):
-        result = len(activities)
+        schedule = []
+        parents = {
+            # key = parent_code: str
+            # value = busy_til: int
+            'C': 0,
+            'J': 0,
+        }
+        for (start, end, activity_index) in sorted(activities):
+            try:
+                parent_code = next(iter(
+                    parent_code for
+                    parent_code, busy_til in parents.items() if
+                    busy_til <= start
+                    ))
+                schedule.append((parent_code, activity_index))
+                parents[parent_code] = end
+            except StopIteration:
+                break
+        result = 'IMPOSSIBLE'
+        if len(schedule) >= len(activities):
+            rearranged_schedule = (
+                parent_code for
+                parent_code, activity_index in
+                sorted(schedule, key=lambda x: x[1])
+            )
+            result = ''.join(rearranged_schedule)
         return result
     
     def main(self):
@@ -147,10 +172,10 @@ class ParentingPartneringReturns: # 2020.Q.3
         output = []
         for test_id in range(1, test_count + 1):
             activity_count = int(input())
-            activities = []
-            for _ in range(activity_count):
+            activities = set()
+            for activity_index in range(activity_count):
                 activity = tuple(map(int, input().split(' ')))
-                activities.append(activity)
+                activities.add((activity[0], activity[1], activity_index))
             solution = self.solve(activities)
             output_row = 'Case #{}: {}'.format(
                 test_id,
