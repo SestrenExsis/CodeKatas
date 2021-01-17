@@ -54,6 +54,56 @@ class Template: # Template
         result = solutions
         return result
 
+class Day11: # Chronal Charge
+    '''
+    Chronal Charge
+    https://adventofcode.com/2018/day/11
+    '''
+    def get_grid_serial_number(self, raw_input_lines: List[str]):
+        result = int(raw_input_lines[0])
+        return result
+    
+    def solve(self, grid_serial_number):
+        grid = collections.defaultdict(int)
+        for row in range(1, 300 + 1):
+            for col in range(1, 300 + 1):
+                rack_id = col + 10
+                power_level = rack_id * row
+                power_level += grid_serial_number
+                power_level *= rack_id
+                power_level = (power_level % 1_000) // 100
+                grid[(row, col)] = power_level
+                grid[(row, col)] += grid[(row - 1, col)]
+                grid[(row, col)] += grid[(row, col - 1)]
+                grid[(row, col)] -= grid[(row - 1, col - 1)]
+        best_coordinate = [0, 0]
+        max_power_level = float('-inf')
+        for row in range(1, 300 + 1 - 2):
+            for col in range(1, 300 + 1 - 2):
+                power_level = grid[(row + 2, col + 2)]
+                power_level -= grid[(row - 1, col + 2)]
+                power_level -= grid[(row + 2, col - 1)]
+                power_level += grid[(row - 1, col - 1)]
+                if power_level > max_power_level:
+                    max_power_level = power_level
+                    best_coordinate = (row, col)
+        result = ','.join(map(str, reversed(best_coordinate)))
+        return result
+    
+    def solve2(self, grid_serial_number):
+        result = grid_serial_number
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        grid_serial_number = self.get_grid_serial_number(raw_input_lines)
+        solutions = (
+            self.solve(grid_serial_number),
+            self.solve2(grid_serial_number),
+            )
+        result = solutions
+        return result
+
 class Day10: # The Stars Align
     '''
     The Stars Align
@@ -727,7 +777,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 10 < inputs/2018day10.in
+    python AdventOfCode2018.py 11 < inputs/2018day11.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -740,7 +790,7 @@ if __name__ == '__main__':
         8: (Day08, 'Memory Maneuver'),
         9: (Day09, 'Marble Mania'),
        10: (Day10, 'The Stars Align'),
-    #    11: (Day11, '???'),
+       11: (Day11, 'Chronal Charge'),
     #    12: (Day12, '???'),
     #    13: (Day13, '???'),
     #    14: (Day14, '???'),
