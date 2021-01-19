@@ -63,10 +63,10 @@ class Day11: # Chronal Charge
         result = int(raw_input_lines[0])
         return result
     
-    def solve(self, grid_serial_number):
+    def get_grid(self, grid_serial_number, size=300):
         grid = collections.defaultdict(int)
-        for row in range(1, 300 + 1):
-            for col in range(1, 300 + 1):
+        for row in range(1, size + 1):
+            for col in range(1, size + 1):
                 rack_id = col + 10
                 power_level = rack_id * row
                 power_level += grid_serial_number
@@ -76,6 +76,11 @@ class Day11: # Chronal Charge
                 grid[(row, col)] += grid[(row - 1, col)]
                 grid[(row, col)] += grid[(row, col - 1)]
                 grid[(row, col)] -= grid[(row - 1, col - 1)]
+        result = grid
+        return result
+    
+    def solve(self, grid_serial_number):
+        grid = self.get_grid(grid_serial_number, 300)
         best_coordinate = [0, 0]
         max_power_level = float('-inf')
         for row in range(1, 300 + 1 - 2):
@@ -86,12 +91,26 @@ class Day11: # Chronal Charge
                 power_level += grid[(row - 1, col - 1)]
                 if power_level > max_power_level:
                     max_power_level = power_level
-                    best_coordinate = (row, col)
-        result = ','.join(map(str, reversed(best_coordinate)))
+                    best_coordinate = (col, row)
+        result = ','.join(map(str, best_coordinate))
         return result
     
     def solve2(self, grid_serial_number):
-        result = grid_serial_number
+        grid_size = 300
+        grid = self.get_grid(grid_serial_number, grid_size)
+        best_coordinate = [0, 0, 0]
+        max_power_level = float('-inf')
+        for size in range(1, grid_size + 1):
+            for row in range(1, grid_size + 2 - size):
+                for col in range(1, grid_size + 2 - size):
+                    power_level = grid[(row + size - 1, col + size - 1)]
+                    power_level -= grid[(row - 1, col + size - 1)]
+                    power_level -= grid[(row + size - 1, col - 1)]
+                    power_level += grid[(row - 1, col - 1)]
+                    if power_level > max_power_level:
+                        max_power_level = power_level
+                        best_coordinate = (col, row, size)
+        result = ','.join(map(str, best_coordinate))
         return result
     
     def main(self):
