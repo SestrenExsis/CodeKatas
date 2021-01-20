@@ -72,12 +72,31 @@ class Day11: # Chronal Charge
                 power_level += grid_serial_number
                 power_level *= rack_id
                 power_level = (power_level % 1_000) // 100
+                power_level -= 5
+                assert -5 <= power_level <= 4
                 grid[(row, col)] = power_level
                 grid[(row, col)] += grid[(row - 1, col)]
                 grid[(row, col)] += grid[(row, col - 1)]
                 grid[(row, col)] -= grid[(row - 1, col - 1)]
         result = grid
         return result
+    
+    def show_grid(self, grid, center, radius):
+        for row in range(center[0] - radius, center[0] + radius + 1):
+            row_data = []
+            for col in range(center[1] - radius, center[1] + radius + 1):
+                cell = ' 0'
+                if (row, col) in grid:
+                    val = grid[(row, col)]
+                    val -= grid[(row - 1, col)]
+                    val -= grid[(row, col - 1)]
+                    val += grid[(row - 1, col - 1)]
+                    if val < 0:
+                        cell = str(val)
+                    else:
+                        cell = '+' + str(val)
+                row_data.append(cell)
+            print(' '.join(row_data))
     
     def solve(self, grid_serial_number):
         grid = self.get_grid(grid_serial_number, 300)
