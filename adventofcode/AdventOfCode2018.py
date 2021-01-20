@@ -100,8 +100,28 @@ class Day12: # Subterranean Sustainability
         result = sum(pots)
         return result
     
-    def solve2(self, pots, rules):
-        result = len(rules)
+    def solve2(self, pots, rules, target_generation: int=50_000_000_000):
+        generation = 0
+        delta = 0
+        while generation < target_generation:
+            next_pots = set()
+            left = min(pots) - 2
+            right = max(pots) + 2
+            for center in range(left, right + 1):
+                chars = ['.', '.', '.', '.', '.']
+                for offset in (-2, -1, 0, 1, 2):
+                    if center + offset in pots:
+                        chars[2 + offset] = '#'
+                key = ''.join(chars)
+                if key in rules and rules[key] == '#':
+                    next_pots.add(center)
+            next_delta = sum(next_pots) - sum(pots)
+            if generation > 1_000 and delta == next_delta:
+                break
+            pots = next_pots
+            delta = next_delta
+            generation += 1
+        result = sum(pots) + (target_generation - generation) * delta
         return result
     
     def main(self):
