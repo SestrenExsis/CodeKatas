@@ -54,6 +54,66 @@ class Template: # Template
         result = solutions
         return result
 
+class Day12: # Subterranean Sustainability
+    '''
+    Subterranean Sustainability
+    https://adventofcode.com/2018/day/12
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        pots = set()
+        for pot_id, char in enumerate(raw_input_lines[0].split(': ')[1]):
+            if char == '#':
+                pots.add(pot_id)
+        rules = {}
+        for raw_input_line in raw_input_lines[2:]:
+            parts = raw_input_line.split(' => ')
+            rules[parts[0]] = parts[1]
+        # Assume that a plant cannot be created in the middle of nowhere
+        assert '.....' not in rules or rules['.....'] == '.'
+        result = pots, rules
+        return result
+    
+    def show_pots(self, pots, left, right):
+        row_data = []
+        for pot_id in range(left, right + 1):
+            pot = '.'
+            if pot_id in pots:
+                pot = '#'
+            row_data.append(pot)
+        result = ''.join(row_data)
+        return result
+    
+    def solve(self, pots, rules):
+        for _ in range(20):
+            next_pots = set()
+            left = min(pots) - 2
+            right = max(pots) + 2
+            for center in range(left, right + 1):
+                chars = ['.', '.', '.', '.', '.']
+                for offset in (-2, -1, 0, 1, 2):
+                    if center + offset in pots:
+                        chars[2 + offset] = '#'
+                key = ''.join(chars)
+                if key in rules and rules[key] == '#':
+                    next_pots.add(center)
+            pots = next_pots
+        result = sum(pots)
+        return result
+    
+    def solve2(self, pots, rules):
+        result = len(rules)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        (pots, rules) = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(set(pots), rules),
+            self.solve2(set(pots), rules),
+            )
+        result = solutions
+        return result
+
 class Day11: # Chronal Charge
     '''
     Chronal Charge
@@ -815,7 +875,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 11 < inputs/2018day11.in
+    python AdventOfCode2018.py 12 < inputs/2018day12.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -829,7 +889,7 @@ if __name__ == '__main__':
         9: (Day09, 'Marble Mania'),
        10: (Day10, 'The Stars Align'),
        11: (Day11, 'Chronal Charge'),
-    #    12: (Day12, '???'),
+       12: (Day12, 'Subterranean Sustainability'),
     #    13: (Day13, '???'),
     #    14: (Day14, '???'),
     #    15: (Day15, '???'),
