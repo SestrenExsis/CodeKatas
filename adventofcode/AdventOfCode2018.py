@@ -54,6 +54,84 @@ class Template: # Template
         result = solutions
         return result
 
+class Day13: # Mine Cart Madness
+    '''
+    Mine Cart Madness
+    https://adventofcode.com/2018/day/13
+    '''
+    DIRECTIONS = '^>v<'
+    OFFSETS = {
+        '^': (-1, 0),
+        '>': ( 0, 1),
+        'v': ( 1, 0),
+        '<': ( 0,-1),
+    }
+
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        tracks = {}
+        carts = []
+        for row, raw_input_line in enumerate(raw_input_lines):
+            for col, cell in enumerate(raw_input_line):
+                if cell in '|-/\\+':
+                    tracks[(row, col)] = cell
+                elif cell in '^v<>':
+                    direction = self.DIRECTIONS.index(cell)
+                    cart = [row, col, direction, 0]
+                    carts.append(cart)
+                    if cell in '^v':
+                        tracks[(row, col)] = '|'
+                    elif cell in '<>':
+                        tracks[(row, col)] = '-'
+                    else:
+                        assert False
+        result = tracks, carts
+        return result
+    
+    def solve(self, tracks, carts):
+        first_crash_location = None
+        while first_crash_location is None:
+            cart_positions = set((cart[0], cart[1]) for cart in carts)
+            carts.sort()
+            for i in range(len(carts)):
+                row, col, direction, intersection_count = carts[i]
+                offset = self.OFFSETS[self.DIRECTIONS[direction]]
+                row += offset[0]
+                col += offset[1]
+                if (row, col) in cart_positions:
+                    first_crash_location = (col, row)
+                    break
+                if tracks[(row, col)] == '/':
+                    direction = self.DIRECTIONS.index('>^<v'[direction])
+                elif tracks[(row, col)] == '\\':
+                    direction = self.DIRECTIONS.index('<v>^'[direction])
+                elif tracks[(row, col)] == '+':
+                    if intersection_count % 3 == 0 :
+                        direction = (direction - 1) % len(self.DIRECTIONS)
+                    elif intersection_count % 3 == 2:
+                        direction = (direction + 1) % len(self.DIRECTIONS)
+                    intersection_count += 1
+                carts[i][0] = row
+                carts[i][1] = col
+                carts[i][2] = direction
+                carts[i][3] = intersection_count
+                cart_positions = set((cart[0], cart[1]) for cart in carts)
+        result = first_crash_location
+        return result
+    
+    def solve2(self, tracks, carts):
+        result = len(carts)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        (tracks, carts) = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(copy.deepcopy(tracks), copy.deepcopy(carts)),
+            self.solve2(copy.deepcopy(tracks), copy.deepcopy(carts)),
+            )
+        result = solutions
+        return result
+
 class Day12: # Subterranean Sustainability
     '''
     Subterranean Sustainability
@@ -895,7 +973,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 12 < inputs/2018day12.in
+    python AdventOfCode2018.py 13 < inputs/2018day13.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -910,7 +988,7 @@ if __name__ == '__main__':
        10: (Day10, 'The Stars Align'),
        11: (Day11, 'Chronal Charge'),
        12: (Day12, 'Subterranean Sustainability'),
-    #    13: (Day13, '???'),
+       13: (Day13, 'Mine Cart Madness'),
     #    14: (Day14, '???'),
     #    15: (Day15, '???'),
     #    16: (Day16, '???'),
