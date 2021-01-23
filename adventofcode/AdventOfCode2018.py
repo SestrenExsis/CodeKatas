@@ -69,15 +69,14 @@ class Day13: # Mine Cart Madness
 
     def get_parsed_input(self, raw_input_lines: List[str]):
         tracks = {}
-        carts = []
+        carts = {}
         for row, raw_input_line in enumerate(raw_input_lines):
             for col, cell in enumerate(raw_input_line):
                 if cell in '|-/\\+':
                     tracks[(row, col)] = cell
                 elif cell in '^v<>':
                     direction = self.DIRECTIONS.index(cell)
-                    cart = [row, col, direction, 0]
-                    carts.append(cart)
+                    carts[(row, col)] = (direction, 0)
                     if cell in '^v':
                         tracks[(row, col)] = '|'
                     elif cell in '<>':
@@ -90,15 +89,50 @@ class Day13: # Mine Cart Madness
     def solve(self, tracks, carts):
         first_crash_location = None
         while first_crash_location is None:
-            cart_positions = set((cart[0], cart[1]) for cart in carts)
-            carts.sort()
-            for i in range(len(carts)):
-                row, col, direction, intersection_count = carts[i]
+            next_carts = {}
+            positions = set(carts.keys())
+            for (row, col) in sorted(carts.keys()):
+                positions.remove((row, col))
+                (direction, intersection_count) = carts[(row, col)]
                 offset = self.OFFSETS[self.DIRECTIONS[direction]]
                 row += offset[0]
                 col += offset[1]
-                if (row, col) in cart_positions:
+                if (row, col) in positions:
                     first_crash_location = (col, row)
+                    break
+                positions.add((row, col))
+                if tracks[(row, col)] == '/':
+                    direction = self.DIRECTIONS.index('>^<v'[direction])
+                elif tracks[(row, col)] == '\\':
+                    direction = self.DIRECTIONS.index('<v>^'[direction])
+                elif tracks[(row, col)] == '+':
+                    if intersection_count % 3 == 0 :
+                        direction = (direction - 1) % len(self.DIRECTIONS)
+                    elif intersection_count % 3 == 2:
+                        direction = (direction + 1) % len(self.DIRECTIONS)
+                    intersection_count += 1
+                next_carts[(row, col)] = (direction, intersection_count)
+            carts = next_carts
+        result = first_crash_location
+        return result
+    
+    def solve2(self, tracks, carts):
+        positions = set(carts.keys())
+        while len(carts) > 1:
+            next_carts = {}
+            for (row, col) in sorted(carts.keys()):
+                if (row, col) not in positions:
+                    continue
+                positions.remove((row, col))
+                (direction, intersection_count) = carts[(row, col)]
+                offset = self.OFFSETS[self.DIRECTIONS[direction]]
+                row += offset[0]
+                col += offset[1]
+                if (row, col) in positions:
+                    positions.remove((row, col))
+                else:
+                    positions.add((row, col))
+                if len(positions) < 2:
                     break
                 if tracks[(row, col)] == '/':
                     direction = self.DIRECTIONS.index('>^<v'[direction])
@@ -110,16 +144,13 @@ class Day13: # Mine Cart Madness
                     elif intersection_count % 3 == 2:
                         direction = (direction + 1) % len(self.DIRECTIONS)
                     intersection_count += 1
-                carts[i][0] = row
-                carts[i][1] = col
-                carts[i][2] = direction
-                carts[i][3] = intersection_count
-                cart_positions = set((cart[0], cart[1]) for cart in carts)
-        result = first_crash_location
-        return result
-    
-    def solve2(self, tracks, carts):
-        result = len(carts)
+                next_carts[(row, col)] = (direction, intersection_count)
+            else:
+                carts = {}
+                for cart in next_carts:
+                    if cart in positions:
+                        carts[cart] = next_carts[cart]
+        result = tuple(reversed(positions.pop()))
         return result
     
     def main(self):
