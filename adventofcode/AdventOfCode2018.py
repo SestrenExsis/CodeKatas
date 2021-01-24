@@ -54,6 +54,45 @@ class Template: # Template
         result = solutions
         return result
 
+class Day14: # Chocolate Charts
+    '''
+    Chocolate Charts
+    https://adventofcode.com/2018/day/14
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = int(raw_input_lines[0])
+        return result
+    
+    def solve(self, recipe_count: int) -> str:
+        recipes = '37'
+        elf_a = 0
+        elf_b = 1
+        while len(recipes) < recipe_count + 10:
+            score_a = int(recipes[elf_a])
+            score_b = int(recipes[elf_b])
+            total_score = score_a + score_b
+            recipes += str(total_score)
+            elf_a = (elf_a + score_a + 1) % len(recipes)
+            elf_b = (elf_b + score_b + 1) % len(recipes)
+        result = ''.join(
+            map(str, recipes[recipe_count : recipe_count + 10])
+            )
+        return result
+    
+    def solve2(self, parsed_input):
+        result = parsed_input
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day13: # Mine Cart Madness
     '''
     Mine Cart Madness
@@ -1004,7 +1043,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 13 < inputs/2018day13.in
+    python AdventOfCode2018.py 14 < inputs/2018day14.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -1020,7 +1059,7 @@ if __name__ == '__main__':
        11: (Day11, 'Chronal Charge'),
        12: (Day12, 'Subterranean Sustainability'),
        13: (Day13, 'Mine Cart Madness'),
-    #    14: (Day14, '???'),
+       14: (Day14, 'Chocolate Charts'),
     #    15: (Day15, '???'),
     #    16: (Day16, '???'),
     #    17: (Day17, '???'),
