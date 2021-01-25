@@ -54,6 +54,35 @@ class Template: # Template
         result = solutions
         return result
 
+class Day15: # Beverage Bandits
+    '''
+    Beverage Bandits
+    https://adventofcode.com/2018/day/15
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day14: # Chocolate Charts
     '''
     Chocolate Charts
@@ -79,8 +108,20 @@ class Day14: # Chocolate Charts
             )
         return result
     
-    def solve2(self, parsed_input):
-        result = parsed_input
+    def solve2(self, recipe_count: int) -> str:
+        result = None
+        digits = str(recipe_count)
+        recipes = '37'
+        elf_a = 0
+        elf_b = 1
+        while digits not in recipes[-7:]:
+            score_a = int(recipes[elf_a])
+            score_b = int(recipes[elf_b])
+            total_score = score_a + score_b
+            recipes += str(total_score)
+            elf_a = (elf_a + score_a + 1) % len(recipes)
+            elf_b = (elf_b + score_b + 1) % len(recipes)
+        result = recipes.index(digits)
         return result
     
     def main(self):
@@ -1060,7 +1101,7 @@ if __name__ == '__main__':
        12: (Day12, 'Subterranean Sustainability'),
        13: (Day13, 'Mine Cart Madness'),
        14: (Day14, 'Chocolate Charts'),
-    #    15: (Day15, '???'),
+       15: (Day15, 'Beverage Bandits'),
     #    16: (Day16, '???'),
     #    17: (Day17, '???'),
     #    18: (Day18, '???'),
