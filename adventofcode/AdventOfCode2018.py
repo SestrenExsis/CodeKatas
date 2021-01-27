@@ -60,25 +60,47 @@ class Day15: # Beverage Bandits
     https://adventofcode.com/2018/day/15
     '''
     def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
-        for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
+        walls = set()
+        units = {}
+        for row, raw_input_line in enumerate(raw_input_lines):
+            for col, cell in enumerate(raw_input_line):
+                if cell == '#':
+                    walls.add((row, col))
+                if cell in 'GE':
+                    units[(row, col)] = (cell, 3, 200)
+        result = (walls, units)
         return result
     
-    def solve(self, parsed_input):
-        result = len(parsed_input)
+    def solve(self, walls, units):
+        round_count = 0
+        combat_active = True
+        while combat_active:
+            # Iterate over all units in page order by current position
+            initiative = list(
+                sorted(
+                    (row, col) for (row, col), unit in
+                    units.items()
+                )
+            )
+            for (row, col) in initiative:
+                # units[(row, col)].attack_or_move()
+                # If one side has run out of units, combat ends
+                combat_active = False
+            round_count += 1
+        remaining_health = sum(unit[2] for unit in units)
+        result = (round_count - 1) * remaining_health
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, walls, units):
+        result = len(units)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        (walls, units) = self.get_parsed_input(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(walls, copy.deepcopy(units)),
+            self.solve2(walls, copy.deepcopy(units)),
             )
         result = solutions
         return result
