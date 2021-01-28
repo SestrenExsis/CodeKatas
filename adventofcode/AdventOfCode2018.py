@@ -77,6 +77,7 @@ class Day15: # Beverage Bandits
         round_count = 0
         goblin_count = sum(1 for unit in units.values() if unit[0] == 'G')
         elf_count = sum(1 for unit in units.values() if unit[0] == 'E')
+        # print(0, elf_count, goblin_count, units)
         combat_active = True
         while combat_active:
             # Iterate over all units in page order by current position
@@ -105,6 +106,9 @@ class Day15: # Beverage Bandits
                 nearest_target_location = None
                 while len(work) > 0:
                     (distance, nrow, ncol, r, c) = heapq.heappop(work)
+                    if distance == 1:
+                        r = nrow
+                        c = ncol
                     if (
                         (nrow, ncol) in walls or 
                         (nrow, ncol) in visited
@@ -116,7 +120,7 @@ class Day15: # Beverage Bandits
                         (nrow, ncol) in units and
                         units[(nrow, ncol)][0] != unit_type
                     ):
-                        nearest_target_location = (nrow, ncol)
+                        nearest_target_location = (nrow, ncol, r, c)
                         break
                     if (nrow != row or ncol != col) and (nrow, ncol) in units:
                         continue
@@ -143,32 +147,38 @@ class Day15: # Beverage Bandits
                                 units[(nrow, ncol)][0] != unit_type
                             ):
                                 target = units[(nrow, ncol)]
-                                heapq.heappush(targets, (target[2], row, col))
+                                heapq.heappush(targets, (target[2], nrow, ncol))
                         _, trow, tcol = heapq.heappop(targets)
                         target = units[(trow, tcol)]
-                        units[(trow, tcol)] = (
+                        target = (
                             target[0],
                             target[1],
                             target[2] - attack_power,
                             )
-                        if target[2] < 0:
+                        units[(trow, tcol)] = target
+                        if target[2] < 1:
                             if target[0] == 'G':
                                 goblin_count -= 1
                             elif target[0] == 'E':
                                 elf_count -= 1
-                            del units[(trow, tcol)]
+                            print(round_count, 'death', target[0], trow, tcol)
+                            units.pop((trow, tcol))
                     elif distance > 1:
+                        nrow = nearest_target_location[2]
+                        ncol = nearest_target_location[3]
+                        print('move', (row, col), (nrow, ncol))
                         # If target not in range, move closer
-                        units[(r, c)] = units[(row, col)]
-                        del units[(row, col)]
+                        units[(nrow, ncol)] = units.pop((row, col))
             else:
                 round_count += 1
-                print(round_count, elf_count, goblin_count, units)
+            print(round_count, elf_count, goblin_count, units)
             if elf_count < 1 or goblin_count < 1:
                 combat_active = False
                 break
         remaining_health = sum(unit[2] for unit in units.values())
-        result = (round_count - 1) * remaining_health
+        # result = (round_count - 1) * remaining_health
+        result = (round_count, remaining_health)
+        print(units)
         return result
     
     def solve2(self, walls, units):
