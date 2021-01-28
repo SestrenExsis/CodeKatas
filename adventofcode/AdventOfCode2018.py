@@ -8,7 +8,9 @@ import collections
 import copy
 import datetime
 import functools
+import heapq
 import operator
+import time
 from typing import Dict, List, Set, Tuple
     
 def get_raw_input_lines() -> list:
@@ -73,6 +75,8 @@ class Day15: # Beverage Bandits
     
     def solve(self, walls, units):
         round_count = 0
+        goblin_count = sum(1 for unit in units.values() if unit[0] == 'G')
+        elf_count = sum(1 for unit in units.values() if unit[0] == 'E')
         combat_active = True
         while combat_active:
             # Iterate over all units in page order by current position
@@ -83,11 +87,87 @@ class Day15: # Beverage Bandits
                 )
             )
             for (row, col) in initiative:
-                # units[(row, col)].attack_or_move()
-                # If one side has run out of units, combat ends
+                if (row, col) not in units:
+                    continue
+                unit_type, attack_power, _ = units[(row, col)]
+                # If opposing side has run out of units, combat ends
+                if (
+                    (unit_type == 'G' and elf_count < 1) or
+                    (unit_type == 'E' and goblin_count < 1)
+                ):
+                    combat_active = False
+                    break
+                # Find nearest target
+                # Use breadth-first search and min-heap
+                work = []
+                heapq.heappush(work, (0, row, col, row, col))
+                visited = set()
+                nearest_target_location = None
+                while len(work) > 0:
+                    (distance, nrow, ncol, r, c) = heapq.heappop(work)
+                    if (
+                        (nrow, ncol) in walls or 
+                        (nrow, ncol) in visited
+                    ):
+                        continue
+                    visited.add((nrow, ncol))
+                    if (
+                        distance > 0 and
+                        (nrow, ncol) in units and
+                        units[(nrow, ncol)][0] != unit_type
+                    ):
+                        nearest_target_location = (nrow, ncol)
+                        break
+                    if (nrow != row or ncol != col) and (nrow, ncol) in units:
+                        continue
+                    heapq.heappush(work, (distance + 1, nrow + 1, ncol, r, c))
+                    heapq.heappush(work, (distance + 1, nrow, ncol + 1, r, c))
+                    heapq.heappush(work, (distance + 1, nrow, ncol - 1, r, c))
+                    heapq.heappush(work, (distance + 1, nrow - 1, ncol, r, c))
+                if nearest_target_location is not None:
+                    distance = abs(nearest_target_location[0] - row)
+                    distance += abs(nearest_target_location[1] - col)
+                    if distance == 1:
+                        # If one or more targets in range, attack one of them
+                        # Choose the target with the lowest health, resolve
+                        # ties using page order
+                        targets = []
+                        for (nrow, ncol) in (
+                            (row + 1, col),
+                            (row - 1, col),
+                            (row, col + 1),
+                            (row, col - 1),
+                            ):
+                            if (
+                                (nrow, ncol) in units and
+                                units[(nrow, ncol)][0] != unit_type
+                            ):
+                                target = units[(nrow, ncol)]
+                                heapq.heappush(targets, (target[2], row, col))
+                        _, trow, tcol = heapq.heappop(targets)
+                        target = units[(trow, tcol)]
+                        units[(trow, tcol)] = (
+                            target[0],
+                            target[1],
+                            target[2] - attack_power,
+                            )
+                        if target[2] < 0:
+                            if target[0] == 'G':
+                                goblin_count -= 1
+                            elif target[0] == 'E':
+                                elf_count -= 1
+                            del units[(trow, tcol)]
+                    elif distance > 1:
+                        # If target not in range, move closer
+                        units[(r, c)] = units[(row, col)]
+                        del units[(row, col)]
+            else:
+                round_count += 1
+                print(round_count, elf_count, goblin_count, units)
+            if elf_count < 1 or goblin_count < 1:
                 combat_active = False
-            round_count += 1
-        remaining_health = sum(unit[2] for unit in units)
+                break
+        remaining_health = sum(unit[2] for unit in units.values())
         result = (round_count - 1) * remaining_health
         return result
     
@@ -1106,7 +1186,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 14 < inputs/2018day14.in
+    python AdventOfCode2018.py 15 < inputs/2018day15.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
