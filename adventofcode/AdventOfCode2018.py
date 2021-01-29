@@ -73,20 +73,20 @@ class Day15: # Beverage Bandits
         result = (walls, units)
         return result
     
+    def show_grid(self, walls, units):
+        pass
+    
     def solve(self, walls, units):
         round_count = 0
         goblin_count = sum(1 for unit in units.values() if unit[0] == 'G')
         elf_count = sum(1 for unit in units.values() if unit[0] == 'E')
         # print(0, elf_count, goblin_count, units)
         combat_active = True
+        combat_log = []
         while combat_active:
+            combat_log.append([])
             # Iterate over all units in page order by current position
-            initiative = list(
-                sorted(
-                    (row, col) for (row, col), unit in
-                    units.items()
-                )
-            )
+            initiative = list(sorted((row, col) for (row, col) in units))
             for (row, col) in initiative:
                 if (row, col) not in units:
                     continue
@@ -129,8 +129,28 @@ class Day15: # Beverage Bandits
                     heapq.heappush(work, (distance + 1, nrow, ncol - 1, r, c))
                     heapq.heappush(work, (distance + 1, nrow - 1, ncol, r, c))
                 if nearest_target_location is not None:
-                    distance = abs(nearest_target_location[0] - row)
-                    distance += abs(nearest_target_location[1] - col)
+                    distance = sum((
+                        abs(nearest_target_location[0] - row),
+                        abs(nearest_target_location[1] - col),
+                        ))
+                    if distance > 1:
+                        # Move to the closest target if not already next to one
+                        mrow = nearest_target_location[2]
+                        mcol = nearest_target_location[3]
+                        combat_log[-1].append(
+                            ' {} moves from ({}, {}) to ({}, {})'.
+                            format(
+                                unit_type, row, col, mrow, mcol
+                                )
+                            )
+                        # If target not in range, move closer
+                        units[(mrow, mcol)] = units.pop((row, col))
+                        distance = sum((
+                            abs(nearest_target_location[0] - mrow),
+                            abs(nearest_target_location[1] - mcol),
+                            ))
+                        row = mrow
+                        col = mcol
                     if distance == 1:
                         # If one or more targets in range, attack one of them
                         # Choose the target with the lowest health, resolve
@@ -155,30 +175,40 @@ class Day15: # Beverage Bandits
                             target[1],
                             target[2] - attack_power,
                             )
+                        combat_log[-1].append(
+                            ' {} at ({}, {}) attacks {} at ({}, {}), hp={}'.
+                            format(
+                                unit_type, row, col,
+                                target[0], trow, tcol, target[2]
+                                )
+                            )
                         units[(trow, tcol)] = target
                         if target[2] < 1:
                             if target[0] == 'G':
                                 goblin_count -= 1
                             elif target[0] == 'E':
                                 elf_count -= 1
-                            print(round_count, 'death', target[0], trow, tcol)
+                            combat_log[-1].append(
+                                ' {} dies at ({}, {})'.
+                                format(
+                                    target[0], trow, tcol
+                                    )
+                                )
                             units.pop((trow, tcol))
-                    elif distance > 1:
-                        nrow = nearest_target_location[2]
-                        ncol = nearest_target_location[3]
-                        print('move', (row, col), (nrow, ncol))
-                        # If target not in range, move closer
-                        units[(nrow, ncol)] = units.pop((row, col))
             else:
                 round_count += 1
-            print(round_count, elf_count, goblin_count, units)
+            # print(round_count, elf_count, goblin_count, units)
             if elf_count < 1 or goblin_count < 1:
                 combat_active = False
                 break
+        if False: # Show combat log?
+            for i in range(len(combat_log)):
+                print('Round #', i + 1)
+                for j in range(len(combat_log[i])):
+                    print(combat_log[i][j])
         remaining_health = sum(unit[2] for unit in units.values())
-        # result = (round_count - 1) * remaining_health
-        result = (round_count, remaining_health)
-        print(units)
+        result = round_count * remaining_health
+        # print(units)
         return result
     
     def solve2(self, walls, units):
