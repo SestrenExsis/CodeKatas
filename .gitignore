@@ -1,3 +1,6 @@
 *.in
 !*test*.in
 .vscode
+withgoogle/judges/*
+withgoogle/InteractiveRunner.py
+spoilers/
