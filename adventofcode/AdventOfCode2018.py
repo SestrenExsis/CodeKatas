@@ -74,7 +74,23 @@ class Day15: # Beverage Bandits
         return result
     
     def show_grid(self, walls, units):
-        pass
+        left = min(wall[1] for wall in walls)
+        right = max(wall[1] for wall in walls)
+        top = min(wall[0] for wall in walls)
+        bottom = max(wall[0] for wall in walls)
+        for row in range(top, bottom + 1):
+            stats = []
+            cells = []
+            for col in range(left, right + 1):
+                cell = '.'
+                if (row, col) in walls:
+                    cell = '#'
+                if (row, col) in units:
+                    unit = units[(row, col)]
+                    cell = unit[0]
+                    stats.append(unit[0] + '(' + str(unit[2]) + ')')
+                cells.append(cell)
+            print(''.join(cells) + '   ' + ', '.join(stats))
     
     def solve(self, walls, units):
         round_count = 0
@@ -201,13 +217,15 @@ class Day15: # Beverage Bandits
             if elf_count < 1 or goblin_count < 1:
                 combat_active = False
                 break
-        if False: # Show combat log?
+        if True: # Show combat log?
             for i in range(len(combat_log)):
                 print('Round #', i + 1)
                 for j in range(len(combat_log[i])):
                     print(combat_log[i][j])
         remaining_health = sum(unit[2] for unit in units.values())
         result = round_count * remaining_health
+        print(round_count, remaining_health)
+        self.show_grid(walls, units)
         # print(units)
         return result
     
