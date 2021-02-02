@@ -93,10 +93,10 @@ class Day15: # Beverage Bandits
             print(''.join(cells) + '   ' + ', '.join(stats))
     
     def solve(self, walls, units):
+        self.show_grid(walls, units)
         round_count = 0
         goblin_count = sum(1 for unit in units.values() if unit[0] == 'G')
         elf_count = sum(1 for unit in units.values() if unit[0] == 'E')
-        # print(0, elf_count, goblin_count, units)
         combat_active = True
         combat_log = []
         while combat_active:
@@ -213,20 +213,18 @@ class Day15: # Beverage Bandits
                             units.pop((trow, tcol))
             else:
                 round_count += 1
-            # print(round_count, elf_count, goblin_count, units)
             if elf_count < 1 or goblin_count < 1:
                 combat_active = False
                 break
-        if True: # Show combat log?
+        with open('AdventOfCode2018.out', 'w') as out:
             for i in range(len(combat_log)):
-                print('Round #', i + 1)
+                out.write('Round #{}\n'.format(i + 1))
                 for j in range(len(combat_log[i])):
-                    print(combat_log[i][j])
+                    out.write(combat_log[i][j] + '\n')
         remaining_health = sum(unit[2] for unit in units.values())
         result = round_count * remaining_health
         print(round_count, remaining_health)
         self.show_grid(walls, units)
-        # print(units)
         return result
     
     def solve2(self, walls, units):
