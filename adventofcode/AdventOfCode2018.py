@@ -93,7 +93,7 @@ class Day15: # Beverage Bandits
             print(''.join(cells) + '   ' + ', '.join(stats))
     
     def solve(self, walls, units):
-        self.show_grid(walls, units)
+        # self.show_grid(walls, units)
         round_count = 0
         goblin_count = sum(1 for unit in units.values() if unit[0] == 'G')
         elf_count = sum(1 for unit in units.values() if unit[0] == 'E')
@@ -114,78 +114,84 @@ class Day15: # Beverage Bandits
                 ):
                     combat_active = False
                     break
-                # Find nearest target
-                # Use breadth-first search and min-heap
-                work = []
-                heapq.heappush(work, (0, row, col, row, col))
-                visited = set()
-                nearest_target_location = None
-                while len(work) > 0:
-                    (distance, nrow, ncol, r, c) = heapq.heappop(work)
-                    if distance == 1:
-                        r = nrow
-                        c = ncol
-                    if (
-                        (nrow, ncol) in walls or 
-                        (nrow, ncol) in visited
-                    ):
-                        continue
-                    visited.add((nrow, ncol))
-                    if (
-                        distance > 0 and
-                        (nrow, ncol) in units and
-                        units[(nrow, ncol)][0] != unit_type
-                    ):
-                        nearest_target_location = (nrow, ncol, r, c)
-                        break
-                    if (nrow != row or ncol != col) and (nrow, ncol) in units:
-                        continue
-                    heapq.heappush(work, (distance + 1, nrow + 1, ncol, r, c))
-                    heapq.heappush(work, (distance + 1, nrow, ncol + 1, r, c))
-                    heapq.heappush(work, (distance + 1, nrow, ncol - 1, r, c))
-                    heapq.heappush(work, (distance + 1, nrow - 1, ncol, r, c))
-                if nearest_target_location is not None:
+                # Find nearest location to attack a target from
+                valid_attack_locations = set()
+                for (trow, tcol), target in units.items():
+                    if target[0] != unit_type and target[2] > 0:
+                        valid_attack_locations.add((trow - 1, tcol))
+                        valid_attack_locations.add((trow + 1, tcol))
+                        valid_attack_locations.add((trow, tcol - 1))
+                        valid_attack_locations.add((trow, tcol + 1))
+                nearest_attack_location = None
+                if (row, col) in valid_attack_locations:
+                    nearest_attack_location = (row, col, row, col)
+                else:
+                    work = []
+                    heapq.heappush(work, (1, row + 1, col, row + 1, col))
+                    heapq.heappush(work, (1, row - 1, col, row - 1, col))
+                    heapq.heappush(work, (1, row, col + 1, row, col + 1))
+                    heapq.heappush(work, (1, row, col - 1, row, col - 1))
+                    visited = set()
+                    visited.add((row, col))
+                    while len(work) > 0 and nearest_attack_location is None:
+                        (dist, nrow, ncol, r, c) = heapq.heappop(work)
+                        if (
+                            (nrow, ncol) in walls or
+                            (nrow, ncol) in units or
+                            (nrow, ncol) in visited
+                        ):
+                            continue
+                        if (nrow, ncol) in valid_attack_locations:
+                            nearest_attack_location = (nrow, ncol, r, c)
+                        visited.add((nrow, ncol))
+                        heapq.heappush(work, (dist + 1, nrow + 1, ncol, r, c))
+                        heapq.heappush(work, (dist + 1, nrow, ncol + 1, r, c))
+                        heapq.heappush(work, (dist + 1, nrow, ncol - 1, r, c))
+                        heapq.heappush(work, (dist + 1, nrow - 1, ncol, r, c))
+                if nearest_attack_location is not None:
                     distance = sum((
-                        abs(nearest_target_location[0] - row),
-                        abs(nearest_target_location[1] - col),
+                        abs(nearest_attack_location[0] - row),
+                        abs(nearest_attack_location[1] - col),
                         ))
-                    if distance > 1:
-                        # Move to the closest target if not already next to one
-                        mrow = nearest_target_location[2]
-                        mcol = nearest_target_location[3]
+                    if distance > 0:
+                        # Move to the nearest attack location if not already
+                        # in range to attack
+                        mrow = nearest_attack_location[2]
+                        mcol = nearest_attack_location[3]
                         combat_log[-1].append(
                             ' {} moves from ({}, {}) to ({}, {})'.
                             format(
-                                unit_type, row, col, mrow, mcol
+                                unit_type, row, col,
+                                mrow, mcol,
                                 )
                             )
-                        # If target not in range, move closer
                         units[(mrow, mcol)] = units.pop((row, col))
                         distance = sum((
-                            abs(nearest_target_location[0] - mrow),
-                            abs(nearest_target_location[1] - mcol),
+                            abs(nearest_attack_location[0] - mrow),
+                            abs(nearest_attack_location[1] - mcol),
                             ))
                         row = mrow
                         col = mcol
-                    if distance == 1:
-                        # If one or more targets in range, attack one of them
-                        # Choose the target with the lowest health, resolve
-                        # ties using page order
-                        targets = []
-                        for (nrow, ncol) in (
-                            (row + 1, col),
-                            (row - 1, col),
-                            (row, col + 1),
-                            (row, col - 1),
+                    # If one or more targets in range, attack one of them
+                    # Choose the target with the lowest health, resolve
+                    # ties using page order
+                    targets = []
+                    for (trow, tcol) in (
+                        (row + 1, col),
+                        (row - 1, col),
+                        (row, col + 1),
+                        (row, col - 1),
+                        ):
+                        if (
+                            (trow, tcol) in units and
+                            units[(trow, tcol)][0] != unit_type
                             ):
-                            if (
-                                (nrow, ncol) in units and
-                                units[(nrow, ncol)][0] != unit_type
-                            ):
-                                target = units[(nrow, ncol)]
-                                heapq.heappush(targets, (target[2], nrow, ncol))
+                            target = units[(trow, tcol)]
+                            heapq.heappush(targets, (target[2], trow, tcol))
+                    if len(targets) > 0:
                         _, trow, tcol = heapq.heappop(targets)
                         target = units[(trow, tcol)]
+                        # Attack and deal damage to the target
                         target = (
                             target[0],
                             target[1],
@@ -195,7 +201,7 @@ class Day15: # Beverage Bandits
                             ' {} at ({}, {}) attacks {} at ({}, {}), hp={}'.
                             format(
                                 unit_type, row, col,
-                                target[0], trow, tcol, target[2]
+                                target[0], trow, tcol, target[2],
                                 )
                             )
                         units[(trow, tcol)] = target
@@ -206,9 +212,7 @@ class Day15: # Beverage Bandits
                                 elf_count -= 1
                             combat_log[-1].append(
                                 ' {} dies at ({}, {})'.
-                                format(
-                                    target[0], trow, tcol
-                                    )
+                                format(target[0], trow, tcol)
                                 )
                             units.pop((trow, tcol))
             else:
@@ -223,8 +227,7 @@ class Day15: # Beverage Bandits
                     out.write(combat_log[i][j] + '\n')
         remaining_health = sum(unit[2] for unit in units.values())
         result = round_count * remaining_health
-        print(round_count, remaining_health)
-        self.show_grid(walls, units)
+        # self.show_grid(walls, units)
         return result
     
     def solve2(self, walls, units):
