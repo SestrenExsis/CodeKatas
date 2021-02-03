@@ -92,8 +92,7 @@ class Day15: # Beverage Bandits
                 cells.append(cell)
             print(''.join(cells) + '   ' + ', '.join(stats))
     
-    def solve(self, walls, units):
-        # self.show_grid(walls, units)
+    def fight(self, walls, units):
         round_count = 0
         goblin_count = sum(1 for unit in units.values() if unit[0] == 'G')
         elf_count = sum(1 for unit in units.values() if unit[0] == 'E')
@@ -220,18 +219,47 @@ class Day15: # Beverage Bandits
             if elf_count < 1 or goblin_count < 1:
                 combat_active = False
                 break
+        result = units, round_count, combat_log
+        return result
+    
+    def write_combat_log(self, combat_log):
         with open('AdventOfCode2018.out', 'w') as out:
             for i in range(len(combat_log)):
                 out.write('Round #{}\n'.format(i + 1))
                 for j in range(len(combat_log[i])):
                     out.write(combat_log[i][j] + '\n')
+    
+    def solve(self, walls, units):
+        units, round_count, _ = self.fight(walls, units)
         remaining_health = sum(unit[2] for unit in units.values())
         result = round_count * remaining_health
-        # self.show_grid(walls, units)
         return result
     
     def solve2(self, walls, units):
-        result = len(units)
+        max_ap = 200
+        min_ap = 1
+        result = None
+        while min_ap < max_ap:
+            curr_ap = min_ap + (max_ap - min_ap) // 2
+            curr_units = copy.deepcopy(units)
+            for key, (unit_type, ap, hp) in curr_units.items():
+                if unit_type == 'E':
+                    curr_units[key] = (unit_type, curr_ap, hp)
+            curr_units, round_count, combat_log = self.fight(walls, curr_units)
+            remaining_health = sum(unit[2] for unit in curr_units.values())
+            result = round_count * remaining_health
+            elf_died = False
+            for round_id in range(round_count):
+                for entry in combat_log[round_id]:
+                    if 'E dies ' in entry:
+                        elf_died = True
+                        break
+                if elf_died:
+                    break
+            if elf_died:
+                min_ap = curr_ap + 1
+            else:
+                max_ap = curr_ap
         return result
     
     def main(self):
