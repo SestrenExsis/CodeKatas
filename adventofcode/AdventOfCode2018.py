@@ -67,71 +67,131 @@ class Day16: # Chronal Classification
         inputs: A, B
         output: C (a register)
     "value A" or "register A"
-
-    addr (add register)
-        addr A B C
-        register C = register A + register B
-
-    addi (add immediate)
-        addi A B C
-        register C = register A + value B
-
-    mulr (multiply register)
-        mulr A B C
-        register C = register A * register B
-
-    muli (multiply immediate)
-        muli A B C
-        register C = register A * value B
-
-    banr (bitwise AND register)
-        banr A B C
-        register C = register A & register B
-
-    bani (bitwise AND immediate)
-        bani A B C
-        register C = register A & value B
-
-    borr (bitwise OR register)
-        borr A B C
-        register C = register A | register B
-
-    bori (bitwise OR immediate)
-        bori A B C
-        register C = register A | value B
-    
-    setr (set register)
-        setr A . C
-        register C = register A (input B is ignored)
-    
-    seti (set immediate)
-        seti A . C
-        register C = value A (input B is ignored)
-    
-    gtir (greater-than immediate/register)
-        gtir A B C
-        register C = 1 if value A > register B else 0
-    
-    gtri (greater-than register/immediate)
-        gtri A B C
-        register C = 1 if register A > value B else 0
-    
-    gtrr (greater-than register/register)
-        gtrr A B C
-        register C = 1 if register A > register B else 0
-    
-    eqir (equal immediate/register)
-        eqir A B C
-        register C = 1 if value A == register B else 0
-    
-    eqri (equal register/immediate)
-        eqri A B C
-        register C = 1 if register A == value B else 0
-    
-    eqrr (equal register/register)
-        eqrr A B C
-        register C = 1 if register A == register B else 0
     '''
+
+    def run_instruction(self, instruction, a, b, c, prev_register):
+        register = prev_register[:]
+        if instruction == 'addr':
+            # ADDR: register C = register A + register B
+            if (
+                0 <= a < len(register) and
+                0 <= b < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = register[a] + register[b]
+        elif instruction == 'addi':
+            # ADDI: register C = register A + value B
+            if (
+                0 <= a < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = register[a] + b
+        elif instruction == 'mulr':
+            # MULR: register C = register A * register B
+            if (
+                0 <= a < len(register) and
+                0 <= b < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = register[a] * register[b]
+        elif instruction == 'muli':
+            # MULI: register C = register A * value B
+            if (
+                0 <= a < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = register[a] * b
+        elif instruction == 'banr':
+            # BANR: register C = register A & register B
+            if (
+                0 <= a < len(register) and
+                0 <= b < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = register[a] & register[b]
+        elif instruction == 'bani':
+            # BANI: register C = register A & value B
+            if (
+                0 <= a < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = register[a] & b
+        elif instruction == 'borr':
+            # BORR: register C = register A | register B
+            if (
+                0 <= a < len(register) and
+                0 <= b < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = register[a] | register[b]
+        elif instruction == 'bori':
+            # BORI: register C = register A | value B
+            if (
+                0 <= a < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = register[a] | b
+        elif instruction == 'setr':
+            # SETR: register C = register A (input B is ignored)
+            if (
+                0 <= a < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = register[a]
+        elif instruction == 'seti':
+            # SETI: register C = value A (input B is ignored)
+            if (
+                0 <= a < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = a
+        elif instruction == 'gtir':
+            # GTIR: register C = 1 if value A > register B else 0
+            if (
+                0 <= b < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = 1 if a > register[b] else 0
+        elif instruction == 'gtri':
+            # GTRI: register C = 1 if register A > value B else 0
+            if (
+                0 <= a < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = 1 if register[a] > b else 0
+        elif instruction == 'gtrr':
+            # GTRR: register C = 1 if register A > register B else 0
+            if (
+                0 <= a < len(register) and
+                0 <= b < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = 1 if register[a] > register[b] else 0
+        elif instruction == 'eqir':
+            # EQIR: register C = 1 if value A == register B else 0
+            if (
+                0 <= b < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = 1 if a == register[b] else 0
+        elif instruction == 'eqri':
+            # EQRI: register C = 1 if register A == value B else 0
+            if (
+                0 <= a < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = 1 if register[a] == b else 0
+        elif instruction == 'eqrr':
+            # EQRR: register C = 1 if register A == register B else 0
+            if (
+                0 <= a < len(register) and
+                0 <= b < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = 1 if register[a] == register[b] else 0
+        result = register
+        return result
+
     def get_parsed_input(self, raw_input_lines: List[str]):
         samples = []
         test_program = []
@@ -163,156 +223,47 @@ class Day16: # Chronal Classification
         result = samples, test_program
         return result
     
-    def solve(self, samples):
-        tested_samples = collections.defaultdict(int)
+    def test_samples(self, samples):
+        tested_samples = collections.defaultdict(set)
         for i in range(len(samples)):
             before = samples[i][0]
             _, a, b, c = samples[i][1]
             after = samples[i][2]
-            registers = []
-            # register C = register A + register B
-            register = before[:]
-            if (
-                0 <= a < len(register) and
-                0 <= b < len(register) and
-                0 <= c < len(register)
+            for instruction in (
+                'addr',
+                'addi',
+                'mulr',
+                'muli',
+                'banr',
+                'bani',
+                'borr',
+                'bori',
+                'setr',
+                'seti',
+                'gtir',
+                'gtri',
+                'gtrr',
+                'eqir',
+                'eqri',
+                'eqrr',
             ):
-                register[c] = register[a] + register[b]
-                registers.append(register)
-            # register C = register A + value B
-            register = before[:]
-            if (
-                0 <= a < len(register) and
-                0 <= c < len(register)
-            ):
-                register[c] = register[a] + b
-                registers.append(register)
-            # register C = register A * register B
-            register = before[:]
-            if (
-                0 <= a < len(register) and
-                0 <= b < len(register) and
-                0 <= c < len(register)
-            ):
-                register[c] = register[a] * register[b]
-                registers.append(register)
-            # register C = register A * value B
-            register = before[:]
-            if (
-                0 <= a < len(registers) and
-                0 <= c < len(registers)
-            ):
-                register[c] = register[a] * b
-                registers.append(register)
-            # register C = register A & register B
-            register = before[:]
-            if (
-                0 <= a < len(register) and
-                0 <= b < len(register) and
-                0 <= c < len(register)
-            ):
-                register[c] = register[a] & register[b]
-                registers.append(register)
-            # register C = register A & value B
-            register = before[:]
-            if (
-                0 <= a < len(register) and
-                0 <= c < len(register)
-            ):
-                register[c] = register[a] & b
-                registers.append(register)
-            # register C = register A | register B
-            register = before[:]
-            if (
-                0 <= a < len(register) and
-                0 <= b < len(register) and
-                0 <= c < len(register)
-            ):
-                register = list(before)
-                register[c] = register[a] | register[b]
-                registers.append(register)
-            # register C = register A | value B
-            register = before[:]
-            if (
-                0 <= a < len(register) and
-                0 <= c < len(register)
-            ):
-                register[c] = register[a] | b
-                registers.append(register)
-            # register C = register A (input B is ignored)
-            register = before[:]
-            if (
-                0 <= a < len(register) and
-                0 <= c < len(register)
-            ):
-                register[c] = register[a]
-                registers.append(register)
-            # register C = value A (input B is ignored)
-            register = before[:]
-            if (
-                0 <= a < len(register) and
-                0 <= c < len(register)
-            ):
-                register[c] = a
-                registers.append(register)
-            # register C = 1 if value A > register B else 0
-            register = before[:]
-            if (
-                0 <= b < len(register) and
-                0 <= c < len(register)
-            ):
-                register[c] = 1 if a > register[b] else 0
-                registers.append(register)
-            # register C = 1 if register A > value B else 0
-            register = before[:]
-            if (
-                0 <= a < len(register) and
-                0 <= c < len(register)
-            ):
-                register[c] = 1 if register[a] > b else 0
-                registers.append(register)
-            # register C = 1 if register A > register B else 0
-            register = before[:]
-            if (
-                0 <= a < len(register) and
-                0 <= b < len(register) and
-                0 <= c < len(register)
-            ):
-                register[c] = 1 if register[a] > register[b] else 0
-                registers.append(register)
-            # register C = 1 if value A == register B else 0
-            register = before[:]
-            if (
-                0 <= b < len(register) and
-                0 <= c < len(register)
-            ):
-                register[c] = 1 if a == register[b] else 0
-                registers.append(register)
-            # register C = 1 if register A == value B else 0
-            register = before[:]
-            if (
-                0 <= a < len(register) and
-                0 <= c < len(register)
-            ):
-                register[c] = 1 if register[a] == b else 0
-                registers.append(register)
-            # register C = 1 if register A == register B else 0
-            register = before[:]
-            if (
-                0 <= a < len(register) and
-                0 <= b < len(register) and
-                0 <= c < len(register)
-            ):
-                register[c] = 1 if register[a] == register[b] else 0
-                registers.append(register)
-            #
-            for register in registers:
+                register = self.run_instruction(instruction, a, b, c, before)
                 if register == after:
-                    tested_samples[i] += 1
+                    tested_samples[i].add(instruction)
+        result = tested_samples
+        return result
+    
+    def get_opcodes(self, tested_samples):
+        opcodes = {}
+        result = opcodes
+        return result
+    
+    def solve(self, samples):
+        tested_samples = self.test_samples(samples)
         result = sum(
-            1 for opcode_count in
+            1 for instructions in
             tested_samples.values() if
-            opcode_count >= 3
+            len(instructions) >= 3
             )
         return result
     
