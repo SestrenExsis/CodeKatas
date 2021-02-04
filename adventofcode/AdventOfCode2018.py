@@ -56,6 +56,280 @@ class Template: # Template
         result = solutions
         return result
 
+class Day16: # Chronal Classification
+    '''
+    Chronal Classification
+    https://adventofcode.com/2018/day/16
+
+    4 registers (0-3)
+    16 opcodes (0-15)
+    instruction = opcode A B C
+        inputs: A, B
+        output: C (a register)
+    "value A" or "register A"
+
+    addr (add register)
+        addr A B C
+        register C = register A + register B
+
+    addi (add immediate)
+        addi A B C
+        register C = register A + value B
+
+    mulr (multiply register)
+        mulr A B C
+        register C = register A * register B
+
+    muli (multiply immediate)
+        muli A B C
+        register C = register A * value B
+
+    banr (bitwise AND register)
+        banr A B C
+        register C = register A & register B
+
+    bani (bitwise AND immediate)
+        bani A B C
+        register C = register A & value B
+
+    borr (bitwise OR register)
+        borr A B C
+        register C = register A | register B
+
+    bori (bitwise OR immediate)
+        bori A B C
+        register C = register A | value B
+    
+    setr (set register)
+        setr A . C
+        register C = register A (input B is ignored)
+    
+    seti (set immediate)
+        seti A . C
+        register C = value A (input B is ignored)
+    
+    gtir (greater-than immediate/register)
+        gtir A B C
+        register C = 1 if value A > register B else 0
+    
+    gtri (greater-than register/immediate)
+        gtri A B C
+        register C = 1 if register A > value B else 0
+    
+    gtrr (greater-than register/register)
+        gtrr A B C
+        register C = 1 if register A > register B else 0
+    
+    eqir (equal immediate/register)
+        eqir A B C
+        register C = 1 if value A == register B else 0
+    
+    eqri (equal register/immediate)
+        eqri A B C
+        register C = 1 if register A == value B else 0
+    
+    eqrr (equal register/register)
+        eqrr A B C
+        register C = 1 if register A == register B else 0
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        samples = []
+        test_program = []
+        input_mode = 'SAMPLES'
+        for i, raw_input_line in enumerate(raw_input_lines):
+            if input_mode == 'PROGRAM':
+                test_program.append(
+                    tuple(map(int, raw_input_line.split(' ')))
+                    )
+            else:
+                if 'Before: ' in raw_input_line:
+                    samples.append([])
+                    array = raw_input_line.split(': [')[1][:-1]
+                    before = list(map(int, array.split(', ')))
+                    samples[-1].append(before)
+                elif 'After: ' in raw_input_line:
+                    array = raw_input_line.split(':  [')[1][:-1]
+                    after = list(map(int, array.split(', ')))
+                    samples[-1].append(after)
+                elif len(raw_input_line) > 0:
+                    instruction = tuple(map(int, raw_input_line.split(' ')))
+                    samples[-1].append(instruction)
+            if len(raw_input_line) < 1:
+                if (
+                    len(raw_input_lines[i - 1]) < 1 and
+                    len(raw_input_lines[i - 2]) < 1
+                ):
+                    input_mode = 'PROGRAM'
+        result = samples, test_program
+        return result
+    
+    def solve(self, samples):
+        tested_samples = collections.defaultdict(int)
+        for i in range(len(samples)):
+            before = samples[i][0]
+            _, a, b, c = samples[i][1]
+            after = samples[i][2]
+            registers = []
+            # register C = register A + register B
+            register = before[:]
+            if (
+                0 <= a < len(register) and
+                0 <= b < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = register[a] + register[b]
+                registers.append(register)
+            # register C = register A + value B
+            register = before[:]
+            if (
+                0 <= a < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = register[a] + b
+                registers.append(register)
+            # register C = register A * register B
+            register = before[:]
+            if (
+                0 <= a < len(register) and
+                0 <= b < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = register[a] * register[b]
+                registers.append(register)
+            # register C = register A * value B
+            register = before[:]
+            if (
+                0 <= a < len(registers) and
+                0 <= c < len(registers)
+            ):
+                register[c] = register[a] * b
+                registers.append(register)
+            # register C = register A & register B
+            register = before[:]
+            if (
+                0 <= a < len(register) and
+                0 <= b < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = register[a] & register[b]
+                registers.append(register)
+            # register C = register A & value B
+            register = before[:]
+            if (
+                0 <= a < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = register[a] & b
+                registers.append(register)
+            # register C = register A | register B
+            register = before[:]
+            if (
+                0 <= a < len(register) and
+                0 <= b < len(register) and
+                0 <= c < len(register)
+            ):
+                register = list(before)
+                register[c] = register[a] | register[b]
+                registers.append(register)
+            # register C = register A | value B
+            register = before[:]
+            if (
+                0 <= a < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = register[a] | b
+                registers.append(register)
+            # register C = register A (input B is ignored)
+            register = before[:]
+            if (
+                0 <= a < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = register[a]
+                registers.append(register)
+            # register C = value A (input B is ignored)
+            register = before[:]
+            if (
+                0 <= a < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = a
+                registers.append(register)
+            # register C = 1 if value A > register B else 0
+            register = before[:]
+            if (
+                0 <= b < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = 1 if a > register[b] else 0
+                registers.append(register)
+            # register C = 1 if register A > value B else 0
+            register = before[:]
+            if (
+                0 <= a < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = 1 if register[a] > b else 0
+                registers.append(register)
+            # register C = 1 if register A > register B else 0
+            register = before[:]
+            if (
+                0 <= a < len(register) and
+                0 <= b < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = 1 if register[a] > register[b] else 0
+                registers.append(register)
+            # register C = 1 if value A == register B else 0
+            register = before[:]
+            if (
+                0 <= b < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = 1 if a == register[b] else 0
+                registers.append(register)
+            # register C = 1 if register A == value B else 0
+            register = before[:]
+            if (
+                0 <= a < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = 1 if register[a] == b else 0
+                registers.append(register)
+            # register C = 1 if register A == register B else 0
+            register = before[:]
+            if (
+                0 <= a < len(register) and
+                0 <= b < len(register) and
+                0 <= c < len(register)
+            ):
+                register[c] = 1 if register[a] == register[b] else 0
+                registers.append(register)
+            #
+            for register in registers:
+                if register == after:
+                    tested_samples[i] += 1
+        result = sum(
+            1 for opcode_count in
+            tested_samples.values() if
+            opcode_count >= 3
+            )
+        return result
+    
+    def solve2(self, test_program):
+        result = len(test_program)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        samples, test_program = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(samples),
+            self.solve2(test_program),
+            )
+        result = solutions
+        return result
+
 class Day15: # Beverage Bandits
     '''
     Beverage Bandits
@@ -1273,7 +1547,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 15 < inputs/2018day15.in
+    python AdventOfCode2018.py 16 < inputs/2018day16.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -1291,7 +1565,7 @@ if __name__ == '__main__':
        13: (Day13, 'Mine Cart Madness'),
        14: (Day14, 'Chocolate Charts'),
        15: (Day15, 'Beverage Bandits'),
-    #    16: (Day16, '???'),
+       16: (Day16, 'Chronal Classification'),
     #    17: (Day17, '???'),
     #    18: (Day18, '???'),
     #    19: (Day19, '???'),
