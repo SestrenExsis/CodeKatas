@@ -253,13 +253,43 @@ class Day16: # Chronal Classification
         result = tested_samples
         return result
     
-    def get_opcodes(self, tested_samples):
+    def assign_opcodes(self, samples, tested_samples):
         opcodes = {}
-        result = opcodes
+        for sample, instructions in tested_samples.items():
+            # print(sample, len(instructions), instructions)
+            opcode = samples[sample][1][0]
+            if opcode not in opcodes:
+                opcodes[opcode] = instructions
+            else:
+                opcodes[opcode] &= instructions
+        assigned_opcodes = [None] * len(opcodes)
+        while True:
+            for i in range(len(opcodes)):
+                if assigned_opcodes[i] is not None:
+                    continue
+                if len(opcodes[i]) == 1:
+                    assigned_opcode = next(iter(opcodes[i]))
+                    assigned_opcodes[i] = assigned_opcode
+                    for j in range(len(opcodes)):
+                        if i == j:
+                            continue
+                        opcodes[j] -= {assigned_opcode}
+            count = sum(
+                1 for instruction in
+                assigned_opcodes if
+                instruction is None
+                )
+            if count < 1:
+                break
+        assert len(set(assigned_opcodes)) == len(opcodes)
+        result = assigned_opcodes
         return result
     
     def solve(self, samples):
         tested_samples = self.test_samples(samples)
+        opcodes = self.assign_opcodes(samples, tested_samples)
+        for opcode, instruction in enumerate(opcodes):
+            print(opcode, instruction)
         result = sum(
             1 for instructions in
             tested_samples.values() if
