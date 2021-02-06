@@ -14,43 +14,6 @@ import random
 import sys
 from typing import Dict, List, Set, Tuple
 
-
-# Template for Submission page
-'''
-import collections
-
-class Solver:
-    def solve(self, raw_input):
-        result = len(raw_input)
-        return result
-    
-    def main(self):
-        test_count = int(input())
-        output = []
-        for test_id in range(1, test_count + 1):
-            raw_input = input()
-            solution = self.solve(raw_input)
-            output_row = 'Case #{}: {}'.format(
-                test_id,
-                solution,
-                )
-            output.append(output_row)
-            print(output_row)
-        return output
-
-if __name__ == '__main__':
-    solver = Solver()
-    solver.main()
-'''
-
-# Usage for Interactive Problems
-'''
--- python judges/DatBae.py 0 python solvers/DatBae.py
-
-import os
-os.system('python filename.py')
-'''
-
 class Vestigium: # 2020.Q.1
     '''
     2020.Q.1
@@ -185,7 +148,133 @@ class ParentingPartneringReturns: # 2020.Q.3
             print(output_row)
         return output
 
-class Solver:
+class Solver: # 2020.Q.5
+    '''
+    2020.Q.5
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209aa0
+    '''
+    def get_main_diagonal(self, matrix_size: int, target_trace: int) -> Tuple[int]:
+        assert 4 <= matrix_size <= 50
+        assert matrix_size <= target_trace <= matrix_size ** 2
+        N = matrix_size
+        K = target_trace
+        main_diagonal = None
+        if N == 2:
+            if K in (2, 4):
+                main_diagonal = (K // N, K // N)
+        elif N == 3:
+            lookup = {
+                (3, 3): (1, 1, 1),
+                (3, 6): (2, 2, 2),
+                (3, 9): (3, 3, 3),
+            }
+            main_diagonal = lookup[(N, K)]
+        else:
+            lookup = {
+                (5, 16): (2, 2, 4, 4, 4),
+                (5, 15): (1, 2, 4, 4, 4),
+            }
+            main_diagonal = lookup[(N, K)]
+        result = main_diagonal
+        return result
+
+    def solve(self, matrix_size: int, target_trace: int):
+        assert 2 <= matrix_size <= 50
+        assert matrix_size <= target_trace <= matrix_size ** 2
+        latin_square = None
+        if matrix_size == 2:
+            if target_trace == 2:
+                latin_square = [[1, 2], [2, 1]]
+            elif target_trace == 4:
+                latin_square = [[2, 1], [1, 2]]
+        elif matrix_size == 3:
+            if target_trace == 3:
+                latin_square = [[1, 2, 3], [3, 1, 2], [2, 3, 1]]
+            elif target_trace == 6:
+                latin_square = [[2, 3, 1], [1, 2, 3], [3, 1, 2]]
+            elif target_trace == 9:
+                latin_square = [[3, 1, 2], [2, 3, 1], [1, 2, 3]]
+        elif target_trace not in (matrix_size + 1, matrix_size ** 2 - 1):
+            latin_square = list([0] * matrix_size for _ in range(matrix_size))
+            rownums = list(
+                set(range(1, matrix_size + 1)) for _
+                in range(matrix_size)
+                )
+            colnums = list(
+                set(range(1, matrix_size + 1)) for _
+                in range(matrix_size)
+                )
+            main_diagonal = self.get_main_diagonal(matrix_size, target_trace)
+            if (
+                main_diagonal[0] != main_diagonal[2] and
+                main_diagonal[1] != main_diagonal[2]
+                ):
+                rownums[0].remove(main_diagonal[2])
+                colnums[0].remove(main_diagonal[2])
+                latin_square[0][1] = main_diagonal[2]
+                rownums[1].remove(main_diagonal[2])
+                colnums[1].remove(main_diagonal[2])
+                latin_square[1][0] = main_diagonal[2]
+            for i in range(len(main_diagonal)):
+                rownums[i].remove(main_diagonal[i])
+                colnums[i].remove(main_diagonal[i])
+                latin_square[i][i] = main_diagonal[i]
+            # TODO: Allegedly, you can greedily pick as long as you start with
+            # the B and C rows filled in with A where missing
+            # 14352
+            # 42135
+            # 51423
+            # 35241
+            # 23514
+            # if main_diagonal[0] != main_diagonal[1]:
+            #   Fill top-left 2x2 with itself rotated
+            # elif main_diagonal[0] == main_diagonal[1] != main_diagonal[2]:
+            #   Fill top-left 2x2 with main_diagonal[2]
+            # elif main_diagonal[0] == main_diagonal[1]:
+            #   Pick an arbitrary number to fill the top-left 2x2
+            for row in range(matrix_size):
+                for col in range(matrix_size):
+                    if latin_square[row][col] > 0:
+                        continue
+                    valid_nums = rownums[row] & colnums[col]
+                    if len(valid_nums) == 0:
+                        print('ERROR')
+                        break
+                    num = valid_nums.pop()
+                    # TODO: Figure out why valid numbers are empty
+                    rownums[row].remove(num)
+                    colnums[col].remove(num)
+                    latin_square[row][col] = num
+        result = 'IMPOSSIBLE'
+        if latin_square is not None:
+            result = 'POSSIBLE\n' + '\n'.join((
+                ' '.join(map(str, row_data)) for row_data in latin_square
+                ))
+        return result
+    
+    def main(self):
+        # Tests
+        # assert self.get_main_diagonal(2, 2) == (1, 1)
+        # assert self.get_main_diagonal(2, 4) == (2, 2)
+        # assert self.get_main_diagonal(3, 3) == (1, 1, 1)
+        # assert self.get_main_diagonal(3, 6) == (2, 2, 2)
+        # assert self.get_main_diagonal(3, 9) == (3, 3, 3)
+        # assert self.get_main_diagonal(5, 16) == (2, 2, 4, 4, 4)
+        # assert self.get_main_diagonal(5, 15) == (1, 2, 4, 4, 4)
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            matrix_size, target_trace = tuple(map(int, input().split(' ')))
+            solution = self.solve(matrix_size, target_trace)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class Template:
     '''
     2020.Q.2
     https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
@@ -211,14 +300,14 @@ class Solver:
 if __name__ == '__main__':
     '''
     Usage
-    python GoogleCodeJam2020.py Template < inputs/Template.in
+    python GoogleCodeJam2020.py Solver < inputs/Solver.in
     '''
     solvers = {
         '2020.Q.1': (Vestigium, 'Vestigium'),
         '2020.Q.2': (NestingDepth, 'Nesting Depth'),
         '2020.Q.3': (ParentingPartneringReturns, 'Parenting Partnering Returns'),
         # '2020.Q.4': (ESAbATAd, 'ESAbATAd'),
-        # '2020.Q.5': (Indicium, 'Indicium'),
+        '2020.Q.5': (Solver, 'Indicium'),
         # '2020.1A.1': (PatternMatching, 'Pattern Matching'),
         # '2020.1A.2': (PascalWalk, 'PascalWalk'),
         # '2020.1A.3': (Problem2020_1A_3, 'Problem2020_1A_3'),
@@ -243,3 +332,39 @@ if __name__ == '__main__':
     print(f'Solution for "{problem}" ({solvers[problem][1]})')
     solution = solver.main()
     #print(f'  Answer:', solution)
+
+# Template for Submission page
+'''
+import collections
+
+class Solver:
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+if __name__ == '__main__':
+    solver = Solver()
+    solver.main()
+'''
+
+# Usage for Interactive Problems
+'''
+-- python judges/DatBae.py 0 python solvers/DatBae.py
+
+import os
+os.system('python filename.py')
+'''
