@@ -287,9 +287,6 @@ class Day16: # Chronal Classification
     
     def solve(self, samples):
         tested_samples = self.test_samples(samples)
-        opcodes = self.assign_opcodes(samples, tested_samples)
-        for opcode, instruction in enumerate(opcodes):
-            print(opcode, instruction)
         result = sum(
             1 for instructions in
             tested_samples.values() if
@@ -297,8 +294,14 @@ class Day16: # Chronal Classification
             )
         return result
     
-    def solve2(self, test_program):
-        result = len(test_program)
+    def solve2(self, samples, test_program):
+        tested_samples = self.test_samples(samples)
+        opcodes = self.assign_opcodes(samples, tested_samples)
+        register = [0, 0, 0, 0]
+        for opcode, a, b, c in test_program:
+            instruction = opcodes[opcode]
+            register = self.run_instruction(instruction, a, b, c, register)
+        result = register[0]
         return result
     
     def main(self):
@@ -306,7 +309,7 @@ class Day16: # Chronal Classification
         samples, test_program = self.get_parsed_input(raw_input_lines)
         solutions = (
             self.solve(samples),
-            self.solve2(test_program),
+            self.solve2(samples, test_program),
             )
         result = solutions
         return result
