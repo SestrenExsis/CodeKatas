@@ -56,6 +56,55 @@ class Template: # Template
         result = solutions
         return result
 
+class Day17: # Reservoir Research
+    '''
+    Reservoir Research
+    https://adventofcode.com/2018/day/17
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        clay = set()
+        water = (0, 500)
+        result = []
+        for raw_input_line in raw_input_lines:
+            a, b = raw_input_line.split(', ')
+            if a[0] == 'x':
+                col = int(a.split('=')[1])
+                c, d = b.split('..')
+                min_row = int(c.split('=')[1])
+                max_row = int(d)
+                for row in range(min_row, max_row + 1):
+                    clay.add((row, col))
+            elif a[0] == 'y':
+                row = int(a.split('=')[1])
+                c, d = b.split('..')
+                min_col = int(c.split('=')[1])
+                max_col = int(d)
+                for col in range(min_col, max_col + 1):
+                    clay.add((row, col))
+        result = clay, water
+        return result
+    
+    def solve(self, clay, water):
+        # How many squares can the water "reach"
+        min_row = min(row for row, col in clay)
+        max_row = max(row for row, col in clay)
+        result = (min_row, max_row)
+        return result
+    
+    def solve2(self, clay, water):
+        result = len(clay)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        clay, water = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(clay, water),
+            self.solve2(clay, water),
+            )
+        result = solutions
+        return result
+
 class Day16: # Chronal Classification
     '''
     Chronal Classification
@@ -1550,7 +1599,7 @@ if __name__ == '__main__':
        14: (Day14, 'Chocolate Charts'),
        15: (Day15, 'Beverage Bandits'),
        16: (Day16, 'Chronal Classification'),
-    #    17: (Day17, '???'),
+       17: (Day17, 'Reservoir Research'),
     #    18: (Day18, '???'),
     #    19: (Day19, '???'),
     #    20: (Day20, '???'),
