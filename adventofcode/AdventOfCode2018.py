@@ -63,7 +63,8 @@ class Day17: # Reservoir Research
     '''
     def get_parsed_input(self, raw_input_lines: List[str]):
         clay = set()
-        water = (0, 500)
+        water = set()
+        water.add((0, 500))
         result = []
         for raw_input_line in raw_input_lines:
             a, b = raw_input_line.split(', ')
@@ -85,10 +86,17 @@ class Day17: # Reservoir Research
         return result
     
     def solve(self, clay, water):
-        # How many squares can the water "reach"
+        # Water will fall
+        # If water hits water while falling, it will attempt to "push"
+        # That water out of the way to the sides
+        # Water that can't be budged is "settled"
         min_row = min(row for row, col in clay)
         max_row = max(row for row, col in clay)
-        result = (min_row, max_row)
+        result = len(set(
+            (row, col) for (row, col) in
+            water if
+            min_row <= row <= max_row
+            ))
         return result
     
     def solve2(self, clay, water):
@@ -1580,7 +1588,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 16 < inputs/2018day16.in
+    python AdventOfCode2018.py 17 < inputs/2018day17.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
