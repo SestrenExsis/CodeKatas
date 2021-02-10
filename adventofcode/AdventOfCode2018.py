@@ -85,13 +85,50 @@ class Day17: # Reservoir Research
         result = clay, water
         return result
     
-    def solve(self, clay, water):
-        # Water will fall
-        # If water hits water while falling, it will attempt to "push"
-        # That water out of the way to the sides
-        # Water that can't be budged is "settled"
+    def solve_slow(self, clay, water):
+        spring = next(iter(water))
         min_row = min(row for row, col in clay)
         max_row = max(row for row, col in clay)
+        min_col = min(col for row, col in clay)
+        max_col = max(col for row, col in clay)
+        settled = set(clay)
+        while True:
+            prev_water_count = len(water)
+            # Flow from the spring space
+            flow = [spring]
+            visited = set()
+            while len(flow) > 0:
+                (row, col) = flow.pop()
+                if (row, col) in visited or row > max_row:
+                    continue
+                visited.add((row, col))
+                water.add((row, col))
+                if (row + 1, col) in settled:
+                    if (row, col - 1) not in settled:
+                        flow.append((row, col - 1))
+                    if (row, col + 1) not in settled:
+                        flow.append((row, col + 1))
+                else:
+                    flow.append((row + 1, col))
+            # Check for settling
+            for row in range(max_row, min_row - 1, -1):
+                left_block_ind = False
+                settling = set()
+                for col in range(min_col, max_col + 1):
+                    if (row, col) in clay:
+                        if left_block_ind:
+                            settled |= settling
+                            settling = set()
+                        left_block_ind = True
+                    elif (row, col) in water:
+                        if left_block_ind:
+                            settling.add((row, col))
+                    else:
+                        left_block_ind = False
+                        settling = set()
+            # Check if new water flow
+            if len(water) <= prev_water_count:
+                break
         result = len(set(
             (row, col) for (row, col) in
             water if
@@ -107,7 +144,7 @@ class Day17: # Reservoir Research
         raw_input_lines = get_raw_input_lines()
         clay, water = self.get_parsed_input(raw_input_lines)
         solutions = (
-            self.solve(clay, water),
+            self.solve_slow(clay, water),
             self.solve2(clay, water),
             )
         result = solutions
