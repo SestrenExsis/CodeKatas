@@ -85,7 +85,7 @@ class Day17: # Reservoir Research
         result = clay, water
         return result
     
-    def solve_slow(self, clay, water):
+    def simulate_flow(self, clay, water):
         spring = next(iter(water))
         min_row = min(row for row, col in clay)
         max_row = max(row for row, col in clay)
@@ -93,6 +93,7 @@ class Day17: # Reservoir Research
         max_col = max(col for row, col in clay)
         settled = set(clay)
         while True:
+            possible_settling_rows = set()
             prev_water_count = len(water)
             # Flow from the spring space
             flow = [spring]
@@ -102,6 +103,8 @@ class Day17: # Reservoir Research
                 if (row, col) in visited or row > max_row:
                     continue
                 visited.add((row, col))
+                if (row, col) not in water:
+                    possible_settling_rows.add(row)
                 water.add((row, col))
                 if (row + 1, col) in settled:
                     if (row, col - 1) not in settled:
@@ -111,7 +114,7 @@ class Day17: # Reservoir Research
                 else:
                     flow.append((row + 1, col))
             # Check for settling
-            for row in range(max_row, min_row - 1, -1):
+            for row in possible_settling_rows:
                 left_block_ind = False
                 settling = set()
                 for col in range(min_col, max_col + 1):
@@ -129,6 +132,13 @@ class Day17: # Reservoir Research
             # Check if new water flow
             if len(water) <= prev_water_count:
                 break
+        result = (water, settled)
+        return result
+    
+    def solve(self, clay, water):
+        (water, _) = self.simulate_flow(clay, water)
+        min_row = min(row for row, col in clay)
+        max_row = max(row for row, col in clay)
         result = len(set(
             (row, col) for (row, col) in
             water if
@@ -137,15 +147,16 @@ class Day17: # Reservoir Research
         return result
     
     def solve2(self, clay, water):
-        result = len(clay)
+        (water, settled) = self.simulate_flow(clay, water)
+        result = len(settled) - len(clay)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         clay, water = self.get_parsed_input(raw_input_lines)
         solutions = (
-            self.solve_slow(clay, water),
-            self.solve2(clay, water),
+            self.solve(copy.deepcopy(clay), copy.deepcopy(water)),
+            self.solve2(copy.deepcopy(clay), copy.deepcopy(water)),
             )
         result = solutions
         return result
