@@ -56,6 +56,79 @@ class Template: # Template
         result = solutions
         return result
 
+class Day18: # Settlers of The North Pole
+    '''
+    Settlers of The North Pole
+    https://adventofcode.com/2018/day/18
+    '''
+    def get_acres(self, raw_input_lines: List[str]):
+        acres = {}
+        for row, raw_input_line in enumerate(raw_input_lines):
+            for col, cell in enumerate(raw_input_line):
+                acres[(row, col)] = cell
+        result = acres
+        return result
+    
+    def solve_slow(self, acres, minutes: int=10):
+        for minute in range(minutes):
+            next_acres = {}
+            for (row, col), cell in acres.items():
+                next_acres[(row, col)] = cell
+                woods = 0
+                lumberyards = 0
+                for (nrow, ncol) in (
+                    (row - 1, col - 1),
+                    (row - 1, col + 0),
+                    (row - 1, col + 1),
+                    (row + 0, col - 1),
+                    (row + 0, col + 1),
+                    (row + 1, col - 1),
+                    (row + 1, col + 0),
+                    (row + 1, col + 1),
+                ):
+                    if (nrow, ncol) not in acres:
+                        continue
+                    neighbor = acres[(nrow, ncol)]
+                    if neighbor == '|':
+                        woods += 1
+                    elif neighbor == '#':
+                        lumberyards += 1
+                if cell == '.':
+                    if woods >= 3:
+                        next_acres[(row, col)] = '|'
+                elif cell == '|':
+                    if lumberyards >= 3:
+                        next_acres[(row, col)] = '#'
+                elif cell == '#':
+                    if woods < 1 or lumberyards < 1:
+                        next_acres[(row, col)] = '.'
+            acres = next_acres
+            wooded_acre_count = sum(1 for cell in acres.values() if cell == '|')
+            lumberyard_count = sum(1 for cell in acres.values() if cell == '#')
+            result = wooded_acre_count * lumberyard_count
+        wooded_acre_count = sum(1 for cell in acres.values() if cell == '|')
+        lumberyard_count = sum(1 for cell in acres.values() if cell == '#')
+        result = wooded_acre_count * lumberyard_count
+        return result
+    
+    def solve(self, acres):
+        result = self.solve_slow(acres, 10)
+        return result
+    
+    def solve2(self, acres):
+        result = -1
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        acres = self.get_acres(raw_input_lines)
+        solutions = (
+            self.solve(copy.deepcopy(acres)),
+            self.solve2(copy.deepcopy(acres)),
+            )
+        result = solutions
+        return result
+
 class Day17: # Reservoir Research
     '''
     Reservoir Research
@@ -1636,7 +1709,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 17 < inputs/2018day17.in
+    python AdventOfCode2018.py 18 < inputs/2018day18.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -1656,7 +1729,7 @@ if __name__ == '__main__':
        15: (Day15, 'Beverage Bandits'),
        16: (Day16, 'Chronal Classification'),
        17: (Day17, 'Reservoir Research'),
-    #    18: (Day18, '???'),
+       18: (Day18, 'Settlers of The North Pole'),
     #    19: (Day19, '???'),
     #    20: (Day20, '???'),
     #    21: (Day21, '???'),
