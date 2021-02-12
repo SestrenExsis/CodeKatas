@@ -56,6 +56,35 @@ class Template: # Template
         result = solutions
         return result
 
+class Day19: # Go With The Flow
+    '''
+    Go With The Flow
+    https://adventofcode.com/2018/day/19
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day18: # Settlers of The North Pole
     '''
     Settlers of The North Pole
@@ -69,62 +98,88 @@ class Day18: # Settlers of The North Pole
         result = acres
         return result
     
-    def solve_slow(self, acres, minutes: int=10):
-        for minute in range(minutes):
-            next_acres = {}
-            for (row, col), cell in acres.items():
-                next_acres[(row, col)] = cell
-                woods = 0
-                lumberyards = 0
-                for (nrow, ncol) in (
-                    (row - 1, col - 1),
-                    (row - 1, col + 0),
-                    (row - 1, col + 1),
-                    (row + 0, col - 1),
-                    (row + 0, col + 1),
-                    (row + 1, col - 1),
-                    (row + 1, col + 0),
-                    (row + 1, col + 1),
-                ):
-                    if (nrow, ncol) not in acres:
-                        continue
-                    neighbor = acres[(nrow, ncol)]
-                    if neighbor == '|':
-                        woods += 1
-                    elif neighbor == '#':
-                        lumberyards += 1
-                if cell == '.':
-                    if woods >= 3:
-                        next_acres[(row, col)] = '|'
-                elif cell == '|':
-                    if lumberyards >= 3:
-                        next_acres[(row, col)] = '#'
-                elif cell == '#':
-                    if woods < 1 or lumberyards < 1:
-                        next_acres[(row, col)] = '.'
-            acres = next_acres
-            wooded_acre_count = sum(1 for cell in acres.values() if cell == '|')
-            lumberyard_count = sum(1 for cell in acres.values() if cell == '#')
-            result = wooded_acre_count * lumberyard_count
+    def simulate(self, acres):
+        next_acres = {}
+        for (row, col), cell in acres.items():
+            next_acres[(row, col)] = cell
+            woods = 0
+            lumberyards = 0
+            for (nrow, ncol) in (
+                (row - 1, col - 1),
+                (row - 1, col + 0),
+                (row - 1, col + 1),
+                (row + 0, col - 1),
+                (row + 0, col + 1),
+                (row + 1, col - 1),
+                (row + 1, col + 0),
+                (row + 1, col + 1),
+            ):
+                if (nrow, ncol) not in acres:
+                    continue
+                neighbor = acres[(nrow, ncol)]
+                if neighbor == '|':
+                    woods += 1
+                elif neighbor == '#':
+                    lumberyards += 1
+            if cell == '.':
+                if woods >= 3:
+                    next_acres[(row, col)] = '|'
+            elif cell == '|':
+                if lumberyards >= 3:
+                    next_acres[(row, col)] = '#'
+            elif cell == '#':
+                if woods < 1 or lumberyards < 1:
+                    next_acres[(row, col)] = '.'
+        result = next_acres
+        return result
+    
+    def solve(self, acres, minutes: int):
+        for _ in range(minutes):
+            acres = self.simulate(acres)
         wooded_acre_count = sum(1 for cell in acres.values() if cell == '|')
         lumberyard_count = sum(1 for cell in acres.values() if cell == '#')
         result = wooded_acre_count * lumberyard_count
         return result
     
-    def solve(self, acres):
-        result = self.solve_slow(acres, 10)
+    def hashable_acres(self, acres) -> str:
+        cells = []
+        row = 0
+        while True:
+            if (row, 0) not in acres:
+                break
+            col = 0
+            while (row, col) in acres:
+                cells.append(acres[(row, col)])
+                col += 1
+            row += 1
+        result = ''.join(cells)
         return result
     
-    def solve2(self, acres):
-        result = -1
+    def solve2(self, acres, minutes: int):
+        prior_acres = set()
+        history = {}
+        for minute in range(minutes):
+            hashable_acres = self.hashable_acres(acres)
+            if hashable_acres in prior_acres:
+                break
+            prior_acres.add(hashable_acres)
+            history[hashable_acres] = (minute, acres)
+            acres = self.simulate(acres)
+        cycle_size = minute - history[self.hashable_acres(acres)][0]
+        remaining_minutes = (minutes - minute) % cycle_size
+        for minute in range(remaining_minutes):
+            acres = self.simulate(acres)
+        wooded_acre_count = sum(1 for cell in acres.values() if cell == '|')
+        lumberyard_count = sum(1 for cell in acres.values() if cell == '#')
+        result = wooded_acre_count * lumberyard_count
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         acres = self.get_acres(raw_input_lines)
         solutions = (
-            self.solve(copy.deepcopy(acres)),
-            self.solve2(copy.deepcopy(acres)),
+            self.solve(copy.deepcopy(acres), 10),
+            self.solve2(copy.deepcopy(acres), 1_000_000_000),
             )
         result = solutions
         return result
@@ -1709,7 +1764,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 18 < inputs/2018day18.in
+    python AdventOfCode2018.py 19 < inputs/2018day19.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -1730,7 +1785,7 @@ if __name__ == '__main__':
        16: (Day16, 'Chronal Classification'),
        17: (Day17, 'Reservoir Research'),
        18: (Day18, 'Settlers of The North Pole'),
-    #    19: (Day19, '???'),
+       19: (Day19, 'Go With The Flow'),
     #    20: (Day20, '???'),
     #    21: (Day21, '???'),
     #    22: (Day22, '???'),
