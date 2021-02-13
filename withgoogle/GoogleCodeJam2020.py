@@ -148,7 +148,7 @@ class ParentingPartneringReturns: # 2020.Q.3
             print(output_row)
         return output
 
-class Solver: # 2020.Q.5
+class Indicium__Incomplete: # 2020.Q.5
     '''
     2020.Q.5
     https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209aa0
@@ -274,6 +274,108 @@ class Solver: # 2020.Q.5
             print(output_row)
         return output
 
+class PatternMatching:
+    '''
+    2020.1A.1
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd74/00000000002b3034
+    '''
+    def solve(self, patterns):
+        # Find the longest prefix
+        prefix = []
+        for pattern in patterns:
+            for i, char in enumerate(pattern):
+                if char == '*':
+                    break
+                elif i < len(prefix):
+                    if prefix[i] != char:
+                        return '*'
+                else:
+                    prefix.append(char)
+        # Find the longest suffix
+        suffix = []
+        for pattern in patterns:
+            for i, char in enumerate(reversed(pattern)):
+                if char == '*':
+                    break
+                elif i < len(suffix):
+                    if suffix[i] != char:
+                        return '*'
+                else:
+                    suffix.append(char)
+        # Gather up all middle portions and ignore any internal wild cards
+        middles = []
+        for pattern in patterns:
+            left = 0
+            right = len(pattern) - 1
+            while pattern[left] != '*':
+                left += 1
+            while pattern[right] != '*':
+                right -= 1
+            middle = []
+            for i in range(left, right):
+                char = pattern[i]
+                if char != '*':
+                    middle.append(char)
+            middles.append(''.join(middle))
+        result = ''.join(prefix) + ''.join(middles) + ''.join(reversed(suffix))
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            pattern_count = int(input())
+            patterns = []
+            for _ in range(pattern_count):
+                pattern = input()
+                patterns.append(pattern)
+            solution = self.solve(patterns)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class Solver2:
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class Solver3:
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
 class Template:
     '''
     2020.Q.2
@@ -307,10 +409,10 @@ if __name__ == '__main__':
         '2020.Q.2': (NestingDepth, 'Nesting Depth'),
         '2020.Q.3': (ParentingPartneringReturns, 'Parenting Partnering Returns'),
         # '2020.Q.4': (ESAbATAd, 'ESAbATAd'),
-        '2020.Q.5': (Solver, 'Indicium'),
-        # '2020.1A.1': (PatternMatching, 'Pattern Matching'),
-        # '2020.1A.2': (PascalWalk, 'PascalWalk'),
-        # '2020.1A.3': (Problem2020_1A_3, 'Problem2020_1A_3'),
+        '2020.Q.5': (Indicium__Incomplete, 'Indicium'),
+        '2020.1A.1': (PatternMatching, 'Pattern Matching'),
+        '2020.1A.2': (Solver2, 'PascalWalk'),
+        '2020.1A.3': (Solver3, 'Problem2020_1A_3'),
         # '2020.1A.4': (Problem2020_1A_4, 'Problem2020_1A_4'),
         # '2020.1B.1': (Expogo, 'Expogo'),
         # '2020.1B.2': (BlindfoldedBullseye, 'Blindfolded Bullseye'),
