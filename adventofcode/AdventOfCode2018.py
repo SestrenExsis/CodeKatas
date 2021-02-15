@@ -58,28 +58,39 @@ class Template: # Template
 
 class WristDeviceProgram:
     '''
-    4 registers (0-3)
+    4 registers (0-3) or 6 registers (0-5)
     16 opcodes (0-15)
     instruction = opcode A B C
         inputs: A, B
         output: C (a register)
     "value A" or "register A"
     '''
-    def __init__(self, register_count, program):
+    def __init__(self, register_count, program, ip_mode: int=-1):
         self.register = [0] * register_count
         self.program = program
+        '''
+        When the instruction pointer mode is -1, the program counter is
+        separate (self.pc). Otherwise, the instruction pointer mode is
+        the index of the register that contains the program counter
+        '''
+        self.ip_mode = ip_mode
         self.pc = 0
     
     def run(self):
-        self.pc = 0
-        while self.pc < len(self.program):
-            self.execute()
+        running = True
+        while running:
+            running = self.execute()
     
     def execute(self) -> bool:
-        instruction, a, b, c = self.program[self.pc]
         result = False
+        if 0 <= self.ip_mode < len(self.register):
+            self.register[self.ip_mode] = self.pc
+        if self.pc < 0 or self.pc >= len(self.program):
+            return result
+        instruction, a, b, c = self.program[self.pc]
+        # print(self.pc, self.register, instruction, a, b, c)
         if instruction == 'addr':
-            # ADDR: register C = register A + register B
+            # ADDR: register A + register B --> register C
             if (
                 0 <= a < len(self.register) and
                 0 <= b < len(self.register) and
@@ -88,7 +99,7 @@ class WristDeviceProgram:
                 self.register[c] = self.register[a] + self.register[b]
                 result = True
         elif instruction == 'addi':
-            # ADDI: register C = register A + value B
+            # ADDI: register A + value B --> register C
             if (
                 0 <= a < len(self.register) and
                 0 <= c < len(self.register)
@@ -96,7 +107,7 @@ class WristDeviceProgram:
                 self.register[c] = self.register[a] + b
                 result = True
         elif instruction == 'mulr':
-            # MULR: register C = register A * register B
+            # MULR: register A * register B --> register C
             if (
                 0 <= a < len(self.register) and
                 0 <= b < len(self.register) and
@@ -105,7 +116,7 @@ class WristDeviceProgram:
                 self.register[c] = self.register[a] * self.register[b]
                 result = True
         elif instruction == 'muli':
-            # MULI: register C = register A * value B
+            # MULI: register A * value B --> register C
             if (
                 0 <= a < len(self.register) and
                 0 <= c < len(self.register)
@@ -113,7 +124,7 @@ class WristDeviceProgram:
                 result = True
                 self.register[c] = self.register[a] * b
         elif instruction == 'banr':
-            # BANR: register C = register A & register B
+            # BANR: register A & register B --> register C
             if (
                 0 <= a < len(self.register) and
                 0 <= b < len(self.register) and
@@ -122,7 +133,7 @@ class WristDeviceProgram:
                 result = True
                 self.register[c] = self.register[a] & self.register[b]
         elif instruction == 'bani':
-            # BANI: register C = register A & value B
+            # BANI: register A & value B --> register C
             if (
                 0 <= a < len(self.register) and
                 0 <= c < len(self.register)
@@ -130,7 +141,7 @@ class WristDeviceProgram:
                 result = True
                 self.register[c] = self.register[a] & b
         elif instruction == 'borr':
-            # BORR: register C = register A | register B
+            # BORR: register A | register B --> register C
             if (
                 0 <= a < len(self.register) and
                 0 <= b < len(self.register) and
@@ -139,7 +150,7 @@ class WristDeviceProgram:
                 result = True
                 self.register[c] = self.register[a] | self.register[b]
         elif instruction == 'bori':
-            # BORI: register C = register A | value B
+            # BORI: register A | value B --> register C
             if (
                 0 <= a < len(self.register) and
                 0 <= c < len(self.register)
@@ -147,7 +158,7 @@ class WristDeviceProgram:
                 result = True
                 self.register[c] = self.register[a] | b
         elif instruction == 'setr':
-            # SETR: register C = register A (input B is ignored)
+            # SETR: register A --> register C
             if (
                 0 <= a < len(self.register) and
                 0 <= c < len(self.register)
@@ -155,7 +166,7 @@ class WristDeviceProgram:
                 result = True
                 self.register[c] = self.register[a]
         elif instruction == 'seti':
-            # SETI: register C = value A (input B is ignored)
+            # SETI: value A --> register C
             if (
                 0 <= a < len(self.register) and
                 0 <= c < len(self.register)
@@ -163,7 +174,7 @@ class WristDeviceProgram:
                 result = True
                 self.register[c] = a
         elif instruction == 'gtir':
-            # GTIR: register C = 1 if value A > register B else 0
+            # GTIR: 1 if value A > register B else 0 --> register C
             if (
                 0 <= b < len(self.register) and
                 0 <= c < len(self.register)
@@ -171,7 +182,7 @@ class WristDeviceProgram:
                 result = True
                 self.register[c] = 1 if a > self.register[b] else 0
         elif instruction == 'gtri':
-            # GTRI: register C = 1 if register A > value B else 0
+            # GTRI: 1 if register A > value B else 0 --> register C
             if (
                 0 <= a < len(self.register) and
                 0 <= c < len(self.register)
@@ -179,7 +190,7 @@ class WristDeviceProgram:
                 result = True
                 self.register[c] = 1 if self.register[a] > b else 0
         elif instruction == 'gtrr':
-            # GTRR: register C = 1 if register A > register B else 0
+            # GTRR: 1 if register A > register B else 0 --> register C
             if (
                 0 <= a < len(self.register) and
                 0 <= b < len(self.register) and
@@ -188,7 +199,7 @@ class WristDeviceProgram:
                 result = True
                 self.register[c] = 1 if self.register[a] > self.register[b] else 0
         elif instruction == 'eqir':
-            # EQIR: register C = 1 if value A == register B else 0
+            # EQIR: 1 if value A == register B else 0 --> register C
             if (
                 0 <= b < len(self.register) and
                 0 <= c < len(self.register)
@@ -196,7 +207,7 @@ class WristDeviceProgram:
                 result = True
                 self.register[c] = 1 if a == self.register[b] else 0
         elif instruction == 'eqri':
-            # EQRI: register C = 1 if register A == value B else 0
+            # EQRI: 1 if register A == value B else 0 --> register C
             if (
                 0 <= a < len(self.register) and
                 0 <= c < len(self.register)
@@ -204,7 +215,7 @@ class WristDeviceProgram:
                 result = True
                 self.register[c] = 1 if self.register[a] == b else 0
         elif instruction == 'eqrr':
-            # EQRR: register C = 1 if register A == register B else 0
+            # EQRR: 1 if register A == register B else 0 --> register C
             if (
                 0 <= a < len(self.register) and
                 0 <= b < len(self.register) and
@@ -212,8 +223,9 @@ class WristDeviceProgram:
             ):
                 result = True
                 self.register[c] = 1 if self.register[a] == self.register[b] else 0
-        if result:
-            self.pc += 1
+        if 0 <= self.ip_mode < len(self.register):
+            self.pc = self.register[self.ip_mode]
+        self.pc += 1
         return result
 
 class Day19: # Go With The Flow
@@ -222,25 +234,36 @@ class Day19: # Go With The Flow
     https://adventofcode.com/2018/day/19
     '''
     def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
-        for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
+        ip_mode = int(raw_input_lines[0].split(' ')[1])
+        program = []
+        for raw_input_line in raw_input_lines[1:]:
+            parts = raw_input_line.split(' ' )
+            instruction = (
+                parts[0],
+                int(parts[1]),
+                int(parts[2]),
+                int(parts[3])
+                )
+            program.append(instruction)
+        result = ip_mode, program
         return result
     
-    def solve(self, parsed_input):
-        result = len(parsed_input)
+    def solve(self, program, ip_mode):
+        vm = WristDeviceProgram(6, program, ip_mode)
+        vm.run()
+        result = vm.register[0]
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, program, ip_mode):
+        result = ip_mode
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        ip_mode, program = self.get_parsed_input(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(program, ip_mode),
+            self.solve2(program, ip_mode),
             )
         result = solutions
         return result
