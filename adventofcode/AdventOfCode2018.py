@@ -75,11 +75,18 @@ class WristDeviceProgram:
         '''
         self.ip_mode = ip_mode
         self.pc = 0
+        self.debug = False
     
     def run(self):
+        if self.debug:
+            with open('AdventOfCode2018.out', 'w') as out:
+                out.write('Start\n')
         running = True
         while running:
             running = self.execute()
+        if self.debug:
+            with open('AdventOfCode2018.out', 'w') as out:
+                out.write('End')
     
     def execute(self) -> bool:
         result = False
@@ -88,7 +95,7 @@ class WristDeviceProgram:
         if self.pc < 0 or self.pc >= len(self.program):
             return result
         instruction, a, b, c = self.program[self.pc]
-        # print(self.pc, self.register, instruction, a, b, c)
+        command = ''
         if instruction == 'addr':
             # ADDR: register A + register B --> register C
             if (
@@ -96,6 +103,7 @@ class WristDeviceProgram:
                 0 <= b < len(self.register) and
                 0 <= c < len(self.register)
             ):
+                command = f'r[{c}] = r[{a}] + r[{b}]'
                 self.register[c] = self.register[a] + self.register[b]
                 result = True
         elif instruction == 'addi':
@@ -104,6 +112,7 @@ class WristDeviceProgram:
                 0 <= a < len(self.register) and
                 0 <= c < len(self.register)
             ):
+                command = f'r[{c}] = r[{a}] + {b}'
                 self.register[c] = self.register[a] + b
                 result = True
         elif instruction == 'mulr':
@@ -113,6 +122,7 @@ class WristDeviceProgram:
                 0 <= b < len(self.register) and
                 0 <= c < len(self.register)
             ):
+                command = f'r[{c}] = r[{a}] * r[{b}]'
                 self.register[c] = self.register[a] * self.register[b]
                 result = True
         elif instruction == 'muli':
@@ -121,6 +131,7 @@ class WristDeviceProgram:
                 0 <= a < len(self.register) and
                 0 <= c < len(self.register)
             ):
+                command = f'r[{c}] = r[{a}] * {b}'
                 result = True
                 self.register[c] = self.register[a] * b
         elif instruction == 'banr':
@@ -130,6 +141,7 @@ class WristDeviceProgram:
                 0 <= b < len(self.register) and
                 0 <= c < len(self.register)
             ):
+                command = f'r[{c}] = r[{a}] & r[{b}]'
                 result = True
                 self.register[c] = self.register[a] & self.register[b]
         elif instruction == 'bani':
@@ -138,6 +150,7 @@ class WristDeviceProgram:
                 0 <= a < len(self.register) and
                 0 <= c < len(self.register)
             ):
+                command = f'r[{c}] = r[{a}] & {b}'
                 result = True
                 self.register[c] = self.register[a] & b
         elif instruction == 'borr':
@@ -147,6 +160,7 @@ class WristDeviceProgram:
                 0 <= b < len(self.register) and
                 0 <= c < len(self.register)
             ):
+                command = f'r{c} = r[{a}] | r[{b}]'
                 result = True
                 self.register[c] = self.register[a] | self.register[b]
         elif instruction == 'bori':
@@ -155,6 +169,7 @@ class WristDeviceProgram:
                 0 <= a < len(self.register) and
                 0 <= c < len(self.register)
             ):
+                command = f'r[{c}] = r[{a}] | {b}'
                 result = True
                 self.register[c] = self.register[a] | b
         elif instruction == 'setr':
@@ -163,6 +178,7 @@ class WristDeviceProgram:
                 0 <= a < len(self.register) and
                 0 <= c < len(self.register)
             ):
+                command = f'r[{c}] = r[{a}]'
                 result = True
                 self.register[c] = self.register[a]
         elif instruction == 'seti':
@@ -171,6 +187,7 @@ class WristDeviceProgram:
                 0 <= a < len(self.register) and
                 0 <= c < len(self.register)
             ):
+                command = f'r[{c}] = {a}'
                 result = True
                 self.register[c] = a
         elif instruction == 'gtir':
@@ -179,6 +196,7 @@ class WristDeviceProgram:
                 0 <= b < len(self.register) and
                 0 <= c < len(self.register)
             ):
+                command = f'r[{c}] = {a} > r[{b}]'
                 result = True
                 self.register[c] = 1 if a > self.register[b] else 0
         elif instruction == 'gtri':
@@ -187,6 +205,7 @@ class WristDeviceProgram:
                 0 <= a < len(self.register) and
                 0 <= c < len(self.register)
             ):
+                command = f'r[{c}] = r[{a}] > {b}'
                 result = True
                 self.register[c] = 1 if self.register[a] > b else 0
         elif instruction == 'gtrr':
@@ -196,6 +215,7 @@ class WristDeviceProgram:
                 0 <= b < len(self.register) and
                 0 <= c < len(self.register)
             ):
+                command = f'r[{c}] = r[{a}] > r[{b}]'
                 result = True
                 self.register[c] = 1 if self.register[a] > self.register[b] else 0
         elif instruction == 'eqir':
@@ -204,6 +224,7 @@ class WristDeviceProgram:
                 0 <= b < len(self.register) and
                 0 <= c < len(self.register)
             ):
+                command = f'r[{c}] = {a} == r[{b}]'
                 result = True
                 self.register[c] = 1 if a == self.register[b] else 0
         elif instruction == 'eqri':
@@ -212,6 +233,7 @@ class WristDeviceProgram:
                 0 <= a < len(self.register) and
                 0 <= c < len(self.register)
             ):
+                command = f'r[{c}] = r[{a}] == {b}'
                 result = True
                 self.register[c] = 1 if self.register[a] == b else 0
         elif instruction == 'eqrr':
@@ -221,8 +243,14 @@ class WristDeviceProgram:
                 0 <= b < len(self.register) and
                 0 <= c < len(self.register)
             ):
+                command = f'r[{c}] = r[{a}] == r[{b}]'
                 result = True
                 self.register[c] = 1 if self.register[a] == self.register[b] else 0
+        if self.debug:
+            with open('AdventOfCode2018.out', 'a') as out:
+                output_line = f'[{self.pc}] {command} {self.register}\n'
+                out.write(output_line)
+                print(output_line, end='')
         if 0 <= self.ip_mode < len(self.register):
             self.pc = self.register[self.ip_mode]
         self.pc += 1
@@ -254,8 +282,49 @@ class Day19: # Go With The Flow
         result = vm.register[0]
         return result
     
-    def solve2(self, program, ip_mode):
-        result = ip_mode
+    def solve2_slow(self, program, ip_mode):
+        vm = WristDeviceProgram(6, program, ip_mode)
+        vm.debug = True
+        vm.register[0] = 1
+        vm.run()
+        result = vm.register[0]
+        return result
+
+    def solve2_hardcoded(self):
+        # First pass refactor
+        '''
+        CONST = 10_551_387
+        a, b, c = 0, 1, 0
+        b = 1           # [Line 1]
+        c = 1           # [Line 2]
+        if b * c == CONST:
+            a += b
+        c += 1
+        if c <= CONST:
+            goto [Line 2]
+        b += 1
+        if b <= CONST:
+            goto [Line 1]
+        return a
+        '''
+        # Second pass refactor
+        '''
+        a = 0
+        CONST = 10_551_387
+        for b in range(1, CONST + 1):
+            for c in range(1, CONST + 1):
+                if b * c == CONST:
+                    a += b
+            print(b, ':', a)
+        result = a
+        '''
+        # Final pass refactor
+        a = 0
+        CONST = 10_551_387
+        for b in range(1, CONST + 1):
+            if CONST % b == 0:
+                a += b
+        result = a
         return result
     
     def main(self):
@@ -263,7 +332,7 @@ class Day19: # Go With The Flow
         ip_mode, program = self.get_parsed_input(raw_input_lines)
         solutions = (
             self.solve(program, ip_mode),
-            self.solve2(program, ip_mode),
+            self.solve2_hardcoded(),
             )
         result = solutions
         return result
