@@ -27,35 +27,6 @@ def get_raw_input_lines() -> list:
             break
     return raw_input_lines
 
-class Template: # Template
-    '''
-    Template
-    https://adventofcode.com/2018/day/?
-    '''
-    def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
-        for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
-        return result
-    
-    def solve(self, parsed_input):
-        result = len(parsed_input)
-        return result
-    
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
-        return result
-    
-    def main(self):
-        raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
-        solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
-            )
-        result = solutions
-        return result
-
 class WristDeviceProgram:
     '''
     4 registers (0-3) or 6 registers (0-5)
@@ -254,6 +225,76 @@ class WristDeviceProgram:
         if 0 <= self.ip_mode < len(self.register):
             self.pc = self.register[self.ip_mode]
         self.pc += 1
+        return result
+
+class Template: # Template
+    '''
+    Template
+    https://adventofcode.com/2018/day/?
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day20: # A Regular Map
+    '''
+    A Regular Map
+    https://adventofcode.com/2018/day/20
+    '''
+    def get_route(self, raw_input_lines: List[str]):
+        route = raw_input_lines[0]
+        result = route
+        return result
+    
+    def solve(self, route):
+        rooms = set()
+        work = [(1, 0, 0)] # (cursor, row, col)
+        while len(work) > 0:
+            (cursor, row, col) = work.pop()
+            rooms.add((row, col))
+            for (direction, nrow, ncol) in(
+                ('N', row - 1, col),
+                ('S', row + 1, col),
+                ('W', row, col - 1),
+                ('E', row, col + 1),
+            ):
+                if route[cursor] == direction:
+                    work.append((cursor + 1, nrow, ncol))
+        result = len(rooms)
+        return result
+    
+    def solve2(self, route):
+        result = len(route)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        route = self.get_route(raw_input_lines)
+        solutions = (
+            self.solve(route),
+            self.solve2(route),
+            )
+        result = solutions
         return result
 
 class Day19: # Go With The Flow
@@ -1898,7 +1939,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 19 < inputs/2018day19.in
+    python AdventOfCode2018.py 20 < inputs/2018day20.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -1920,7 +1961,7 @@ if __name__ == '__main__':
        17: (Day17, 'Reservoir Research'),
        18: (Day18, 'Settlers of The North Pole'),
        19: (Day19, 'Go With The Flow'),
-    #    20: (Day20, '???'),
+       20: (Day20, 'A Regular Map'),
     #    21: (Day21, '???'),
     #    22: (Day22, '???'),
     #    23: (Day23, '???'),
