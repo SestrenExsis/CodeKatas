@@ -267,20 +267,46 @@ class Day20: # A Regular Map
         return result
     
     def solve(self, route):
-        rooms = set()
-        work = [(1, 0, 0)] # (cursor, row, col)
+        directions = {
+            'N': (-1, 0),
+            'S': ( 1, 0),
+            'W': ( 0,-1),
+            'E': ( 0, 1),
+        }
+        # Map out all rooms and doors between them
+        rooms = collections.defaultdict(set)
+        row = 0
+        col = 0
+        stack = []
+        for i in range(len(route)):
+            char = route[i]
+            if char == '(':
+                stack.append((row, col))
+            elif char == '|':
+                row, col = stack[-1]
+            elif char == ')':
+                stack.pop()
+            elif char in directions:
+                row_offset, col_offset = directions[char]
+                next_row, next_col = row + row_offset, col + col_offset
+                rooms[(row, col)].add((next_row, next_col))
+                rooms[(next_row, next_col)].add((row, col))
+                row = next_row
+                col = next_col
+        # Find shortest paths to each room
+        row, col = 0, 0
+        distances = {}
+        work = collections.deque()
+        work.append((0, 0, 0)) # distance, row, col
         while len(work) > 0:
-            (cursor, row, col) = work.pop()
-            rooms.add((row, col))
-            for (direction, nrow, ncol) in(
-                ('N', row - 1, col),
-                ('S', row + 1, col),
-                ('W', row, col - 1),
-                ('E', row, col + 1),
-            ):
-                if route[cursor] == direction:
-                    work.append((cursor + 1, nrow, ncol))
-        result = len(rooms)
+            distance, row, col = work.pop()
+            if (row, col) in distances:
+                continue
+            distances[(row, col)] = distance
+            for next_row, next_col in rooms[(row, col)]:
+                work.appendleft((distance + 1, next_row, next_col))
+        # Find furthest-away room
+        result = max(distances.values())
         return result
     
     def solve2(self, route):
