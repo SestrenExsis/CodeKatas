@@ -266,7 +266,7 @@ class Day20: # A Regular Map
         result = route
         return result
     
-    def solve(self, route):
+    def get_rooms(self, route):
         directions = {
             'N': (-1, 0),
             'S': ( 1, 0),
@@ -293,6 +293,10 @@ class Day20: # A Regular Map
                 rooms[(next_row, next_col)].add((row, col))
                 row = next_row
                 col = next_col
+        result = rooms
+        return result
+    
+    def get_distances(self, rooms):
         # Find shortest paths to each room
         row, col = 0, 0
         distances = {}
@@ -305,12 +309,20 @@ class Day20: # A Regular Map
             distances[(row, col)] = distance
             for next_row, next_col in rooms[(row, col)]:
                 work.appendleft((distance + 1, next_row, next_col))
+        result = distances
+        return result
+    
+    def solve(self, route):
+        rooms = self.get_rooms(route)
+        distances = self.get_distances(rooms)
         # Find furthest-away room
         result = max(distances.values())
         return result
     
     def solve2(self, route):
-        result = len(route)
+        rooms = self.get_rooms(route)
+        distances = self.get_distances(rooms)
+        result = sum(1 for distance in distances.values() if distance >= 1000)
         return result
     
     def main(self):
