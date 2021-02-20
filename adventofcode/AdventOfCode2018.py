@@ -256,6 +256,48 @@ class Template: # Template
         result = solutions
         return result
 
+class Day21: # Chronal Conversion
+    '''
+    Chronal Conversion
+    https://adventofcode.com/2018/day/21
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        ip_mode = int(raw_input_lines[0].split(' ')[1])
+        program = []
+        for raw_input_line in raw_input_lines[1:]:
+            parts = raw_input_line.split(' ' )
+            instruction = (
+                parts[0],
+                int(parts[1]),
+                int(parts[2]),
+                int(parts[3])
+                )
+            program.append(instruction)
+        result = ip_mode, program
+        return result
+    
+    def solve(self, program, ip_mode):
+        vm = WristDeviceProgram(6, program, ip_mode)
+        vm.debug = True
+        # vm.register[0] = 1
+        vm.run()
+        result = vm.register[0]
+        return result
+    
+    def solve2(self, program, ip_mode):
+        result = len(program)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        ip_mode, program = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(program, ip_mode),
+            self.solve2(program, ip_mode),
+            )
+        result = solutions
+        return result
+
 class Day20: # A Regular Map
     '''
     A Regular Map
@@ -1977,7 +2019,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 20 < inputs/2018day20.in
+    python AdventOfCode2018.py 21 < inputs/2018day21.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -2000,7 +2042,7 @@ if __name__ == '__main__':
        18: (Day18, 'Settlers of The North Pole'),
        19: (Day19, 'Go With The Flow'),
        20: (Day20, 'A Regular Map'),
-    #    21: (Day21, '???'),
+       21: (Day21, 'Chronal Conversion'),
     #    22: (Day22, '???'),
     #    23: (Day23, '???'),
     #    24: (Day24, '???'),
