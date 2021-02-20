@@ -47,6 +47,7 @@ class WristDeviceProgram:
         self.ip_mode = ip_mode
         self.pc = 0
         self.debug = False
+        self.execution_count = 0
     
     def run(self):
         if self.debug:
@@ -56,7 +57,7 @@ class WristDeviceProgram:
         while running:
             running = self.execute()
         if self.debug:
-            with open('AdventOfCode2018.out', 'w') as out:
+            with open('AdventOfCode2018.out', 'a') as out:
                 out.write('End')
     
     def execute(self) -> bool:
@@ -103,8 +104,8 @@ class WristDeviceProgram:
                 0 <= c < len(self.register)
             ):
                 command = f'r[{c}] = r[{a}] * {b}'
-                result = True
                 self.register[c] = self.register[a] * b
+                result = True
         elif instruction == 'banr':
             # BANR: register A & register B --> register C
             if (
@@ -113,8 +114,8 @@ class WristDeviceProgram:
                 0 <= c < len(self.register)
             ):
                 command = f'r[{c}] = r[{a}] & r[{b}]'
-                result = True
                 self.register[c] = self.register[a] & self.register[b]
+                result = True
         elif instruction == 'bani':
             # BANI: register A & value B --> register C
             if (
@@ -122,8 +123,8 @@ class WristDeviceProgram:
                 0 <= c < len(self.register)
             ):
                 command = f'r[{c}] = r[{a}] & {b}'
-                result = True
                 self.register[c] = self.register[a] & b
+                result = True
         elif instruction == 'borr':
             # BORR: register A | register B --> register C
             if (
@@ -132,8 +133,8 @@ class WristDeviceProgram:
                 0 <= c < len(self.register)
             ):
                 command = f'r{c} = r[{a}] | r[{b}]'
-                result = True
                 self.register[c] = self.register[a] | self.register[b]
+                result = True
         elif instruction == 'bori':
             # BORI: register A | value B --> register C
             if (
@@ -141,8 +142,8 @@ class WristDeviceProgram:
                 0 <= c < len(self.register)
             ):
                 command = f'r[{c}] = r[{a}] | {b}'
-                result = True
                 self.register[c] = self.register[a] | b
+                result = True
         elif instruction == 'setr':
             # SETR: register A --> register C
             if (
@@ -150,17 +151,14 @@ class WristDeviceProgram:
                 0 <= c < len(self.register)
             ):
                 command = f'r[{c}] = r[{a}]'
-                result = True
                 self.register[c] = self.register[a]
+                result = True
         elif instruction == 'seti':
             # SETI: value A --> register C
-            if (
-                0 <= a < len(self.register) and
-                0 <= c < len(self.register)
-            ):
+            if 0 <= c < len(self.register):
                 command = f'r[{c}] = {a}'
-                result = True
                 self.register[c] = a
+                result = True
         elif instruction == 'gtir':
             # GTIR: 1 if value A > register B else 0 --> register C
             if (
@@ -168,8 +166,8 @@ class WristDeviceProgram:
                 0 <= c < len(self.register)
             ):
                 command = f'r[{c}] = {a} > r[{b}]'
-                result = True
                 self.register[c] = 1 if a > self.register[b] else 0
+                result = True
         elif instruction == 'gtri':
             # GTRI: 1 if register A > value B else 0 --> register C
             if (
@@ -177,8 +175,8 @@ class WristDeviceProgram:
                 0 <= c < len(self.register)
             ):
                 command = f'r[{c}] = r[{a}] > {b}'
-                result = True
                 self.register[c] = 1 if self.register[a] > b else 0
+                result = True
         elif instruction == 'gtrr':
             # GTRR: 1 if register A > register B else 0 --> register C
             if (
@@ -187,8 +185,8 @@ class WristDeviceProgram:
                 0 <= c < len(self.register)
             ):
                 command = f'r[{c}] = r[{a}] > r[{b}]'
-                result = True
                 self.register[c] = 1 if self.register[a] > self.register[b] else 0
+                result = True
         elif instruction == 'eqir':
             # EQIR: 1 if value A == register B else 0 --> register C
             if (
@@ -196,8 +194,8 @@ class WristDeviceProgram:
                 0 <= c < len(self.register)
             ):
                 command = f'r[{c}] = {a} == r[{b}]'
-                result = True
                 self.register[c] = 1 if a == self.register[b] else 0
+                result = True
         elif instruction == 'eqri':
             # EQRI: 1 if register A == value B else 0 --> register C
             if (
@@ -205,8 +203,8 @@ class WristDeviceProgram:
                 0 <= c < len(self.register)
             ):
                 command = f'r[{c}] = r[{a}] == {b}'
-                result = True
                 self.register[c] = 1 if self.register[a] == b else 0
+                result = True
         elif instruction == 'eqrr':
             # EQRR: 1 if register A == register B else 0 --> register C
             if (
@@ -215,8 +213,8 @@ class WristDeviceProgram:
                 0 <= c < len(self.register)
             ):
                 command = f'r[{c}] = r[{a}] == r[{b}]'
-                result = True
                 self.register[c] = 1 if self.register[a] == self.register[b] else 0
+                result = True
         if self.debug:
             with open('AdventOfCode2018.out', 'a') as out:
                 output_line = f'[{self.pc}] {command} {self.register}\n'
@@ -224,6 +222,7 @@ class WristDeviceProgram:
                 print(output_line, end='')
         if 0 <= self.ip_mode < len(self.register):
             self.pc = self.register[self.ip_mode]
+            self.execution_count += 1
         self.pc += 1
         return result
 
@@ -281,6 +280,7 @@ class Day21: # Chronal Conversion
         vm.debug = True
         # vm.register[0] = 1
         vm.run()
+        print(vm.execution_count)
         result = vm.register[0]
         return result
     
