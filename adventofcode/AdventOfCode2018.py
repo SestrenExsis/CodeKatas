@@ -275,6 +275,59 @@ class Day21: # Chronal Conversion
         result = ip_mode, program
         return result
     
+    def solve_hardcoded(self):
+        # Initial rewrite
+        '''
+        E = 0
+        B = (E | 65_536)    # [Line_06]
+        E = 7_571_367
+        D = B & 255         # [Line_08]
+        E += D
+        E &= 16_777_215
+        E *= 65_899
+        E &= 16_777_215
+        D = (256 > B)
+        pc += D
+        pc += 1
+        goto [Line_28]
+        D = 0
+        C = D + 1           # [Line_18]
+        C *= 256
+        C = (C > B)
+        pc += C
+        pc += 1
+        goto [Line_26]
+        D += 1
+        goto [Line_18]
+        B = D               # [Line_26]
+        goto [Line_08]
+        D = (E == A)        # [Line_28]
+        pc += D
+        goto [Line_06]
+        '''
+        # First pass refactor
+        result = -1
+        A, B, C = 0, 0, 0
+        while True:
+            A = (C | 65_536)
+            C = 7_571_367
+            while True:
+                B = A & 255
+                C += B
+                C &= 16_777_215
+                C *= 65_899
+                C &= 16_777_215
+                if 256 > A:
+                    break
+                B = 0
+                while 256 * (B + 1) <= A:
+                    B += 1
+                A = B
+            if C >= 0:
+                result = C
+                break
+        return result
+    
     def solve(self, program, ip_mode):
         vm = WristDeviceProgram(6, program, ip_mode)
         vm.debug = True
@@ -292,7 +345,7 @@ class Day21: # Chronal Conversion
         raw_input_lines = get_raw_input_lines()
         ip_mode, program = self.get_parsed_input(raw_input_lines)
         solutions = (
-            self.solve(program, ip_mode),
+            self.solve_hardcoded(),
             self.solve2(program, ip_mode),
             )
         result = solutions
