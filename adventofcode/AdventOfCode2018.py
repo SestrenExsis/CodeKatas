@@ -260,27 +260,17 @@ class Day21: # Chronal Conversion
     Chronal Conversion
     https://adventofcode.com/2018/day/21
     '''
-    def get_parsed_input(self, raw_input_lines: List[str]):
-        ip_mode = int(raw_input_lines[0].split(' ')[1])
-        program = []
-        for raw_input_line in raw_input_lines[1:]:
-            parts = raw_input_line.split(' ' )
-            instruction = (
-                parts[0],
-                int(parts[1]),
-                int(parts[2]),
-                int(parts[3])
-                )
-            program.append(instruction)
-        result = ip_mode, program
+    def get_magic_number(self, raw_input_lines: List[str]):
+        magic_number = int(raw_input_lines[8].split(' ')[1])
+        result = magic_number
         return result
     
-    def solve_hardcoded(self):
+    def solve_hardcoded(self, magic_number):
         # Initial rewrite
         '''
         E = 0
         B = (E | 65_536)    # [Line_06]
-        E = 7_571_367
+        E = magic_number
         D = B & 255         # [Line_08]
         E += D
         E &= 16_777_215
@@ -305,12 +295,12 @@ class Day21: # Chronal Conversion
         pc += D
         goto [Line_06]
         '''
-        # First pass refactor
+        # Refactor
         result = -1
         A, B, C = 0, 0, 0
         while True:
             A = (C | 65_536)
-            C = 7_571_367
+            C = magic_number
             while True:
                 B = A & 255
                 C += B
@@ -328,25 +318,56 @@ class Day21: # Chronal Conversion
                 break
         return result
     
-    def solve(self, program, ip_mode):
-        vm = WristDeviceProgram(6, program, ip_mode)
-        vm.debug = True
-        # vm.register[0] = 1
-        vm.run()
-        print(vm.execution_count)
-        result = vm.register[0]
+    def solve(self, magic_number):
+        C = 0
+        result = -1
+        while result == -1:
+            A = C | 65_536
+            C = magic_number
+            while True:
+                B = A & 255
+                C += B
+                C &= 16_777_215
+                C *= 65_899
+                C &= 16_777_215
+                if 256 > A:
+                    result = C
+                    break
+                else:
+                    A //= 256
         return result
     
-    def solve2(self, program, ip_mode):
-        result = len(program)
+    def solve2(self, magic_number):
+        seen = set()
+        C = 0
+        cycle_found_ind = False
+        result = -1
+        while not cycle_found_ind:
+            A = C | 65_536
+            C = magic_number
+            while True:
+                B = A & 255
+                C += B
+                C &= 16_777_215
+                C *= 65_899
+                C &= 16_777_215
+                if 256 > A:
+                    if C in seen:
+                        cycle_found_ind = True
+                    else:
+                        seen.add(C)
+                        result = C
+                    break
+                else:
+                    A //= 256
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        ip_mode, program = self.get_parsed_input(raw_input_lines)
+        magic_number = self.get_magic_number(raw_input_lines)
         solutions = (
-            self.solve_hardcoded(),
-            self.solve2(program, ip_mode),
+            self.solve(magic_number),
+            self.solve2(magic_number),
             )
         result = solutions
         return result
