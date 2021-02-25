@@ -268,34 +268,38 @@ class Day22: # Mode Maze
         return result
     
     def solve(self, depth, target):
-        MOD = 20183
+        '''
+        Modular arithmetic properties
+        Addition      : (a + b) % n = [a % n + b % n] % n
+        Multiplication: (a * b) % n = [a % n * b % n] % n
+        '''
+        MODULO = 20183
         geo_indexes = {}
         geo_indexes[(0, 0)] = 0
-        for row in range(1, target[0] + 1):
-            geo_indexes[(row, 0)] = row * 48_271
-        for col in range(1, target[1] + 1):
-            geo_indexes[(0, col)] = col * 16_807
         geo_indexes[target] = 0
-        for row in range(1, target[0] + 1):
-            for col in range(1, target[1] + 1):
-                if (row, col) == (0, 0):
-                    continue
-                a = geo_indexes[(row - 1, col)] % MOD
-                b = geo_indexes[(row, col - 1)] % MOD
-                geo_index = (a * b) % MOD
-                geo_indexes[(row, col)] = geo_index
-        for row in range(target[0] + 1):
-            for col in range(target[1] + 1):
-                geo_index = geo_indexes[(row, col)]
-                erosion_level = (geo_index % MOD + depth % MOD) % MOD
-                print(row, col, geo_index, erosion_level, erosion_level % 3)
+        erosion_levels = {}
+        for row in range(0, target[0] + 1):
+            for col in range(0, target[1] + 1):
+                if (row, col) not in geo_indexes:
+                    geo_index = 0
+                    if row == 0:
+                        geo_index = col * 16_807
+                    elif col == 0:
+                        geo_index = row * 48_271
+                    else:
+                        a = erosion_levels[(row - 1, col)]
+                        b = erosion_levels[(row, col - 1)]
+                        geo_index = a * b
+                    geo_indexes[(row, col)] = geo_index
+                if (row, col) not in erosion_levels:
+                    erosion_level = (geo_indexes[(row, col)] + depth) % MODULO
+                    erosion_levels[(row, col)] = erosion_level
         total_risk_level = sum(
-            ((geo_index % MOD + depth % MOD) % MOD) % 3 for
-            geo_index in
-            geo_indexes.values()
+            erosion_level % 3 for
+            erosion_level in
+            erosion_levels.values()
             )
         result = total_risk_level
-        # 3934 is too low
         return result
     
     def solve2(self, depth, target):
