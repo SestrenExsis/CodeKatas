@@ -255,6 +255,63 @@ class Template: # Template
         result = solutions
         return result
 
+class Day22: # Mode Maze
+    '''
+    Mode Maze
+    https://adventofcode.com/2018/day/22
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        depth = int(raw_input_lines[0].split(' ')[1])
+        raw_target = raw_input_lines[1].split(' ')[1]
+        target = tuple(map(int, raw_target.split(',')))
+        result = (depth, (target[1], target[0]))
+        return result
+    
+    def solve(self, depth, target):
+        MOD = 20183
+        geo_indexes = {}
+        geo_indexes[(0, 0)] = 0
+        for row in range(1, target[0] + 1):
+            geo_indexes[(row, 0)] = row * 48_271
+        for col in range(1, target[1] + 1):
+            geo_indexes[(0, col)] = col * 16_807
+        geo_indexes[target] = 0
+        for row in range(1, target[0] + 1):
+            for col in range(1, target[1] + 1):
+                if (row, col) == (0, 0):
+                    continue
+                a = geo_indexes[(row - 1, col)] % MOD
+                b = geo_indexes[(row, col - 1)] % MOD
+                geo_index = (a * b) % MOD
+                geo_indexes[(row, col)] = geo_index
+        for row in range(target[0] + 1):
+            for col in range(target[1] + 1):
+                geo_index = geo_indexes[(row, col)]
+                erosion_level = (geo_index % MOD + depth % MOD) % MOD
+                print(row, col, geo_index, erosion_level, erosion_level % 3)
+        total_risk_level = sum(
+            ((geo_index % MOD + depth % MOD) % MOD) % 3 for
+            geo_index in
+            geo_indexes.values()
+            )
+        result = total_risk_level
+        # 3934 is too low
+        return result
+    
+    def solve2(self, depth, target):
+        result = target
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        (depth, target) = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(depth, target),
+            self.solve2(depth, target),
+            )
+        result = solutions
+        return result
+
 class Day21: # Chronal Conversion
     '''
     Chronal Conversion
@@ -2093,7 +2150,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 21 < inputs/2018day21.in
+    python AdventOfCode2018.py 22 < inputs/2018day22.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -2117,7 +2174,7 @@ if __name__ == '__main__':
        19: (Day19, 'Go With The Flow'),
        20: (Day20, 'A Regular Map'),
        21: (Day21, 'Chronal Conversion'),
-    #    22: (Day22, '???'),
+       22: (Day22, 'Mode Maze'),
     #    23: (Day23, '???'),
     #    24: (Day24, '???'),
     #    25: (Day25, '???'),
