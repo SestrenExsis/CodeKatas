@@ -303,7 +303,103 @@ class Day22: # Mode Maze
         return result
     
     def solve2(self, depth, target):
-        result = target
+        '''
+        Negative rows or negative columns are impassible terrain
+        Moving costs 1 minute
+        Equipping costs 7 minutes
+        With NOTHING equipped, you can enter 1 or 2
+        With TORCH equipped, you can enter 0 or 2
+        With CLIMBING GEAR equipped, you can enter 0 or 1
+        equipment can enter terrain that isn't equal to its index
+        You start at (0, 0, 1)
+        You need to be at (target[0], target[1], 1)
+        '''
+        MODULO = 20183
+        NOTHING = 0
+        TORCH = 1
+        CLIMBING_GEAR = 2
+        geo_indexes = {}
+        erosion_levels = {}
+        furthest_row = -1
+        furthest_col = -1
+        def get_terrain(next_row, next_col):
+            nonlocal depth
+            nonlocal geo_indexes, erosion_levels, furthest_row, furthest_col
+            row = furthest_row + 1
+            while row <= next_row:
+                for col in range(furthest_col + 1):
+                    if (row, col) not in geo_indexes:
+                        geo_index = 0
+                        if row == 0:
+                            geo_index = col * 16_807
+                        elif col == 0:
+                            geo_index = row * 48_271
+                        else:
+                            a = erosion_levels[(row - 1, col)]
+                            b = erosion_levels[(row, col - 1)]
+                            geo_index = a * b
+                        geo_indexes[(row, col)] = geo_index
+                    if (row, col) not in erosion_levels:
+                        erosion_level = (geo_indexes[(row, col)] + depth) % MODULO
+                        erosion_levels[(row, col)] = erosion_level
+                row += 1
+            furthest_row = next_row
+            col = furthest_col + 1
+            while col <= next_col:
+                for row in range(furthest_row + 1):
+                    if (row, col) not in geo_indexes:
+                        geo_index = 0
+                        if row == 0:
+                            geo_index = col * 16_807
+                        elif col == 0:
+                            geo_index = row * 48_271
+                        else:
+                            a = erosion_levels[(row - 1, col)]
+                            b = erosion_levels[(row, col - 1)]
+                            geo_index = a * b
+                        geo_indexes[(row, col)] = geo_index
+                    if (row, col) not in erosion_levels:
+                        erosion_level = (geo_indexes[(row, col)] + depth) % MODULO
+                        erosion_levels[(row, col)] = erosion_level
+                col += 1
+            furthest_col = next_col
+            terrain = erosion_levels[(next_row, next_col)] % 3
+            return terrain
+        min_time = float('inf')
+        visits = {}
+        work = [(0, 0, 0, TORCH)] # (time, row, col, equip)
+        while len(work) > 0:
+            (time, row, col, equip) = work.pop()
+            print(time, row, col, equip, len(geo_indexes), len(erosion_levels))
+            if (row, col, equip) in visits:
+                if visits[(row, col, equip)] <= time:
+                    continue
+            if (row, col, equip) == (target[0], target[1], TORCH):
+                min_time = time
+                break
+            visits[(row, col, equip)] = time
+            if (row, col) == target and equip != TORCH:
+                heapq.heappush(work, (time + 7, row, col, TORCH))
+            for (next_row, next_col) in (
+                (row - 1, col),
+                (row + 1, col),
+                (row, col - 1),
+                (row, col + 1),
+            ):
+                if next_row < 0 or next_col < 0:
+                    continue
+                terrain = get_terrain(next_row, next_col)
+                for next_equip in range(3):
+                    delay = 1
+                    if next_equip == terrain:
+                        continue
+                    if next_equip != equip:
+                        delay += 7
+                    heapq.heappush(
+                        work,
+                        (time + delay, next_row, next_col, next_equip),
+                        )
+        result = min_time
         return result
     
     def main(self):
