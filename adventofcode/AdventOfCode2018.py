@@ -319,11 +319,13 @@ class Day22: # Mode Maze
         TORCH = 1
         CLIMBING_GEAR = 2
         geo_indexes = {}
+        geo_indexes[(0, 0)] = 0
+        geo_indexes[target] = 0
         erosion_levels = {}
         furthest_row = -1
         furthest_col = -1
         def get_terrain(next_row, next_col):
-            nonlocal depth
+            nonlocal depth, target
             nonlocal geo_indexes, erosion_levels, furthest_row, furthest_col
             row = furthest_row + 1
             while row <= next_row:
@@ -343,7 +345,7 @@ class Day22: # Mode Maze
                         erosion_level = (geo_indexes[(row, col)] + depth) % MODULO
                         erosion_levels[(row, col)] = erosion_level
                 row += 1
-            furthest_row = next_row
+            furthest_row = max(furthest_row, next_row)
             col = furthest_col + 1
             while col <= next_col:
                 for row in range(furthest_row + 1):
@@ -362,24 +364,30 @@ class Day22: # Mode Maze
                         erosion_level = (geo_indexes[(row, col)] + depth) % MODULO
                         erosion_levels[(row, col)] = erosion_level
                 col += 1
-            furthest_col = next_col
+            furthest_col = max(furthest_col, next_col)
             terrain = erosion_levels[(next_row, next_col)] % 3
             return terrain
-        min_time = float('inf')
+        min_t = float('inf')
         visits = {}
-        work = [(0, 0, 0, TORCH)] # (time, row, col, equip)
+        work = [(0, 0, 0, TORCH)] # (t, row, col, equip)
         while len(work) > 0:
-            (time, row, col, equip) = work.pop()
-            print(time, row, col, equip, len(geo_indexes), len(erosion_levels))
-            if (row, col, equip) in visits:
-                if visits[(row, col, equip)] <= time:
-                    continue
+            (t, row, col, equip) = heapq.heappop(work)
+            if (row, col, equip) not in visits:
+                visits[(row, col, equip)] = t
+            elif visits[(row, col, equip)] <= t:
+                continue
+            visits[(row, col, equip)] = min(visits[(row, col, equip)], t)
             if (row, col, equip) == (target[0], target[1], TORCH):
-                min_time = time
+                min_t = t
                 break
-            visits[(row, col, equip)] = time
-            if (row, col) == target and equip != TORCH:
-                heapq.heappush(work, (time + 7, row, col, TORCH))
+            terrain = get_terrain(row, col)
+            # The enumeration values of the equipment match the terrain type
+            # They are NOT allowed to function in
+            next_equips = {NOTHING, TORCH, CLIMBING_GEAR}
+            next_equips.remove(terrain)
+            next_equips.remove(equip)
+            next_equip = next_equips.pop()
+            heapq.heappush(work, (t + 7, row, col, next_equip))
             for (next_row, next_col) in (
                 (row - 1, col),
                 (row + 1, col),
@@ -388,26 +396,32 @@ class Day22: # Mode Maze
             ):
                 if next_row < 0 or next_col < 0:
                     continue
-                terrain = get_terrain(next_row, next_col)
-                for next_equip in range(3):
-                    delay = 1
-                    if next_equip == terrain:
-                        continue
-                    if next_equip != equip:
-                        delay += 7
-                    heapq.heappush(
-                        work,
-                        (time + delay, next_row, next_col, next_equip),
-                        )
-        result = min_time
+                next_terrain = get_terrain(next_row, next_col)
+                if equip != next_terrain:
+                    heapq.heappush(work, (t + 1, next_row, next_col, equip))
+        result = min_t
+        # self.show_grid(erosion_levels, 0, 10, 0, 10)
         return result
+    
+    def show_grid(self, erosion_levels, min_row, max_row, min_col, max_col):
+        for row in range(min_row, max_row + 1):
+            row_data = []
+            for col in range(min_col, max_col + 1):
+                cell = '.'
+                terrain = erosion_levels[(row, col)] % 3
+                if terrain == 1:
+                    cell = '='
+                elif terrain == 2:
+                    cell = '|'
+                row_data.append(cell)
+            print(''.join(row_data))
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         (depth, target) = self.get_parsed_input(raw_input_lines)
         solutions = (
             self.solve(depth, target),
-            self.solve2(depth, target),
+            self.solve2(depth, target), #1042 is too low
             )
         result = solutions
         return result
