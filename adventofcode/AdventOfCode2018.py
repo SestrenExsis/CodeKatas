@@ -255,6 +255,46 @@ class Template: # Template
         result = solutions
         return result
 
+class Day23: # Experimental Emergency Teleportation
+    '''
+    Experimental Emergency Teleportation
+    https://adventofcode.com/2018/day/23
+    '''
+    def get_nanobots(self, raw_input_lines: List[str]):
+        nanobots = []
+        for raw_input_line in raw_input_lines:
+            a, b = raw_input_line[5:].split('>, r=')
+            radius = int(b)
+            pos = tuple(map(int, a.split(',')))
+            nanobot = (radius, pos[0], pos[1], pos[2])
+            nanobots.append(nanobot)
+        result = nanobots
+        return result
+    
+    def solve(self, nanobots):
+        strongest_nanobot = sorted(nanobots)[-1]
+        r1, x1, y1, z1 = strongest_nanobot
+        within_range_count = 0
+        for (r2, x2, y2, z2) in nanobots:
+            if abs(x2 - x1) + abs(y2 - y1) + abs(z2 - z1) <= r1:
+                within_range_count += 1
+        result = within_range_count
+        return result
+    
+    def solve2(self, nanobots):
+        result = len(nanobots)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        nanobots = self.get_nanobots(raw_input_lines)
+        solutions = (
+            self.solve(nanobots),
+            self.solve2(nanobots),
+            )
+        result = solutions
+        return result
+
 class Day22: # Mode Maze
     '''
     Mode Maze
@@ -2264,7 +2304,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 22 < inputs/2018day22.in
+    python AdventOfCode2018.py 23 < inputs/2018day23.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -2289,7 +2329,7 @@ if __name__ == '__main__':
        20: (Day20, 'A Regular Map'),
        21: (Day21, 'Chronal Conversion'),
        22: (Day22, 'Mode Maze'),
-    #    23: (Day23, '???'),
+       23: (Day23, 'Experimental Emergency Teleportation'),
     #    24: (Day24, '???'),
     #    25: (Day25, '???'),
         }
