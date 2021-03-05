@@ -282,7 +282,59 @@ class Day23: # Experimental Emergency Teleportation
         return result
     
     def solve2(self, nanobots):
-        result = len(nanobots)
+        # Could we try a dimensional reduction approach?
+        # Could we try a divide everything by a million approach?
+        # Idea:
+        # * Start at (0, 0, 0) and move in whatever direction
+        #   leads you toward the most nanobots
+        # * Keep moving until no move gets you closer to more nanobots?
+        nanobots_within_range = {}
+        work = [(0, 0, 0)]
+        visited = set()
+        while len(work) > 0:
+            x1, y1, z1 = work.pop()
+            if (x1, y1, z1) in visited:
+                continue
+            visited.add((x1, y1, z1))
+            within_range_count = 0
+            x_weight, y_weight, z_weight = 0, 0, 0
+            for (r, x2, y2, z2) in nanobots:
+                distance = abs(x2 - x1) + abs(y2 - y1) + abs(z2 - z1)
+                if distance <= r:
+                    within_range_count += 1
+                nanobots_within_range[(x1, y1, z1)] = within_range_count
+                if x1 < x2:
+                    x_weight += 1
+                elif x1 > x2:
+                    x_weight -= 1
+                if y1 < y2:
+                    y_weight += 1
+                elif y1 > y2:
+                    y_weight -= 1
+                if z1 < z2:
+                    z_weight += 1
+                elif z1 > z2:
+                    z_weight -= 1
+            if x_weight < 0:
+                work.append((x1 - 1, y1, z1))
+            elif x_weight > 0:
+                work.append((x1 + 1, y1, z1))
+            if y_weight < 0:
+                work.append((x1, y1 - 1, z1))
+            elif y_weight > 0:
+                work.append((x1, y1 + 1, z1))
+            if z_weight < 0:
+                work.append((x1, y1, z1 - 1))
+            elif z_weight > 0:
+                work.append((x1, y1, z1 + 1))
+        max_within_range_count = max(nanobots_within_range.values())
+        closest_distance = float('inf')
+        for (x, y, z), within_range_count in nanobots_within_range.items():
+            if within_range_count == max_within_range_count:
+                distance = abs(x) + abs(y) + abs(z)
+                if distance < closest_distance:
+                    closest_distance = distance
+        result = closest_distance
         return result
     
     def main(self):
