@@ -255,6 +255,35 @@ class Template: # Template
         result = solutions
         return result
 
+class Day24: # Immune System Simulator 20XX
+    '''
+    Immune System Simulator 20XX
+    https://adventofcode.com/2018/day/24
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day23: # Experimental Emergency Teleportation
     '''
     Experimental Emergency Teleportation
@@ -2356,7 +2385,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 23 < inputs/2018day23.in
+    python AdventOfCode2018.py 24 < inputs/2018day24.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -2382,7 +2411,7 @@ if __name__ == '__main__':
        21: (Day21, 'Chronal Conversion'),
        22: (Day22, 'Mode Maze'),
        23: (Day23, 'Experimental Emergency Teleportation'),
-    #    24: (Day24, '???'),
+       24: (Day24, 'Immune System Simulator 20XX'),
     #    25: (Day25, '???'),
         }
     parser = argparse.ArgumentParser()
