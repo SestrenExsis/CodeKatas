@@ -10,6 +10,7 @@ import datetime
 import functools
 import heapq
 import operator
+import re
 import time
 from typing import Dict, List, Set, Tuple
     
@@ -260,26 +261,67 @@ class Day24: # Immune System Simulator 20XX
     Immune System Simulator 20XX
     https://adventofcode.com/2018/day/24
     '''
-    def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
+    def get_units(self, raw_input_lines: List[str]):
+        pattern_str = r'^(\d+) units each with (\d+) hit points (.*)with an attack that does (\d+) (.+) damage at initiative (\d+)$'
+        pattern = re.compile(pattern_str)
+        # team, unit_count, hp, initiative, attack_type, attack_damage, weaknesses, immunities
+        units = []
+        team = None
         for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
+            if len(raw_input_line) < 1:
+                continue
+            elif raw_input_line[-1] == ':':
+                team = raw_input_line[:-1]
+            else:
+                matches = pattern.match(raw_input_line)
+                count = int(matches.group(1))
+                hp = int(matches.group(2))
+                attack = matches.group(5)
+                dmg = int(matches.group(4))
+                init = int(matches.group(6))
+                weak = set()
+                immune = set()
+                parts = matches.group(3)[1:-2].split(';')
+                for part in parts:
+                    part2 = part.strip().split(', ')
+                    part3 = part2[0].split(' ')
+                    if part3[0] == 'immune':
+                        immune.add(part3[2])
+                        for subpart in part2[1:]:
+                            immune.add(subpart)
+                    elif part3[0] == 'weak':
+                        weak.add(part3[2])
+                        for subpart in part2[1:]:
+                            weak.add(subpart)
+                unit = {
+                    'team': team,
+                    'count': count,
+                    'hp': hp,
+                    'init': init,
+                    'dmg': dmg,
+                    'attack': attack,
+                    'weak': weak,
+                    'immune': immune,
+                }
+                units.append(unit)
+        result = units
+        print(units)
         return result
     
-    def solve(self, parsed_input):
-        result = len(parsed_input)
+    def solve(self, units):
+        result = len(units)
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, units):
+        result = len(units)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        units = self.get_units(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(units),
+            self.solve2(units),
             )
         result = solutions
         return result
