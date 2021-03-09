@@ -265,9 +265,9 @@ class Day24: # Immune System Simulator 20XX
         pattern_str = r'^(\d+) units each with (\d+) hit points (.*)with an attack that does (\d+) (.+) damage at initiative (\d+)$'
         pattern = re.compile(pattern_str)
         # team, unit_count, hp, initiative, attack_type, attack_damage, weaknesses, immunities
-        units = []
+        units = {}
         team = None
-        for raw_input_line in raw_input_lines:
+        for unit_id, raw_input_line in enumerate(raw_input_lines):
             if len(raw_input_line) < 1:
                 continue
             elif raw_input_line[-1] == ':':
@@ -303,13 +303,45 @@ class Day24: # Immune System Simulator 20XX
                     'weak': weak,
                     'immune': immune,
                 }
-                units.append(unit)
+                units[unit_id] = unit
         result = units
-        print(units)
         return result
     
     def solve(self, units):
-        result = len(units)
+        '''
+        effective power of a group equals count * dmg
+        fight consists of two phases:
+        - target selection:
+            - in order by effective power, initiative resolving ties,
+              each group chooses their target
+            - when choosing, the attacker targets the group to which
+              they would deal the most damage (weak/immunities considered),
+              ties resolved first by effective power, then by initiative
+        - attacking:
+            - groups attack in decreasing order of initiative
+            - immunity lowers damage to zero, weakness doubles damage
+            - only whole units are lost from damage
+        '''
+        teams = collections.defaultdict(set)
+        for unit_id, unit in units.items():
+            if unit['team'] == 'Immune System':
+                teams[0].add(unit_id)
+            else:
+                teams[1].add(unit_id)
+        while True:
+            # Units select their targets in descending order by effective power
+            # and then by initiative in the event of a tie
+            roster = []
+            for unit_id, unit in units.items():
+                effective_power = unit['count'] * unit['dmg']
+                heapq.heappush(roster, (-effective_power, -unit['init'], unit_id))
+            attacks = {}
+            # while len(roster) > 0:
+            #     (_, _, unit_id) = heapq.heappop(roster)
+            #     unit = units[unit_id]
+            #     attacks[attacker] = target
+            break
+        result = sum(unit['count'] for unit in units.values())
         return result
     
     def solve2(self, units):
@@ -320,13 +352,13 @@ class Day24: # Immune System Simulator 20XX
         raw_input_lines = get_raw_input_lines()
         units = self.get_units(raw_input_lines)
         solutions = (
-            self.solve(units),
-            self.solve2(units),
+            self.solve(copy.deepcopy(units)),
+            self.solve2(copy.deepcopy(units)),
             )
         result = solutions
         return result
 
-class Day23: # Experimental Emergency Teleportation
+class Day23Incomplete: # Experimental Emergency Teleportation
     '''
     Experimental Emergency Teleportation
     https://adventofcode.com/2018/day/23
@@ -2452,7 +2484,7 @@ if __name__ == '__main__':
        20: (Day20, 'A Regular Map'),
        21: (Day21, 'Chronal Conversion'),
        22: (Day22, 'Mode Maze'),
-       23: (Day23, 'Experimental Emergency Teleportation'),
+       23: (Day23Incomplete, 'Experimental Emergency Teleportation'),
        24: (Day24, 'Immune System Simulator 20XX'),
     #    25: (Day25, '???'),
         }
