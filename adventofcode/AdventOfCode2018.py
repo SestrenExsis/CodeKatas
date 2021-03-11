@@ -329,19 +329,68 @@ class Day24: # Immune System Simulator 20XX
             else:
                 teams[1].add(unit_id)
         while True:
+            # print(' ')
+            # for unit in units.values():
+            #     print(unit)
             # Units select their targets in descending order by effective power
             # and then by initiative in the event of a tie
             roster = []
             for unit_id, unit in units.items():
                 effective_power = unit['count'] * unit['dmg']
                 heapq.heappush(roster, (-effective_power, -unit['init'], unit_id))
-            attacks = {}
-            # while len(roster) > 0:
-            #     (_, _, unit_id) = heapq.heappop(roster)
-            #     unit = units[unit_id]
-            #     attacks[attacker] = target
-            break
+            # Select targets
+            attacks = set()
+            while len(roster) > 0:
+                (_, _, attacking_unit_id) = heapq.heappop(roster)
+                attacker = units[attacking_unit_id]
+                target_unit_ids = []
+                max_dmg = -1
+                for target_unit_id, target in units.items():
+                    if target['team'] == attacker['team']:
+                        continue
+                    dmg = attacker['dmg'] * attacker['count']
+                    multiplier = 1
+                    if attacker['attack'] in target['immune']:
+                        multiplier = 0
+                    elif attacker['attack'] in target['weak']:
+                        multiplier = 2
+                    dmg *= multiplier
+                    if dmg >= max_dmg:
+                        target_ep = target['count'] * target['dmg']
+                        target_unit_ids.append((
+                            multiplier * attacker['dmg'],
+                            target_ep,
+                            target['init'],
+                            attacker['init'],
+                            target_unit_id,
+                            attacking_unit_id,
+                        ))
+                        max_dmg = dmg
+                attacks.add(max(target_unit_ids))
+            # Resolve attacks
+            # Attacks are resolved in decreasing order of initiative
+            for attack in sorted(attacks, key=lambda x: -x[3]):
+                dmg, _, _, _, target_unit_id, attacking_unit_id = attack
+                if (
+                    attacking_unit_id not in units or
+                    target_unit_id not in units
+                ):
+                    continue
+                attacker = units[attacking_unit_id]
+                target = units[target_unit_id]
+                ep = dmg * attacker['count']
+                kills = ep // target['hp']
+                print(ep, kills, target['hp'])
+                target['count'] -= kills
+                if target['count'] < 1:
+                    units.pop(target_unit_id)
+            # If one side has no units, fighting stops
+            if len(set(unit['team'] for unit in units.values())) < 2:
+                break
+            # print(len(units), sum(unit['count'] for unit in units.values()))
         result = sum(unit['count'] for unit in units.values())
+        print(len(units), sum(unit['count'] for unit in units.values()))
+        # 25728 is too high
         return result
     
     def solve2(self, units):
