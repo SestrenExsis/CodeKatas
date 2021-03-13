@@ -294,6 +294,7 @@ class Day24: # Immune System Simulator 20XX
                         for subpart in part2[1:]:
                             weak.add(subpart)
                 unit = {
+                    'id': unit_id,
                     'team': team,
                     'count': count,
                     'hp': hp,
@@ -306,6 +307,26 @@ class Day24: # Immune System Simulator 20XX
                 units[unit_id] = unit
         result = units
         return result
+
+    def show_attack(self, attacker, target):
+        multiplier = 1
+        if attacker['attack'] in target['immune']:
+            multiplier = 0
+        elif attacker['attack'] in target['weak']:
+            multiplier = 2
+        ep = multiplier * attacker['dmg'] * attacker['count']
+        kills = min(ep // target['hp'], target['count'])
+        print(f"    {attacker['team']} group {attacker['id']} attacks defending group {target['id']}, killing {kills} units")
+    
+    def show_units(self, units):
+        print('Immune System:')
+        for unit_id, unit in units.items():
+            if unit['team'] == 'Immune System':
+                print(f"    Group {unit_id} contains {unit['count']} units")
+        print('\nInfection:')
+        for unit_id, unit in units.items():
+            if unit['team'] == 'Infection':
+                print(f"    Group {unit_id} contains {unit['count']} units")
     
     def solve(self, units):
         '''
@@ -328,10 +349,10 @@ class Day24: # Immune System Simulator 20XX
                 teams[0].add(unit_id)
             else:
                 teams[1].add(unit_id)
+        print('--------------')
+        self.show_units(units)
         while True:
-            # print(' ')
-            # for unit in units.values():
-            #     print(unit)
+            print('\nAttacks:')
             # Units select their targets in descending order by effective power
             # and then by initiative in the event of a tie
             roster = []
@@ -340,37 +361,45 @@ class Day24: # Immune System Simulator 20XX
                 heapq.heappush(roster, (-effective_power, -unit['init'], unit_id))
             # Select targets
             attacks = set()
+            chosen_targets = set()
             while len(roster) > 0:
                 (_, _, attacking_unit_id) = heapq.heappop(roster)
                 attacker = units[attacking_unit_id]
-                target_unit_ids = []
-                max_dmg = -1
+                potential_attacks = []
+                max_ep = -1
                 for target_unit_id, target in units.items():
                     if target['team'] == attacker['team']:
                         continue
-                    dmg = attacker['dmg'] * attacker['count']
                     multiplier = 1
                     if attacker['attack'] in target['immune']:
                         multiplier = 0
                     elif attacker['attack'] in target['weak']:
                         multiplier = 2
-                    dmg *= multiplier
-                    if dmg >= max_dmg:
-                        target_ep = target['count'] * target['dmg']
-                        target_unit_ids.append((
-                            multiplier * attacker['dmg'],
+                    ep = multiplier * attacker['dmg'] * attacker['count']
+                    if ep >= max_ep:
+                        target_ep = target['dmg'] * target['count']
+                        potential_attacks.append((
+                            ep,
                             target_ep,
                             target['init'],
                             attacker['init'],
                             target_unit_id,
                             attacking_unit_id,
                         ))
-                        max_dmg = dmg
-                attacks.add(max(target_unit_ids))
+                        max_ep = ep
+                chosen_attack = None
+                for attack in potential_attacks:
+                    if attack[4] in chosen_targets:
+                        continue
+                    if chosen_attack is None or attack > chosen_attack:
+                        chosen_attack = attack
+                if chosen_attack is not None:
+                    attacks.add(chosen_attack)
+                    chosen_targets.add(chosen_attack[4])
             # Resolve attacks
             # Attacks are resolved in decreasing order of initiative
             for attack in sorted(attacks, key=lambda x: -x[3]):
-                dmg, _, _, _, target_unit_id, attacking_unit_id = attack
+                _, _, _, _, target_unit_id, attacking_unit_id = attack
                 if (
                     attacking_unit_id not in units or
                     target_unit_id not in units
@@ -378,19 +407,26 @@ class Day24: # Immune System Simulator 20XX
                     continue
                 attacker = units[attacking_unit_id]
                 target = units[target_unit_id]
-                ep = dmg * attacker['count']
+                multiplier = 1
+                if attacker['attack'] in target['immune']:
+                    multiplier = 0
+                elif attacker['attack'] in target['weak']:
+                    multiplier = 2
+                ep = multiplier * attacker['dmg'] * attacker['count']
                 kills = ep // target['hp']
-                print(ep, kills, target['hp'])
+                self.show_attack(attacker, target)
                 target['count'] -= kills
                 if target['count'] < 1:
                     units.pop(target_unit_id)
             # If one side has no units, fighting stops
             if len(set(unit['team'] for unit in units.values())) < 2:
                 break
-            # print(len(units), sum(unit['count'] for unit in units.values()))
+            print('--------------')
+            self.show_units(units)
         result = sum(unit['count'] for unit in units.values())
-        print(len(units), sum(unit['count'] for unit in units.values()))
         # 25728 is too high
+        # 25509 is too low
+        print('--------------')
         return result
     
     def solve2(self, units):
