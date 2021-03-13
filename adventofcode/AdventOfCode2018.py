@@ -309,13 +309,8 @@ class Day24: # Immune System Simulator 20XX
         return result
 
     def show_attack(self, attacker, target):
-        multiplier = 1
-        if attacker['attack'] in target['immune']:
-            multiplier = 0
-        elif attacker['attack'] in target['weak']:
-            multiplier = 2
-        ep = multiplier * attacker['dmg'] * attacker['count']
-        kills = min(ep // target['hp'], target['count'])
+        dmg = self.get_damage(attacker, target)
+        kills = min(dmg // target['hp'], target['count'])
         print(f"    {attacker['team']} group {attacker['id']} attacks defending group {target['id']}, killing {kills} units")
     
     def show_units(self, units):
@@ -328,6 +323,21 @@ class Day24: # Immune System Simulator 20XX
             if unit['team'] == 'Infection':
                 print(f"    Group {unit_id} contains {unit['count']} units")
     
+    def get_effective_power(self, unit):
+        effective_power = unit['dmg'] * unit['count']
+        result = effective_power
+        return result
+    
+    def get_damage(self, attacker, target):
+        multiplier = 1
+        if attacker['attack'] in target['immune']:
+            multiplier = 0
+        elif attacker['attack'] in target['weak']:
+            multiplier = 2
+        damage = multiplier * self.get_effective_power(attacker)
+        result = damage
+        return result
+
     def solve(self, units):
         '''
         effective power of a group equals count * dmg
@@ -357,7 +367,7 @@ class Day24: # Immune System Simulator 20XX
             # and then by initiative in the event of a tie
             roster = []
             for unit_id, unit in units.items():
-                effective_power = unit['count'] * unit['dmg']
+                effective_power = self.get_effective_power(unit)
                 heapq.heappush(roster, (-effective_power, -unit['init'], unit_id))
             # Select targets
             attacks = set()
@@ -366,27 +376,23 @@ class Day24: # Immune System Simulator 20XX
                 (_, _, attacking_unit_id) = heapq.heappop(roster)
                 attacker = units[attacking_unit_id]
                 potential_attacks = []
-                max_ep = -1
+                max_dmg = -1
                 for target_unit_id, target in units.items():
                     if target['team'] == attacker['team']:
                         continue
-                    multiplier = 1
-                    if attacker['attack'] in target['immune']:
-                        multiplier = 0
-                    elif attacker['attack'] in target['weak']:
-                        multiplier = 2
-                    ep = multiplier * attacker['dmg'] * attacker['count']
-                    if ep >= max_ep:
-                        target_ep = target['dmg'] * target['count']
+                    ep = self.get_effective_power(attacker)
+                    dmg = self.get_damage(attacker, target)
+                    if dmg >= max_dmg:
+                        target_ep = self.get_effective_power(target)
                         potential_attacks.append((
-                            ep,
+                            dmg,
                             target_ep,
                             target['init'],
                             attacker['init'],
                             target_unit_id,
                             attacking_unit_id,
                         ))
-                        max_ep = ep
+                        max_dmg = dmg
                 chosen_attack = None
                 for attack in potential_attacks:
                     if attack[4] in chosen_targets:
@@ -407,13 +413,8 @@ class Day24: # Immune System Simulator 20XX
                     continue
                 attacker = units[attacking_unit_id]
                 target = units[target_unit_id]
-                multiplier = 1
-                if attacker['attack'] in target['immune']:
-                    multiplier = 0
-                elif attacker['attack'] in target['weak']:
-                    multiplier = 2
-                ep = multiplier * attacker['dmg'] * attacker['count']
-                kills = ep // target['hp']
+                dmg = self.get_damage(attacker, target)
+                kills = dmg // target['hp']
                 self.show_attack(attacker, target)
                 target['count'] -= kills
                 if target['count'] < 1:
@@ -424,8 +425,6 @@ class Day24: # Immune System Simulator 20XX
             print('--------------')
             self.show_units(units)
         result = sum(unit['count'] for unit in units.values())
-        # 25728 is too high
-        # 25509 is too low
         print('--------------')
         return result
     
