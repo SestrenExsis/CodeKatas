@@ -307,21 +307,29 @@ class Day24: # Immune System Simulator 20XX
                 units[unit_id] = unit
         result = units
         return result
+    
+    def write_combat_log(self, combat_log):
+        with open('AdventOfCode2018.out', 'w') as out:
+            for i in range(len(combat_log)):
+                out.write('Round #{}\n'.format(i + 1))
+                for j in range(len(combat_log[i])):
+                    out.write(combat_log[i][j] + '\n')
 
-    def show_attack(self, attacker, target):
+    def show_attack(self, combat_log, attacker, target):
         dmg = self.get_damage(attacker, target)
         kills = min(dmg // target['hp'], target['count'])
-        print(f"    {attacker['team']} group {attacker['id']} attacks defending group {target['id']}, killing {kills} units")
+        combat_log[-1].append(f"    {attacker['team']} group {attacker['id']} attacks defending group {target['id']}, killing {kills} units")
     
-    def show_units(self, units):
-        print('Immune System:')
+    def show_units(self, combat_log, units):
+        # time.sleep(2)
+        combat_log[-1].append('Immune System:')
         for unit_id, unit in units.items():
             if unit['team'] == 'Immune System':
-                print(f"    Group {unit_id} contains {unit['count']} units")
-        print('\nInfection:')
+                combat_log[-1].append(f"    Group {unit_id} contains {unit['count']} units")
+        combat_log[-1].append('Infection:')
         for unit_id, unit in units.items():
             if unit['team'] == 'Infection':
-                print(f"    Group {unit_id} contains {unit['count']} units")
+                combat_log[-1].append(f"    Group {unit_id} contains {unit['count']} units")
     
     def get_effective_power(self, unit):
         effective_power = unit['dmg'] * unit['count']
@@ -353,16 +361,17 @@ class Day24: # Immune System Simulator 20XX
             - immunity lowers damage to zero, weakness doubles damage
             - only whole units are lost from damage
         '''
+        combat_log = []
         teams = collections.defaultdict(set)
         for unit_id, unit in units.items():
             if unit['team'] == 'Immune System':
                 teams[0].add(unit_id)
             else:
                 teams[1].add(unit_id)
-        print('--------------')
-        self.show_units(units)
         while True:
-            print('\nAttacks:')
+            combat_log.append([])
+            self.show_units(combat_log, units)
+            combat_log[-1].append('Attacks:')
             # Units select their targets in descending order by effective power
             # and then by initiative in the event of a tie
             roster = []
@@ -415,17 +424,16 @@ class Day24: # Immune System Simulator 20XX
                 target = units[target_unit_id]
                 dmg = self.get_damage(attacker, target)
                 kills = dmg // target['hp']
-                self.show_attack(attacker, target)
+                self.show_attack(combat_log, attacker, target)
                 target['count'] -= kills
                 if target['count'] < 1:
                     units.pop(target_unit_id)
             # If one side has no units, fighting stops
             if len(set(unit['team'] for unit in units.values())) < 2:
                 break
-            print('--------------')
-            self.show_units(units)
+            # self.show_units(combat_log, units)
         result = sum(unit['count'] for unit in units.values())
-        print('--------------')
+        self.write_combat_log(combat_log)
         return result
     
     def solve2(self, units):
