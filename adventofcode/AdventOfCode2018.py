@@ -318,18 +318,20 @@ class Day24: # Immune System Simulator 20XX
     def show_attack(self, combat_log, attacker, target):
         dmg = self.get_damage(attacker, target)
         kills = min(dmg // target['hp'], target['count'])
-        combat_log[-1].append(f"    {attacker['team']} group {attacker['id']} attacks defending group {target['id']}, killing {kills} units")
+        combat_log[-1].append(f"    {attacker['team']} group {attacker['group_id']} attacks defending group {target['group_id']}, killing {kills} units")
     
     def show_units(self, combat_log, units):
         # time.sleep(2)
         combat_log[-1].append('Immune System:')
-        for unit_id, unit in units.items():
+        for unit in units.values():
+            group_id = unit['group_id']
             if unit['team'] == 'Immune System':
-                combat_log[-1].append(f"    Group {unit_id} contains {unit['count']} units")
+                combat_log[-1].append(f"    Group {group_id} contains {unit['count']} units")
         combat_log[-1].append('Infection:')
-        for unit_id, unit in units.items():
+        for unit in units.values():
+            group_id = unit['group_id']
             if unit['team'] == 'Infection':
-                combat_log[-1].append(f"    Group {unit_id} contains {unit['count']} units")
+                combat_log[-1].append(f"    Group {group_id} contains {unit['count']} units")
     
     def get_effective_power(self, unit):
         effective_power = unit['dmg'] * unit['count']
@@ -363,11 +365,18 @@ class Day24: # Immune System Simulator 20XX
         '''
         combat_log = []
         teams = collections.defaultdict(set)
+        unit_ids_by_team = [0, 0]
         for unit_id, unit in units.items():
             if unit['team'] == 'Immune System':
                 teams[0].add(unit_id)
+                unit['team_id'] = 0
+                unit['group_id'] = unit_ids_by_team[0]
+                unit_ids_by_team[0] += 1
             else:
                 teams[1].add(unit_id)
+                unit['team_id'] = 1
+                unit['group_id'] = unit_ids_by_team[1]
+                unit_ids_by_team[1] += 1
         while True:
             combat_log.append([])
             self.show_units(combat_log, units)
