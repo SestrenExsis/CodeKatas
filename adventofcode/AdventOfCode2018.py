@@ -386,47 +386,46 @@ class Day24: # Immune System Simulator 20XX
             roster = []
             for unit_id, unit in units.items():
                 effective_power = self.get_effective_power(unit)
-                heapq.heappush(roster, (-effective_power, -unit['init'], unit_id))
+                heapq.heappush(roster, (unit['team_id'], -effective_power, -unit['init'], unit_id))
             # Select targets
             attacks = set()
             chosen_targets = set()
             while len(roster) > 0:
-                (_, _, attacking_unit_id) = heapq.heappop(roster)
+                (_, _, _, attacking_unit_id) = heapq.heappop(roster)
                 attacker = units[attacking_unit_id]
                 potential_attacks = []
                 max_dmg = -1
                 for target_unit_id, target in units.items():
-                    if target['team'] == attacker['team']:
+                    if target['team_id'] == attacker['team_id']:
                         continue
                     ep = self.get_effective_power(attacker)
                     dmg = self.get_damage(attacker, target)
                     if dmg >= max_dmg:
                         target_ep = self.get_effective_power(target)
-                        potential_attacks.append((
-                            dmg,
-                            target_ep,
-                            target['init'],
+                        heapq.heappush(potential_attacks, (
+                            -dmg,
+                            -target_ep,
+                            -target['init'],
                             attacker['init'],
                             target_unit_id,
                             attacking_unit_id,
                         ))
                         max_dmg = dmg
-                chosen_attack = None
-                for attack in potential_attacks:
-                    if attack[4] in chosen_targets:
-                        continue
-                    if chosen_attack is None or attack > chosen_attack:
-                        chosen_attack = attack
-                if chosen_attack is not None:
-                    attacks.add(chosen_attack)
-                    chosen_targets.add(chosen_attack[4])
+                attack = None
+                while len(potential_attacks) > 0:
+                    attack = heapq.heappop(potential_attacks)
+                    if attack[4] not in chosen_targets:
+                        attacks.add(attack)
+                        chosen_targets.add(attack[4])
+                        break
             # Resolve attacks
             # Attacks are resolved in decreasing order of initiative
             for attack in sorted(attacks, key=lambda x: -x[3]):
                 _, _, _, _, target_unit_id, attacking_unit_id = attack
                 if (
                     attacking_unit_id not in units or
-                    target_unit_id not in units
+                    target_unit_id not in units or
+                    units[attacking_unit_id]['count'] < 1
                 ):
                     continue
                 attacker = units[attacking_unit_id]
@@ -438,7 +437,7 @@ class Day24: # Immune System Simulator 20XX
                 if target['count'] < 1:
                     units.pop(target_unit_id)
             # If one side has no units, fighting stops
-            if len(set(unit['team'] for unit in units.values())) < 2:
+            if len(set(unit['team_id'] for unit in units.values())) < 2:
                 break
             # self.show_units(combat_log, units)
         result = sum(unit['count'] for unit in units.values())
