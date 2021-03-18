@@ -261,18 +261,62 @@ class Day24: # Immune System Simulator 20XX
     Immune System Simulator 20XX
     https://adventofcode.com/2018/day/24
     '''
+
+    class Unit(object):
+        def __init__(self,
+            unit_id: int,
+            team_id: int,
+            group_id: int,
+            count: int,
+            hp: int,
+            attack: str,
+            dmg: int,
+            init: int,
+            weak: set,
+            immune: set,
+        ):
+            self.unit_id = unit_id
+            self.team_id = team_id
+            self.group_id = group_id
+            self.count = count
+            self.hp = hp
+            self.attack = attack
+            self.dmg = dmg
+            self.init = init
+            self.weak = weak
+            self.immune = immune
+
+        def ep(self):
+            result = self.count * self.dmg
+            return result
+        
+        def attack_damage(self, target: 'Unit'):
+            multiplier = 1
+            if self.attack in target.immune:
+                multiplier = 0
+            elif self.attack in target.weak:
+                multiplier = 2
+            result = multiplier * self.ep()
+            return result
+
     def get_units(self, raw_input_lines: List[str]):
         pattern_str = r'^(\d+) units each with (\d+) hit points (.*)with an attack that does (\d+) (.+) damage at initiative (\d+)$'
         pattern = re.compile(pattern_str)
         # team, unit_count, hp, initiative, attack_type, attack_damage, weaknesses, immunities
         units = {}
-        team = None
+        team_id = -1
+        group_ids_by_team = [0, 0]
         for unit_id, raw_input_line in enumerate(raw_input_lines):
             if len(raw_input_line) < 1:
                 continue
             elif raw_input_line[-1] == ':':
-                team = raw_input_line[:-1]
+                if raw_input_line[:-1] == 'Immune System':
+                    team_id = 0
+                else:
+                    team_id = 1
             else:
+                group_id = group_ids_by_team[team_id]
+                group_ids_by_team[team_id] += 1
                 matches = pattern.match(raw_input_line)
                 count = int(matches.group(1))
                 hp = int(matches.group(2))
@@ -293,17 +337,10 @@ class Day24: # Immune System Simulator 20XX
                         weak.add(part3[2])
                         for subpart in part2[1:]:
                             weak.add(subpart)
-                unit = {
-                    'id': unit_id,
-                    'team': team,
-                    'count': count,
-                    'hp': hp,
-                    'init': init,
-                    'dmg': dmg,
-                    'attack': attack,
-                    'weak': weak,
-                    'immune': immune,
-                }
+                unit = self.Unit(
+                    unit_id, team_id, group_id,
+                    count, hp, attack, dmg, init, weak, immune
+                )
                 units[unit_id] = unit
         result = units
         return result
@@ -316,37 +353,20 @@ class Day24: # Immune System Simulator 20XX
                     out.write(combat_log[i][j] + '\n')
 
     def show_attack(self, combat_log, attacker, target):
-        dmg = self.get_damage(attacker, target)
-        kills = min(dmg // target['hp'], target['count'])
-        combat_log[-1].append(f"    {attacker['team']} group {attacker['group_id']} attacks defending group {target['group_id']}, killing {kills} units")
+        attack_damage = attacker.attack_damage(target)
+        kills = min(attack_damage // target.hp, target.count)
+        team = ['Immune System', 'Infection'][attacker.team_id]
+        combat_log[-1].append(f"    {team} group {attacker.group_id} attacks defending group {target.group_id}, killing {kills} units")
     
     def show_units(self, combat_log, units):
-        # time.sleep(2)
         combat_log[-1].append('Immune System:')
         for unit in units.values():
-            group_id = unit['group_id']
-            if unit['team'] == 'Immune System':
-                combat_log[-1].append(f"    Group {group_id} contains {unit['count']} units")
+            if unit.team_id == 0:
+                combat_log[-1].append(f"    Group {unit.group_id} contains {unit.count} units")
         combat_log[-1].append('Infection:')
         for unit in units.values():
-            group_id = unit['group_id']
-            if unit['team'] == 'Infection':
-                combat_log[-1].append(f"    Group {group_id} contains {unit['count']} units")
-    
-    def get_effective_power(self, unit):
-        effective_power = unit['dmg'] * unit['count']
-        result = effective_power
-        return result
-    
-    def get_damage(self, attacker, target):
-        multiplier = 1
-        if attacker['attack'] in target['immune']:
-            multiplier = 0
-        elif attacker['attack'] in target['weak']:
-            multiplier = 2
-        damage = multiplier * self.get_effective_power(attacker)
-        result = damage
-        return result
+            if unit.team_id == 1:
+                combat_log[-1].append(f"    Group {unit.group_id} contains {unit.count} units")
 
     def solve(self, units):
         '''
@@ -364,20 +384,8 @@ class Day24: # Immune System Simulator 20XX
             - only whole units are lost from damage
         '''
         combat_log = []
-        teams = collections.defaultdict(set)
-        unit_ids_by_team = [0, 0]
-        for unit_id, unit in units.items():
-            if unit['team'] == 'Immune System':
-                teams[0].add(unit_id)
-                unit['team_id'] = 0
-                unit['group_id'] = unit_ids_by_team[0]
-                unit_ids_by_team[0] += 1
-            else:
-                teams[1].add(unit_id)
-                unit['team_id'] = 1
-                unit['group_id'] = unit_ids_by_team[1]
-                unit_ids_by_team[1] += 1
         while True:
+            # units = sorted(units, key=lambda unit: (-unit.ep, -unit.init))
             combat_log.append([])
             self.show_units(combat_log, units)
             combat_log[-1].append('Attacks:')
@@ -385,62 +393,69 @@ class Day24: # Immune System Simulator 20XX
             # and then by initiative in the event of a tie
             roster = []
             for unit_id, unit in units.items():
-                effective_power = self.get_effective_power(unit)
-                heapq.heappush(roster, (unit['team_id'], -effective_power, -unit['init'], unit_id))
+                heapq.heappush(roster, (-unit.ep(), -unit.init, unit_id))
             # Select targets
             attacks = set()
             chosen_targets = set()
             while len(roster) > 0:
-                (_, _, _, attacking_unit_id) = heapq.heappop(roster)
+                (_, _, attacking_unit_id) = heapq.heappop(roster)
                 attacker = units[attacking_unit_id]
                 potential_attacks = []
-                max_dmg = -1
+                max_attack_damage = 1
                 for target_unit_id, target in units.items():
-                    if target['team_id'] == attacker['team_id']:
+                    if (
+                        target.team_id == attacker.team_id or
+                        target.count < 1 or
+                        attacker.count < 1
+                    ):
                         continue
-                    ep = self.get_effective_power(attacker)
-                    dmg = self.get_damage(attacker, target)
-                    if dmg >= max_dmg:
-                        target_ep = self.get_effective_power(target)
+                    attack_damage = attacker.attack_damage(target)
+                    if (
+                        attack_damage >= max_attack_damage and
+                        target_unit_id not in chosen_targets
+                    ):
                         heapq.heappush(potential_attacks, (
-                            -dmg,
-                            -target_ep,
-                            -target['init'],
-                            attacker['init'],
-                            target_unit_id,
+                            -attack_damage,
+                            -target.ep(),
+                            -target.init,
+                            attacker.init,
                             attacking_unit_id,
+                            target_unit_id,
                         ))
-                        max_dmg = dmg
+                        max_attack_damage = attack_damage
                 attack = None
                 while len(potential_attacks) > 0:
-                    attack = heapq.heappop(potential_attacks)
-                    if attack[4] not in chosen_targets:
+                    _, _, _, init, attacking_unit_id, target_unit_id = heapq.heappop(potential_attacks)
+                    if target_unit_id not in chosen_targets:
+                        attack = (init, attacking_unit_id, target_unit_id)
                         attacks.add(attack)
-                        chosen_targets.add(attack[4])
+                        chosen_targets.add(target_unit_id)
                         break
             # Resolve attacks
             # Attacks are resolved in decreasing order of initiative
-            for attack in sorted(attacks, key=lambda x: -x[3]):
-                _, _, _, _, target_unit_id, attacking_unit_id = attack
+            total_kills = 0
+            for attack in sorted(attacks, key=lambda x: -x[0]):
+                _, attacking_unit_id, target_unit_id = attack
                 if (
                     attacking_unit_id not in units or
                     target_unit_id not in units or
-                    units[attacking_unit_id]['count'] < 1
+                    units[attacking_unit_id].count < 1
                 ):
                     continue
                 attacker = units[attacking_unit_id]
                 target = units[target_unit_id]
-                dmg = self.get_damage(attacker, target)
-                kills = dmg // target['hp']
+                attack_damage = attacker.attack_damage(target)
+                kills = min(target.count, attack_damage // target.hp)
+                total_kills += kills
                 self.show_attack(combat_log, attacker, target)
-                target['count'] -= kills
-                if target['count'] < 1:
+                target.count -= kills
+                if target.count < 1:
                     units.pop(target_unit_id)
-            # If one side has no units, fighting stops
-            if len(set(unit['team_id'] for unit in units.values())) < 2:
+            # If nobody died, the fight stops
+            if total_kills < 1:
                 break
             # self.show_units(combat_log, units)
-        result = sum(unit['count'] for unit in units.values())
+        result = sum(max(0, unit.count) for unit in units.values())
         self.write_combat_log(combat_log)
         return result
     
