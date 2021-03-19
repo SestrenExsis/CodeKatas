@@ -368,21 +368,7 @@ class Day24: # Immune System Simulator 20XX
             if unit.team_id == 1:
                 combat_log[-1].append(f"    Group {unit.group_id} contains {unit.count} units")
 
-    def solve(self, units):
-        '''
-        effective power of a group equals count * dmg
-        fight consists of two phases:
-        - target selection:
-            - in order by effective power, initiative resolving ties,
-              each group chooses their target
-            - when choosing, the attacker targets the group to which
-              they would deal the most damage (weak/immunities considered),
-              ties resolved first by effective power, then by initiative
-        - attacking:
-            - groups attack in decreasing order of initiative
-            - immunity lowers damage to zero, weakness doubles damage
-            - only whole units are lost from damage
-        '''
+    def fight(self, units, write_to_log: bool):
         combat_log = []
         while True:
             # units = sorted(units, key=lambda unit: (-unit.ep, -unit.init))
@@ -455,15 +441,66 @@ class Day24: # Immune System Simulator 20XX
             if total_kills < 1:
                 break
             # self.show_units(combat_log, units)
+        outcome = -1
+        units_left = [0, 0]
+        units_left[0] = sum(
+            max(0, unit.count) for
+            unit in units.values() if
+            unit.team_id == 0
+            )
+        units_left[1] = sum(
+            max(0, unit.count) for
+            unit in units.values() if
+            unit.team_id == 1
+            )
+        if units_left[0] < 1 and units_left[1] > 0:
+            outcome = 1
+        elif units_left[0] > 0 and units_left[1] < 1:
+            outcome = 0
+        result = (outcome, units_left[0], units_left[1])
+        if write_to_log:
+            self.write_combat_log(combat_log)
+        return result
+    
+    def solve(self, units):
+        winning_team = self.fight(units, False)
         result = sum(max(0, unit.count) for unit in units.values())
-        self.write_combat_log(combat_log)
         return result
     
     def solve2(self, units):
-        result = len(units)
+        # Find the smallest boost that allows the immune system to win
+        max_boost = 10_000_000 # max(unit.count * unit.hp for unit in units.values())
+        min_boost = 0
+        boosts = {}
+        while min_boost < max_boost:
+            curr_units = copy.deepcopy(units)
+            boost = min_boost + (max_boost - min_boost) // 2
+            for unit_id in curr_units:
+                unit = curr_units[unit_id]
+                if unit.team_id == 0:
+                    curr_units[unit_id].dmg += boost
+            outcome, team0_left, team1_left = self.fight(curr_units, False)
+            boosts[boost] = (outcome, team0_left, team1_left)
+            if outcome == 0:
+                max_boost = boost - 1
+            elif outcome == 1:
+                min_boost = boost + 1
+            else:
+                break
+        for boost in range(min_boost - 1, max_boost + 1):
+            curr_units = copy.deepcopy(units)
+            for unit_id in curr_units:
+                unit = curr_units[unit_id]
+                if unit.team_id == 0:
+                    curr_units[unit_id].dmg += boost
+            outcome, team0_left, team1_left = self.fight(curr_units, False)
+            boosts[boost] = (outcome, team0_left, team1_left)
+        min_boost = min(boost for boost, (outcome, _, _) in boosts.items() if outcome == 0)
+        result = boosts[min_boost][1]
         return result
     
     def main(self):
+        # 26594 is too high for part 2
         raw_input_lines = get_raw_input_lines()
         units = self.get_units(raw_input_lines)
         solutions = (
