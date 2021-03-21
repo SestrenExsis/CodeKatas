@@ -564,7 +564,7 @@ class Day24: # Immune System Simulator 20XX
         result = solutions
         return result
 
-class Day23Incomplete: # Experimental Emergency Teleportation
+class Day23: # Experimental Emergency Teleportation
     '''
     Experimental Emergency Teleportation
     https://adventofcode.com/2018/day/23
@@ -591,58 +591,20 @@ class Day23Incomplete: # Experimental Emergency Teleportation
         return result
     
     def solve2(self, nanobots):
-        # Could we try a dimensional reduction approach?
-        # Could we try a divide everything by a million approach?
-        # Idea:
-        # * Start at (0, 0, 0) and move in whatever direction
-        #   leads you toward the most nanobots
-        # * Keep moving until no move gets you closer to more nanobots?
-        nanobots_within_range = {}
-        work = [(0, 0, 0)]
-        visited = set()
+        work = []
+        for (radius, x, y, z) in nanobots:
+            distance = abs(x) + abs(y) + abs(z)
+            heapq.heappush(work, (max(0, distance - radius), 1))
+            heapq.heappush(work, (distance + radius + 1, -1))
+        count = 0
+        max_count = 0
+        closest_distance = 0
         while len(work) > 0:
-            x1, y1, z1 = work.pop()
-            if (x1, y1, z1) in visited:
-                continue
-            visited.add((x1, y1, z1))
-            within_range_count = 0
-            x_weight, y_weight, z_weight = 0, 0, 0
-            for (r, x2, y2, z2) in nanobots:
-                distance = abs(x2 - x1) + abs(y2 - y1) + abs(z2 - z1)
-                if distance <= r:
-                    within_range_count += 1
-                nanobots_within_range[(x1, y1, z1)] = within_range_count
-                if x1 < x2:
-                    x_weight += 1
-                elif x1 > x2:
-                    x_weight -= 1
-                if y1 < y2:
-                    y_weight += 1
-                elif y1 > y2:
-                    y_weight -= 1
-                if z1 < z2:
-                    z_weight += 1
-                elif z1 > z2:
-                    z_weight -= 1
-            if x_weight < 0:
-                work.append((x1 - 1, y1, z1))
-            elif x_weight > 0:
-                work.append((x1 + 1, y1, z1))
-            if y_weight < 0:
-                work.append((x1, y1 - 1, z1))
-            elif y_weight > 0:
-                work.append((x1, y1 + 1, z1))
-            if z_weight < 0:
-                work.append((x1, y1, z1 - 1))
-            elif z_weight > 0:
-                work.append((x1, y1, z1 + 1))
-        max_within_range_count = max(nanobots_within_range.values())
-        closest_distance = float('inf')
-        for (x, y, z), within_range_count in nanobots_within_range.items():
-            if within_range_count == max_within_range_count:
-                distance = abs(x) + abs(y) + abs(z)
-                if distance < closest_distance:
-                    closest_distance = distance
+            distance, delta = heapq.heappop(work)
+            count += delta
+            if count > max_count:
+                closest_distance = distance
+                max_count = count
         result = closest_distance
         return result
     
@@ -2665,7 +2627,7 @@ class Day01: # Chronal Calibration
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2018.py 24 < inputs/2018day24.in
+    python AdventOfCode2018.py 23 < inputs/2018day23.in
     '''
     solvers = {
         1: (Day01, 'Chronal Calibration'),
@@ -2690,7 +2652,7 @@ if __name__ == '__main__':
        20: (Day20, 'A Regular Map'),
        21: (Day21, 'Chronal Conversion'),
        22: (Day22, 'Mode Maze'),
-       23: (Day23Incomplete, 'Experimental Emergency Teleportation'),
+       23: (Day23, 'Experimental Emergency Teleportation'),
        24: (Day24, 'Immune System Simulator 20XX'),
        25: (Day25, 'Four-Dimensional Adventure'),
         }
