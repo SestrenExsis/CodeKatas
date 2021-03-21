@@ -256,6 +256,60 @@ class Template: # Template
         result = solutions
         return result
 
+class Day25: # Four-Dimensional Adventure
+    '''
+    Four-Dimensional Adventure
+    https://adventofcode.com/2018/day/25
+    '''
+    def get_points(self, raw_input_lines: List[str]):
+        points = []
+        for raw_input_line in raw_input_lines:
+            w, x, y, z = tuple(map(int, raw_input_line.split(',')))
+            points.append((w, x, y, z))
+        result = points
+        return result
+    
+    def solve(self, points):
+        constellation_count = 0
+        points_left = set(points)
+        while len(points_left) > 0:
+            work = [min(points_left)]
+            while len(work) > 0:
+                point1 = work.pop()
+                w1, x1, y1, z1 = point1
+                if point1 not in points_left:
+                    continue
+                points_left.remove(point1)
+                next_points = set()
+                for point2 in points_left:
+                    w2, x2, y2, z2 = point2
+                    distance = sum([
+                        abs(w2 - w1),
+                        abs(x2 - x1),
+                        abs(y2 - y1),
+                        abs(z2 - z1),
+                    ])
+                    if distance <= 3:
+                        work.append(point2)
+                        next_points.add(point2)
+            constellation_count += 1
+        result = constellation_count
+        return result
+    
+    def solve2(self, points):
+        result = len(points)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        points = self.get_points(raw_input_lines)
+        solutions = (
+            self.solve(points),
+            self.solve2(points),
+            )
+        result = solutions
+        return result
+
 class Day24: # Immune System Simulator 20XX
     '''
     Immune System Simulator 20XX
@@ -2638,7 +2692,7 @@ if __name__ == '__main__':
        22: (Day22, 'Mode Maze'),
        23: (Day23Incomplete, 'Experimental Emergency Teleportation'),
        24: (Day24, 'Immune System Simulator 20XX'),
-    #    25: (Day25, '???'),
+       25: (Day25, 'Four-Dimensional Adventure'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('day', help='Solve for a given day', type=int)
