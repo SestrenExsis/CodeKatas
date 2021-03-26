@@ -274,7 +274,7 @@ class Indicium__Incomplete: # 2020.Q.5
             print(output_row)
         return output
 
-class PatternMatching:
+class PatternMatching: # 2020.1A.1
     '''
     2020.1A.1
     https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd74/00000000002b3034
@@ -338,7 +338,113 @@ class PatternMatching:
             print(output_row)
         return output
 
-class Solver2:
+class Solver: # 2020.1A.2
+    '''
+    2020.1A.2 (Pascal Walk)
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd74/00000000002b1353
+    '''
+    pascal_memo = {}
+
+    def pascal(self, row: int, col: int) -> int:
+        assert col <= row
+        result = 1
+        if row == 1:
+            result = 1
+        elif col in (1, row):
+            result = 1
+        elif col in (2, row - 1):
+            result = row - 1
+        elif (row, col) in self.pascal_memo:
+            result = self.pascal_memo[(row, col)]
+        elif (row, row - col + 1) in self.pascal_memo:
+            result = self.pascal_memo[(row, row - col + 1)]
+        else:
+            a = self.pascal(row - 1, col)
+            b = self.pascal(row - 1, col - 1)
+            result = a + b
+            self.pascal_memo[(row, min(col, row - col + 1))] = result
+        return result
+
+    def solve(self, target):
+        result = target
+        return result
+    
+    def run_tests(self):
+        # 1: 1
+        assert self.pascal(1, 1) == 1
+        # 2: 1 1
+        assert self.pascal(2, 1) == 1
+        assert self.pascal(2, 2) == 1
+        # 3: 1 2 1
+        assert self.pascal(3, 1) == 1
+        assert self.pascal(3, 2) == 2
+        assert self.pascal(3, 3) == 1
+        # 4: 1 3 3 1
+        assert self.pascal(4, 1) == 1
+        assert self.pascal(4, 2) == 3
+        assert self.pascal(4, 3) == 3
+        assert self.pascal(4, 4) == 1
+        # 5: 1 4 6 4 1
+        assert self.pascal(5, 1) == 1
+        assert self.pascal(5, 2) == 4
+        assert self.pascal(5, 3) == 6
+        assert self.pascal(5, 4) == 4
+        assert self.pascal(5, 5) == 1
+        # 6: 1 5 10 10 5 1
+        assert self.pascal(6, 1) == 1
+        assert self.pascal(6, 2) == 5
+        assert self.pascal(6, 3) == 10
+        assert self.pascal(6, 4) == 10
+        assert self.pascal(6, 5) == 5
+        assert self.pascal(6, 6) == 1
+        # 7: 1 6 15 20 15 6 1
+        assert self.pascal(7, 1) == 1
+        assert self.pascal(7, 2) == 6
+        assert self.pascal(7, 3) == 15
+        assert self.pascal(7, 4) == 20
+        assert self.pascal(7, 5) == 15
+        assert self.pascal(7, 6) == 6
+        assert self.pascal(7, 7) == 1
+        # 8: 1 7 21 35 35 21 7 1
+        assert self.pascal(8, 1) == 1
+        assert self.pascal(8, 2) == 7
+        assert self.pascal(8, 3) == 21
+        assert self.pascal(8, 4) == 35
+        assert self.pascal(8, 5) == 35
+        assert self.pascal(8, 6) == 21
+        assert self.pascal(8, 7) == 7
+        assert self.pascal(8, 8) == 1
+        # 9: 1 8 28 56 70 56 28 8 1
+        assert self.pascal(9, 1) == 1
+        assert self.pascal(9, 2) == 8
+        assert self.pascal(9, 3) == 28
+        assert self.pascal(9, 4) == 56
+        assert self.pascal(9, 5) == 70
+        assert self.pascal(9, 6) == 56
+        assert self.pascal(9, 7) == 28
+        assert self.pascal(9, 8) == 8
+        assert self.pascal(9, 9) == 1
+        print('All tests pass')
+        print('Size of memo:', len(self.pascal_memo))
+    
+    def main(self):
+        # Max number of steps in the walk is 500
+        # Max target in test set 3 is 1_000_000_000
+        self.run_tests()
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            target = int(input())
+            solution = self.solve(target)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverA:
     def solve(self, raw_input):
         result = len(raw_input)
         return result
@@ -357,7 +463,26 @@ class Solver2:
             print(output_row)
         return output
 
-class Solver3:
+class SolverB:
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverC:
     def solve(self, raw_input):
         result = len(raw_input)
         return result
@@ -402,6 +527,7 @@ class Template:
 if __name__ == '__main__':
     '''
     Usage
+    python GoogleCodeJam2020.py 2020.1A.1 < inputs/PatternMatching.in
     python GoogleCodeJam2020.py Solver < inputs/Solver.in
     '''
     solvers = {
@@ -411,8 +537,8 @@ if __name__ == '__main__':
         # '2020.Q.4': (ESAbATAd, 'ESAbATAd'),
         '2020.Q.5': (Indicium__Incomplete, 'Indicium'),
         '2020.1A.1': (PatternMatching, 'Pattern Matching'),
-        '2020.1A.2': (Solver2, 'PascalWalk'),
-        '2020.1A.3': (Solver3, 'Problem2020_1A_3'),
+        '2020.1A.2': (Solver, 'PascalWalk'),
+        # '2020.1A.3': (SolverC, 'Problem2020_1A_3'),
         # '2020.1A.4': (Problem2020_1A_4, 'Problem2020_1A_4'),
         # '2020.1B.1': (Expogo, 'Expogo'),
         # '2020.1B.2': (BlindfoldedBullseye, 'Blindfolded Bullseye'),
