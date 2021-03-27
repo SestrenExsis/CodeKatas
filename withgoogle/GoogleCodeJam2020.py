@@ -366,6 +366,9 @@ class Solver: # 2020.1A.2
         return result
 
     def solve(self, target):
+        # Go down the lefthand-center column of the triangle until you are halfway there
+        # Then proceed up the rightand-center of the column, zip to the righthand edge
+        # if you need to
         result = target
         return result
     
