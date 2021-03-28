@@ -168,7 +168,7 @@ class ReversortEngineering: # 2021.Q.C
             print(output_row)
         return output
 
-class SolverE:
+class CheatingDetection:
     '''
     2020.Q.E
     https://codingcompetitions.withgoogle.com/codejam/round/000000000043580a/00000000006d1155
@@ -225,9 +225,9 @@ class SolverE:
     
     def main(self):
         test_count = int(input())
+        threshold = int(input())
         output = []
         for test_id in range(1, test_count + 1):
-            threshold = int(input())
             player_answers = []
             for i in range(self.player_count):
                 player_answers.append(input())
@@ -251,7 +251,7 @@ if __name__ == '__main__':
         '2021.Q.B': (MoonsAndUmbrellas, 'Moons and Umbrellas'),
         '2021.Q.C': (ReversortEngineering, 'Reversort Engineering'),
         # '2021.Q.D': (MedianSort, 'Median Sort'),
-        'SolverE': (SolverE, 'Cheating Detection'),
+        '2021.Q.E': (CheatingDetection, 'Cheating Detection'),
         # '2021.1A.A': (PatternMatching, 'Pattern Matching'),
         # '2021.1A.B': (Solver, 'PascalWalk'),
         # '2021.1A.C': (SolverC, 'Problem2020_1A_3'),
