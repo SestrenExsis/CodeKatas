@@ -343,92 +343,74 @@ class Solver: # 2020.1A.2
     2020.1A.2 (Pascal Walk)
     https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd74/00000000002b1353
     '''
-    pascal_memo = {}
-
-    def pascal(self, row: int, col: int) -> int:
-        assert col <= row
-        result = 1
-        if row == 1:
-            result = 1
-        elif col in (1, row):
-            result = 1
-        elif col in (2, row - 1):
-            result = row - 1
-        elif (row, col) in self.pascal_memo:
-            result = self.pascal_memo[(row, col)]
-        elif (row, row - col + 1) in self.pascal_memo:
-            result = self.pascal_memo[(row, row - col + 1)]
-        else:
-            a = self.pascal(row - 1, col)
-            b = self.pascal(row - 1, col - 1)
-            result = a + b
-            self.pascal_memo[(row, min(col, row - col + 1))] = result
+    
+    def get_next_row(self, pascal_row: list) -> list:
+        # This:         [1, 4, 6, 4, 1]
+        # Becomes this: [1, 5, 10, 10, 5, 1]
+        next_row = [1] * (len(pascal_row) + 1)
+        for i in range(1, len(next_row) - 1):
+            next_row[i] = pascal_row[i - 1] + pascal_row[i]
+        result = next_row
+        return result
+    
+    def get_prev_row(self, pascal_row: list) -> list:
+        # This:         [1, 5, 10, 10, 5, 1]
+        # Becomes this: [1, 4, 6, 4, 1]
+        if len(pascal_row) < 2:
+            return pascal_row
+        prev_row = [1] * (len(pascal_row) - 1)
+        for i in range(1, len(pascal_row) - 1):
+            prev_row[i] = pascal_row[i] - prev_row[i - 1]
+        result = prev_row
         return result
 
     def solve(self, target):
         # Go down the lefthand-center column of the triangle until you are halfway there
-        # Then proceed up the rightand-center of the column, zip to the righthand edge
+        # Then proceed up the righthand-center of the column, zip to the righthand edge
         # if you need to
         result = target
         return result
     
     def run_tests(self):
-        # 1: 1
-        assert self.pascal(1, 1) == 1
-        # 2: 1 1
-        assert self.pascal(2, 1) == 1
-        assert self.pascal(2, 2) == 1
-        # 3: 1 2 1
-        assert self.pascal(3, 1) == 1
-        assert self.pascal(3, 2) == 2
-        assert self.pascal(3, 3) == 1
-        # 4: 1 3 3 1
-        assert self.pascal(4, 1) == 1
-        assert self.pascal(4, 2) == 3
-        assert self.pascal(4, 3) == 3
-        assert self.pascal(4, 4) == 1
-        # 5: 1 4 6 4 1
-        assert self.pascal(5, 1) == 1
-        assert self.pascal(5, 2) == 4
-        assert self.pascal(5, 3) == 6
-        assert self.pascal(5, 4) == 4
-        assert self.pascal(5, 5) == 1
-        # 6: 1 5 10 10 5 1
-        assert self.pascal(6, 1) == 1
-        assert self.pascal(6, 2) == 5
-        assert self.pascal(6, 3) == 10
-        assert self.pascal(6, 4) == 10
-        assert self.pascal(6, 5) == 5
-        assert self.pascal(6, 6) == 1
-        # 7: 1 6 15 20 15 6 1
-        assert self.pascal(7, 1) == 1
-        assert self.pascal(7, 2) == 6
-        assert self.pascal(7, 3) == 15
-        assert self.pascal(7, 4) == 20
-        assert self.pascal(7, 5) == 15
-        assert self.pascal(7, 6) == 6
-        assert self.pascal(7, 7) == 1
-        # 8: 1 7 21 35 35 21 7 1
-        assert self.pascal(8, 1) == 1
-        assert self.pascal(8, 2) == 7
-        assert self.pascal(8, 3) == 21
-        assert self.pascal(8, 4) == 35
-        assert self.pascal(8, 5) == 35
-        assert self.pascal(8, 6) == 21
-        assert self.pascal(8, 7) == 7
-        assert self.pascal(8, 8) == 1
-        # 9: 1 8 28 56 70 56 28 8 1
-        assert self.pascal(9, 1) == 1
-        assert self.pascal(9, 2) == 8
-        assert self.pascal(9, 3) == 28
-        assert self.pascal(9, 4) == 56
-        assert self.pascal(9, 5) == 70
-        assert self.pascal(9, 6) == 56
-        assert self.pascal(9, 7) == 28
-        assert self.pascal(9, 8) == 8
-        assert self.pascal(9, 9) == 1
+        pascal_row = [1]
+        # Descend
+        pascal_row = self.get_next_row(pascal_row)
+        assert pascal_row == [1, 1]
+        pascal_row = self.get_next_row(pascal_row)
+        assert pascal_row == [1, 2, 1]
+        pascal_row = self.get_next_row(pascal_row)
+        assert pascal_row == [1, 3, 3, 1]
+        pascal_row = self.get_next_row(pascal_row)
+        assert pascal_row == [1, 4, 6, 4, 1]
+        pascal_row = self.get_next_row(pascal_row)
+        assert pascal_row == [1, 5, 10, 10, 5, 1]
+        pascal_row = self.get_next_row(pascal_row)
+        assert pascal_row == [1, 6, 15, 20, 15, 6, 1]
+        pascal_row = self.get_next_row(pascal_row)
+        assert pascal_row == [1, 7, 21, 35, 35, 21, 7, 1]
+        pascal_row = self.get_next_row(pascal_row)
+        assert pascal_row == [1, 8, 28, 56, 70, 56, 28, 8, 1]
+        # Ascend
+        pascal_row = self.get_prev_row(pascal_row)
+        print(pascal_row)
+        assert pascal_row == [1, 7, 21, 35, 35, 21, 7, 1]
+        pascal_row = self.get_prev_row(pascal_row)
+        assert pascal_row == [1, 6, 15, 20, 15, 6, 1]
+        pascal_row = self.get_prev_row(pascal_row)
+        assert pascal_row == [1, 5, 10, 10, 5, 1]
+        pascal_row = self.get_prev_row(pascal_row)
+        assert pascal_row == [1, 4, 6, 4, 1]
+        pascal_row = self.get_prev_row(pascal_row)
+        assert pascal_row == [1, 3, 3, 1]
+        pascal_row = self.get_prev_row(pascal_row)
+        assert pascal_row == [1, 2, 1]
+        pascal_row = self.get_prev_row(pascal_row)
+        assert pascal_row == [1, 1]
+        pascal_row = self.get_prev_row(pascal_row)
+        assert pascal_row == [1]
+        pascal_row = self.get_prev_row(pascal_row)
+        assert pascal_row == [1]
         print('All tests pass')
-        print('Size of memo:', len(self.pascal_memo))
     
     def main(self):
         # Max number of steps in the walk is 500
