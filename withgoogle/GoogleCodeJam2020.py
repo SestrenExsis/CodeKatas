@@ -344,72 +344,112 @@ class Solver: # 2020.1A.2
     https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd74/00000000002b1353
     '''
     
-    def get_next_row(self, pascal_row: list) -> list:
+    def get_next_pascal(self, pascal: list) -> list:
         # This:         [1, 4, 6, 4, 1]
         # Becomes this: [1, 5, 10, 10, 5, 1]
-        next_row = [1] * (len(pascal_row) + 1)
-        for i in range(1, len(next_row) - 1):
-            next_row[i] = pascal_row[i - 1] + pascal_row[i]
-        result = next_row
+        next_pascal = [1] * (len(pascal) + 1)
+        for i in range(1, len(next_pascal) - 1):
+            next_pascal[i] = pascal[i - 1] + pascal[i]
+        result = next_pascal
         return result
     
-    def get_prev_row(self, pascal_row: list) -> list:
+    def get_prev_pascal(self, pascal: list) -> list:
         # This:         [1, 5, 10, 10, 5, 1]
         # Becomes this: [1, 4, 6, 4, 1]
-        if len(pascal_row) < 2:
-            return pascal_row
-        prev_row = [1] * (len(pascal_row) - 1)
-        for i in range(1, len(pascal_row) - 1):
-            prev_row[i] = pascal_row[i] - prev_row[i - 1]
-        result = prev_row
+        if len(pascal) < 2:
+            return pascal
+        prev_pascal = [1] * (len(pascal) - 1)
+        for i in range(1, len(pascal) - 1):
+            prev_pascal[i] = pascal[i] - prev_pascal[i - 1]
+        result = prev_pascal
         return result
 
     def solve(self, target):
         # Go down the lefthand-center column of the triangle until you are halfway there
         # Then proceed up the righthand-center of the column, zip to the righthand edge
-        # if you need to
-        result = target
+        if target == 1:
+            return [(1, 1)]
+        elif target == 2:
+            return [(1, 1), (2, 1)]
+        elif target == 3:
+            return [(1, 1), (2, 1), (2, 2)]
+        row = 1
+        col = 1
+        pascal = [1]
+        score = 0
+        path = []
+        while True:
+            score += pascal[col - 1]
+            path.append((row, col))
+            row += 1
+            col = (row + 1) // 2
+            pascal = self.get_next_pascal(pascal)
+            walk_back_score = sum(pascal[col + 1:])
+            if score + walk_back_score >= target:
+                break
+        col += 1
+        score += pascal[col - 1]
+        path.append((row, col))
+        pascal = self.get_prev_pascal(pascal)
+        row -= 1
+        score += pascal[col - 1]
+        path.append((row, col))
+        while score < target:
+            if col == len(pascal):
+                pascal = self.get_next_pascal(pascal)
+                row += 1
+                col = len(pascal)
+                score += pascal[col - 1]
+                path.append((row, col))
+            else:
+                col += 1
+                score += pascal[col - 1]
+                path.append((row, col))
+        result = path
+        if score != target:
+            print('score =', score, 'target =', target, 'path = ', path)
+        assert score == target
         return result
     
     def run_tests(self):
-        pascal_row = [1]
+        pascal = [1]
         # Descend
-        pascal_row = self.get_next_row(pascal_row)
-        assert pascal_row == [1, 1]
-        pascal_row = self.get_next_row(pascal_row)
-        assert pascal_row == [1, 2, 1]
-        pascal_row = self.get_next_row(pascal_row)
-        assert pascal_row == [1, 3, 3, 1]
-        pascal_row = self.get_next_row(pascal_row)
-        assert pascal_row == [1, 4, 6, 4, 1]
-        pascal_row = self.get_next_row(pascal_row)
-        assert pascal_row == [1, 5, 10, 10, 5, 1]
-        pascal_row = self.get_next_row(pascal_row)
-        assert pascal_row == [1, 6, 15, 20, 15, 6, 1]
-        pascal_row = self.get_next_row(pascal_row)
-        assert pascal_row == [1, 7, 21, 35, 35, 21, 7, 1]
-        pascal_row = self.get_next_row(pascal_row)
-        assert pascal_row == [1, 8, 28, 56, 70, 56, 28, 8, 1]
+        pascal = self.get_next_pascal(pascal)
+        assert pascal == [1, 1]
+        pascal = self.get_next_pascal(pascal)
+        assert pascal == [1, 2, 1]
+        pascal = self.get_next_pascal(pascal)
+        assert pascal == [1, 3, 3, 1]
+        pascal = self.get_next_pascal(pascal)
+        assert pascal == [1, 4, 6, 4, 1]
+        pascal = self.get_next_pascal(pascal)
+        assert pascal == [1, 5, 10, 10, 5, 1]
+        pascal = self.get_next_pascal(pascal)
+        assert pascal == [1, 6, 15, 20, 15, 6, 1]
+        pascal = self.get_next_pascal(pascal)
+        assert pascal == [1, 7, 21, 35, 35, 21, 7, 1]
+        pascal = self.get_next_pascal(pascal)
+        assert pascal == [1, 8, 28, 56, 70, 56, 28, 8, 1]
         # Ascend
-        pascal_row = self.get_prev_row(pascal_row)
-        print(pascal_row)
-        assert pascal_row == [1, 7, 21, 35, 35, 21, 7, 1]
-        pascal_row = self.get_prev_row(pascal_row)
-        assert pascal_row == [1, 6, 15, 20, 15, 6, 1]
-        pascal_row = self.get_prev_row(pascal_row)
-        assert pascal_row == [1, 5, 10, 10, 5, 1]
-        pascal_row = self.get_prev_row(pascal_row)
-        assert pascal_row == [1, 4, 6, 4, 1]
-        pascal_row = self.get_prev_row(pascal_row)
-        assert pascal_row == [1, 3, 3, 1]
-        pascal_row = self.get_prev_row(pascal_row)
-        assert pascal_row == [1, 2, 1]
-        pascal_row = self.get_prev_row(pascal_row)
-        assert pascal_row == [1, 1]
-        pascal_row = self.get_prev_row(pascal_row)
-        assert pascal_row == [1]
-        pascal_row = self.get_prev_row(pascal_row)
-        assert pascal_row == [1]
+        pascal = self.get_prev_pascal(pascal)
+        print(pascal)
+        assert pascal == [1, 7, 21, 35, 35, 21, 7, 1]
+        pascal = self.get_prev_pascal(pascal)
+        assert pascal == [1, 6, 15, 20, 15, 6, 1]
+        pascal = self.get_prev_pascal(pascal)
+        assert pascal == [1, 5, 10, 10, 5, 1]
+        pascal = self.get_prev_pascal(pascal)
+        assert pascal == [1, 4, 6, 4, 1]
+        pascal = self.get_prev_pascal(pascal)
+        assert pascal == [1, 3, 3, 1]
+        pascal = self.get_prev_pascal(pascal)
+        assert pascal == [1, 2, 1]
+        pascal = self.get_prev_pascal(pascal)
+        assert pascal == [1, 1]
+        pascal = self.get_prev_pascal(pascal)
+        assert pascal == [1]
+        pascal = self.get_prev_pascal(pascal)
+        assert pascal == [1]
         print('All tests pass')
     
     def main(self):
@@ -420,7 +460,11 @@ class Solver: # 2020.1A.2
         output = []
         for test_id in range(1, test_count + 1):
             target = int(input())
-            solution = self.solve(target)
+            path = self.solve(target)
+            solution = ''
+            for (row, col) in path:
+                solution += '\n'
+                solution += ' '.join([str(row), str(col)])
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
