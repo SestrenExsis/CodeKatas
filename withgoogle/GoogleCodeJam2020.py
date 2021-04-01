@@ -343,7 +343,6 @@ class Solver: # 2020.1A.2
     2020.1A.2 (Pascal Walk)
     https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd74/00000000002b1353
     '''
-    
     def get_next_pascal(self, pascal: list) -> list:
         # This:         [1, 4, 6, 4, 1]
         # Becomes this: [1, 5, 10, 10, 5, 1]
@@ -365,49 +364,42 @@ class Solver: # 2020.1A.2
         return result
 
     def solve(self, target):
-        # Go down the lefthand-center column of the triangle until you are halfway there
-        # Then proceed up the righthand-center of the column, zip to the righthand edge
         if target == 1:
             return [(1, 1)]
         elif target == 2:
             return [(1, 1), (2, 1)]
         elif target == 3:
             return [(1, 1), (2, 1), (2, 2)]
+        pascal = [1]
+        next_pascal = self.get_next_pascal(pascal)
         row = 1
         col = 1
-        pascal = [1]
-        score = 0
-        path = []
-        while True:
-            score += pascal[col - 1]
-            path.append((row, col))
-            row += 1
-            col = (row + 1) // 2
-            pascal = self.get_next_pascal(pascal)
-            walk_back_score = sum(pascal[col + 1:])
-            if score + walk_back_score >= target:
-                break
-        col += 1
-        score += pascal[col - 1]
-        path.append((row, col))
-        pascal = self.get_prev_pascal(pascal)
-        row -= 1
-        score += pascal[col - 1]
-        path.append((row, col))
+        path = [(1, 1)]
+        score = 1
         while score < target:
-            if col == len(pascal):
-                pascal = self.get_next_pascal(pascal)
-                row += 1
-                col = len(pascal)
-                score += pascal[col - 1]
-                path.append((row, col))
+            # Move preference is, in order:
+            # Southeast: (1, 1)
+            # Southwest: (1, 0)
+            # West: (0, -1)
+            move = (0, -1)
+            path_score = sum(next_pascal[:col + 1])
+            if (
+                col <= (len(pascal) // 2) and
+                score + path_score <= target
+            ):
+                move = (1, 1)
             else:
-                col += 1
-                score += pascal[col - 1]
-                path.append((row, col))
+                path_score -= next_pascal[col]
+                if score + path_score <= target:
+                    move = (1, 0)
+            row += move[0]
+            col += move[1]
+            if move[0] == 1:
+                pascal = next_pascal
+                next_pascal = self.get_next_pascal(pascal)
+            path.append((row, col))
+            score += pascal[col - 1]
         result = path
-        if score != target:
-            print('score =', score, 'target =', target, 'path = ', path)
         assert score == target
         return result
     
@@ -455,7 +447,7 @@ class Solver: # 2020.1A.2
     def main(self):
         # Max number of steps in the walk is 500
         # Max target in test set 3 is 1_000_000_000
-        self.run_tests()
+        # self.run_tests()
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
@@ -557,7 +549,7 @@ if __name__ == '__main__':
     '''
     Usage
     python GoogleCodeJam2020.py 2020.1A.1 < inputs/PatternMatching.in
-    python GoogleCodeJam2020.py Solver < inputs/Solver.in
+    python GoogleCodeJam2020.py Solver < inputs/PascalWalk.in
     '''
     solvers = {
         '2020.Q.1': (Vestigium, 'Vestigium'),
