@@ -338,7 +338,7 @@ class PatternMatching: # 2020.1A.1
             print(output_row)
         return output
 
-class Solver: # 2020.1A.2
+class PascalWalk: # 2020.1A.2
     '''
     2020.1A.2 (Pascal Walk)
     https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd74/00000000002b1353
@@ -350,17 +350,6 @@ class Solver: # 2020.1A.2
         for i in range(1, len(next_pascal) - 1):
             next_pascal[i] = pascal[i - 1] + pascal[i]
         result = next_pascal
-        return result
-    
-    def get_prev_pascal(self, pascal: list) -> list:
-        # This:         [1, 5, 10, 10, 5, 1]
-        # Becomes this: [1, 4, 6, 4, 1]
-        if len(pascal) < 2:
-            return pascal
-        prev_pascal = [1] * (len(pascal) - 1)
-        for i in range(1, len(pascal) - 1):
-            prev_pascal[i] = pascal[i] - prev_pascal[i - 1]
-        result = prev_pascal
         return result
 
     def solve(self, target):
@@ -403,51 +392,9 @@ class Solver: # 2020.1A.2
         assert score == target
         return result
     
-    def run_tests(self):
-        pascal = [1]
-        # Descend
-        pascal = self.get_next_pascal(pascal)
-        assert pascal == [1, 1]
-        pascal = self.get_next_pascal(pascal)
-        assert pascal == [1, 2, 1]
-        pascal = self.get_next_pascal(pascal)
-        assert pascal == [1, 3, 3, 1]
-        pascal = self.get_next_pascal(pascal)
-        assert pascal == [1, 4, 6, 4, 1]
-        pascal = self.get_next_pascal(pascal)
-        assert pascal == [1, 5, 10, 10, 5, 1]
-        pascal = self.get_next_pascal(pascal)
-        assert pascal == [1, 6, 15, 20, 15, 6, 1]
-        pascal = self.get_next_pascal(pascal)
-        assert pascal == [1, 7, 21, 35, 35, 21, 7, 1]
-        pascal = self.get_next_pascal(pascal)
-        assert pascal == [1, 8, 28, 56, 70, 56, 28, 8, 1]
-        # Ascend
-        pascal = self.get_prev_pascal(pascal)
-        print(pascal)
-        assert pascal == [1, 7, 21, 35, 35, 21, 7, 1]
-        pascal = self.get_prev_pascal(pascal)
-        assert pascal == [1, 6, 15, 20, 15, 6, 1]
-        pascal = self.get_prev_pascal(pascal)
-        assert pascal == [1, 5, 10, 10, 5, 1]
-        pascal = self.get_prev_pascal(pascal)
-        assert pascal == [1, 4, 6, 4, 1]
-        pascal = self.get_prev_pascal(pascal)
-        assert pascal == [1, 3, 3, 1]
-        pascal = self.get_prev_pascal(pascal)
-        assert pascal == [1, 2, 1]
-        pascal = self.get_prev_pascal(pascal)
-        assert pascal == [1, 1]
-        pascal = self.get_prev_pascal(pascal)
-        assert pascal == [1]
-        pascal = self.get_prev_pascal(pascal)
-        assert pascal == [1]
-        print('All tests pass')
-    
     def main(self):
         # Max number of steps in the walk is 500
         # Max target in test set 3 is 1_000_000_000
-        # self.run_tests()
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
@@ -457,6 +404,29 @@ class Solver: # 2020.1A.2
             for (row, col) in path:
                 solution += '\n'
                 solution += ' '.join([str(row), str(col)])
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverC: # 2020.1A.3
+    '''
+    2020.1A.3 (Square Dance)
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd74/00000000002b1355
+    '''
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
@@ -504,16 +474,61 @@ class SolverB:
         return output
 
 class SolverC:
-    def solve(self, raw_input):
-        result = len(raw_input)
+    '''
+    2020.Q.2
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
+    '''
+    def solve(self, rows: int, cols: int, floor: dict):
+        total_interest = 0
+        while True:
+            eliminations = set()
+            for (row, col) in floor:
+                neighbor_skills = []
+                # North neighbor
+                for r in range(row - 1, -1, -1):
+                    if (r, col) in floor:
+                        neighbor_skills.append(floor[(r, col)])
+                        break
+                # South neighbor
+                for r in range(row + 1, rows, 1):
+                    if (r, col) in floor:
+                        neighbor_skills.append(floor[(r, col)])
+                        break
+                # West neighbor
+                for c in range(col - 1, -1, -1):
+                    if (row, c) in floor:
+                        neighbor_skills.append(floor[(row, c)])
+                        break
+                # East neighbor
+                for c in range(col + 1, cols, 1):
+                    if (row, c) in floor:
+                        neighbor_skills.append(floor[(row, c)])
+                        break
+                if len(neighbor_skills) > 0:
+                    skill = floor[(row, col)]
+                    threshold = sum(neighbor_skills) / len(neighbor_skills)
+                    if skill < threshold:
+                        eliminations.add((row, col))
+            interest = sum(floor.values())
+            for (row, col) in eliminations:
+                floor.pop((row, col))
+            total_interest += interest
+            if len(eliminations) < 1:
+                break
+        result = total_interest
         return result
     
     def main(self):
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
-            raw_input = input()
-            solution = self.solve(raw_input)
+            rows, cols = tuple(map(int, input().split(' ')))
+            floor = {}
+            for row in range(rows):
+                dancers = tuple(map(int, input().split(' ')))
+                for col, skill in enumerate(dancers):
+                    floor[(row, col)] = skill
+            solution = self.solve(rows, cols, floor)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
@@ -523,10 +538,6 @@ class SolverC:
         return output
 
 class Template:
-    '''
-    2020.Q.2
-    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
-    '''
     def solve(self, raw_input):
         result = len(raw_input)
         return result
@@ -548,8 +559,7 @@ class Template:
 if __name__ == '__main__':
     '''
     Usage
-    python GoogleCodeJam2020.py 2020.1A.1 < inputs/PatternMatching.in
-    python GoogleCodeJam2020.py Solver < inputs/PascalWalk.in
+    python GoogleCodeJam2020.py 2020.1A.3 < inputs/SolverC.in
     '''
     solvers = {
         '2020.Q.1': (Vestigium, 'Vestigium'),
@@ -558,8 +568,8 @@ if __name__ == '__main__':
         # '2020.Q.4': (ESAbATAd, 'ESAbATAd'),
         '2020.Q.5': (Indicium__Incomplete, 'Indicium'),
         '2020.1A.1': (PatternMatching, 'Pattern Matching'),
-        '2020.1A.2': (Solver, 'PascalWalk'),
-        # '2020.1A.3': (SolverC, 'Problem2020_1A_3'),
+        '2020.1A.2': (PascalWalk, 'PascalWalk'),
+        '2020.1A.3': (SolverC, 'SquareDance'),
         # '2020.1A.4': (Problem2020_1A_4, 'Problem2020_1A_4'),
         # '2020.1B.1': (Expogo, 'Expogo'),
         # '2020.1B.2': (BlindfoldedBullseye, 'Blindfolded Bullseye'),
@@ -571,7 +581,7 @@ if __name__ == '__main__':
         # '2020.2.2': (SecurityUpdate, 'Security Update'),
         # '2020.2.3': (WormholeInOne, 'Wormhole in One'),
         # '2020.2.4': (EmacsPlusPlus, 'Emacs++'),
-        'Solver': (Solver, 'Solver'),
+        # 'Solver': (Solver, 'Solver'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('problem', help='Solve for a given problem', type=str)
