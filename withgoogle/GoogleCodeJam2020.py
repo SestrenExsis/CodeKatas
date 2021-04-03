@@ -478,22 +478,86 @@ class SolverC:
     2020.Q.2
     https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd74/00000000002b1355
     '''
-    class Node: # Quad-linked node
-        def __init__(self,
-            skill: int,
-            left: 'Node',
-            right: 'Node',
-            up: 'Node',
-            down: 'Node',
-        ):
+    class QuadNode: # Quad-linked node
+        def __init__(self, skill: int):
             self.skill = skill
-            self.left = left
-            self.right = right
-            self.up = up
-            self.down = down
+            self.north = None
+            self.south = None
+            self.west = None
+            self.east = None
         
     def solve(self, rows: int, cols: int, floor: dict):
+        '''
+        Create a 2D lattice of QuadNodes so that deletion of nodes
+        and neighbor comparisons can be O(1) time complexity
+        '''
+        nodes = {}
+        for row in range(-1, rows + 1):
+            for col in range(-1, cols + 1):
+                node = self.QuadNode(0)
+                nodes[(row, col)] = node
+        for row in range(-1, rows + 1):
+            for col in range(-1, cols + 1):
+                node = nodes[(row, col)]
+                if row > 0:
+                    north_node = nodes[(row - 1, col)]
+                    north_node.south = node
+                    node.north = north_node
+                if row < rows:
+                    south_node = nodes[(row + 1, col)]
+                    south_node.north = node
+                    node.south = south_node
+                if col > 0:
+                    west_node = nodes[(row, col - 1)]
+                    west_node.east = node
+                    node.west = west_node
+                if col < cols:
+                    east_node = nodes[(row, col + 1)]
+                    east_node.west = node
+                    node.east = east_node
+        for (row, col), skill in floor.items():
+            nodes[(row, col)].skill = skill
+        head = nodes[(-1, -1)]
         total_interest = 0
+        skills_left = sum(floor.values())
+        while True:
+            eliminations = set()
+            work = [head]
+            while len(work) > 0:
+                node = work.pop()
+                if node.east is not None:
+                    work.append(node.east)
+                if node.south is not None:
+                    work.append(node.south)
+                if node.skill < 1:
+                    continue
+                neighbor_skills = []
+                if node.north.skill >= 1:
+                    neighbor_skills.append(node.north.skill)
+                if node.south.skill >= 1:
+                    neighbor_skills.append(node.south.skill)
+                if node.west.skill >= 1:
+                    neighbor_skills.append(node.west.skill)
+                if node.east.skill >= 1:
+                    neighbor_skills.append(node.east.skill)
+                if len(neighbor_skills) > 0:
+                    threshold = sum(neighbor_skills) / len(neighbor_skills)
+                    if node.skill < threshold:
+                        eliminations.add(node)
+            interest = skills_left
+            total_interest += interest
+            for node in eliminations:
+                skills_left -= node.skill
+                north_node = node.north
+                south_node = node.south
+                north_node.south = south_node
+                south_node.north = north_node
+                west_node = node.west
+                east_node = node.east
+                west_node.east = east_node
+                east_node.west = west_node
+            if len(eliminations) < 1:
+                break
         result = total_interest
         return result
 
@@ -547,7 +611,7 @@ class SolverC:
                 dancers = tuple(map(int, input().split(' ')))
                 for col, skill in enumerate(dancers):
                     floor[(row, col)] = skill
-            solution = self.brute_force(rows, cols, floor)
+            solution = self.solve(rows, cols, floor)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
