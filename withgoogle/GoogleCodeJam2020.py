@@ -476,9 +476,28 @@ class SolverB:
 class SolverC:
     '''
     2020.Q.2
-    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd74/00000000002b1355
     '''
+    class Node: # Quad-linked node
+        def __init__(self,
+            skill: int,
+            left: 'Node',
+            right: 'Node',
+            up: 'Node',
+            down: 'Node',
+        ):
+            self.skill = skill
+            self.left = left
+            self.right = right
+            self.up = up
+            self.down = down
+        
     def solve(self, rows: int, cols: int, floor: dict):
+        total_interest = 0
+        result = total_interest
+        return result
+
+    def brute_force(self, rows: int, cols: int, floor: dict):
         total_interest = 0
         while True:
             eliminations = set()
@@ -528,7 +547,7 @@ class SolverC:
                 dancers = tuple(map(int, input().split(' ')))
                 for col, skill in enumerate(dancers):
                     floor[(row, col)] = skill
-            solution = self.solve(rows, cols, floor)
+            solution = self.brute_force(rows, cols, floor)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
