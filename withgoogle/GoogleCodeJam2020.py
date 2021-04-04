@@ -475,35 +475,68 @@ class SolverB:
 
 class SolverC:
     '''
-    2020.Q.2
+    2020.Q.3
     https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd74/00000000002b1355
     '''
-    class QuadNode: # Quad-linked node
+    class Dancer:
         def __init__(self, skill: int):
             self.skill = skill
+            self._eliminated_ind = False
             self.north = None
             self.south = None
             self.west = None
             self.east = None
         
-    def solve(self, rows: int, cols: int, floor: dict):
-        '''
-        Create a 2D lattice of QuadNodes so that deletion of nodes
-        and neighbor comparisons can be O(1) time complexity
-        '''
+        def get_neighbors(self):
+            neighbors = set(
+                dancer for dancer in
+                (
+                    self.north,
+                    self.south,
+                    self.west,
+                    self.east,
+                ) if
+                dancer is not None and dancer.skill > 0
+            )
+            result = neighbors
+            return result
+
+        @property
+        def eliminated_ind(self):
+            neighbors = self.get_neighbors()
+            if len(neighbors) > 0:
+                threshold = sum(
+                    neighbor.skill for neighbor in
+                    neighbors
+                ) / len(neighbors)
+                self._eliminated_ind = self.skill < threshold
+            result = self._eliminated_ind
+            return result
+        
+        def remove(self):
+            if self.north is not None:
+                self.north.south = self.south
+            if self.south is not None:
+                self.south.north = self.north
+            if self.west is not None:
+                self.west.east = self.east
+            if self.east is not None:
+                self.east.west = self.west
+    
+    def get_dancers(self, rows: int, cols: int, floor: dict):
         nodes = {}
-        for row in range(-1, rows + 1):
-            for col in range(-1, cols + 1):
-                node = self.QuadNode(0)
+        for row in range(rows):
+            for col in range(cols):
+                node = self.Dancer(0)
                 nodes[(row, col)] = node
-        for row in range(-1, rows + 1):
-            for col in range(-1, cols + 1):
+        for row in range(rows):
+            for col in range(cols):
                 node = nodes[(row, col)]
                 if row > 0:
                     north_node = nodes[(row - 1, col)]
                     north_node.south = node
                     node.north = north_node
-                if row < rows:
+                if row < rows - 1:
                     south_node = nodes[(row + 1, col)]
                     south_node.north = node
                     node.south = south_node
@@ -511,94 +544,39 @@ class SolverC:
                     west_node = nodes[(row, col - 1)]
                     west_node.east = node
                     node.west = west_node
-                if col < cols:
+                if col < cols - 1:
                     east_node = nodes[(row, col + 1)]
                     east_node.west = node
                     node.east = east_node
         for (row, col), skill in floor.items():
             nodes[(row, col)].skill = skill
-        head = nodes[(-1, -1)]
-        total_interest = 0
-        skills_left = sum(floor.values())
-        while True:
-            eliminations = set()
-            work = [head]
-            while len(work) > 0:
-                node = work.pop()
-                if node.east is not None:
-                    work.append(node.east)
-                if node.south is not None:
-                    work.append(node.south)
-                if node.skill < 1:
-                    continue
-                neighbor_skills = []
-                if node.north.skill >= 1:
-                    neighbor_skills.append(node.north.skill)
-                if node.south.skill >= 1:
-                    neighbor_skills.append(node.south.skill)
-                if node.west.skill >= 1:
-                    neighbor_skills.append(node.west.skill)
-                if node.east.skill >= 1:
-                    neighbor_skills.append(node.east.skill)
-                if len(neighbor_skills) > 0:
-                    threshold = sum(neighbor_skills) / len(neighbor_skills)
-                    if node.skill < threshold:
-                        eliminations.add(node)
-            interest = skills_left
-            total_interest += interest
-            for node in eliminations:
-                skills_left -= node.skill
-                north_node = node.north
-                south_node = node.south
-                north_node.south = south_node
-                south_node.north = north_node
-                west_node = node.west
-                east_node = node.east
-                west_node.east = east_node
-                east_node.west = west_node
-            if len(eliminations) < 1:
-                break
-        result = total_interest
+        dancers = set(node for node in nodes.values() if node.skill > 0)
+        result = dancers
         return result
-
-    def brute_force(self, rows: int, cols: int, floor: dict):
-        total_interest = 0
+    
+    def solve(self, dancers: set):
+        interest = []
+        skills_left = sum(dancer.skill for dancer in dancers)
+        interest.append(skills_left)
+        dancers_to_check = set(dancers)
         while True:
-            eliminations = set()
-            for (row, col) in floor:
-                neighbor_skills = []
-                # North neighbor
-                for r in range(row - 1, -1, -1):
-                    if (r, col) in floor:
-                        neighbor_skills.append(floor[(r, col)])
-                        break
-                # South neighbor
-                for r in range(row + 1, rows, 1):
-                    if (r, col) in floor:
-                        neighbor_skills.append(floor[(r, col)])
-                        break
-                # West neighbor
-                for c in range(col - 1, -1, -1):
-                    if (row, c) in floor:
-                        neighbor_skills.append(floor[(row, c)])
-                        break
-                # East neighbor
-                for c in range(col + 1, cols, 1):
-                    if (row, c) in floor:
-                        neighbor_skills.append(floor[(row, c)])
-                        break
-                if len(neighbor_skills) > 0:
-                    skill = floor[(row, col)]
-                    threshold = sum(neighbor_skills) / len(neighbor_skills)
-                    if skill < threshold:
-                        eliminations.add((row, col))
-            interest = sum(floor.values())
-            for (row, col) in eliminations:
-                floor.pop((row, col))
-            total_interest += interest
+            eliminations = set(
+                dancer for dancer in
+                dancers_to_check if
+                dancer.eliminated_ind
+            )
+            dancers_to_check = set()
+            for dancer in eliminations:
+                for neighbor in dancer.get_neighbors():
+                    if not neighbor.eliminated_ind:
+                        dancers_to_check.add(neighbor)
             if len(eliminations) < 1:
                 break
-        result = total_interest
+            for dancer in eliminations:
+                skills_left -= dancer.skill
+                dancer.remove()
+            interest.append(skills_left)
+        result = sum(interest)
         return result
     
     def main(self):
@@ -608,10 +586,11 @@ class SolverC:
             rows, cols = tuple(map(int, input().split(' ')))
             floor = {}
             for row in range(rows):
-                dancers = tuple(map(int, input().split(' ')))
-                for col, skill in enumerate(dancers):
+                skills = tuple(map(int, input().split(' ')))
+                for col, skill in enumerate(skills):
                     floor[(row, col)] = skill
-            solution = self.solve(rows, cols, floor)
+            dancers = self.get_dancers(rows, cols, floor)
+            solution = self.solve(dancers)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
