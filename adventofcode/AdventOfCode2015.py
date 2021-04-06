@@ -57,6 +57,55 @@ class Template: # Template
         result = solutions
         return result
 
+class Day02: # I Was Told There Would Be No Math
+    '''
+    I Was Told There Would Be No Math
+    https://adventofcode.com/2015/day/2
+    '''
+    def get_dimensions(self, raw_input_lines: List[str]):
+        dimensions = []
+        for raw_input_line in raw_input_lines:
+            # Dimension = (Length, Width, Height)
+            dimension = tuple(map(int, raw_input_line.split('x')))
+            dimensions.append(dimension)
+        result = dimensions
+        return result
+    
+    def solve(self, dimensions: List[Tuple[int]]):
+        wrapping_paper = []
+        for dimension in dimensions:
+            l, w, h = dimension
+            smallest_side = min((l * w, w * h, h * l))
+            needed = 2 * l * w + 2 * w * h + 2 * h * l + smallest_side
+            wrapping_paper.append(needed)
+        result = sum(wrapping_paper)
+        return result
+    
+    def solve2(self, dimensions: List[Tuple[int]]):
+        ribbon = []
+        for dimension in dimensions:
+            l, w, h = dimension
+            perimeters = [
+                2 * (l + w),
+                2 * (w + h),
+                2 * (h + l),
+            ]
+            volume = l * w * h
+            needed = min(perimeters) + volume
+            ribbon.append(needed)
+        result = sum(ribbon)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        dimensions = self.get_dimensions(raw_input_lines)
+        solutions = (
+            self.solve(dimensions),
+            self.solve2(dimensions),
+            )
+        result = solutions
+        return result
+
 class Day01: # Not Quite Lisp
     '''
     Not Quite Lisp
@@ -102,11 +151,11 @@ class Day01: # Not Quite Lisp
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2015.py 1 < inputs/2015day01.in
+    python AdventOfCode2015.py 2 < inputs/2015day02.in
     '''
     solvers = {
         1: (Day01, 'Not Quite Lisp'),
-    #     2: (Day02, '???'),
+        2: (Day02, 'I Was Told There Would Be No Math'),
     #     3: (Day03, '???'),
     #     4: (Day04, '???'),
     #     5: (Day05, '???'),
