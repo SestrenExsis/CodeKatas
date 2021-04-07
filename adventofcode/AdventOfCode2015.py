@@ -58,6 +58,86 @@ class Template: # Template
         result = solutions
         return result
 
+class Day05: # Doesn't He Have Intern-Elves For This?
+    '''
+    Doesn't He Have Intern-Elves For This?
+    https://adventofcode.com/2015/day/5
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        '''
+        Nice strings:
+            Contain at least three vowels (aeiou)
+            Contain at least one letter that appears twice in a row
+            Do not contain the strings ab, cd, pq, or xy
+        '''
+        nice_string_count = 0
+        for string in parsed_input:
+            nice_ind = all([
+                sum([
+                    string.count('a'),
+                    string.count('e'),
+                    string.count('i'),
+                    string.count('o'),
+                    string.count('u'),
+                ]) >= 3,
+                any(
+                    string[i] == string[i - 1] for
+                    i in range(1, len(string))
+                ),
+                all([
+                    'ab' not in string,
+                    'cd' not in string,
+                    'pq' not in string,
+                    'xy' not in string,
+                ]),
+            ])
+            if nice_ind:
+                nice_string_count += 1
+        result = nice_string_count
+        return result
+    
+    def solve2(self, parsed_input):
+        '''
+        Nice strings:
+            Contain a pair of any two letters that appear twice without overlapping
+            Contain at least one letter which repeats with ONE letter between them
+        '''
+        nice_string_count = 0
+        for string in parsed_input:
+            pairs = {}
+            duplicate_pair_found = False
+            triplet_found = False
+            for i in range(1, len(string)):
+                pair = string[i - 1:i + 1]
+                if pair in pairs and pairs[pair] < i - 1:
+                    duplicate_pair_found = True
+                if pair not in pairs:
+                    pairs[pair] = i
+                if i < len(string) - 1:
+                    triplet = string[i - 1: i + 2]
+                    if triplet[0] == triplet[2]:
+                        triplet_found = True
+            if duplicate_pair_found and triplet_found:
+                nice_string_count += 1
+        result = nice_string_count
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day04: # The Ideal Stocking Stuffer
     '''
     The Ideal Stocking Stuffer
@@ -253,14 +333,14 @@ class Day01: # Not Quite Lisp
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2015.py 4 < inputs/2015day04.in
+    python AdventOfCode2015.py 5 < inputs/2015day05.in
     '''
     solvers = {
         1: (Day01, 'Not Quite Lisp'),
         2: (Day02, 'I Was Told There Would Be No Math'),
         3: (Day03, 'Perfectly Spherical Houses in a Vacuum'),
         4: (Day04, 'The Ideal Stocking Stuffer'),
-    #     5: (Day05, '???'),
+        5: (Day05, 'Doesn\'t He Have Intern-Elves For This?'),
     #     6: (Day06, '???'),
     #     7: (Day07, '???'),
     #     8: (Day08, '???'),
