@@ -57,6 +57,64 @@ class Template: # Template
         result = solutions
         return result
 
+class Day03: # Perfectly Spherical Houses in a Vacuum
+    '''
+    Perfectly Spherical Houses in a Vacuum
+    https://adventofcode.com/2015/day/3
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = raw_input_lines[0]
+        return result
+    
+    def solve(self, parsed_input):
+        row = 0
+        col = 0
+        houses = set()
+        for char in parsed_input:
+            if char == '^':
+                row -= 1
+            elif char == '>':
+                col += 1
+            elif char == 'v':
+                row += 1
+            elif char == '<':
+                col -= 1
+            houses.add((row, col))
+        result = len(houses)
+        return result
+    
+    def solve2(self, parsed_input):
+        santa_id = 0
+        santas = [
+            (0, 0),
+            (0, 0),
+            ]
+        houses = set()
+        for char in parsed_input:
+            pos = santas[santa_id]
+            if char == '^':
+                santas[santa_id] = (pos[0] - 1, pos[1])
+            elif char == 'v':
+                santas[santa_id] = (pos[0] + 1, pos[1])
+            elif char == '<':
+                santas[santa_id] = (pos[0], pos[1] - 1)
+            elif char == '>':
+                santas[santa_id] = (pos[0], pos[1] + 1)
+            houses.add(santas[santa_id])
+            santa_id = 1 - santa_id
+        result = len(houses)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day02: # I Was Told There Would Be No Math
     '''
     I Was Told There Would Be No Math
@@ -151,12 +209,12 @@ class Day01: # Not Quite Lisp
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2015.py 2 < inputs/2015day02.in
+    python AdventOfCode2015.py 3 < inputs/2015day03.in
     '''
     solvers = {
         1: (Day01, 'Not Quite Lisp'),
         2: (Day02, 'I Was Told There Would Be No Math'),
-    #     3: (Day03, '???'),
+        3: (Day03, 'Perfectly Spherical Houses in a Vacuum'),
     #     4: (Day04, '???'),
     #     5: (Day05, '???'),
     #     6: (Day06, '???'),
