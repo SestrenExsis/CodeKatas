@@ -9,6 +9,7 @@ import copy
 import datetime
 import functools
 import heapq
+import hashlib
 import operator
 import re
 import time
@@ -53,6 +54,49 @@ class Template: # Template
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day04: # The Ideal Stocking Stuffer
+    '''
+    The Ideal Stocking Stuffer
+    https://adventofcode.com/2015/day/4
+    '''
+    def get_secret_key(self, raw_input_lines: List[str]):
+        result = raw_input_lines[0]
+        return result
+    
+    def solve(self, secret_key):
+        num = 0
+        while True:
+            algorithm = hashlib.md5()
+            key = secret_key + str(num)
+            algorithm.update(key.encode('utf-8'))
+            if algorithm.hexdigest()[:5] == '00000':
+                break
+            num += 1
+        result = num
+        return result
+    
+    def solve2(self, secret_key):
+        num = 0
+        while True:
+            algorithm = hashlib.md5()
+            key = secret_key + str(num)
+            algorithm.update(key.encode('utf-8'))
+            if algorithm.hexdigest()[:6] == '000000':
+                break
+            num += 1
+        result = num
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        secret_key = self.get_secret_key(raw_input_lines)
+        solutions = (
+            self.solve(secret_key),
+            self.solve2(secret_key),
             )
         result = solutions
         return result
@@ -209,13 +253,13 @@ class Day01: # Not Quite Lisp
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2015.py 3 < inputs/2015day03.in
+    python AdventOfCode2015.py 4 < inputs/2015day04.in
     '''
     solvers = {
         1: (Day01, 'Not Quite Lisp'),
         2: (Day02, 'I Was Told There Would Be No Math'),
         3: (Day03, 'Perfectly Spherical Houses in a Vacuum'),
-    #     4: (Day04, '???'),
+        4: (Day04, 'The Ideal Stocking Stuffer'),
     #     5: (Day05, '???'),
     #     6: (Day06, '???'),
     #     7: (Day07, '???'),
