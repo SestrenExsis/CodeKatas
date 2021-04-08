@@ -58,6 +58,73 @@ class Template: # Template
         result = solutions
         return result
 
+class Day06: # Probably a Fire Hazard
+    '''
+    Probably a Fire Hazard
+    https://adventofcode.com/2015/day/6
+    '''
+    def get_instructions(self, raw_input_lines: List[str]):
+        instructions = []
+        for raw_input_line in raw_input_lines:
+            a, b = raw_input_line.split(' through ')
+            mode = 'ERROR'
+            if 'toggle' in a:
+                a1, a2 = a.split(' ')
+                left, top = tuple(map(int, a2.split(',')))
+                mode = 'toggle'
+            else:
+                a1, a2, a3 = a.split(' ')
+                left, top = tuple(map(int, a3.split(',')))
+                if a2 == 'on':
+                    mode = 'turn_on'
+                elif a2 == 'off':
+                    mode = 'turn_off'
+            right, bottom = tuple(map(int, b.split(',')))
+            instruction = (mode, left, top, right, bottom)
+            instructions.append(instruction)
+        result = instructions
+        return result
+    
+    def solve(self, instructions):
+        lights = [0] * (1000 * 1000)
+        for mode, left, top, right, bottom in instructions:
+            for row in range(top, bottom + 1):
+                for col in range(left, right + 1):
+                    index = 1000 * row + col
+                    if mode == 'turn_on':
+                        lights[index] = 1
+                    elif mode == 'turn_off':
+                        lights[index] = 0
+                    elif mode == 'toggle':
+                        lights[index] =  1 - lights[index]
+        result = sum(lights)
+        return result
+    
+    def solve2(self, instructions):
+        lights = [0] * (1000 * 1000)
+        for mode, left, top, right, bottom in instructions:
+            for row in range(top, bottom + 1):
+                for col in range(left, right + 1):
+                    index = 1000 * row + col
+                    if mode == 'turn_on':
+                        lights[index] += 1
+                    elif mode == 'turn_off':
+                        lights[index] = max(0, lights[index] - 1)
+                    elif mode == 'toggle':
+                        lights[index] += 2
+        result = sum(lights)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        instructions = self.get_instructions(raw_input_lines)
+        solutions = (
+            self.solve(instructions),
+            self.solve2(instructions),
+            )
+        result = solutions
+        return result
+
 class Day05: # Doesn't He Have Intern-Elves For This?
     '''
     Doesn't He Have Intern-Elves For This?
@@ -333,7 +400,7 @@ class Day01: # Not Quite Lisp
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2015.py 5 < inputs/2015day05.in
+    python AdventOfCode2015.py 6 < inputs/2015day06.in
     '''
     solvers = {
         1: (Day01, 'Not Quite Lisp'),
@@ -341,7 +408,7 @@ if __name__ == '__main__':
         3: (Day03, 'Perfectly Spherical Houses in a Vacuum'),
         4: (Day04, 'The Ideal Stocking Stuffer'),
         5: (Day05, 'Doesn\'t He Have Intern-Elves For This?'),
-    #     6: (Day06, '???'),
+        6: (Day06, 'Probably a Fire Hazard'),
     #     7: (Day07, '???'),
     #     8: (Day08, '???'),
     #     9: (Day09, '???'),
