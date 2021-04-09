@@ -14,9 +14,101 @@ import random
 import sys
 from typing import Dict, List, Set, Tuple
 
-class Solver:
+class SolverA: # 2021.Q.A
     '''
-    2020.Q.A
+    2021.Q.A
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
+    '''
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverB: # 2021.Q.B
+    '''
+    2021.Q.B
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
+    '''
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverC: # 2021.Q.C
+    '''
+    2021.Q.C
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
+    '''
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverD: # 2021.Q.D
+    '''
+    2021.Q.D
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
+    '''
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverE: # 2021.Q.E
+    '''
+    2021.Q.E
     https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
     '''
     def solve(self, raw_input):
@@ -73,7 +165,7 @@ class Reversort: # 2021.Q.A
 
 class MoonsAndUmbrellas: # 2021.Q.B
     '''
-    2020.Q.B
+    2021.Q.B
     https://codingcompetitions.withgoogle.com/codejam/round/000000000043580a/00000000006d1145
     '''
     def solve(self, costs: dict, mural: str) -> int:
@@ -114,7 +206,7 @@ class MoonsAndUmbrellas: # 2021.Q.B
 
 class ReversortEngineering: # 2021.Q.C
     '''
-    2020.Q.C
+    2021.Q.C
     https://codingcompetitions.withgoogle.com/codejam/round/000000000043580a/00000000006d12d7
     '''
     arrays = {}
@@ -170,7 +262,7 @@ class ReversortEngineering: # 2021.Q.C
 
 class CheatingDetection:
     '''
-    2020.Q.E
+    2021.Q.E
     https://codingcompetitions.withgoogle.com/codejam/round/000000000043580a/00000000006d1155
     
     100 players
@@ -252,20 +344,11 @@ if __name__ == '__main__':
         '2021.Q.C': (ReversortEngineering, 'Reversort Engineering'),
         # '2021.Q.D': (MedianSort, 'Median Sort'),
         '2021.Q.E': (CheatingDetection, 'Cheating Detection'),
-        # '2021.1A.A': (PatternMatching, 'Pattern Matching'),
-        # '2021.1A.B': (Solver, 'PascalWalk'),
-        # '2021.1A.C': (SolverC, 'Problem2020_1A_3'),
-        # '2021.1A.D': (Problem2020_1A_4, 'Problem2020_1A_4'),
-        # '2021.1B.A': (Expogo, 'Expogo'),
-        # '2021.1B.B': (BlindfoldedBullseye, 'Blindfolded Bullseye'),
-        # '2021.1B.C': (JoinTheRanks, 'Join the Ranks'),
-        # '2021.1C.A': (OverexcitedFan, 'Overexcited Fan'),
-        # '2021.1C.B': (Overrandomized, 'Overrandomized'),
-        # '2021.1C.C': (OversizedPancakeChoppers, 'Oversized Pancake Choppers'),
-        # '2021.2.A': (IncrementalHouseOfPancakes, 'Incremental House of Pancakes'),
-        # '2021.2.B': (SecurityUpdate, 'Security Update'),
-        # '2021.2.C': (WormholeInOne, 'Wormhole in One'),
-        # '2021.2.D': (EmacsPlusPlus, 'Emacs++'),
+        # '2021.1A.A': (SolverA, '???'),
+        # '2021.1A.B': (SolverB, '???'),
+        # '2021.1A.C': (SolverC, '???'),
+        # '2021.1A.D': (SolverD, '???'),
+        # '2021.1A.E': (SolverE, '???'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('problem', help='Solve for a given problem', type=str)
