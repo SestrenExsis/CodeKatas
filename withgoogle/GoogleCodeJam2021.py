@@ -14,21 +14,38 @@ import random
 import sys
 from typing import Dict, List, Set, Tuple
 
-class SolverA: # 2021.Q.A
+class AppendSort: # 2021.Q.A
     '''
     2021.Q.A
-    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000043585d/00000000007549e5
+    When we append something, we might as well append the smallest number it takes to make it bigger
+    Either the current number is already big enough, in which case we do nothing, or ...
+    it needs to be made
+    N[i] = smallest number bigger than N[i - 1] that starts with the digits in N[i]
+
     '''
-    def solve(self, raw_input):
-        result = len(raw_input)
+    def solve(self, nums):
+        modded_nums = nums[::]
+        prev_num = ''
+        for i in range(1, len(modded_nums)):
+            str_num = str(nums[i])
+            start = max(nums[i], modded_nums[i - 1])
+            offset = 0
+            while True:
+                if start + offset > modded_nums[i - 1] and str(start + offset).startswith(str_num):
+                    break
+                offset += 1
+            modded_nums[i] = start + offset
+        result = sum(len(str(modded_nums[i])) - len(str(nums[i])) for i in range(len(nums)))
         return result
     
     def main(self):
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
-            raw_input = input()
-            solution = self.solve(raw_input)
+            N = int(input())
+            nums = list(map(int, input().split(' ')))
+            solution = self.solve(nums)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
@@ -40,18 +57,103 @@ class SolverA: # 2021.Q.A
 class SolverB: # 2021.Q.B
     '''
     2021.Q.B
-    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000043585d/00000000007543d8
+    Test set 1 max sum is 10
+    Test set 2 max sum is 100
+    Test set 3 max sum is 10 ** 15
+
+    Start with the largest product that is <= the maximum sum,
+    work our way down until we find a match
     '''
-    def solve(self, raw_input):
-        result = len(raw_input)
+    def solve(self, deck):
+        sanity_check = self.bruteforce(deck)
+        max_score = 0
+        total_deck_value = sum(prime * count for prime, count in deck.items())
+        for product in range(total_deck_value, -1, -1):
+            remaining_product = product
+            primes = []
+            valid_ind = True
+            for candidate in range(2, 500):
+                if remaining_product == 1:
+                    break
+                if remaining_product % candidate == 0:
+                    while remaining_product % candidate == 0:
+                        if candidate not in deck or deck[candidate] < 1:
+                            valid_ind = False
+                            break
+                        deck[candidate] -= 1
+                        primes.append(candidate)
+                        remaining_product /= candidate
+            if valid_ind:
+                if sum(prime * count for prime, count in deck.items()) == product:
+                    max_score = product
+                    break
+            for prime in primes:
+                deck[prime] += 1
+        result = max_score
+        assert result == sanity_check
         return result
     
+    def bruteforce(self, deck):
+        cards = []
+        for prime, count in deck.items():
+            for _ in range(count):
+                cards.append(prime)
+        total_deck_value = sum(cards)
+        max_score = 0
+        for N in range(1, len(cards)):
+            for arrangement in itertools.combinations(cards, N):
+                total_sum = total_deck_value - sum(arrangement)
+                product = 1
+                for card in arrangement:
+                    product *= card
+                if total_sum == product:
+                    score = total_sum
+                    if score > max_score:
+                        max_score = score
+        result = max_score
+        return result
+    
+    def random_test(self):
+        max_deck_value = 10
+        primes = [2, 3, 5, 7]
+        max_cards = max_deck_value // 2
+        # primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
+        random_deck = {}
+        sanity_check = 0
+        zero_check = random.random() < 0.5
+        while True:
+            N = random.randint(1, max_cards)
+            random_deck = {}
+            total_deck_value = 0
+            for _ in range(N):
+                prime = random.choice(primes)
+                total_deck_value += prime
+                if prime not in random_deck:
+                    random_deck[prime] = 0
+                random_deck[prime] += 1
+            sanity_check = self.bruteforce(random_deck)
+            if total_deck_value <= max_deck_value:
+                if zero_check is True and sanity_check == 0:
+                    break
+                elif zero_check is not True and sanity_check != 0:
+                    break
+        print(sanity_check, random_deck)
+        solution = self.solve(random_deck)
+        assert solution == sanity_check
+    
     def main(self):
+        # for _ in range(100_000):
+        #     self.random_test()
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
-            raw_input = input()
-            solution = self.solve(raw_input)
+            M = int(input())
+            deck = {}
+            for _ in range(M):
+                prime, count = tuple(map(int, input().split(' ')))
+                deck[prime] = count
+            solution = self.solve(deck)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
@@ -63,7 +165,7 @@ class SolverB: # 2021.Q.B
 class SolverC: # 2021.Q.C
     '''
     2021.Q.C
-    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000043585d/0000000000754750
     '''
     def solve(self, raw_input):
         result = len(raw_input)
@@ -338,20 +440,24 @@ class CheatingDetection:
 if __name__ == '__main__':
     '''
     Usage
-    python GoogleCodeJam2021.py SolverE < inputs/SolverE.in
+    python GoogleCodeJam2021.py 2021.1A.A < inputs/SolverA.in
     '''
     solvers = {
-        # 'Solver': (Solver, 'Solver'),
         '2021.Q.A': (Reversort, 'Reversort'),
         '2021.Q.B': (MoonsAndUmbrellas, 'Moons and Umbrellas'),
         '2021.Q.C': (ReversortEngineering, 'Reversort Engineering'),
         # '2021.Q.D': (MedianSort, 'Median Sort'),
         '2021.Q.E': (CheatingDetection, 'Cheating Detection'),
-        # '2021.1A.A': (SolverA, '???'),
-        # '2021.1A.B': (SolverB, '???'),
-        # '2021.1A.C': (SolverC, '???'),
+        '2021.1A.A': (AppendSort, 'Append Sort'),
+        '2021.1A.B': (SolverB, 'Prime Time'),
+        '2021.1A.C': (SolverC, 'Hacked Exam'),
         # '2021.1A.D': (SolverD, '???'),
         # '2021.1A.E': (SolverE, '???'),
+        # '2021.1B.A': (SolverA, '???'),
+        # '2021.1B.B': (SolverB, '???'),
+        # '2021.1B.C': (SolverC, '???'),
+        # '2021.1B.D': (SolverD, '???'),
+        # '2021.1B.E': (SolverE, '???'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('problem', help='Solve for a given problem', type=str)
@@ -360,7 +466,6 @@ if __name__ == '__main__':
     solver = solvers[problem][0]()
     print(f'Solution for "{problem}" ({solvers[problem][1]})')
     solution = solver.main()
-    #print(f'  Answer:', solution)
 
 # Template for Submission page
 '''
