@@ -58,9 +58,9 @@ class SolverB: # 2021.Q.B
     '''
     2021.Q.B
     https://codingcompetitions.withgoogle.com/codejam/round/000000000043585d/00000000007543d8
-    Test set 1 max sum is 10
-    Test set 2 max sum is 100
-    Test set 3 max sum is 10 ** 15
+    Test set 1 max card count is 10
+    Test set 2 max card count is 100
+    Test set 3 max card count is 10 ^ 15
 
     Start with the largest product that is <= the maximum sum,
     work our way down until we find a match
@@ -69,29 +69,29 @@ class SolverB: # 2021.Q.B
         sanity_check = self.bruteforce(deck)
         max_score = 0
         total_deck_value = sum(prime * count for prime, count in deck.items())
-        for product in range(total_deck_value, -1, -1):
+        print(total_deck_value)
+        for product in range(total_deck_value // 2, -1, -1):
             remaining_product = product
             primes = []
             valid_ind = True
             for candidate in range(2, 500):
                 if remaining_product == 1:
                     break
-                if remaining_product % candidate == 0:
-                    while remaining_product % candidate == 0:
-                        if candidate not in deck or deck[candidate] < 1:
-                            valid_ind = False
-                            break
-                        deck[candidate] -= 1
-                        primes.append(candidate)
-                        remaining_product /= candidate
+                while remaining_product % candidate == 0:
+                    if candidate not in deck or deck[candidate] < 1:
+                        valid_ind = False
+                        break
+                    deck[candidate] -= 1
+                    primes.append(candidate)
+                    remaining_product //= candidate
             if valid_ind:
                 if sum(prime * count for prime, count in deck.items()) == product:
                     max_score = product
                     break
+            print(primes, deck)
             for prime in primes:
                 deck[prime] += 1
         result = max_score
-        assert result == sanity_check
         return result
     
     def bruteforce(self, deck):
@@ -114,11 +114,23 @@ class SolverB: # 2021.Q.B
         result = max_score
         return result
     
-    def random_test(self):
-        max_deck_value = 10
-        primes = [2, 3, 5, 7]
-        max_cards = max_deck_value // 2
-        # primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
+    def get_primes(self, max_prime: int) -> List[int]:
+        prime_inds = [True] * (max_prime + 1)
+        prime_inds[0] = False
+        prime_inds[1] = False
+        for num in range(2, int(math.sqrt(max_prime)) + 1):
+            if prime_inds[num]:
+                for i in range(num + num, max_prime + 1, num):
+                    prime_inds[i] = False
+        primes = []
+        for num, prime_ind in enumerate(prime_inds):
+            if prime_ind:
+                primes.append(num)
+        result = primes
+        return result
+    
+    def random_test(self, primes):
+        max_cards = 10
         random_deck = {}
         sanity_check = 0
         zero_check = random.random() < 0.5
@@ -133,18 +145,22 @@ class SolverB: # 2021.Q.B
                     random_deck[prime] = 0
                 random_deck[prime] += 1
             sanity_check = self.bruteforce(random_deck)
-            if total_deck_value <= max_deck_value:
-                if zero_check is True and sanity_check == 0:
-                    break
-                elif zero_check is not True and sanity_check != 0:
-                    break
-        print(sanity_check, random_deck)
+            if zero_check is True and sanity_check == 0:
+                break
+            elif zero_check is not True and sanity_check != 0:
+                break
         solution = self.solve(random_deck)
-        assert solution == sanity_check
+        try:
+            assert solution == sanity_check
+        except AssertionError:
+            print('Expected:', sanity_check, '\nObserved:', solution, '\nDeck:', random_deck)
+            raise AssertionError
     
     def main(self):
-        # for _ in range(100_000):
-        #     self.random_test()
+        self.solve({5: 1, 431: 2, 401: 1, 293: 1, 89: 1, 137: 1})
+        primes = self.get_primes(500)
+        for _ in range(100_000):
+            self.random_test(primes)
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
