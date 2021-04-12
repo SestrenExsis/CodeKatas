@@ -65,31 +65,32 @@ class SolverB: # 2021.Q.B
     Start with the largest product that is <= the maximum sum,
     work our way down until we find a match
     '''
-    def solve(self, deck):
-        sanity_check = self.bruteforce(deck)
+    def solve(self, deck: list, primes: list):
         max_score = 0
         total_deck_value = sum(prime * count for prime, count in deck.items())
-        print(total_deck_value)
-        for product in range(total_deck_value // 2, -1, -1):
+        for product in range(total_deck_value, -1, -1):
             remaining_product = product
-            primes = []
+            chosen_primes = []
             valid_ind = True
-            for candidate in range(2, 500):
-                if remaining_product == 1:
-                    break
+            i = 0
+            while remaining_product > 1:
+                if i >= len(primes):
+                  valid_ind = False
+                  break
+                candidate = primes[i]
                 while remaining_product % candidate == 0:
                     if candidate not in deck or deck[candidate] < 1:
                         valid_ind = False
                         break
                     deck[candidate] -= 1
-                    primes.append(candidate)
+                    chosen_primes.append(candidate)
                     remaining_product //= candidate
+                i += 1
             if valid_ind:
                 if sum(prime * count for prime, count in deck.items()) == product:
                     max_score = product
                     break
-            print(primes, deck)
-            for prime in primes:
+            for prime in chosen_primes:
                 deck[prime] += 1
         result = max_score
         return result
@@ -129,7 +130,7 @@ class SolverB: # 2021.Q.B
         result = primes
         return result
     
-    def random_test(self, primes):
+    def random_test(self, primes: list):
         max_cards = 10
         random_deck = {}
         sanity_check = 0
@@ -149,16 +150,18 @@ class SolverB: # 2021.Q.B
                 break
             elif zero_check is not True and sanity_check != 0:
                 break
-        solution = self.solve(random_deck)
+        solution = self.solve(random_deck, primes)
         try:
             assert solution == sanity_check
         except AssertionError:
-            print('Expected:', sanity_check, '\nObserved:', solution, '\nDeck:', random_deck)
+            print('Expected:', sanity_check)
+            print('Observed:', solution)
+            print('Deck:', random_deck)
             raise AssertionError
     
     def main(self):
-        self.solve({5: 1, 431: 2, 401: 1, 293: 1, 89: 1, 137: 1})
         primes = self.get_primes(500)
+        self.solve({5: 1, 431: 2, 401: 1, 293: 1, 89: 1, 137: 1}, primes)
         for _ in range(100_000):
             self.random_test(primes)
         test_count = int(input())
@@ -169,7 +172,7 @@ class SolverB: # 2021.Q.B
             for _ in range(M):
                 prime, count = tuple(map(int, input().split(' ')))
                 deck[prime] = count
-            solution = self.solve(deck)
+            solution = self.solve(deck, primes)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
