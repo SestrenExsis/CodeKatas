@@ -58,6 +58,81 @@ class Template: # Template
         result = solutions
         return result
 
+class Day07: # Some Assembly Required
+    '''
+    Some Assembly Required
+    https://adventofcode.com/2015/day/7
+    '''
+    def get_connections(self, raw_input_lines: List[str]):
+        connections = {}
+        for raw_input_line in raw_input_lines:
+            a, wire = raw_input_line.split(' -> ')
+            connection = list(a.split(' '))
+            for i in range(len(connection)):
+                try:
+                    value = int(connection[i])
+                    connection[i] = value
+                except ValueError:
+                    pass
+            connections[wire] = tuple(connection)
+        result = connections
+        return result
+    
+    def solve(self, connections):
+        # NOTE: This is not in a workable state yet
+        inputs = {}
+        while len(connections) > 0:
+            next_wires = set()
+            for wire, connection in connections.items():
+                ready = True
+                for i, part in enumerate(connection):
+                    if (
+                        i in (0, 2) and
+                        type(part) is str and
+                        part not in inputs
+                    ):
+                        ready = False
+                        break
+                if ready:
+                    if len(connection) == 1:
+                        if type(connection) is int:
+                            inputs[wire] = connection
+                        else:
+                            inputs[wire] = inputs[connection]
+                    elif len(connection) == 2:
+                        pass
+                    elif len(connection) == 3:
+                        a, OP, b = connection
+                        value = 0
+                        if type(a) is str:
+                            a = inputs[a]
+                        if type(b) is str:
+                            b = inputs[b]
+                        if OP == 'AND':
+                            value = a & b
+                        elif OP == 'OR':
+                            value = a | b
+                        elif OP == 'LSHIFT':
+                            value = a | b
+                    else:
+                        raise AssertionError
+        result = inputs['a']
+        return result
+    
+    def solve2(self, connections):
+        result = len(connections)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        connections = self.get_connections(raw_input_lines)
+        solutions = (
+            self.solve(connections),
+            self.solve2(connections),
+            )
+        result = solutions
+        return result
+
 class Day06: # Probably a Fire Hazard
     '''
     Probably a Fire Hazard
@@ -409,7 +484,7 @@ if __name__ == '__main__':
         4: (Day04, 'The Ideal Stocking Stuffer'),
         5: (Day05, 'Doesn\'t He Have Intern-Elves For This?'),
         6: (Day06, 'Probably a Fire Hazard'),
-    #     7: (Day07, '???'),
+        7: (Day07, 'Some Assembly Required'),
     #     8: (Day08, '???'),
     #     9: (Day09, '???'),
     #    10: (Day10, '???'),
