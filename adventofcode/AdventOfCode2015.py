@@ -113,7 +113,7 @@ class Day07: # Some Assembly Required
                         elif OP == 'OR':
                             value = a | b
                         elif OP == 'LSHIFT':
-                            value = a | b
+                            value = a << b
                     else:
                         raise AssertionError
         result = inputs['a']
