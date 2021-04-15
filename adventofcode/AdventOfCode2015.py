@@ -80,27 +80,33 @@ class Day07: # Some Assembly Required
     
     def solve(self, connections):
         # NOTE: This is not in a workable state yet
+        OPS = {'NOT', 'AND', 'OR', 'LSHIFT', 'RSHIFT'}
+        MODULO = 2 ** 16 # 0 to 65535
         inputs = {}
         while len(connections) > 0:
-            next_wires = set()
             for wire, connection in connections.items():
                 ready = True
                 for i, part in enumerate(connection):
                     if (
-                        i in (0, 2) and
                         type(part) is str and
+                        part not in OPS and
                         part not in inputs
                     ):
                         ready = False
                         break
                 if ready:
+                    print(wire, connection)
                     if len(connection) == 1:
-                        if type(connection) is int:
-                            inputs[wire] = connection
+                        if type(connection[0]) is int:
+                            inputs[wire] = connection[0]
                         else:
-                            inputs[wire] = inputs[connection]
+                            inputs[wire] = inputs[connection[0]]
                     elif len(connection) == 2:
-                        pass
+                        OP, a = connection
+                        assert OP == 'NOT'
+                        if type(a) is str:
+                            a = inputs[a]
+                        value = ~a
                     elif len(connection) == 3:
                         a, OP, b = connection
                         value = 0
@@ -114,9 +120,15 @@ class Day07: # Some Assembly Required
                             value = a | b
                         elif OP == 'LSHIFT':
                             value = a << b
+                        elif OP == 'RSHIFT':
+                            value = a >> b
+                        value = value % MODULO
                     else:
                         raise AssertionError
-        result = inputs['a']
+            for wire in inputs:
+                if wire in connections:
+                    connections.pop(wire)
+        result = inputs['i']
         return result
     
     def solve2(self, connections):
