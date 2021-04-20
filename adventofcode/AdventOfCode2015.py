@@ -132,16 +132,18 @@ class Day07: # Some Assembly Required
         result = inputs['a']
         return result
     
-    def solve2(self, connections):
-        result = len(connections)
+    def solve2(self, signal, connections):
+        connections['b'] = (signal, )
+        result = self.solve(connections)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         connections = self.get_connections(raw_input_lines)
+        signal = self.solve(copy.deepcopy(connections))
         solutions = (
-            self.solve(connections),
-            self.solve2(connections),
+            signal,
+            self.solve2(signal, copy.deepcopy(connections)),
             )
         result = solutions
         return result
