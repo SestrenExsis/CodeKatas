@@ -79,56 +79,57 @@ class Day07: # Some Assembly Required
         return result
     
     def solve(self, connections):
-        # NOTE: This is not in a workable state yet
         OPS = {'NOT', 'AND', 'OR', 'LSHIFT', 'RSHIFT'}
         MODULO = 2 ** 16 # 0 to 65535
+        wires = set(connections.keys())
         inputs = {}
-        while len(connections) > 0:
-            for wire, connection in connections.items():
-                ready = True
-                for i, part in enumerate(connection):
+        while len(wires) > 0:
+            for wire in wires:
+                needed = set()
+                connection = connections[wire]
+                for part in connection:
                     if (
-                        type(part) is str and
                         part not in OPS and
-                        part not in inputs
+                        type(part) == str and
+                        part not in inputs.keys()
                     ):
-                        ready = False
-                        break
-                if ready:
-                    print(wire, connection)
-                    if len(connection) == 1:
-                        if type(connection[0]) is int:
-                            inputs[wire] = connection[0]
-                        else:
-                            inputs[wire] = inputs[connection[0]]
-                    elif len(connection) == 2:
-                        OP, a = connection
-                        assert OP == 'NOT'
-                        if type(a) is str:
-                            a = inputs[a]
-                        value = ~a
-                    elif len(connection) == 3:
-                        a, OP, b = connection
-                        value = 0
-                        if type(a) is str:
-                            a = inputs[a]
-                        if type(b) is str:
-                            b = inputs[b]
-                        if OP == 'AND':
-                            value = a & b
-                        elif OP == 'OR':
-                            value = a | b
-                        elif OP == 'LSHIFT':
-                            value = a << b
-                        elif OP == 'RSHIFT':
-                            value = a >> b
-                        value = value % MODULO
+                        needed.add(part)
+                if len(needed) > 0:
+                    continue
+                if len(connection) == 1:
+                    a = connection[0]
+                    if type(a) is int:
+                        inputs[wire] = a
                     else:
-                        raise AssertionError
-            for wire in inputs:
-                if wire in connections:
-                    connections.pop(wire)
-        result = inputs['i']
+                        inputs[wire] = inputs[a]
+                elif len(connection) == 2:
+                    OP, a = connection
+                    assert OP == 'NOT'
+                    if type(a) is str:
+                        a = inputs[a]
+                    value = ~a
+                    inputs[wire] = value
+                elif len(connection) == 3:
+                    a, OP, b = connection
+                    value = 0
+                    if type(a) is str:
+                        a = inputs[a]
+                    if type(b) is str:
+                        b = inputs[b]
+                    if OP == 'AND':
+                        value = a & b
+                    elif OP == 'OR':
+                        value = a | b
+                    elif OP == 'LSHIFT':
+                        value = a << b
+                    elif OP == 'RSHIFT':
+                        value = a >> b
+                    value = value % MODULO
+                    inputs[wire] = value
+                else:
+                    raise AssertionError
+            wires -= inputs.keys()
+        result = inputs['a']
         return result
     
     def solve2(self, connections):
@@ -487,7 +488,7 @@ class Day01: # Not Quite Lisp
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2015.py 6 < inputs/2015day06.in
+    python AdventOfCode2015.py 7 < inputs/2015day07.in
     '''
     solvers = {
         1: (Day01, 'Not Quite Lisp'),
