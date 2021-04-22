@@ -58,6 +58,69 @@ class Template: # Template
         result = solutions
         return result
 
+class Day08: # Matchsticks
+    '''
+    Matchsticks
+    https://adventofcode.com/2015/day/8
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        memory_char_count = 0
+        literal_char_count = 0
+        for row_data in parsed_input:
+            prev_counts = (memory_char_count, literal_char_count)
+            stack = []
+            memory_char_count += 2
+            for char in row_data[1:-1]:
+                memory_char_count += 1
+                stack.append(char)
+                if (
+                    len(stack) >= 1 and stack[0] != '\\' or
+                    len(stack) >= 2 and stack[1] not in '\\"x' or
+                    len(stack) >= 3 and stack[2] not in '0123456789abcdef' or
+                    len(stack) >= 4 and stack[3] not in '0123456789abcdef'
+                ):
+                    literal_char_count += len(stack)
+                    stack = []
+                if (
+                    (
+                        len(stack) == 2 and
+                        stack[0] == '\\' and
+                        stack[1] in '\\"'
+                    ) or
+                    (
+                        len(stack) == 4 and
+                        stack[0] == '\\' and
+                        stack[1] == 'x' and
+                        stack[2] in '0123456789abcdef' and
+                        stack[3] in '0123456789abcdef'
+                    )
+                ):
+                    literal_char_count += 1
+                    stack = []
+            print(row_data, memory_char_count - prev_counts[0], literal_char_count - prev_counts[1])
+        result = memory_char_count - literal_char_count
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day07: # Some Assembly Required
     '''
     Some Assembly Required
@@ -500,7 +563,7 @@ if __name__ == '__main__':
         5: (Day05, 'Doesn\'t He Have Intern-Elves For This?'),
         6: (Day06, 'Probably a Fire Hazard'),
         7: (Day07, 'Some Assembly Required'),
-    #     8: (Day08, '???'),
+        8: (Day08, 'Matchsticks'),
     #     9: (Day09, '???'),
     #    10: (Day10, '???'),
     #    11: (Day11, '???'),
