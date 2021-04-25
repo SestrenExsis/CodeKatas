@@ -14,9 +14,124 @@ import random
 import sys
 from typing import Dict, List, Set, Tuple
 
-class AppendSort: # 2021.Q.A
+class SolverA: # 2021.1B.A
     '''
-    2021.Q.A
+    2021.1B.A
+    https://codingcompetitions.withgoogle.com/codejam/???
+    '''
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverB: # 2021.1B.B
+    '''
+    2021.1B.B
+    https://codingcompetitions.withgoogle.com/codejam/???
+    '''
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverC: # 2021.1B.C
+    '''
+    2021.1B.C
+    https://codingcompetitions.withgoogle.com/codejam/???
+    '''
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverD: # 2021.1B.D
+    '''
+    2021.1B.D
+    https://codingcompetitions.withgoogle.com/codejam/???
+    '''
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverE: # 2021.1B.E
+    '''
+    2021.1B.E
+    https://codingcompetitions.withgoogle.com/codejam/???
+    '''
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class AppendSort: # 2021.1A.A
+    '''
+    2021.1A.A
     https://codingcompetitions.withgoogle.com/codejam/round/000000000043585d/00000000007549e5
     When we append something, we might as well append the smallest number it takes to make it bigger
     Either the current number is already big enough, in which case we do nothing, or ...
@@ -54,9 +169,9 @@ class AppendSort: # 2021.Q.A
             print(output_row)
         return output
 
-class SolverB: # 2021.Q.B
+class PrimeTime: # 2021.1A.B
     '''
-    2021.Q.B
+    2021.1A.B
     https://codingcompetitions.withgoogle.com/codejam/round/000000000043585d/00000000007543d8
     Test set 1 max card count is 10
     Test set 2 max card count is 100
@@ -181,56 +296,10 @@ class SolverB: # 2021.Q.B
             print(output_row)
         return output
 
-class SolverC: # 2021.Q.C
+class HackedExam: # 2021.1A.C
     '''
-    2021.Q.C
+    2021.1A.C
     https://codingcompetitions.withgoogle.com/codejam/round/000000000043585d/0000000000754750
-    '''
-    def solve(self, raw_input):
-        result = len(raw_input)
-        return result
-    
-    def main(self):
-        test_count = int(input())
-        output = []
-        for test_id in range(1, test_count + 1):
-            raw_input = input()
-            solution = self.solve(raw_input)
-            output_row = 'Case #{}: {}'.format(
-                test_id,
-                solution,
-                )
-            output.append(output_row)
-            print(output_row)
-        return output
-
-class SolverD: # 2021.Q.D
-    '''
-    2021.Q.D
-    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
-    '''
-    def solve(self, raw_input):
-        result = len(raw_input)
-        return result
-    
-    def main(self):
-        test_count = int(input())
-        output = []
-        for test_id in range(1, test_count + 1):
-            raw_input = input()
-            solution = self.solve(raw_input)
-            output_row = 'Case #{}: {}'.format(
-                test_id,
-                solution,
-                )
-            output.append(output_row)
-            print(output_row)
-        return output
-
-class SolverE: # 2021.Q.E
-    '''
-    2021.Q.E
-    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd27/0000000000209a9f
     '''
     def solve(self, raw_input):
         result = len(raw_input)
@@ -381,7 +450,7 @@ class ReversortEngineering: # 2021.Q.C
             print(output_row)
         return output
 
-class CheatingDetection:
+class CheatingDetection: # 2021.Q.E
     '''
     2021.Q.E
     https://codingcompetitions.withgoogle.com/codejam/round/000000000043580a/00000000006d1155
@@ -459,7 +528,7 @@ class CheatingDetection:
 if __name__ == '__main__':
     '''
     Usage
-    python GoogleCodeJam2021.py 2021.1A.A < inputs/SolverA.in
+    python GoogleCodeJam2021.py 2021.1B.A < inputs/SolverA.in
     '''
     solvers = {
         '2021.Q.A': (Reversort, 'Reversort'),
@@ -468,15 +537,13 @@ if __name__ == '__main__':
         # '2021.Q.D': (MedianSort, 'Median Sort'),
         '2021.Q.E': (CheatingDetection, 'Cheating Detection'),
         '2021.1A.A': (AppendSort, 'Append Sort'),
-        '2021.1A.B': (SolverB, 'Prime Time'),
-        '2021.1A.C': (SolverC, 'Hacked Exam'),
-        # '2021.1A.D': (SolverD, '???'),
-        # '2021.1A.E': (SolverE, '???'),
-        # '2021.1B.A': (SolverA, '???'),
-        # '2021.1B.B': (SolverB, '???'),
-        # '2021.1B.C': (SolverC, '???'),
-        # '2021.1B.D': (SolverD, '???'),
-        # '2021.1B.E': (SolverE, '???'),
+        '2021.1A.B': (PrimeTime, 'Prime Time'),
+        '2021.1A.C': (HackedExam, 'Hacked Exam'),
+        '2021.1B.A': (SolverA, '???'),
+        '2021.1B.B': (SolverB, '???'),
+        '2021.1B.C': (SolverC, '???'),
+        '2021.1B.D': (SolverD, '???'),
+        '2021.1B.E': (SolverE, '???'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('problem', help='Solve for a given problem', type=str)
