@@ -296,7 +296,7 @@ class PrimeTime: # 2021.1A.B
             print(output_row)
         return output
 
-class HackedExam: # 2021.1A.C
+class HackedExamNotStarted: # 2021.1A.C
     '''
     2021.1A.C
     https://codingcompetitions.withgoogle.com/codejam/round/000000000043585d/0000000000754750
@@ -538,7 +538,7 @@ if __name__ == '__main__':
         '2021.Q.E': (CheatingDetection, 'Cheating Detection'),
         '2021.1A.A': (AppendSort, 'Append Sort'),
         '2021.1A.B': (PrimeTime, 'Prime Time'),
-        '2021.1A.C': (HackedExam, 'Hacked Exam'),
+        '2021.1A.C': (HackedExamNotStarted, 'Hacked Exam'),
         '2021.1B.A': (SolverA, '???'),
         '2021.1B.B': (SolverB, '???'),
         '2021.1B.C': (SolverC, '???'),
