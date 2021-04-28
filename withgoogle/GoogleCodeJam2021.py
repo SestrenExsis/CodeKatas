@@ -17,18 +17,73 @@ from typing import Dict, List, Set, Tuple
 class SolverA: # 2021.1B.A
     '''
     2021.1B.A
-    https://codingcompetitions.withgoogle.com/codejam/???
+    https://codingcompetitions.withgoogle.com/codejam/round/0000000000435baf/00000000007ae694
+    1 tick is equal to (1 / 12) * (10 ** −10) degrees
+    Hours hand rotates exactly 1 tick each nanosecond
+    Minutes hand rotates exactly 12 ticks each nanosecond
+    Seconds hand rotates exactly 720 ticks each nanosecond
+    There are 10 ** 9 nanoseconds in a second
+    OUTPUT: "hours minutes seconds nanoseconds" since midnight
     '''
-    def solve(self, raw_input):
-        result = len(raw_input)
+    def solve(self, A, B, C):
+        HOUR_HAND_TICKS_PER_NANOSEC = 1
+        MINUTE_HAND_TICKS_PER_NANOSEC = 12
+        SECOND_HAND_TICKS_PER_NANOSEC = 720
+        NANOSECS_PER_SECOND = 10 ** 9
+        SECONDS_PER_MINUTE = 60
+        NANOSECS_PER_MINUTE = NANOSECS_PER_SECOND * SECONDS_PER_MINUTE
+        MINUTES_PER_HOUR = 60
+        NANOSECS_PER_HOUR = NANOSECS_PER_MINUTE * MINUTES_PER_HOUR
+        HOURS_PER_CYCLE = 12
+        NANOSECS_PER_CYCLE = NANOSECS_PER_HOUR * HOURS_PER_CYCLE
+        ticks = -1
+        # There are only 6 possible hand combinations, so we try them all
+        for h_ticks, m_ticks, s_ticks in (
+            (A, B, C),
+            (A, C, B),
+            (B, A, C),
+            (B, C, A),
+            (C, A, B),
+            (C, B, A),
+        ):
+            # The second-hand will be a multiple of 720 unless a rotation was involved
+            # The modulo of the second hand and the rotation must equal each other
+            rotation_mod = s_ticks % SECOND_HAND_TICKS_PER_NANOSEC
+            rotation = rotation_mod
+            while True:
+                h = (h_ticks + rotation) % NANOSECS_PER_CYCLE
+                m = (m_ticks + rotation) % NANOSECS_PER_CYCLE
+                s = (s_ticks + rotation) % NANOSECS_PER_CYCLE
+                if all([
+                    (12 * h) % NANOSECS_PER_CYCLE == m,
+                    (720 * h) % NANOSECS_PER_CYCLE == s,
+                    (60 * m) % NANOSECS_PER_CYCLE == s,
+                ]):
+                    ticks = h
+                    break
+                rotation = (rotation + SECOND_HAND_TICKS_PER_NANOSEC) % NANOSECS_PER_CYCLE
+                if rotation == rotation_mod:
+                    break
+                # For now, we're not doing rotations
+                # TODO: Handle rotations quickly
+                # break
+            if ticks >= 0:
+                break
+        clock = (
+            (ticks // NANOSECS_PER_HOUR) % HOURS_PER_CYCLE,
+            (ticks // NANOSECS_PER_MINUTE) % MINUTES_PER_HOUR,
+            (ticks // NANOSECS_PER_SECOND) % SECONDS_PER_MINUTE,
+            ticks % NANOSECS_PER_SECOND,
+        )
+        result = ' '.join(map(str, clock))
         return result
     
     def main(self):
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
-            raw_input = input()
-            solution = self.solve(raw_input)
+            A, B, C = tuple(map(int, input().split(' ')))
+            solution = self.solve(A, B, C)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
@@ -40,18 +95,43 @@ class SolverA: # 2021.1B.A
 class SolverB: # 2021.1B.B
     '''
     2021.1B.B
-    https://codingcompetitions.withgoogle.com/codejam/???
+    https://codingcompetitions.withgoogle.com/codejam/round/0000000000435baf/00000000007ae4aa
+    For some fixed numbers A and B, with A < B, you can take one unit of metal i
+    and destroy it to create one unit of metal (i − A) and one unit of metal (i−B)
+    If either of those integers is not positive, that specific unit is not created
+    In particular, if i ≤ A, the spell simply destroys the unit and creates nothing.
+    If A < i ≤ B the spell destroys the unit and creates only a single unit of metal (i−A)
+    A single unit of metal represented by the smallest possible integer that is 
+    sufficient to complete your task, or say that there is no such metal.
+    4 -> (3, 2)
+    4 -> (3, 1)
+    4 -> (2, 1)
+    A is 1 and B is 2 for Test Set 1
+    A and B are between 1 and 20 for Test Set 2
+
+    1 2 3 4 5 6
+    -----------
+    2 0 0 0 1 0
+    -----------
+    0 0 0 0 0 1
+    0 0 0 1 1 1
+    0 0 0 
     '''
-    def solve(self, raw_input):
-        result = len(raw_input)
+    def solve(self, metals, A, B):
+        result = len(metals)
         return result
     
     def main(self):
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
-            raw_input = input()
-            solution = self.solve(raw_input)
+            _, A, B = tuple(map(int, input().split(' ')))
+            metal_counts = tuple(map(int, input().split(' ')))
+            metals = {}
+            for metal_id, count in enumerate(metal_counts, start=1):
+                if count > 0:
+                    metals[metal_id] = count
+            solution = self.solve(metals, A, B)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
@@ -63,52 +143,6 @@ class SolverB: # 2021.1B.B
 class SolverC: # 2021.1B.C
     '''
     2021.1B.C
-    https://codingcompetitions.withgoogle.com/codejam/???
-    '''
-    def solve(self, raw_input):
-        result = len(raw_input)
-        return result
-    
-    def main(self):
-        test_count = int(input())
-        output = []
-        for test_id in range(1, test_count + 1):
-            raw_input = input()
-            solution = self.solve(raw_input)
-            output_row = 'Case #{}: {}'.format(
-                test_id,
-                solution,
-                )
-            output.append(output_row)
-            print(output_row)
-        return output
-
-class SolverD: # 2021.1B.D
-    '''
-    2021.1B.D
-    https://codingcompetitions.withgoogle.com/codejam/???
-    '''
-    def solve(self, raw_input):
-        result = len(raw_input)
-        return result
-    
-    def main(self):
-        test_count = int(input())
-        output = []
-        for test_id in range(1, test_count + 1):
-            raw_input = input()
-            solution = self.solve(raw_input)
-            output_row = 'Case #{}: {}'.format(
-                test_id,
-                solution,
-                )
-            output.append(output_row)
-            print(output_row)
-        return output
-
-class SolverE: # 2021.1B.E
-    '''
-    2021.1B.E
     https://codingcompetitions.withgoogle.com/codejam/???
     '''
     def solve(self, raw_input):
@@ -539,11 +573,9 @@ if __name__ == '__main__':
         '2021.1A.A': (AppendSort, 'Append Sort'),
         '2021.1A.B': (PrimeTime, 'Prime Time'),
         '2021.1A.C': (HackedExamNotStarted, 'Hacked Exam'),
-        '2021.1B.A': (SolverA, '???'),
+        '2021.1B.A': (SolverA, 'Broken Clock'),
         '2021.1B.B': (SolverB, '???'),
         '2021.1B.C': (SolverC, '???'),
-        '2021.1B.D': (SolverD, '???'),
-        '2021.1B.E': (SolverE, '???'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('problem', help='Solve for a given problem', type=str)
