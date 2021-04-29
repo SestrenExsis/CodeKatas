@@ -575,7 +575,7 @@ if __name__ == '__main__':
         '2021.1A.C': (HackedExamNotStarted, 'Hacked Exam'),
         '2021.1B.A': (SolverA, 'Broken Clock'),
         '2021.1B.B': (SolverB, '???'),
-        '2021.1B.C': (SolverC, '???'),
+        # '2021.1B.C': (SolverC, 'Digit Blocks'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('problem', help='Solve for a given problem', type=str)
@@ -615,7 +615,7 @@ if __name__ == '__main__':
 
 # Usage for Interactive Problems
 '''
--- python judges/DatBae.py 0 python solvers/DatBae.py
+-- python judges/DigitBlocks.py 0 python solvers/DigitBlocks.py
 
 import os
 os.system('python filename.py')
