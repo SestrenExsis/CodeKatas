@@ -14,7 +14,7 @@ import random
 import sys
 from typing import Dict, List, Set, Tuple
 
-class SolverA: # 2021.1B.A
+class BrokenClock: # 2021.1B.A
     '''
     2021.1B.A
     https://codingcompetitions.withgoogle.com/codejam/round/0000000000435baf/00000000007ae694
@@ -25,56 +25,47 @@ class SolverA: # 2021.1B.A
     There are 10 ** 9 nanoseconds in a second
     OUTPUT: "hours minutes seconds nanoseconds" since midnight
     '''
-    def solve(self, A, B, C):
-        HOUR_HAND_TICKS_PER_NANOSEC = 1
-        MINUTE_HAND_TICKS_PER_NANOSEC = 12
-        SECOND_HAND_TICKS_PER_NANOSEC = 720
-        NANOSECS_PER_SECOND = 10 ** 9
-        SECONDS_PER_MINUTE = 60
-        NANOSECS_PER_MINUTE = NANOSECS_PER_SECOND * SECONDS_PER_MINUTE
-        MINUTES_PER_HOUR = 60
-        NANOSECS_PER_HOUR = NANOSECS_PER_MINUTE * MINUTES_PER_HOUR
-        HOURS_PER_CYCLE = 12
-        NANOSECS_PER_CYCLE = NANOSECS_PER_HOUR * HOURS_PER_CYCLE
-        ticks = -1
-        # There are only 6 possible hand combinations, so we try them all
-        for h_ticks, m_ticks, s_ticks in (
-            (A, B, C),
-            (A, C, B),
-            (B, A, C),
-            (B, C, A),
-            (C, A, B),
-            (C, B, A),
+    HOUR_HAND_TICKS_PER_NANOSEC = H_NANO = 1
+    MINUTE_HAND_TICKS_PER_NANOSEC = M_NANO = 12
+    SECOND_HAND_TICKS_PER_NANOSEC = S_NANO = 720
+    NANOSECS_PER_SECOND = 10 ** 9
+    SECONDS_PER_MINUTE = 60
+    NANOSECS_PER_MINUTE = NANOSECS_PER_SECOND * SECONDS_PER_MINUTE
+    MINUTES_PER_HOUR = 60
+    NANOSECS_PER_HOUR = NANOSECS_PER_MINUTE * MINUTES_PER_HOUR
+    HOURS_PER_CYCLE = 12
+    NANOSECS_PER_CYCLE = NANOSECS_PER_HOUR * HOURS_PER_CYCLE
+    
+    def canonicalize(self, A, B, C):
+        canonical_form = None
+        for a, b, c in (
+            (A - A, B - A, C - A),
+            (A - B, B - B, C - B),
+            (A - C, B - C, C - C),
         ):
-            # The second-hand will be a multiple of 720 unless a rotation was involved
-            # The modulo of the second hand and the rotation must equal each other
-            rotation_mod = s_ticks % SECOND_HAND_TICKS_PER_NANOSEC
-            rotation = rotation_mod
-            while True:
-                h = (h_ticks + rotation) % NANOSECS_PER_CYCLE
-                m = (m_ticks + rotation) % NANOSECS_PER_CYCLE
-                s = (s_ticks + rotation) % NANOSECS_PER_CYCLE
-                if all([
-                    (12 * h) % NANOSECS_PER_CYCLE == m,
-                    (720 * h) % NANOSECS_PER_CYCLE == s,
-                    (60 * m) % NANOSECS_PER_CYCLE == s,
-                ]):
-                    ticks = h
-                    break
-                rotation = (rotation + SECOND_HAND_TICKS_PER_NANOSEC) % NANOSECS_PER_CYCLE
-                if rotation == rotation_mod:
-                    break
-                # For now, we're not doing rotations
-                # TODO: Handle rotations quickly
-                # break
-            if ticks >= 0:
-                break
-        clock = (
-            (ticks // NANOSECS_PER_HOUR) % HOURS_PER_CYCLE,
-            (ticks // NANOSECS_PER_MINUTE) % MINUTES_PER_HOUR,
-            (ticks // NANOSECS_PER_SECOND) % SECONDS_PER_MINUTE,
-            ticks % NANOSECS_PER_SECOND,
-        )
+            a %= self.NANOSECS_PER_CYCLE
+            b %= self.NANOSECS_PER_CYCLE
+            c %= self.NANOSECS_PER_CYCLE
+            candidate = tuple(sorted([a, b, c]))
+            if canonical_form is None or candidate < canonical_form:
+                canonical_form = candidate
+        result = canonical_form
+        return result
+    
+    def solve(self, A, B, C):
+        clocks = {}
+        for ticks in range(0, self.NANOSECS_PER_CYCLE, self.NANOSECS_PER_SECOND):
+            h = (ticks // self.NANOSECS_PER_HOUR) % self.HOURS_PER_CYCLE
+            m = (ticks // self.NANOSECS_PER_MINUTE) % self.MINUTES_PER_HOUR
+            s = (ticks // self.NANOSECS_PER_SECOND) % self.SECONDS_PER_MINUTE
+            clock = (h, m, s, ticks % self.NANOSECS_PER_SECOND)
+            h_ticks = (self.H_NANO * ticks) % self.NANOSECS_PER_CYCLE
+            m_ticks = (self.M_NANO * ticks) % self.NANOSECS_PER_CYCLE
+            s_ticks = (self.S_NANO * ticks) % self.NANOSECS_PER_CYCLE
+            canonical_form = self.canonicalize(h_ticks, m_ticks, s_ticks)
+            clocks[canonical_form] = clock
+        canonical_form = self.canonicalize(A, B, C)
+        clock = clocks[canonical_form]
         result = ' '.join(map(str, clock))
         return result
     
@@ -573,8 +564,8 @@ if __name__ == '__main__':
         '2021.1A.A': (AppendSort, 'Append Sort'),
         '2021.1A.B': (PrimeTime, 'Prime Time'),
         '2021.1A.C': (HackedExamNotStarted, 'Hacked Exam'),
-        '2021.1B.A': (SolverA, 'Broken Clock'),
-        '2021.1B.B': (SolverB, '???'),
+        '2021.1B.A': (BrokenClock, 'Broken Clock'),
+        '2021.1B.B': (SolverB, 'Subtransmutation'),
         # '2021.1B.C': (SolverC, 'Digit Blocks'),
         }
     parser = argparse.ArgumentParser()
