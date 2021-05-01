@@ -14,6 +14,121 @@ import random
 import sys
 from typing import Dict, List, Set, Tuple
 
+class SolverA: # 2021.1C.A
+    '''
+    2021.1C.A
+    https://codingcompetitions.withgoogle.com/codejam/???
+    '''
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverB: # 2021.1C.B
+    '''
+    2021.1C.C
+    https://codingcompetitions.withgoogle.com/codejam/???
+    '''
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverC: # 2021.1C.C
+    '''
+    2021.1C.C
+    https://codingcompetitions.withgoogle.com/codejam/???
+    '''
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverD: # 2021.1C.D
+    '''
+    2021.1C.D
+    https://codingcompetitions.withgoogle.com/codejam/???
+    '''
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverE: # 2021.1C.E
+    '''
+    2021.1C.E
+    https://codingcompetitions.withgoogle.com/codejam/???
+    '''
+    def solve(self, raw_input):
+        result = len(raw_input)
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
 class BrokenClock: # 2021.1B.A
     '''
     2021.1B.A
@@ -83,7 +198,7 @@ class BrokenClock: # 2021.1B.A
             print(output_row)
         return output
 
-class SolverB: # 2021.1B.B
+class Subtransmutation: # 2021.1B.B
     '''
     2021.1B.B
     https://codingcompetitions.withgoogle.com/codejam/round/0000000000435baf/00000000007ae4aa
@@ -100,13 +215,24 @@ class SolverB: # 2021.1B.B
     A is 1 and B is 2 for Test Set 1
     A and B are between 1 and 20 for Test Set 2
 
+    1 2 3 4
+    -------
+    1 2 0 0
+    0 1 1 0
+    0 0 0 1
+
     1 2 3 4 5 6
     -----------
-    2 0 0 0 1 0
-    -----------
     0 0 0 0 0 1
-    0 0 0 1 1 1
-    0 0 0 
+    0 0 0 1 1 0
+    0 1 1 0 1 0
+    1 2 0 0 1 0
+    2 1 0 0 1 0
+
+    2 x x x 1 x
+    2 1 x x 1 x
+    1 0 1 x 1 x
+    
     '''
     def solve(self, metals, A, B):
         result = len(metals)
@@ -123,29 +249,6 @@ class SolverB: # 2021.1B.B
                 if count > 0:
                     metals[metal_id] = count
             solution = self.solve(metals, A, B)
-            output_row = 'Case #{}: {}'.format(
-                test_id,
-                solution,
-                )
-            output.append(output_row)
-            print(output_row)
-        return output
-
-class SolverC: # 2021.1B.C
-    '''
-    2021.1B.C
-    https://codingcompetitions.withgoogle.com/codejam/???
-    '''
-    def solve(self, raw_input):
-        result = len(raw_input)
-        return result
-    
-    def main(self):
-        test_count = int(input())
-        output = []
-        for test_id in range(1, test_count + 1):
-            raw_input = input()
-            solution = self.solve(raw_input)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
@@ -553,7 +656,7 @@ class CheatingDetection: # 2021.Q.E
 if __name__ == '__main__':
     '''
     Usage
-    python GoogleCodeJam2021.py 2021.1B.A < inputs/SolverA.in
+    python GoogleCodeJam2021.py 2021.1C.A < inputs/SolverA.in
     '''
     solvers = {
         '2021.Q.A': (Reversort, 'Reversort'),
@@ -565,8 +668,13 @@ if __name__ == '__main__':
         '2021.1A.B': (PrimeTime, 'Prime Time'),
         '2021.1A.C': (HackedExamNotStarted, 'Hacked Exam'),
         '2021.1B.A': (BrokenClock, 'Broken Clock'),
-        '2021.1B.B': (SolverB, 'Subtransmutation'),
-        # '2021.1B.C': (SolverC, 'Digit Blocks'),
+        '2021.1B.B': (Subtransmutation, 'Subtransmutation'),
+        # '2021.1B.C': (DigitBlocks, 'Digit Blocks'),
+        '2021.1C.A': (SolverA, 'SolverA'),
+        '2021.1C.B': (SolverB, 'SolverB'),
+        '2021.1C.C': (SolverC, 'SolverC'),
+        '2021.1C.D': (SolverD, 'SolverD'),
+        '2021.1C.E': (SolverE, 'SolverE'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('problem', help='Solve for a given problem', type=str)
@@ -602,12 +710,4 @@ class Solver:
 if __name__ == '__main__':
     solver = Solver()
     solver.main()
-'''
-
-# Usage for Interactive Problems
-'''
--- python judges/DigitBlocks.py 0 python solvers/DigitBlocks.py
-
-import os
-os.system('python filename.py')
 '''
