@@ -17,18 +17,71 @@ from typing import Dict, List, Set, Tuple
 class SolverA: # 2021.1C.A
     '''
     2021.1C.A
-    https://codingcompetitions.withgoogle.com/codejam/???
+    https://codingcompetitions.withgoogle.com/codejam/round/00000000004362d7/00000000007c0f00
     '''
-    def solve(self, raw_input):
-        result = len(raw_input)
+    def solve(self, ticket_count, tickets_sold):
+        '''
+        For your first ticket, you should choose one of the following:
+            Cover the end of the starting gap if one exists
+            Cover the start of the ending gap if one exists
+            Cover one end of the largest gap if one exists
+        For your second ticket, you should choose one of the following:
+            Cover the end of the starting gap if one exists
+            Cover the start of the ending gap if one exists
+            Convert the already split gap into a bookend if one exists
+            Cover one end of the next largest gap if one exists
+        '''
+        gaps = []
+        for ticket in range(1, ticket_count + 1):
+            if ticket not in tickets_sold:
+                if len(gaps) < 1 or gaps[-1][1] < ticket - 1:
+                    gaps.append([ticket, ticket])
+                else:
+                    gaps[-1][1] = ticket
+        if len(gaps) < 1:
+            return 0
+        largest_gaps = []
+        for start, end in gaps:
+            if start > 1 and end < ticket_count:
+                gap = end - start + 1
+                heapq.heappush(largest_gaps, -gap)
+        choices = []
+        # Cover the opening gap
+        opener = min(tickets_sold) - 1
+        heapq.heappush(choices, -opener)
+        # Cover the closing gap
+        closer = ticket_count - max(tickets_sold)
+        heapq.heappush(choices, -closer)
+        # Cover the largest gap
+        covered_gap = -1
+        if len(largest_gaps) > 0:
+            max_gap = -heapq.heappop(largest_gaps)
+            covered_gap = (max_gap - 1) // 2 + 1
+            heapq.heappush(choices, -covered_gap)
+        # Make the best choice with our first ticket
+        chances_to_win = 0
+        chances_to_win -= heapq.heappop(choices)
+        # We can bookend the largest gap if we've already covered it
+        if chances_to_win == covered_gap:
+            bookend_gap = max_gap - covered_gap
+            heapq.heappush(choices, -bookend_gap)
+        # We can check the next largest gap if it exists
+        if len(largest_gaps) > 0:
+            max_gap = -heapq.heappop(largest_gaps)
+            covered_gap = (max_gap - 1) // 2 + 1
+            heapq.heappush(choices, -covered_gap)
+        # Make the best choice with our second ticket
+        chances_to_win -= heapq.heappop(choices)
+        result = chances_to_win / ticket_count
         return result
     
     def main(self):
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
-            raw_input = input()
-            solution = self.solve(raw_input)
+            sold_count, ticket_count = tuple(map(int, input().split(' ')))
+            tickets_sold = set(map(int, input().split(' ')))
+            solution = self.solve(ticket_count, tickets_sold)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
@@ -39,19 +92,75 @@ class SolverA: # 2021.1C.A
 
 class SolverB: # 2021.1C.B
     '''
-    2021.1C.C
-    https://codingcompetitions.withgoogle.com/codejam/???
+    2021.1C.B
+    https://codingcompetitions.withgoogle.com/codejam/round/00000000004362d7/00000000007c0f01
+    Given the current year (which may or may not be roaring),
+    find what the next roaring year is going to be.
+    This assumption is wrong, but what's missing?
+        Given 192020, either:
+            join range starting at 1 increasing for 6
+            join range starting at 2 increasing for 6
+            join range starting at 19 increasing for 3
+            join range starting at 20 increasing for 3
+            join range starting at 192 increasing for 2
+            join range starting at 193 increasing for 2
+        Get the smallest of these that are larger than 192020
+        Guaranteed at least one will succeed (???)
+
+        (10 ** (len(prefix)), prefix, 10 ** (len(prefix) + 1)
+
     '''
-    def solve(self, raw_input):
-        result = len(raw_input)
+    roaring_years = []
+
+    def is_roaring_year(self, year):
+        string = str(year)
+        valid_ind = False
+        for i in range(1, len(string) // 2 + 1):
+            start = int(string[:i])
+            chunks = []
+            for j in range(len(string) // i):
+                chunks.append(str(start + j))
+            if ''.join(chunks) == string:
+                valid_ind = True
+                break
+        result = valid_ind
+        return result
+
+    def populate_roaring_years(self, max_digits: int=6):
+        roaring_years = []
+        for start in range(1, 10 ** (max_digits // 2) + 1):
+            if start % 1000000 == 0:
+                print(start)
+            max_repeat = (max_digits // len(str(start))) + 1
+            for repeat in range(2, max_repeat + 1):
+                if len(str(start)) * repeat > 2 * max_digits:
+                    break
+                year = ''.join(
+                    map(str, range(start, start + repeat))
+                )
+                roaring_years.append(int(year))
+        self.roaring_years = sorted(roaring_years)
+
+    def solve(self, year):
+        left = 0
+        right = len(self.roaring_years) - 1
+        while left < right:
+            mid = left + (right - left) // 2
+            roaring_year = self.roaring_years[mid]
+            if roaring_year <= year:
+                left = mid + 1
+            else:
+                right = mid
+        result = self.roaring_years[right]
         return result
     
     def main(self):
+        self.populate_roaring_years()
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
-            raw_input = input()
-            solution = self.solve(raw_input)
+            start_year = int(input())
+            solution = self.solve(start_year)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
