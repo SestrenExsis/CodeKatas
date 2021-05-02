@@ -14,7 +14,7 @@ import random
 import sys
 from typing import Dict, List, Set, Tuple
 
-class SolverA: # 2021.1C.A
+class ClosestPick: # 2021.1C.A
     '''
     2021.1C.A
     https://codingcompetitions.withgoogle.com/codejam/round/00000000004362d7/00000000007c0f00
@@ -90,25 +90,12 @@ class SolverA: # 2021.1C.A
             print(output_row)
         return output
 
-class SolverB: # 2021.1C.B
+class RoaringYears: # 2021.1C.B
     '''
     2021.1C.B
     https://codingcompetitions.withgoogle.com/codejam/round/00000000004362d7/00000000007c0f01
     Given the current year (which may or may not be roaring),
     find what the next roaring year is going to be.
-    This assumption is wrong, but what's missing?
-        Given 192020, either:
-            join range starting at 1 increasing for 6
-            join range starting at 2 increasing for 6
-            join range starting at 19 increasing for 3
-            join range starting at 20 increasing for 3
-            join range starting at 192 increasing for 2
-            join range starting at 193 increasing for 2
-        Get the smallest of these that are larger than 192020
-        Guaranteed at least one will succeed (???)
-
-        (10 ** (len(prefix)), prefix, 10 ** (len(prefix) + 1)
-
     '''
     roaring_years = []
 
@@ -140,6 +127,63 @@ class SolverB: # 2021.1C.B
                 )
                 roaring_years.append(int(year))
         self.roaring_years = sorted(roaring_years)
+    
+    def get_next_roaring_year(self, year):
+        '''
+        This assumption is wrong, but what's missing?
+        192020
+        ------
+        192 193
+        19 20 21
+        2 3 4 5 6 7
+
+        99999 --> 100101
+
+         9999 --> 12345
+        Given 192020, either:
+            1 increasing for LENGTH + 1 if LENGTH is even
+            10 ** ((LENGTH + 1) // 2) increasing for 2 if LENGTH is odd
+            First digit increasing for LENGTH
+            First digit + 1 increasing for LENGTH
+            First two digits increasing for LENGTH // 2
+            First two digits + 1 increasing for LENGTH // 2
+            ...
+
+        Get the smallest of these that are larger than the number
+        Guaranteed at least one will succeed (???)
+
+        FIRST HALF IS GREATER OR
+        FIRST HALF IS EQUAL AND SECOND HALF IS GREATER
+        '''
+        STR = str(year)
+        LEN = len(STR)
+        HALFLEN = (LEN + 1) // 2
+        starts = {
+            1,
+            10 ** HALFLEN,
+        }
+        for size in range(1, HALFLEN + 1):
+            first = int(STR[:size])
+            for start in range(first, 10 ** size + 1):
+                starts.add(start)
+        roaring_years = set()
+        for start in starts:
+            num = start
+            sequence = str(num)
+            size = 1
+            while size < 2 or len(sequence) < LEN:
+                num += 1
+                sequence += str(num)
+                size += 1
+            roaring_years.add(int(sequence))
+            sequence += str(num + 1)
+            roaring_years.add(int(sequence))
+        result = min(
+            roaring_year for
+            roaring_year in roaring_years if
+            roaring_year > year
+        )
+        return result
 
     def solve(self, year):
         left = 0
@@ -155,7 +199,17 @@ class SolverB: # 2021.1C.B
         return result
     
     def main(self):
-        self.populate_roaring_years()
+        self.populate_roaring_years(6)
+        # for year in range(1, 10 ** 5 + 1):
+        #     yr1 = min(y for y in self.roaring_years if y > year)
+        #     yr2 = self.get_next_roaring_year(year)
+        #     if year % 10000 == 0:
+        #         print(year)
+        #     try:
+        #         assert yr1 == yr2
+        #     except AssertionError:
+        #         print(year, yr1, yr2)
+        #         exit()
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
@@ -169,9 +223,9 @@ class SolverB: # 2021.1C.B
             print(output_row)
         return output
 
-class SolverC: # 2021.1C.C
+class SolverA: # ???
     '''
-    2021.1C.C
+    ???
     https://codingcompetitions.withgoogle.com/codejam/???
     '''
     def solve(self, raw_input):
@@ -192,9 +246,9 @@ class SolverC: # 2021.1C.C
             print(output_row)
         return output
 
-class SolverD: # 2021.1C.D
+class SolverB: # ???
     '''
-    2021.1C.D
+    ???
     https://codingcompetitions.withgoogle.com/codejam/???
     '''
     def solve(self, raw_input):
@@ -215,9 +269,9 @@ class SolverD: # 2021.1C.D
             print(output_row)
         return output
 
-class SolverE: # 2021.1C.E
+class SolverC: # ???
     '''
-    2021.1C.E
+    ???
     https://codingcompetitions.withgoogle.com/codejam/???
     '''
     def solve(self, raw_input):
@@ -779,11 +833,9 @@ if __name__ == '__main__':
         '2021.1B.A': (BrokenClock, 'Broken Clock'),
         '2021.1B.B': (Subtransmutation, 'Subtransmutation'),
         # '2021.1B.C': (DigitBlocks, 'Digit Blocks'),
-        '2021.1C.A': (SolverA, 'SolverA'),
-        '2021.1C.B': (SolverB, 'SolverB'),
+        '2021.1C.A': (ClosestPick, 'Closest Pick'),
+        '2021.1C.B': (RoaringYears, 'Roaring Years'),
         '2021.1C.C': (SolverC, 'SolverC'),
-        '2021.1C.D': (SolverD, 'SolverD'),
-        '2021.1C.E': (SolverE, 'SolverE'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('problem', help='Solve for a given problem', type=str)
