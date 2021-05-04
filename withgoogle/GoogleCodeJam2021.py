@@ -19,69 +19,69 @@ class ClosestPick: # 2021.1C.A
     2021.1C.A
     https://codingcompetitions.withgoogle.com/codejam/round/00000000004362d7/00000000007c0f00
     '''
-    def solve(self, ticket_count, tickets_sold):
-        '''
-        For your first ticket, you should choose one of the following:
-            Cover the end of the starting gap if one exists
-            Cover the start of the ending gap if one exists
-            Cover one end of the largest gap if one exists
-        For your second ticket, you should choose one of the following:
-            Cover the end of the starting gap if one exists
-            Cover the start of the ending gap if one exists
-            Convert the already split gap into a bookend if one exists
-            Cover one end of the next largest gap if one exists
-        '''
-        gaps = []
-        for ticket in range(1, ticket_count + 1):
-            if ticket not in tickets_sold:
-                if len(gaps) < 1 or gaps[-1][1] < ticket - 1:
-                    gaps.append([ticket, ticket])
-                else:
-                    gaps[-1][1] = ticket
-        if len(gaps) < 1:
-            return 0
-        largest_gaps = []
-        for start, end in gaps:
-            if start > 1 and end < ticket_count:
-                gap = end - start + 1
-                heapq.heappush(largest_gaps, -gap)
-        choices = []
-        # Cover the opening gap
-        opener = min(tickets_sold) - 1
-        heapq.heappush(choices, -opener)
-        # Cover the closing gap
-        closer = ticket_count - max(tickets_sold)
-        heapq.heappush(choices, -closer)
-        # Cover the largest gap
-        covered_gap = -1
-        if len(largest_gaps) > 0:
-            max_gap = -heapq.heappop(largest_gaps)
-            covered_gap = (max_gap - 1) // 2 + 1
-            heapq.heappush(choices, -covered_gap)
-        # Make the best choice with our first ticket
-        chances_to_win = 0
-        chances_to_win -= heapq.heappop(choices)
-        # We can bookend the largest gap if we've already covered it
-        if chances_to_win == covered_gap:
-            bookend_gap = max_gap - covered_gap
-            heapq.heappush(choices, -bookend_gap)
-        # We can check the next largest gap if it exists
-        if len(largest_gaps) > 0:
-            max_gap = -heapq.heappop(largest_gaps)
-            covered_gap = (max_gap - 1) // 2 + 1
-            heapq.heappush(choices, -covered_gap)
-        # Make the best choice with our second ticket
-        chances_to_win -= heapq.heappop(choices)
-        result = chances_to_win / ticket_count
+    def get_hits(self, unsold_tickets, ticket_count, a, b):
+        hits = 0
+        for start, end in unsold_tickets:
+            if any((
+                start == 1 and end in (a, b),
+                end == ticket_count and start in (a, b),
+                start in (a, b) and end in (a, b),
+            )):
+                hits += end - start + 1
+            elif start in (a, b) or end in (a, b):
+                hits += 1 + (end - start) // 2
+        result = hits
+        return result
+    
+    def solve(self, ticket_count, tickets_purchased):
+        # Generate intervals to represent unsold tickets
+        unsold_tickets = []
+        prev_ticket = 0
+        tickets = list(sorted(tickets_purchased))
+        for ticket in tickets:
+            if ticket != prev_ticket + 1:
+                unsold_tickets.append([prev_ticket + 1, ticket - 1])
+            prev_ticket = ticket
+        if prev_ticket < ticket_count:
+            unsold_tickets.append([prev_ticket + 1, ticket_count])
+        # The best tickets to buy are adjacent to purchased tickets
+        candidates = set()
+        for ticket in tickets_purchased:
+            if (
+                ticket > 1 and
+                ticket - 1 not in tickets_purchased
+            ):
+                candidates.add(ticket - 1)
+            if (
+                ticket < ticket_count and
+                ticket + 1 not in tickets_purchased
+            ):
+                candidates.add(ticket + 1)
+        # Try all combinations from the candidate tickets
+        max_odds = 0
+        for a in candidates:
+            for b in candidates:
+                hits = self.get_hits(unsold_tickets, ticket_count, a, b)
+                odds = hits / ticket_count
+                max_odds = max(max_odds, odds)
+        result = max_odds
         return result
     
     def main(self):
+        '''
+        For Test Set 1:
+            1 <= len(tickets_purchased) <= 30
+            1 <= ticket_count <= 30
+        For Test Set 2:
+            1 <= len(tickets_purchased) <= 30
+            1 <= ticket_count <= 10 ** 9
+        '''
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
-            sold_count, ticket_count = tuple(map(int, input().split(' ')))
-            tickets_sold = set(map(int, input().split(' ')))
-            solution = self.solve(ticket_count, tickets_sold)
+            N, ticket_count = tuple(map(int, input().split(' ')))
+            tickets_purchased = set(tuple(map(int, input().split(' '))))
+            solution = self.solve(ticket_count, tickets_purchased)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,

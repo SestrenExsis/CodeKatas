@@ -1,47 +1,67 @@
-import collections
-
 class Solver:
-    def get_hits(self, K, P, a, b):
-        hits = set()
-        for card in range(1, K + 1):
-            left = card
-            right = card
-            while left >= 0 or right <= K:
-                if left in P or right in P:
-                    break
-                if left in (a, b) or right in (a, b):
-                    hits.add(card)
-                    break
-                left -= 1
-                right += 1
-        result = len(hits)
+    def get_hits(self, unsold_tickets, ticket_count, a, b):
+        hits = 0
+        for start, end in unsold_tickets:
+            if any((
+                start == 1 and end in (a, b),
+                end == ticket_count and start in (a, b),
+                start in (a, b) and end in (a, b),
+            )):
+                hits += end - start + 1
+            elif start in (a, b) or end in (a, b):
+                hits += 1 + (end - start) // 2
+        result = hits
         return result
     
-    def bruteforce(self, K, P):
-        assert K <= 30
+    def solve(self, ticket_count, tickets_purchased):
+        # Generate intervals to represent unsold tickets
+        unsold_tickets = []
+        prev_ticket = 0
+        tickets = list(sorted(tickets_purchased))
+        for ticket in tickets:
+            if ticket != prev_ticket + 1:
+                unsold_tickets.append([prev_ticket + 1, ticket - 1])
+            prev_ticket = ticket
+        if prev_ticket < ticket_count:
+            unsold_tickets.append([prev_ticket + 1, ticket_count])
+        # The best tickets to buy are adjacent to purchased tickets
+        candidates = set()
+        for ticket in tickets_purchased:
+            if (
+                ticket > 1 and
+                ticket - 1 not in tickets_purchased
+            ):
+                candidates.add(ticket - 1)
+            if (
+                ticket < ticket_count and
+                ticket + 1 not in tickets_purchased
+            ):
+                candidates.add(ticket + 1)
+        # Try all combinations from the candidate tickets
         max_odds = 0
-        for a in range(1, K + 1):
-            if a in P:
-                continue
-            for b in range(1, K + 1):
-                if b in P:
-                    continue
-                hits = self.get_hits(K, P, a, b)
-                odds = hits / K
+        for a in candidates:
+            for b in candidates:
+                hits = self.get_hits(unsold_tickets, ticket_count, a, b)
+                odds = hits / ticket_count
                 max_odds = max(max_odds, odds)
         result = max_odds
         return result
     
-    def solve(self, K, P):
-        return 0
-    
     def main(self):
+        '''
+        For Test Set 1:
+            1 <= len(tickets_purchased) <= 30
+            1 <= ticket_count <= 30
+        For Test Set 2:
+            1 <= len(tickets_purchased) <= 30
+            1 <= ticket_count <= 10 ** 9
+        '''
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
-            N, K = tuple(map(int, input().split(' ')))
-            P = set(tuple(map(int, input().split(' '))))
-            solution = self.bruteforce(K, P)
+            N, ticket_count = tuple(map(int, input().split(' ')))
+            tickets_purchased = set(tuple(map(int, input().split(' '))))
+            solution = self.solve(ticket_count, tickets_purchased)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
