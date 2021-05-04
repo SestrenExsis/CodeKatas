@@ -59,7 +59,7 @@ class Solver:
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
-            N, ticket_count = tuple(map(int, input().split(' ')))
+            _, ticket_count = tuple(map(int, input().split(' ')))
             tickets_purchased = set(tuple(map(int, input().split(' '))))
             solution = self.solve(ticket_count, tickets_purchased)
             output_row = 'Case #{}: {}'.format(

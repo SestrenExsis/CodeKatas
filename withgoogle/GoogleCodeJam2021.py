@@ -79,7 +79,7 @@ class ClosestPick: # 2021.1C.A
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
-            N, ticket_count = tuple(map(int, input().split(' ')))
+            _, ticket_count = tuple(map(int, input().split(' ')))
             tickets_purchased = set(tuple(map(int, input().split(' '))))
             solution = self.solve(ticket_count, tickets_purchased)
             output_row = 'Case #{}: {}'.format(
@@ -233,6 +233,14 @@ class SolverA: # ???
         return result
     
     def main(self):
+        '''
+        For Test Set 1:
+            1 <= A <= 10
+            1 <= B <= 10
+        For Test Set 2:
+            1 <= A <= 10 ** 9
+            1 <= B <= 10 ** 9
+        '''
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
@@ -256,6 +264,14 @@ class SolverB: # ???
         return result
     
     def main(self):
+        '''
+        For Test Set 1:
+            1 <= A <= 10
+            1 <= B <= 10
+        For Test Set 2:
+            1 <= A <= 1000
+            1 <= B <= 1000
+        '''
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
@@ -279,6 +295,14 @@ class SolverC: # ???
         return result
     
     def main(self):
+        '''
+        For Test Set 1:
+            1 <= A <= 10
+            1 <= B <= 10
+        For Test Set 2:
+            1 <= A <= 1000
+            1 <= B <= 1000
+        '''
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
@@ -432,7 +456,6 @@ class AppendSort: # 2021.1A.A
     '''
     def solve(self, nums):
         modded_nums = nums[::]
-        prev_num = ''
         for i in range(1, len(modded_nums)):
             str_num = str(nums[i])
             start = max(nums[i], modded_nums[i - 1])
@@ -449,7 +472,7 @@ class AppendSort: # 2021.1A.A
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
-            N = int(input())
+            _ = int(input()) # num_count
             nums = list(map(int, input().split(' ')))
             solution = self.solve(nums)
             output_row = 'Case #{}: {}'.format(
@@ -633,7 +656,7 @@ class Reversort: # 2021.Q.A
         test_count = int(input())
         output = []
         for test_id in range(1, test_count + 1):
-            element_count = int(input())
+            _ = int(input()) # element_count
             elements = list(map(int, input().split(' ')))
             solution = self.solve(elements)
             output_row = 'Case #{}: {}'.format(
@@ -764,7 +787,6 @@ class CheatingDetection: # 2021.Q.E
                 if answer == '0':
                     difficulties[question_id] += 1
         # Partition the questions into two groups: easy and hard
-        questions = []
         max_partition_size = int(partition_threshold * self.question_count)
         easy_questions = []
         hard_questions = []
@@ -801,11 +823,11 @@ class CheatingDetection: # 2021.Q.E
     
     def main(self):
         test_count = int(input())
-        threshold = int(input())
+        _ = int(input()) # threshold
         output = []
         for test_id in range(1, test_count + 1):
             player_answers = []
-            for i in range(self.player_count):
+            for _ in range(self.player_count):
                 player_answers.append(input())
             solution = self.solve(player_answers, 0.10)
             output_row = 'Case #{}: {}'.format(

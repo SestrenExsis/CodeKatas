@@ -20,5 +20,9 @@ class Solver:
         return output
 
 if __name__ == '__main__':
+    '''
+    Usage
+    python SolverDebug.py < inputs/SolverA.in
+    '''
     solver = Solver()
     solver.main()
