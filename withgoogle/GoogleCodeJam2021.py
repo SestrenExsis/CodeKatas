@@ -223,6 +223,80 @@ class RoaringYears: # 2021.1C.B
             print(output_row)
         return output
 
+class DoubleOrNOTing: # 2021.1C.C
+    '''
+    Double or NOTing
+    https://codingcompetitions.withgoogle.com/codejam/round/00000000004362d7/00000000007c1139
+    '''
+    memo = {}
+
+    def bnot(self, num: int) -> int:
+        if num <= 0xff and num in self.memo:
+            return self.memo[num]
+        a = num
+        digits = []
+        while a >= 0:
+            if a & 1 == 0:
+                digits.append('1')
+            else:
+                digits.append('0')
+            if a <= 1:
+                break
+            a //= 2
+        notted_num = int('0b' + ''.join(reversed(digits)), 2)
+        result = notted_num
+        if num <= 0xff:
+            self.memo[num] = notted_num
+        return result
+
+    def solve(self, source: int, target: int):
+        visits = set()
+        work = collections.deque()
+        work.append((0, source))
+        min_step_count = None
+        while len(work) > 0 and min_step_count is None:
+            N = len(work)
+            for _ in range(N):
+                step_count, num = work.pop()
+                if (step_count) > 50:
+                    break
+                if num == target:
+                    min_step_count = step_count
+                    break
+                visits.add(num)
+                doubled_num = 2 * num
+                if doubled_num not in visits:
+                    work.appendleft((step_count + 1, doubled_num))
+                notted_num = self.bnot(num)
+                if notted_num not in visits:
+                    work.appendleft((step_count + 1, notted_num))
+        result = min_step_count
+        return result
+    
+    def main(self):
+        '''
+        For Test Set 1:
+            1 <= len(S) <= 8
+            1 <= len(E) <= 8
+        For Test Set 2:
+            1 <= len(S) <= 100
+            1 <= len(E) <= 100
+        '''
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            S, E = tuple(input().split(' '))
+            source = int('0b' + S, 2)
+            target = int('0b' + E, 2)
+            solution = self.solve(source, target)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                'IMPOSSIBLE' if solution is None else solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
 class SolverA: # ???
     '''
     ???
@@ -857,7 +931,7 @@ if __name__ == '__main__':
         # '2021.1B.C': (DigitBlocks, 'Digit Blocks'),
         '2021.1C.A': (ClosestPick, 'Closest Pick'),
         '2021.1C.B': (RoaringYears, 'Roaring Years'),
-        '2021.1C.C': (SolverC, 'SolverC'),
+        '2021.1C.C': (DoubleOrNOTing, 'Double or NOTing'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('problem', help='Solve for a given problem', type=str)
