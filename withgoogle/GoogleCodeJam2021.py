@@ -228,28 +228,41 @@ class DoubleOrNOTing: # 2021.1C.C
     Double or NOTing
     https://codingcompetitions.withgoogle.com/codejam/round/00000000004362d7/00000000007c1139
     '''
-    memo = {}
+    def __init__(self):
+        self.masks = [
+            (0, 0, 1), # (power, lower, upper)
+        ]
+    
+    def add_mask(self, num: int):
+        while self.masks[-1][2] < num:
+            power, _, upper = self.masks[-1]
+            self.masks.append((
+                power + 1,
+                upper + 1,
+                2 * (upper + 1) - 1,
+            ))
 
     def bnot(self, num: int) -> int:
-        if num <= 0xff and num in self.memo:
-            return self.memo[num]
-        a = num
-        digits = []
-        while a >= 0:
-            if a & 1 == 0:
-                digits.append('1')
-            else:
-                digits.append('0')
-            if a <= 1:
+        self.add_mask(num)
+        assert 0 <= num <= self.masks[-1][2]
+        mask = 0
+        left = 0
+        right = len(self.masks)
+        while left < right:
+            mid = left + (right - left) // 2
+            _, lower, upper = self.masks[mid]
+            if lower <= num <= upper:
+                mask = upper
                 break
-            a //= 2
-        notted_num = int('0b' + ''.join(reversed(digits)), 2)
+            elif num < lower:
+                right = mid
+            elif num > upper:
+                left = mid + 1
+        notted_num = mask - num
         result = notted_num
-        if num <= 0xff:
-            self.memo[num] = notted_num
         return result
 
-    def solve(self, source: int, target: int):
+    def solve(self, source: int, target: int, max_tries: int = 1000):
         visits = set()
         work = collections.deque()
         work.append((0, source))
@@ -258,7 +271,7 @@ class DoubleOrNOTing: # 2021.1C.C
             N = len(work)
             for _ in range(N):
                 step_count, num = work.pop()
-                if (step_count) > 50:
+                if (step_count) > max_tries:
                     break
                 if num == target:
                     min_step_count = step_count
@@ -288,7 +301,7 @@ class DoubleOrNOTing: # 2021.1C.C
             S, E = tuple(input().split(' '))
             source = int('0b' + S, 2)
             target = int('0b' + E, 2)
-            solution = self.solve(source, target)
+            solution = self.solve(source, target, 2 * (len(S) + len(E)))
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 'IMPOSSIBLE' if solution is None else solution,
