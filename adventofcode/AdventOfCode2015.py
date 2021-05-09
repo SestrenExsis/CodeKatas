@@ -58,6 +58,35 @@ class Template: # Template
         result = solutions
         return result
 
+class Day09: # All in a Single Night
+    '''
+    All in a Single Night
+    https://adventofcode.com/2015/day/9
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day08: # Matchsticks
     '''
     Matchsticks
@@ -103,12 +132,21 @@ class Day08: # Matchsticks
                 ):
                     literal_char_count += 1
                     stack = []
-            print(row_data, memory_char_count - prev_counts[0], literal_char_count - prev_counts[1])
         result = memory_char_count - literal_char_count
         return result
     
     def solve2(self, parsed_input):
-        result = len(parsed_input)
+        literal_char_count = 0
+        encoded_char_count = 0
+        for row_data in parsed_input:
+            literal_char_count += len(row_data)
+            encoded_char_count += 2
+            for char in row_data:
+                if char in ('"', '\\'):
+                    encoded_char_count += 2
+                else:
+                    encoded_char_count += 1
+        result = encoded_char_count - literal_char_count
         return result
     
     def main(self):
