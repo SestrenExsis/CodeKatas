@@ -62,27 +62,48 @@ class Day09: # All in a Single Night
     '''
     All in a Single Night
     https://adventofcode.com/2015/day/9
+    You must visit each location exactly once
+    Any given location is either the first or last location in your path,
+    or it is a location between the start and end of your path.
+    The greedy approach would be to start with the smallest distance edge
+    and attempt to add locations to either the start or end of that path,
+    choosing whichever edge has the smallest distance as you go.
     '''
-    def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
-        for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
+    def get_edges(self, raw_input_lines: List[str]):
+        edges = {}
+        for row_data in raw_input_lines:
+            source, _, destination, _, distance = row_data.split(' ')
+            distance = int(distance)
+            edges[(source, destination)] = distance
+            edges[(destination, source)] = distance
+        result = edges
         return result
     
-    def solve(self, parsed_input):
-        result = len(parsed_input)
+    def solve(self, edges):
+        locations = set()
+        for source, destination in edges.keys():
+            locations.add(source)
+            locations.add(destination)
+        edges_left = set(edges.keys())
+        path = collections.deque()
+        path.append(min(edges, key=lambda edge: edges[edge]))
+        head = path[0]
+        tail = path[1]
+        while len(path) < len(locations):
+            break
+        result = sum(edges[edge] for edge in path)
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, edges):
+        result = len(edges)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        edges = self.get_edges(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(edges),
+            self.solve2(edges),
             )
         result = solutions
         return result
@@ -602,7 +623,7 @@ if __name__ == '__main__':
         6: (Day06, 'Probably a Fire Hazard'),
         7: (Day07, 'Some Assembly Required'),
         8: (Day08, 'Matchsticks'),
-    #     9: (Day09, '???'),
+        9: (Day09, 'All in a Single Night'),
     #    10: (Day10, '???'),
     #    11: (Day11, '???'),
     #    12: (Day12, '???'),
