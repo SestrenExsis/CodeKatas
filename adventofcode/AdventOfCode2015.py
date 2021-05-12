@@ -10,6 +10,7 @@ import datetime
 import functools
 import heapq
 import hashlib
+import itertools
 import operator
 import re
 import time
@@ -63,77 +64,49 @@ class Day09: # All in a Single Night
     All in a Single Night
     https://adventofcode.com/2015/day/9
     '''
-    def get_edges(self, raw_input_lines: List[str]):
-        edges = {}
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        locations = set()
+        distances = {}
         for row_data in raw_input_lines:
             source, _, destination, _, distance = row_data.split(' ')
             distance = int(distance)
-            edges[(source, destination)] = distance
-            edges[(destination, source)] = distance
-        result = edges
-        return result
-    
-    def solve(self, edges):
-        '''
-        You must visit each location exactly once
-        Any given location is either the first or last location in your path,
-        or it is a location between the start and end of your path.
-        The greedy approach would be to start with the smallest distance edge
-        and attempt to add locations to either the start or end of that path,
-        choosing whichever edge has the smallest distance as you go.
-        '''
-        locations = set()
-        options = []
-        for (source, destination), distance in edges.items():
+            distances[(source, destination)] = distance
+            distances[(destination, source)] = distance
             locations.add(source)
             locations.add(destination)
-            heapq.heappush(options, (distance, source, destination))
-        visits = set()
-        path = collections.deque()
-        head = None
-        tail = None
-        while len(options) > 0:
-            distance, source, destination = heapq.heappop(options)
-            if source in visits or destination in visits:
-                continue
-            if None in (head, tail):
-                head = source
-                tail = destination
-                path.append((source, destination))
-            elif (
-                head in (source, destination) and
-                tail in (source, destination)
-            ):
-                continue
-            elif head == source:
-                path.append((source, destination))
-                visits.add(source)
-                head = destination
-            elif head == destination:
-                path.append((source, destination))
-                visits.add(destination)
-                head = source
-            elif tail == source:
-                path.appendleft((source, destination))
-                visits.add(source)
-                tail = destination
-            elif tail == destination:
-                path.appendleft((source, destination))
-                visits.add(destination)
-                tail = source
-        result = sum(edges[edge] for edge in path)
+        result = (locations, distances)
         return result
     
-    def solve2(self, edges):
-        result = len(edges)
+    def bruteforce(self, locations, distances):
+        min_distance = float('inf')
+        for route in itertools.permutations(locations):
+            distance = 0
+            prev_stop = route[0]
+            for stop in route[1:]:
+                distance += distances[(prev_stop, stop)]
+                prev_stop = stop
+            min_distance = min(min_distance, distance)
+        result = min_distance
+        return result
+    
+    def bruteforce2(self, locations, distances):
+        max_distance = float('-inf')
+        for route in itertools.permutations(locations):
+            distance = 0
+            prev_stop = route[0]
+            for stop in route[1:]:
+                distance += distances[(prev_stop, stop)]
+                prev_stop = stop
+            max_distance = max(max_distance, distance)
+        result = max_distance
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        edges = self.get_edges(raw_input_lines)
+        locations, distances = self.get_parsed_input(raw_input_lines)
         solutions = (
-            self.solve(edges),
-            self.solve2(edges),
+            self.bruteforce(locations, distances),
+            self.bruteforce2(locations, distances),
             )
         result = solutions
         return result
