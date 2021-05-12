@@ -59,6 +59,47 @@ class Template: # Template
         result = solutions
         return result
 
+class Day10: # Elves Look, Elves Say
+    '''
+    Elves Look, Elves Say
+    https://adventofcode.com/2015/day/10
+    '''
+    def get_sequence(self, raw_input_lines: List[str]):
+        sequence = raw_input_lines[0]
+        result = sequence
+        return result
+    
+    def bruteforce(self, sequence, iteration_count):
+        final_sequence = sequence
+        for _ in range(iteration_count):
+            counts = []
+            for char in final_sequence:
+                if len(counts) < 1 or counts[-1][1] != char:
+                    counts.append([1, char])
+                else:
+                    counts[-1][0] += 1
+            final_sequence = ''.join(
+                ''.join(map(str, count)) for count in counts
+            )
+        result = final_sequence
+        return result
+    
+    def solve(self, sequence, iteration_count):
+        final_sequence = self.bruteforce(sequence, iteration_count)
+        result = len(final_sequence)
+        return result
+    
+    def main(self):
+        assert self.bruteforce('1', 5) == '312211'
+        raw_input_lines = get_raw_input_lines()
+        sequence = self.get_sequence(raw_input_lines)
+        solutions = (
+            self.solve(sequence, 40),
+            self.solve(sequence, 50),
+            )
+        result = solutions
+        return result
+
 class Day09: # All in a Single Night
     '''
     All in a Single Night
@@ -615,7 +656,7 @@ class Day01: # Not Quite Lisp
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2015.py 7 < inputs/2015day07.in
+    python AdventOfCode2015.py 10 < inputs/2015day10.in
     '''
     solvers = {
         1: (Day01, 'Not Quite Lisp'),
@@ -627,7 +668,7 @@ if __name__ == '__main__':
         7: (Day07, 'Some Assembly Required'),
         8: (Day08, 'Matchsticks'),
         9: (Day09, 'All in a Single Night'),
-    #    10: (Day10, '???'),
+       10: (Day10, 'Elves Look, Elves Say'),
     #    11: (Day11, '???'),
     #    12: (Day12, '???'),
     #    13: (Day13, '???'),
