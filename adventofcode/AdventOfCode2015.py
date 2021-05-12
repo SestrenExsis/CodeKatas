@@ -62,12 +62,6 @@ class Day09: # All in a Single Night
     '''
     All in a Single Night
     https://adventofcode.com/2015/day/9
-    You must visit each location exactly once
-    Any given location is either the first or last location in your path,
-    or it is a location between the start and end of your path.
-    The greedy approach would be to start with the smallest distance edge
-    and attempt to add locations to either the start or end of that path,
-    choosing whichever edge has the smallest distance as you go.
     '''
     def get_edges(self, raw_input_lines: List[str]):
         edges = {}
@@ -80,17 +74,53 @@ class Day09: # All in a Single Night
         return result
     
     def solve(self, edges):
+        '''
+        You must visit each location exactly once
+        Any given location is either the first or last location in your path,
+        or it is a location between the start and end of your path.
+        The greedy approach would be to start with the smallest distance edge
+        and attempt to add locations to either the start or end of that path,
+        choosing whichever edge has the smallest distance as you go.
+        '''
         locations = set()
-        for source, destination in edges.keys():
+        options = []
+        for (source, destination), distance in edges.items():
             locations.add(source)
             locations.add(destination)
-        edges_left = set(edges.keys())
+            heapq.heappush(options, (distance, source, destination))
+        visits = set()
         path = collections.deque()
-        path.append(min(edges, key=lambda edge: edges[edge]))
-        head = path[0]
-        tail = path[1]
-        while len(path) < len(locations):
-            break
+        head = None
+        tail = None
+        while len(options) > 0:
+            distance, source, destination = heapq.heappop(options)
+            if source in visits or destination in visits:
+                continue
+            if None in (head, tail):
+                head = source
+                tail = destination
+                path.append((source, destination))
+            elif (
+                head in (source, destination) and
+                tail in (source, destination)
+            ):
+                continue
+            elif head == source:
+                path.append((source, destination))
+                visits.add(source)
+                head = destination
+            elif head == destination:
+                path.append((source, destination))
+                visits.add(destination)
+                head = source
+            elif tail == source:
+                path.appendleft((source, destination))
+                visits.add(source)
+                tail = destination
+            elif tail == destination:
+                path.appendleft((source, destination))
+                visits.add(destination)
+                tail = source
         result = sum(edges[edge] for edge in path)
         return result
     
