@@ -59,6 +59,82 @@ class Template: # Template
         result = solutions
         return result
 
+class Day11: # Corporate Policy
+    '''
+    Corporate Policy
+    https://adventofcode.com/2015/day/11
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = raw_input_lines[0]
+        return result
+    
+    def encode(self, password):
+        encoded_password = 0
+        for i, char in enumerate(reversed(password)):
+            encoded_char = ord(char) - ord('a')
+            encoded_password += (26 ** i) * encoded_char
+        result = encoded_password
+        return result
+
+    def decode(self, encoded_password):
+        password = collections.deque()
+        while encoded_password > 0:
+            char = chr(ord('a') + encoded_password % 26)
+            encoded_password //= 26
+            password.appendleft(char)
+        result = password
+        return result
+    
+    def check_validity(self, password):
+        straight_ind = False
+        banned_chars_ind = False
+        paired_indices_found = set()
+        for i, char in enumerate(password):
+            if i >= 1:
+                if password[i] == password[i - 1]:
+                    paired_indices_found.add(i)
+                    paired_indices_found.add(i - 1)
+            if i >= 2:
+                if (
+                    ord(password[i]) == ord(password[i - 1]) + 1 and
+                    ord(password[i - 1]) == ord(password[i - 2]) + 1
+                ):
+                    straight_ind = True
+            if char in 'iol':
+                banned_chars_ind = True
+                break
+        result = all([
+            straight_ind,
+            not banned_chars_ind,
+            len(paired_indices_found) >= 4,
+        ])
+        return result
+    
+    def solve(self, prev_password):
+        decoded_password = prev_password
+        encoded_password = self.encode(prev_password)
+        while True:
+            encoded_password += 1
+            decoded_password = self.decode(encoded_password)
+            if self.check_validity(decoded_password):
+                break
+        result = ''.join(decoded_password)
+        return result
+    
+    def solve2(self, prev_password):
+        result = self.solve(self.solve(prev_password))
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        prev_password = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(prev_password),
+            self.solve2(prev_password),
+            )
+        result = solutions
+        return result
+
 class Day10: # Elves Look, Elves Say
     '''
     Elves Look, Elves Say
@@ -669,7 +745,7 @@ if __name__ == '__main__':
         8: (Day08, 'Matchsticks'),
         9: (Day09, 'All in a Single Night'),
        10: (Day10, 'Elves Look, Elves Say'),
-    #    11: (Day11, '???'),
+       11: (Day11, 'Corporate Policy'),
     #    12: (Day12, '???'),
     #    13: (Day13, '???'),
     #    14: (Day14, '???'),
