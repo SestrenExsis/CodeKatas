@@ -59,6 +59,49 @@ class Template: # Template
         result = solutions
         return result
 
+class Day12: # JSAbacusFramework.io
+    '''
+    JSAbacusFramework.io
+    https://adventofcode.com/2015/day/12
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = raw_input_lines[0]
+        return result
+    
+    def solve(self, parsed_input):
+        nums = []
+        num = 0
+        prev_char = ''
+        sign = 1
+        for char in parsed_input:
+            if char in '0123456789':
+                num = 10 * num + int(char)
+                if prev_char == '-':
+                    sign = -1
+            elif num > 0:
+                nums.append(sign * num)
+                num = 0
+                sign = 1
+            prev_char = char
+        print(nums)
+        nums.append(num)
+        result = sum(nums)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day11: # Corporate Policy
     '''
     Corporate Policy
@@ -732,7 +775,7 @@ class Day01: # Not Quite Lisp
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2015.py 10 < inputs/2015day10.in
+    python AdventOfCode2015.py 12 < inputs/2015day12.in
     '''
     solvers = {
         1: (Day01, 'Not Quite Lisp'),
@@ -746,7 +789,7 @@ if __name__ == '__main__':
         9: (Day09, 'All in a Single Night'),
        10: (Day10, 'Elves Look, Elves Say'),
        11: (Day11, 'Corporate Policy'),
-    #    12: (Day12, '???'),
+       12: (Day12, 'JSAbacusFramework.io'),
     #    13: (Day13, '???'),
     #    14: (Day14, '???'),
     #    15: (Day15, '???'),
