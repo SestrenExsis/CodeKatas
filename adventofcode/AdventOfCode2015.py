@@ -11,6 +11,7 @@ import functools
 import heapq
 import hashlib
 import itertools
+import json
 import operator
 import re
 import time
@@ -70,26 +71,48 @@ class Day12: # JSAbacusFramework.io
     
     def solve(self, parsed_input):
         nums = []
-        num = 0
-        prev_char = ''
-        sign = 1
-        for char in parsed_input:
-            if char in '0123456789':
-                num = 10 * num + int(char)
-                if prev_char == '-':
-                    sign = -1
-            elif num > 0:
-                nums.append(sign * num)
-                num = 0
-                sign = 1
-            prev_char = char
-        print(nums)
-        nums.append(num)
+        obj = json.loads(parsed_input)
+        work = [obj]
+        while len(work) > 0:
+            element = work.pop()
+            element_type = type(element)
+            if element_type == list:
+                for subelement in element:
+                    work.append(subelement)
+            elif element_type == dict:
+                for subelement in element.values():
+                    work.append(subelement)
+            elif element_type == int:
+                nums.append(element)
+            elif element_type == str:
+                pass
         result = sum(nums)
         return result
     
     def solve2(self, parsed_input):
-        result = len(parsed_input)
+        nums = []
+        obj = json.loads(parsed_input)
+        work = [obj]
+        while len(work) > 0:
+            element = work.pop()
+            element_type = type(element)
+            if element_type == list:
+                for subelement in element:
+                    work.append(subelement)
+            elif element_type == dict:
+                red_ind = False
+                for value in element.values():
+                    if value == 'red':
+                        red_ind = True
+                        break
+                if not red_ind:
+                    for subelement in element.values():
+                        work.append(subelement)
+            elif element_type == int:
+                nums.append(element)
+            elif element_type == str:
+                pass
+        result = sum(nums)
         return result
     
     def main(self):
