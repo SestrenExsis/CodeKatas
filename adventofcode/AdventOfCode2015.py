@@ -60,6 +60,53 @@ class Template: # Template
         result = solutions
         return result
 
+class Day13: # Knights of the Dinner Table
+    '''
+    Knights of the Dinner Table
+    https://adventofcode.com/2015/day/13
+    '''
+    def get_preferences(self, raw_input_lines: List[str]):
+        preferences = collections.defaultdict(int)
+        for raw_input_line in raw_input_lines:
+            parts = raw_input_line.split(' ')
+            person_a = parts[0]
+            sign = -1 if parts[2] == 'lose' else 1
+            value = sign * int(parts[3])
+            person_b = parts[-1][:-1]
+            pair = (min(person_a, person_b), max(person_a, person_b))
+            preferences[pair] += value
+        result = preferences
+        return result
+    
+    def solve(self, preferences):
+        max_happiness = float('-inf')
+        guests = set(pair[0] for pair in preferences)
+        guests |= set(pair[1] for pair in preferences)
+        for seating in itertools.permutations(guests, len(guests)):
+            happiness = 0
+            for i in range(len(seating)):
+                person_a = seating[i]
+                person_b = seating[(i + 1) % len(seating)]
+                pair = (min(person_a, person_b), max(person_a, person_b))
+                happiness += preferences[pair]
+            max_happiness = max(max_happiness, happiness)
+        result = max_happiness
+        return result
+    
+    def solve2(self, preferences):
+        result = len(preferences)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        preferences = self.get_preferences(raw_input_lines)
+        solutions = (
+            self.solve(preferences),
+            self.solve2(preferences),
+            )
+        result = solutions
+        return result
+
 class Day12: # JSAbacusFramework.io
     '''
     JSAbacusFramework.io
@@ -813,7 +860,7 @@ if __name__ == '__main__':
        10: (Day10, 'Elves Look, Elves Say'),
        11: (Day11, 'Corporate Policy'),
        12: (Day12, 'JSAbacusFramework.io'),
-    #    13: (Day13, '???'),
+       13: (Day13, 'Knights of the Dinner Table'),
     #    14: (Day14, '???'),
     #    15: (Day15, '???'),
     #    16: (Day16, '???'),
