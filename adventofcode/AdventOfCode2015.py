@@ -94,7 +94,20 @@ class Day13: # Knights of the Dinner Table
         return result
     
     def solve2(self, preferences):
-        result = len(preferences)
+        max_happiness = float('-inf')
+        guests = set(pair[0] for pair in preferences)
+        guests |= set(pair[1] for pair in preferences)
+        guests.add('Me')
+        for seating in itertools.permutations(guests, len(guests)):
+            happiness = 0
+            for i in range(len(seating)):
+                person_a = seating[i]
+                person_b = seating[(i + 1) % len(seating)]
+                pair = (min(person_a, person_b), max(person_a, person_b))
+                if pair in preferences:
+                    happiness += preferences[pair]
+            max_happiness = max(max_happiness, happiness)
+        result = max_happiness
         return result
     
     def main(self):
