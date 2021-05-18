@@ -60,6 +60,41 @@ class Template: # Template
         result = solutions
         return result
 
+class Day14: # Reindeer Olympics
+    '''
+    Reindeer Olympics
+    https://adventofcode.com/2015/day/14
+    '''
+    def get_reindeer(self, raw_input_lines: List[str]):
+        reindeer = {}
+        for raw_input_line in raw_input_lines:
+            parts = raw_input_line.split(' ')
+            name = parts[0]
+            speed = int(parts[3])
+            fly_duration = int(parts[6])
+            rest_duration = int(parts[13])
+            reindeer[name] = (speed, fly_duration, rest_duration)
+        result = reindeer
+        return result
+    
+    def solve(self, reindeer):
+        result = len(reindeer)
+        return result
+    
+    def solve2(self, reindeer):
+        result = len(reindeer)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        reindeer = self.get_reindeer(raw_input_lines)
+        solutions = (
+            self.solve(reindeer),
+            self.solve2(reindeer),
+            )
+        result = solutions
+        return result
+
 class Day13: # Knights of the Dinner Table
     '''
     Knights of the Dinner Table
@@ -858,7 +893,7 @@ class Day01: # Not Quite Lisp
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2015.py 12 < inputs/2015day12.in
+    python AdventOfCode2015.py 14 < inputs/2015day14.in
     '''
     solvers = {
         1: (Day01, 'Not Quite Lisp'),
@@ -874,7 +909,7 @@ if __name__ == '__main__':
        11: (Day11, 'Corporate Policy'),
        12: (Day12, 'JSAbacusFramework.io'),
        13: (Day13, 'Knights of the Dinner Table'),
-    #    14: (Day14, '???'),
+       14: (Day14, 'Reindeer Olympics'),
     #    15: (Day15, '???'),
     #    16: (Day16, '???'),
     #    17: (Day17, '???'),
