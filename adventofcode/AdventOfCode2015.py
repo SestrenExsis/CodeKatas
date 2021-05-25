@@ -78,7 +78,28 @@ class Day14: # Reindeer Olympics
         return result
     
     def solve(self, reindeer):
-        result = len(reindeer)
+        race = {}
+        for name, info in reindeer.items():
+            # distance, state, timer
+            race[name] = [0, 'flying', info[1]]
+        for _ in range(2503):
+            for name in race:
+                info = reindeer[name]
+                state = race[name][1]
+                if state == 'flying':
+                    race[name][0] += info[0]
+                race[name][2] -= 1
+                if race[name][2] < 1:
+                    if state == 'flying':
+                        race[name][1] = 'resting'
+                        race[name][2] = info[2]
+                    else:
+                        race[name][1] = 'flying'
+                        race[name][2] = info[1]
+        max_distance = 0
+        for name in race:
+            max_distance = max(max_distance, race[name][0])
+        result = max_distance
         return result
     
     def solve2(self, reindeer):
