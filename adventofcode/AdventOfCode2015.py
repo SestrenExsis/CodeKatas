@@ -106,8 +106,37 @@ class Day15: # Science for Hungry People
         result = max_score
         return result
     
-    def solve2(self, recipes):
-        result = len(recipes)
+    def solve2(self, recipes, teaspoons: int, target_calories: int):
+        recipe_names = list(sorted(recipes))
+        max_score = 0
+        for a in range(teaspoons):
+            for b in range(teaspoons - a):
+                for c in range(teaspoons - a - b):
+                    d = teaspoons - a - b - c
+                    if d < 0:
+                        break
+                    amounts = [a, b, c, d]
+                    capacity = 0
+                    durability = 0
+                    flavor = 0
+                    texture = 0
+                    calories = 0
+                    for i in range(4):
+                        recipe = recipes[recipe_names[i]]
+                        capacity += recipe['capacity'] * amounts[i]
+                        durability += recipe['durability'] * amounts[i]
+                        flavor += recipe['flavor'] * amounts[i]
+                        texture += recipe['texture'] * amounts[i]
+                        calories += recipe['calories'] * amounts[i]
+                    if calories != target_calories:
+                        continue
+                    capacity = 0 if capacity < 0 else capacity
+                    durability = 0 if durability < 0 else durability
+                    flavor = 0 if flavor < 0 else flavor
+                    texture = 0 if texture < 0 else texture
+                    score = capacity * durability * flavor * texture
+                    max_score = max(max_score, score)
+        result = max_score
         return result
     
     def main(self):
@@ -115,7 +144,7 @@ class Day15: # Science for Hungry People
         recipes = self.get_recipes(raw_input_lines)
         solutions = (
             self.solve(recipes, 100),
-            self.solve2(recipes),
+            self.solve2(recipes, 100, 500),
             )
         result = solutions
         return result
