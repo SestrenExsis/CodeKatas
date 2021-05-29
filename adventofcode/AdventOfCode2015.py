@@ -60,6 +60,66 @@ class Template: # Template
         result = solutions
         return result
 
+class Day16: # Aunt Sue
+    '''
+    Aunt Sue
+    https://adventofcode.com/2015/day/16
+    '''
+    def get_sue_data(self, raw_input_lines: List[str]):
+        sue_data = {}
+        for raw_input_line in raw_input_lines:
+            partition = raw_input_line.index(':')
+            a = raw_input_line[:partition]
+            b = raw_input_line[partition + 2:]
+            sue_id = int(a.split(' ')[1])
+            parts = b.split(', ')
+            sue_data[sue_id] = {}
+            for part in parts:
+                key, val = part.split(': ')
+                sue_data[sue_id][key] = int(val)
+        result = sue_data
+        return result
+    
+    def solve(self, sue_data, analysis):
+        detected_sue_id = None
+        for sue_id, data in sue_data.items():
+            for key, val in analysis.items():
+                if key not in data:
+                    continue
+                if val != data[key]:
+                    break
+            else:
+                detected_sue_id = sue_id
+                break
+        result = detected_sue_id
+        return result
+    
+    def solve2(self, sue_data):
+        result = len(sue_data)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        sue_data = self.get_sue_data(raw_input_lines)
+        analysis = {
+            'children': 3,
+            'cats': 7,
+            'samoyeds': 2,
+            'pomeranians': 3,
+            'akitas': 0,
+            'vizslas': 0,
+            'goldfish': 5,
+            'trees': 3,
+            'cars': 2,
+            'perfumes': 1,
+        }
+        solutions = (
+            self.solve(sue_data, analysis),
+            self.solve2(sue_data),
+            )
+        result = solutions
+        return result
+
 class Day15: # Science for Hungry People
     '''
     Science for Hungry People
@@ -1025,7 +1085,7 @@ class Day01: # Not Quite Lisp
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2015.py 15 < inputs/2015day15.in
+    python AdventOfCode2015.py 16 < inputs/2015day16.in
     '''
     solvers = {
         1: (Day01, 'Not Quite Lisp'),
@@ -1043,7 +1103,7 @@ if __name__ == '__main__':
        13: (Day13, 'Knights of the Dinner Table'),
        14: (Day14, 'Reindeer Olympics'),
        15: (Day15, 'Science for Hungry People'),
-    #    16: (Day16, '???'),
+       16: (Day16, 'Aunt Sue'),
     #    17: (Day17, '???'),
     #    18: (Day18, '???'),
     #    19: (Day19, '???'),
