@@ -60,6 +60,66 @@ class Template: # Template
         result = solutions
         return result
 
+class Day15: # Science for Hungry People
+    '''
+    Science for Hungry People
+    https://adventofcode.com/2015/day/15
+    '''
+    def get_recipes(self, raw_input_lines: List[str]):
+        recipes = {}
+        for raw_input_line in raw_input_lines:
+            recipe_name, raw_recipe = raw_input_line.split(': ')
+            recipe = {}
+            raw_properties = raw_recipe.split(', ')
+            for raw_property in raw_properties:
+                property_name, a = raw_property.split(' ')
+                recipe[property_name] = int(a)
+            recipes[recipe_name] = recipe
+        return recipes
+    
+    def solve(self, recipes, teaspoons: int):
+        recipe_names = list(sorted(recipes))
+        max_score = 0
+        for a in range(teaspoons):
+            for b in range(teaspoons - a):
+                for c in range(teaspoons - a - b):
+                    d = teaspoons - a - b - c
+                    if d < 0:
+                        break
+                    amounts = [a, b, c, d]
+                    capacity = 0
+                    durability = 0
+                    flavor = 0
+                    texture = 0
+                    for i in range(4):
+                        recipe = recipes[recipe_names[i]]
+                        capacity += recipe['capacity'] * amounts[i]
+                        durability += recipe['durability'] * amounts[i]
+                        flavor += recipe['flavor'] * amounts[i]
+                        texture += recipe['texture'] * amounts[i]
+                    capacity = 0 if capacity < 0 else capacity
+                    durability = 0 if durability < 0 else durability
+                    flavor = 0 if flavor < 0 else flavor
+                    texture = 0 if texture < 0 else texture
+                    score = capacity * durability * flavor * texture
+                    max_score = max(max_score, score)
+        result = max_score
+        return result
+    
+    def solve2(self, recipes):
+        result = len(recipes)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        recipes = self.get_recipes(raw_input_lines)
+        solutions = (
+            self.solve(recipes, 100),
+            self.solve2(recipes),
+            )
+        result = solutions
+        return result
+
 class Day14: # Reindeer Olympics
     '''
     Reindeer Olympics
@@ -936,7 +996,7 @@ class Day01: # Not Quite Lisp
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2015.py 14 < inputs/2015day14.in
+    python AdventOfCode2015.py 15 < inputs/2015day15.in
     '''
     solvers = {
         1: (Day01, 'Not Quite Lisp'),
@@ -953,7 +1013,7 @@ if __name__ == '__main__':
        12: (Day12, 'JSAbacusFramework.io'),
        13: (Day13, 'Knights of the Dinner Table'),
        14: (Day14, 'Reindeer Olympics'),
-    #    15: (Day15, '???'),
+       15: (Day15, 'Science for Hungry People'),
     #    16: (Day16, '???'),
     #    17: (Day17, '???'),
     #    18: (Day18, '???'),
