@@ -94,8 +94,25 @@ class Day16: # Aunt Sue
         result = detected_sue_id
         return result
     
-    def solve2(self, sue_data):
-        result = len(sue_data)
+    def solve2(self, sue_data, analysis, ranges):
+        detected_sue_id = None
+        for sue_id, data in sue_data.items():
+            for key, analyzed_value in analysis.items():
+                if key not in data:
+                    continue
+                if key not in ranges:
+                    if analyzed_value != data[key]:
+                        break
+                elif ranges[key] == '<':
+                    if data[key] >= analyzed_value:
+                        break
+                elif ranges[key] == '>':
+                    if data[key] <= analyzed_value:
+                        break
+            else:
+                detected_sue_id = sue_id
+                break
+        result = detected_sue_id
         return result
     
     def main(self):
@@ -113,9 +130,15 @@ class Day16: # Aunt Sue
             'cars': 2,
             'perfumes': 1,
         }
+        ranges = {
+            'cats': '>',
+            'trees': '>',
+            'pomeranians': '<',
+            'goldfish': '<',
+        }
         solutions = (
             self.solve(sue_data, analysis),
-            self.solve2(sue_data),
+            self.solve2(sue_data, analysis, ranges),
             )
         result = solutions
         return result
