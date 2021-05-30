@@ -60,6 +60,42 @@ class Template: # Template
         result = solutions
         return result
 
+class Day17: # No Such Thing as Too Much
+    '''
+    No Such Thing as Too Much
+    https://adventofcode.com/2015/day/17
+    '''
+    def get_containers(self, raw_input_lines: List[str]):
+        containers = []
+        for raw_input_line in raw_input_lines:
+            containers.append(int(raw_input_line))
+        result = containers
+        return result
+    
+    def solve(self, target_liters, containers):
+        amounts = [1] + [0] * target_liters
+        for container in containers:
+            for i in range(target_liters, -1, -1):
+                if i >= container:
+                    amounts[i] += amounts[i - container]
+        result = amounts[target_liters]
+        return result
+    
+    def solve2(self, target_liters, containers):
+        result = containers
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        containers = self.get_containers(raw_input_lines)
+        solutions = (
+            self.solve(25, [20, 15, 10, 5, 5]),
+            self.solve(150, containers),
+            self.solve2(150, containers),
+            )
+        result = solutions
+        return result
+
 class Day16: # Aunt Sue
     '''
     Aunt Sue
@@ -1127,7 +1163,7 @@ if __name__ == '__main__':
        14: (Day14, 'Reindeer Olympics'),
        15: (Day15, 'Science for Hungry People'),
        16: (Day16, 'Aunt Sue'),
-    #    17: (Day17, '???'),
+       17: (Day17, 'No Such Thing as Too Much'),
     #    18: (Day18, '???'),
     #    19: (Day19, '???'),
     #    20: (Day20, '???'),
