@@ -81,15 +81,58 @@ class Day17: # No Such Thing as Too Much
         result = amounts[target_liters]
         return result
     
+    def get_min_containers(self, target_liters, containers):
+        amounts = collections.defaultdict(int)
+        amounts[0] = 0
+        for container in containers:
+            for amount in list(amounts.keys()):
+                new_amount = amount + container
+                if new_amount not in amounts:
+                    amounts[new_amount] = amounts[amount] + 1
+                else:
+                    amounts[new_amount] = min(
+                        amounts[new_amount],
+                        amounts[amount] + 1,
+                    )
+        min_containers = amounts[target_liters]
+        result = min_containers
+        return result
+    
     def solve2(self, target_liters, containers):
-        result = containers
+        min_containers = self.get_min_containers(target_liters, containers)
+        amounts = collections.defaultdict(list)
+        amounts[0] = [[]]
+        for i, container in enumerate(containers):
+            for amount in list(amounts.keys()):
+                new_amount = amount + container
+                if new_amount not in amounts:
+                    amounts[new_amount] = []
+                    if len(amounts[amount]) < 1:
+                        amounts[new_amount].append([i])
+                    else:
+                        for method in amounts[amount]:
+                            amounts[new_amount].append(method + [i])
+                else:
+                    old_method_length = len(amounts[new_amount][0])
+                    new_method_length = len(amounts[amount][0]) + 1
+                    if new_method_length < old_method_length:
+                        amounts[new_amount] = []
+                        for method in amounts[amount]:
+                            amounts[new_amount].append(method + [i])
+                    elif new_method_length == old_method_length:
+                        for method in amounts[amount]:
+                            amounts[new_amount].append(method + [i])
+        method_count = 0
+        for method in amounts[target_liters]:
+            if len(set(method)) == len(method):
+                method_count += 1
+        result = method_count
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         containers = self.get_containers(raw_input_lines)
         solutions = (
-            self.solve(25, [20, 15, 10, 5, 5]),
             self.solve(150, containers),
             self.solve2(150, containers),
             )
