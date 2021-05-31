@@ -60,6 +60,99 @@ class Template: # Template
         result = solutions
         return result
 
+class Day18: # Like a GIF For Your Yard
+    '''
+    Like a GIF For Your Yard
+    https://adventofcode.com/2015/day/18
+    '''
+    def get_lights(self, raw_input_lines: List[str]):
+        lights = {}
+        for row, raw_input_line in enumerate(raw_input_lines):
+            for col, char in enumerate(raw_input_line):
+                lights[(row, col)] = 0 if char == '.' else 1
+        result = lights
+        return result
+    
+    def solve(self, lights, step_count):
+        rows = 1 + max(key[0] for key in lights)
+        cols = 1 + max(key[1] for key in lights)
+        for _ in range(step_count):
+            toggles = set()
+            for row in range(rows):
+                for col in range(cols):
+                    neighbors = 0
+                    for neighbor in (
+                        (row - 1, col - 1),
+                        (row + 0, col - 1),
+                        (row + 1, col - 1),
+                        (row - 1, col + 0),
+                        (row + 1, col + 0),
+                        (row - 1, col + 1),
+                        (row + 0, col + 1),
+                        (row + 1, col + 1),
+                    ):
+                        if neighbor in lights:
+                            neighbors += lights[neighbor]
+                    value = lights[(row, col)]
+                    if value == 1 and (neighbors < 2 or neighbors > 3):
+                        toggles.add((row, col))
+                    if value == 0 and neighbors == 3:
+                        toggles.add((row, col))
+            for (row, col) in toggles:
+                lights[(row, col)] = 1 - lights[(row, col)]
+        result = sum(lights.values())
+        return result
+    
+    def solve2(self, lights, step_count):
+        rows = 1 + max(key[0] for key in lights)
+        cols = 1 + max(key[1] for key in lights)
+        stuck_lights = (
+            (0, 0),
+            (rows - 1, 0),
+            (0, cols - 1),
+            (rows - 1, cols - 1),
+        )
+        for stuck_light in stuck_lights:
+            lights[stuck_light] = 1
+        for _ in range(step_count):
+            toggles = set()
+            for row in range(rows):
+                for col in range(cols):
+                    if (row, col) in stuck_lights:
+                        continue
+                    neighbors = 0
+                    for neighbor in (
+                        (row - 1, col - 1),
+                        (row + 0, col - 1),
+                        (row + 1, col - 1),
+                        (row - 1, col + 0),
+                        (row + 1, col + 0),
+                        (row - 1, col + 1),
+                        (row + 0, col + 1),
+                        (row + 1, col + 1),
+                    ):
+                        if neighbor in lights:
+                            neighbors += lights[neighbor]
+                    value = lights[(row, col)]
+                    if value == 1 and (neighbors < 2 or neighbors > 3):
+                        toggles.add((row, col))
+                    if value == 0 and neighbors == 3:
+                        toggles.add((row, col))
+            for (row, col) in toggles:
+                lights[(row, col)] = 1 - lights[(row, col)]
+        result = sum(lights.values())
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        lights = self.get_lights(raw_input_lines)
+        solutions = (
+            self.solve(copy.deepcopy(lights), 100),
+            self.solve2(copy.deepcopy(lights), 100),
+            )
+        result = solutions
+        return result
+
 class Day17: # No Such Thing as Too Much
     '''
     No Such Thing as Too Much
@@ -1207,7 +1300,7 @@ if __name__ == '__main__':
        15: (Day15, 'Science for Hungry People'),
        16: (Day16, 'Aunt Sue'),
        17: (Day17, 'No Such Thing as Too Much'),
-    #    18: (Day18, '???'),
+       18: (Day18, 'Like a GIF For Your Yard'),
     #    19: (Day19, '???'),
     #    20: (Day20, '???'),
     #    21: (Day21, '???'),
