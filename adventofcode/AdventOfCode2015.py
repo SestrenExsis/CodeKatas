@@ -60,6 +60,50 @@ class Template: # Template
         result = solutions
         return result
 
+class Day19: # Medicine for Rudolph
+    '''
+    Medicine for Rudolph
+    https://adventofcode.com/2015/day/19
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        replacements = collections.defaultdict(set)
+        for raw_input_line in raw_input_lines:
+            if len(raw_input_line) < 1:
+                break
+            source, target = raw_input_line.split(' => ')
+            replacements[source].add(target)
+        molecule = raw_input_lines[-1]
+        result = (replacements, molecule)
+        return result
+    
+    def solve(self, replacements, molecule):
+        new_molecules = set()
+        for i in range(len(molecule)):
+            prefix = molecule[:i]
+            for source in replacements:
+                if prefix.endswith(source):
+                    a = prefix[:-len(source)]
+                    b = molecule[i:]
+                    for target in replacements[source]:
+                        new_molecule = a + target + b
+                        new_molecules.add(new_molecule)
+        result = len(new_molecules)
+        return result
+    
+    def solve2(self, replacements, molecule):
+        result = molecule
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        replacements, molecule = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(replacements, molecule),
+            self.solve2(replacements, molecule),
+            )
+        result = solutions
+        return result
+
 class Day18: # Like a GIF For Your Yard
     '''
     Like a GIF For Your Yard
@@ -1280,7 +1324,7 @@ class Day01: # Not Quite Lisp
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2015.py 16 < inputs/2015day16.in
+    python AdventOfCode2015.py 19 < inputs/2015day19.in
     '''
     solvers = {
         1: (Day01, 'Not Quite Lisp'),
@@ -1301,7 +1345,7 @@ if __name__ == '__main__':
        16: (Day16, 'Aunt Sue'),
        17: (Day17, 'No Such Thing as Too Much'),
        18: (Day18, 'Like a GIF For Your Yard'),
-    #    19: (Day19, '???'),
+       19: (Day19, 'Medicine for Rudolph'),
     #    20: (Day20, '???'),
     #    21: (Day21, '???'),
     #    22: (Day22, '???'),
