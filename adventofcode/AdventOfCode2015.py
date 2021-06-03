@@ -13,6 +13,7 @@ import hashlib
 import itertools
 import json
 import operator
+import random
 import re
 import time
 from typing import Dict, List, Set, Tuple
@@ -71,35 +72,68 @@ class Day19: # Medicine for Rudolph
             if len(raw_input_line) < 1:
                 break
             source, target = raw_input_line.split(' => ')
-            replacements[source].add(target)
-        molecule = raw_input_lines[-1]
-        result = (replacements, molecule)
+            assert source == 'e' or 'e' not in source
+            assert 'e' not in target
+            components = []
+            for char in target:
+                if char in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+                    components.append(char)
+                else:
+                    components[-1] = components[-1] + char
+            replacements[source].add(tuple(components))
+        assert 'e' not in raw_input_lines[-1]
+        medicine_molecule = []
+        for char in raw_input_lines[-1]:
+            if char in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+                medicine_molecule.append(char)
+            else:
+                medicine_molecule[-1] = medicine_molecule[-1] + char
+        assert ''.join(medicine_molecule) == raw_input_lines[-1]
+        result = (replacements, tuple(medicine_molecule))
         return result
     
-    def solve(self, replacements, molecule):
+    def solve(self, replacements, medicine_molecule):
         new_molecules = set()
-        for i in range(len(molecule)):
-            prefix = molecule[:i]
-            for source in replacements:
-                if prefix.endswith(source):
-                    a = prefix[:-len(source)]
-                    b = molecule[i:]
-                    for target in replacements[source]:
-                        new_molecule = a + target + b
-                        new_molecules.add(new_molecule)
+        for i, source in enumerate(medicine_molecule):
+            a = list(medicine_molecule[:i])
+            b = list(medicine_molecule[i + 1:])
+            for target in replacements[source]:
+                new_molecule = tuple(a + list(target) + b)
+                new_molecules.add(new_molecule)
         result = len(new_molecules)
         return result
     
-    def solve2(self, replacements, molecule):
-        result = molecule
+    def solve2_randomly(self, seed, replacements, medicine_molecule):
+        # Based on https://www.reddit.com/r/adventofcode/comments/3xflz8/day_19_solutions/cy4cu5b?utm_source=share&utm_medium=web2x&context=3
+        pairs = []
+        for source, targets in replacements.items():
+            for target in targets:
+                pairs.append((source, ''.join(target)))
+        min_step_count = float('inf')
+        for _ in range(1_000):
+            step_count = 0
+            molecule = ''.join(medicine_molecule)
+            random.shuffle(pairs)
+            while len(molecule) > 1 or molecule[0] != seed:
+                prev_molecule = molecule
+                for source, target in pairs:
+                    if target not in molecule:
+                        continue
+                    molecule = molecule.replace(target, source, 1)
+                    step_count += 1
+                if molecule == prev_molecule:
+                    break
+            if molecule == seed:
+                min_step_count = min(min_step_count, step_count)
+        result = min_step_count
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        replacements, molecule = self.get_parsed_input(raw_input_lines)
+        replacements, medicine_molecule = self.get_parsed_input(raw_input_lines)
         solutions = (
-            self.solve(replacements, molecule),
-            self.solve2(replacements, molecule),
+            self.solve(replacements, medicine_molecule),
+            self.solve2_randomly('e', replacements, medicine_molecule),
             )
         result = solutions
         return result
