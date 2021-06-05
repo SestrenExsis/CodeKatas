@@ -103,8 +103,19 @@ class Day20: # Infinite Elves and Infinite Houses
         result = target_house_id
         return result
     
-    def solve2(self, target_present_count):
-        result = target_present_count
+    def solve2_poorly(self, target_present_count):
+        target_sum_of_divisors = 1 + (target_present_count - 1) // 10
+        houses = [0] * (50 * target_sum_of_divisors + 1)
+        for elf_id in range(1, target_sum_of_divisors + 1):
+            for stop_id in range(50):
+                house_id = (stop_id + 1) * elf_id
+                houses[house_id] += 11 * elf_id
+        target_house_id = None
+        for house_id, present_count in enumerate(houses):
+            if present_count >= target_present_count:
+                target_house_id = house_id
+                break
+        result = target_house_id
         return result
     
     def main(self):
@@ -112,7 +123,7 @@ class Day20: # Infinite Elves and Infinite Houses
         target_present_count = self.get_target_present_count(raw_input_lines)
         solutions = (
             self.solve(target_present_count),
-            self.solve2(target_present_count),
+            self.solve2_poorly(target_present_count),
             )
         result = solutions
         return result
