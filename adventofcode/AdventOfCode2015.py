@@ -88,37 +88,18 @@ class Day20: # Infinite Elves and Infinite Houses
         target_present_count = int(raw_input_lines[0])
         result = target_present_count
         return result
-    
-    def solve_too_slowly(self, target_present_count):
+
+    def solve(self, target_present_count):
         target_sum_of_divisors = 1 + (target_present_count - 1) // 10
-        max_sum_of_divisors = 0
-        target_house_id = -1
-        house_id = 2
-        prev_sum_of_divisors = [0, 1]
-        while True:
-            sum_of_divisors = 0
-            for factor in range(2, house_id + 1):
-                if house_id % factor == 0:
-                    complement = house_id // factor
-                    sum_of_divisors = prev_sum_of_divisors[complement] + house_id
-                    break
-            prev_sum_of_divisors.append(sum_of_divisors)
-            max_sum_of_divisors = max(max_sum_of_divisors, sum_of_divisors)
-            if house_id % 1000 == 0:
-                print(house_id, max_sum_of_divisors)
-            if sum_of_divisors >= target_sum_of_divisors:
+        houses = [0] * (target_sum_of_divisors + 1)
+        for elf_id in range(1, target_sum_of_divisors + 1):
+            for house_id in range(elf_id, target_sum_of_divisors + 1, elf_id):
+                houses[house_id] += 10 * elf_id
+        target_house_id = None
+        for house_id, present_count in enumerate(houses):
+            if present_count >= target_present_count:
                 target_house_id = house_id
                 break
-            house_id += 1
-        # max_num = 0
-        # powers = set(2 ** i for i in range(26))
-        # for i, num in enumerate(prev_sum_of_divisors):
-        #     if i in powers:
-        #         error = ''
-        #         if num < max_num:
-        #             error = 'ERROR!!'
-        #         print(i, num, max_num, error)
-        #     max_num = max(max_num, num)
         result = target_house_id
         return result
     
@@ -130,7 +111,7 @@ class Day20: # Infinite Elves and Infinite Houses
         raw_input_lines = get_raw_input_lines()
         target_present_count = self.get_target_present_count(raw_input_lines)
         solutions = (
-            self.solve_too_slowly(target_present_count),
+            self.solve(target_present_count),
             self.solve2(target_present_count),
             )
         result = solutions
