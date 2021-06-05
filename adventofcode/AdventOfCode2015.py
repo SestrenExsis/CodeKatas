@@ -61,6 +61,81 @@ class Template: # Template
         result = solutions
         return result
 
+class Day20: # Infinite Elves and Infinite Houses
+    '''
+    Infinite Elves and Infinite Houses
+    https://adventofcode.com/2015/day/20
+
+    1 -> 1 -> 1
+    2 -> 1 + 2 -> 3
+    3 -> 1 + 3 -> 4
+    4 -> 1 + 2 + 4 -> 7
+    5 -> 1 + 5 -> 6
+    6 -> 1 + 2 + 3 + 6 = 12
+    7 -> 1 + 7 = 8
+    8 -> 1 + 2 + 4 + 8 = 15
+    9 -> 1 + 3 + 9 = 13
+    10 -> 1 + 2 + 5 + 10 = 18
+    11 -> 1 + 11 = 12
+    12 -> 1 + 2 + 3 + 4 + 6 + 12 = 28
+    13 -> 1 + 13 = 14
+    14 -> 1 + 2 + 7 + 14 = 24
+    15 -> 1 + 3 + 5 + 15 = 24
+    16 -> 1 + 2 + 4 + 8 + 16 = 31
+    '''
+
+    def get_target_present_count(self, raw_input_lines: List[str]):
+        target_present_count = int(raw_input_lines[0])
+        result = target_present_count
+        return result
+    
+    def solve_too_slowly(self, target_present_count):
+        target_sum_of_divisors = 1 + (target_present_count - 1) // 10
+        max_sum_of_divisors = 0
+        target_house_id = -1
+        house_id = 2
+        prev_sum_of_divisors = [0, 1]
+        while True:
+            sum_of_divisors = 0
+            for factor in range(2, house_id + 1):
+                if house_id % factor == 0:
+                    complement = house_id // factor
+                    sum_of_divisors = prev_sum_of_divisors[complement] + house_id
+                    break
+            prev_sum_of_divisors.append(sum_of_divisors)
+            max_sum_of_divisors = max(max_sum_of_divisors, sum_of_divisors)
+            if house_id % 1000 == 0:
+                print(house_id, max_sum_of_divisors)
+            if sum_of_divisors >= target_sum_of_divisors:
+                target_house_id = house_id
+                break
+            house_id += 1
+        # max_num = 0
+        # powers = set(2 ** i for i in range(26))
+        # for i, num in enumerate(prev_sum_of_divisors):
+        #     if i in powers:
+        #         error = ''
+        #         if num < max_num:
+        #             error = 'ERROR!!'
+        #         print(i, num, max_num, error)
+        #     max_num = max(max_num, num)
+        result = target_house_id
+        return result
+    
+    def solve2(self, target_present_count):
+        result = target_present_count
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        target_present_count = self.get_target_present_count(raw_input_lines)
+        solutions = (
+            self.solve_too_slowly(target_present_count),
+            self.solve2(target_present_count),
+            )
+        result = solutions
+        return result
+
 class Day19: # Medicine for Rudolph
     '''
     Medicine for Rudolph
@@ -1380,7 +1455,7 @@ if __name__ == '__main__':
        17: (Day17, 'No Such Thing as Too Much'),
        18: (Day18, 'Like a GIF For Your Yard'),
        19: (Day19, 'Medicine for Rudolph'),
-    #    20: (Day20, '???'),
+       20: (Day20, 'Infinite Elves and Infinite Houses'),
     #    21: (Day21, '???'),
     #    22: (Day22, '???'),
     #    23: (Day23, '???'),
