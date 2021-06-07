@@ -75,29 +75,29 @@ class Day21: # RPG Simulator 20XX
         result = boss
         return result
     
-    def solve(self, shop, boss):
-        # You must buy exactly 1 weapon
-        # You can buy 0 or 1 armor
-        # You can buy 0-2 rings
-        # No duplicate items
-        weapons = [
-            stats[1:] for
-            _, stats in shop.items() if
-            stats[0] == 'Weapon'
-        ]
-        armors = [
-            stats[1:] for
-            _, stats in shop.items() if
-            stats[0] == 'Armor'
-        ]
-        armors.append((0, 0, 0))
-        rings = [
-            stats[1:] for
-            _, stats in shop.items() if
-            stats[0] == 'Ring'
-        ]
-        rings.append((0, 0, 0))
-        rings.append((0, 0, 0))
+    def fight(self, boss, hero_atk, hero_def) -> bool:
+        victory = True
+        hero_hp = 100
+        boss_atk = boss['Damage']
+        boss_def = boss['Armor']
+        boss_hp = boss['Hit Points']
+        while True:
+            # Hero attacks
+            hero_dmg = max(1, hero_atk - boss_def)
+            boss_hp -= hero_dmg
+            if boss_hp < 1:
+                victory = True
+                break
+            # Boss attacks
+            boss_dmg = max(1, boss_atk - hero_def)
+            hero_hp -= boss_dmg
+            if hero_hp < 1:
+                victory = False
+                break
+        result = victory
+        return result
+    
+    def solve(self, boss, weapons, armors, rings):
         min_cost_to_win = float('inf')
         for i in range(len(weapons)):
             weapon_cost, weapon_atk, _ = weapons[i]
@@ -115,28 +115,34 @@ class Day21: # RPG Simulator 20XX
                         ])
                         hero_atk = weapon_atk + ring1_atk + ring2_atk
                         hero_def = armor_def + ring1_def + ring2_def
-                        hero_hp = 100
-                        boss_atk = boss['Damage']
-                        boss_def = boss['Armor']
-                        boss_hp = boss['Hit Points']
-                        while True:
-                            # You attack
-                            hero_dmg = max(1, hero_atk - boss_def)
-                            boss_hp -= hero_dmg
-                            if boss_hp < 1:
-                                min_cost_to_win = min(min_cost_to_win, cost)
-                                break
-                            # Boss attacks
-                            boss_dmg = max(1, boss_atk - hero_def)
-                            hero_hp -= boss_dmg
-                            if hero_hp < 1:
-                                break
+                        victory = self.fight(boss, hero_atk, hero_def)
+                        if victory:
+                            min_cost_to_win = min(min_cost_to_win, cost)
         result = min_cost_to_win
-        # 135 too high
         return result
     
-    def solve2(self, shop, boss):
-        result = len(boss)
+    def solve2(self, boss, weapons, armors, rings):
+        max_cost_to_win = float('-inf')
+        for i in range(len(weapons)):
+            weapon_cost, weapon_atk, _ = weapons[i]
+            for j in range(len(armors)):
+                armor_cost, _, armor_def = armors[j]
+                for k1 in range(len(rings)):
+                    ring1_cost, ring1_atk, ring1_def = rings[k1]
+                    for k2 in range(k1 + 1, len(rings)):
+                        ring2_cost, ring2_atk, ring2_def = rings[k2]
+                        cost = sum([
+                            weapon_cost,
+                            armor_cost,
+                            ring1_cost,
+                            ring2_cost,
+                        ])
+                        hero_atk = weapon_atk + ring1_atk + ring2_atk
+                        hero_def = armor_def + ring1_def + ring2_def
+                        victory = self.fight(boss, hero_atk, hero_def)
+                        if not victory:
+                            max_cost_to_win = max(max_cost_to_win, cost)
+        result = max_cost_to_win
         return result
     
     def main(self):
@@ -161,9 +167,31 @@ class Day21: # RPG Simulator 20XX
         }
         raw_input_lines = get_raw_input_lines()
         boss = self.get_boss(raw_input_lines)
+        weapons = [
+            stats[1:] for
+            _, stats in shop.items() if
+            stats[0] == 'Weapon'
+        ]
+        armors = [
+            stats[1:] for
+            _, stats in shop.items() if
+            stats[0] == 'Armor'
+        ]
+        armors.append((0, 0, 0))
+        rings = [
+            stats[1:] for
+            _, stats in shop.items() if
+            stats[0] == 'Ring'
+        ]
+        rings.append((0, 0, 0))
+        rings.append((0, 0, 0))
+        # You must buy exactly 1 weapon
+        # You can buy 0 or 1 armor
+        # You can buy 0-2 rings
+        # No duplicate items
         solutions = (
-            self.solve(shop, boss),
-            self.solve2(shop, boss),
+            self.solve(boss, weapons, armors, rings),
+            self.solve2(boss, weapons, armors, rings),
             )
         result = solutions
         return result
