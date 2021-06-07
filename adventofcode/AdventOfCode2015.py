@@ -61,6 +61,113 @@ class Template: # Template
         result = solutions
         return result
 
+class Day21: # RPG Simulator 20XX
+    '''
+    RPG Simulator 20XX
+    https://adventofcode.com/2015/day/21
+    '''
+    def get_boss(self, raw_input_lines: List[str]):
+        boss = {}
+        for raw_input_line in raw_input_lines:
+            stat, raw_value = raw_input_line.split(': ')
+            value = int(raw_value)
+            boss[stat] = value
+        result = boss
+        return result
+    
+    def solve(self, shop, boss):
+        # You must buy exactly 1 weapon
+        # You can buy 0 or 1 armor
+        # You can buy 0-2 rings
+        # No duplicate items
+        weapons = [
+            stats[1:] for
+            _, stats in shop.items() if
+            stats[0] == 'Weapon'
+        ]
+        armors = [
+            stats[1:] for
+            _, stats in shop.items() if
+            stats[0] == 'Armor'
+        ]
+        armors.append((0, 0, 0))
+        rings = [
+            stats[1:] for
+            _, stats in shop.items() if
+            stats[0] == 'Ring'
+        ]
+        rings.append((0, 0, 0))
+        rings.append((0, 0, 0))
+        min_cost_to_win = float('inf')
+        for i in range(len(weapons)):
+            weapon_cost, weapon_atk, _ = weapons[i]
+            for j in range(len(armors)):
+                armor_cost, _, armor_def = armors[j]
+                for k1 in range(len(rings)):
+                    ring1_cost, ring1_atk, ring1_def = rings[k1]
+                    for k2 in range(k1 + 1, len(rings)):
+                        ring2_cost, ring2_atk, ring2_def = rings[k2]
+                        cost = sum([
+                            weapon_cost,
+                            armor_cost,
+                            ring1_cost,
+                            ring2_cost,
+                        ])
+                        hero_atk = weapon_atk + ring1_atk + ring2_atk
+                        hero_def = armor_def + ring1_def + ring2_def
+                        hero_hp = 100
+                        boss_atk = boss['Damage']
+                        boss_def = boss['Armor']
+                        boss_hp = boss['Hit Points']
+                        while True:
+                            # You attack
+                            hero_dmg = max(1, hero_atk - boss_def)
+                            boss_hp -= hero_dmg
+                            if boss_hp < 1:
+                                min_cost_to_win = min(min_cost_to_win, cost)
+                                break
+                            # Boss attacks
+                            boss_dmg = max(1, boss_atk - hero_def)
+                            hero_hp -= boss_dmg
+                            if hero_hp < 1:
+                                break
+        result = min_cost_to_win
+        # 135 too high
+        return result
+    
+    def solve2(self, shop, boss):
+        result = len(boss)
+        return result
+    
+    def main(self):
+        shop = {
+            # Item: (Type, Cost, Damage, Armor)
+            'Dagger': ('Weapon', 8, 4, 0),
+            'Shortsword': ('Weapon', 10, 5, 0),
+            'Warhammer': ('Weapon', 25, 6, 0),
+            'Longsword': ('Weapon', 40, 7, 0),
+            'Greataxe': ('Weapon', 74, 8, 0),
+            'Leather': ('Armor', 13, 0, 1),
+            'Chainmail': ('Armor', 31, 0, 2),
+            'Splintmail': ('Armor', 53, 0, 3),
+            'Bandedmail': ('Armor', 75, 0, 4),
+            'Platemail': ('Armor', 102, 0, 5),
+            'Ring of Damage +1': ('Ring', 25, 1, 0),
+            'Ring of Damage +2': ('Ring', 50, 2, 0),
+            'Ring of Damage +3': ('Ring', 100, 3, 0),
+            'Ring of Defense +1': ('Ring', 20, 0, 1),
+            'Ring of Defense +2': ('Ring', 40, 0, 2),
+            'Ring of Defense +3': ('Ring', 80, 0, 3),
+        }
+        raw_input_lines = get_raw_input_lines()
+        boss = self.get_boss(raw_input_lines)
+        solutions = (
+            self.solve(shop, boss),
+            self.solve2(shop, boss),
+            )
+        result = solutions
+        return result
+
 class Day20: # Infinite Elves and Infinite Houses
     '''
     Infinite Elves and Infinite Houses
@@ -1448,7 +1555,7 @@ if __name__ == '__main__':
        18: (Day18, 'Like a GIF For Your Yard'),
        19: (Day19, 'Medicine for Rudolph'),
        20: (Day20, 'Infinite Elves and Infinite Houses'),
-    #    21: (Day21, '???'),
+       21: (Day21, 'RPG Simulator 20XX'),
     #    22: (Day22, '???'),
     #    23: (Day23, '???'),
     #    24: (Day24, '???'),
