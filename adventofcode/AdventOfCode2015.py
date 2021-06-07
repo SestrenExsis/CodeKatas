@@ -122,7 +122,7 @@ class Day21: # RPG Simulator 20XX
         return result
     
     def solve2(self, boss, weapons, armors, rings):
-        max_cost_to_win = float('-inf')
+        max_cost_to_lose = float('-inf')
         for i in range(len(weapons)):
             weapon_cost, weapon_atk, _ = weapons[i]
             for j in range(len(armors)):
@@ -141,8 +141,8 @@ class Day21: # RPG Simulator 20XX
                         hero_def = armor_def + ring1_def + ring2_def
                         victory = self.fight(boss, hero_atk, hero_def)
                         if not victory:
-                            max_cost_to_win = max(max_cost_to_win, cost)
-        result = max_cost_to_win
+                            max_cost_to_lose = max(max_cost_to_lose, cost)
+        result = max_cost_to_lose
         return result
     
     def main(self):
