@@ -61,6 +61,75 @@ class Template: # Template
         result = solutions
         return result
 
+class Day22: # Wizard Simulator 20XX
+    '''
+    Wizard Simulator 20XX
+    https://adventofcode.com/2015/day/22
+    '''
+    def get_boss(self, raw_input_lines: List[str]):
+        boss = {}
+        for raw_input_line in raw_input_lines:
+            stat, raw_value = raw_input_line.split(': ')
+            value = int(raw_value)
+            boss[stat] = value
+        result = boss
+        return result
+    
+    def fight(self, boss, spells) -> bool:
+        victory = True
+        hero_hp = 50
+        hero_mp = 500
+        hero_def = 0
+        boss_atk = boss['Damage']
+        boss_hp = boss['Hit Points']
+        min_mp_spent = float('inf')
+        # mp_spent, boss_hp, hero_hp, hero_mp, shield_t, poison_t, recharge_t
+        work = [(0, boss_hp, hero_hp, hero_mp, 0, 0, 0)]
+        while len(work) > 0:
+            mp_spent, boss_hp, hero_hp, hero_mp, shield_t, poison_t, recharge_t = heapq.heappop(work)
+            shield_t = max(0, shield_t - 1)
+            poison_t = max(0, poison_t - 1)
+            recharge_t = max(0, recharge_t - 1)
+            next_spells = set(spells.keys())
+            if shield_t > 0:
+                next_spells.remove('Shield')
+            if poison_t > 0:
+                next_spells.remove('Poison')
+            if recharge_t > 0:
+                next_spells.remove('Recharge')
+            # Hero casts a spell
+            for next_spell in next_spells:
+                pass
+            # TODO: Finish fight
+        result = victory
+        return result
+    
+    def solve(self, boss, spells):
+        result = len(boss)
+        return result
+    
+    def solve2(self, boss, spells):
+        result = len(spells)
+        return result
+    
+    def main(self):
+        spells = {
+            # Spell: (Cost, Effect, Amount, Duration)
+            'Magic Missile': (53, 'Damage', 4, 0),
+            'Drain': (73, 'Damage Heal', 2, 0),
+            'Shield': (113, 'Armor', 7, 6),
+            'Poison': (173, 'Damage', 4, 6),
+            'Recharge': (229, 'Mana', 101, 5),
+        }
+        raw_input_lines = get_raw_input_lines()
+        boss = self.get_boss(raw_input_lines)
+        solutions = (
+            self.solve(boss, spells),
+            self.solve2(boss, spells),
+            )
+        result = solutions
+        return result
+
 class Day21: # RPG Simulator 20XX
     '''
     RPG Simulator 20XX
@@ -1584,7 +1653,7 @@ if __name__ == '__main__':
        19: (Day19, 'Medicine for Rudolph'),
        20: (Day20, 'Infinite Elves and Infinite Houses'),
        21: (Day21, 'RPG Simulator 20XX'),
-    #    22: (Day22, '???'),
+       22: (Day22, 'Wizard Simulator 20XX'),
     #    23: (Day23, '???'),
     #    24: (Day24, '???'),
     #    25: (Day25, '???'),
