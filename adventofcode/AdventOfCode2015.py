@@ -66,6 +66,24 @@ class Day22: # Wizard Simulator 20XX
     Wizard Simulator 20XX
     https://adventofcode.com/2015/day/22
     '''
+    # Spell Info Indexes
+    COST = 0
+    EFFECTS = 1
+    AMOUNT = 2
+    DURATION = 3
+    TIMER = 4
+
+    # Spell Instant Effect Bitmasks
+    STATUS = 0b0000
+    ATTACK = 0b0001
+    HEAL   = 0b0010
+
+    # Spell Timer Indexes
+    NO_TIMER = -1
+    SHIELD   = 0
+    POISON   = 1
+    RECHARGE = 2
+
     def get_boss(self, raw_input_lines: List[str]):
         boss = {}
         for raw_input_line in raw_input_lines:
@@ -75,37 +93,87 @@ class Day22: # Wizard Simulator 20XX
         result = boss
         return result
     
-    def fight(self, boss, spells) -> bool:
-        victory = True
-        hero_hp = 50
-        hero_mp = 500
-        hero_def = 0
-        boss_atk = boss['Damage']
-        boss_hp = boss['Hit Points']
-        min_mp_spent = float('inf')
-        # mp_spent, boss_hp, hero_hp, hero_mp, shield_t, poison_t, recharge_t
-        work = [(0, boss_hp, hero_hp, hero_mp, 0, 0, 0)]
-        while len(work) > 0:
-            mp_spent, boss_hp, hero_hp, hero_mp, shield_t, poison_t, recharge_t = heapq.heappop(work)
-            shield_t = max(0, shield_t - 1)
-            poison_t = max(0, poison_t - 1)
-            recharge_t = max(0, recharge_t - 1)
-            next_spells = set(spells.keys())
-            if shield_t > 0:
-                next_spells.remove('Shield')
-            if poison_t > 0:
-                next_spells.remove('Poison')
-            if recharge_t > 0:
-                next_spells.remove('Recharge')
-            # Hero casts a spell
-            for next_spell in next_spells:
-                pass
-            # TODO: Finish fight
-        result = victory
-        return result
-    
-    def solve(self, boss, spells):
-        result = len(boss)
+    def solve(self, boss, spells, hero_hp, hero_mp) -> bool:
+        # TODO: Figure out if the hero has an upper limit to their HP?
+        max_hero_hp = hero_hp
+        min_mp_spent = None
+        # mp_spent, boss_hp, hero_hp, hero_mp, shield_t, poison_t, recharge_t, win_ind, prev_spell_name
+        work = [(0, boss['Hit Points'], hero_hp, hero_mp, 0, 0, 0, False, None)]
+        while len(work) > 0 and min_mp_spent is None:
+            '''
+            Steps in combat:
+                Player's turn:
+                    1) Resolve ongoing spell effects at start of player's turn
+                    2) Update spell effect timers at start of player's turn
+                    3) Player casts a spell
+                Boss's turn:
+                    4) Resolve ongoing spell effects at start of boss's turn
+                    5) Update spell effect timers at start of boss's turn
+                    6) Boss attacks player
+            '''
+            print(work[0])
+            mp_spent, boss_hp, hero_hp, hero_mp, t0, t1, t2, victory_ind, prev_spell_name = heapq.heappop(work)
+            if victory_ind is True:
+                min_mp_spent = mp_spent
+                break
+            timers = [t0, t1, t2]
+            # 1) Resolve ongoing spell effects at start of player's turn
+            for i in range(len(timers)):
+                if timers[i] < 1:
+                    continue
+                if i == self.POISON:
+                    boss_hp -= spells['Poison'][self.AMOUNT]
+                elif i == self.RECHARGE:
+                    hero_mp += spells['Recharge'][self.AMOUNT]
+            # 2) Update spell timers at start of player's turn
+            for i in range(len(timers)):
+                timers[i] = max(0, timers[i] - 1)
+            # Choose next spell to cast
+            for next_spell_name, next_spell in spells.items():
+                mp_cost, effects, amount, duration, timer = next_spell
+                next_mp_spent = mp_spent + mp_cost
+                next_hero_hp = hero_hp
+                next_hero_mp = hero_mp
+                next_boss_hp = boss_hp
+                next_victory_ind = victory_ind
+                next_timers = timers[:]
+                # Does the hero have the mana to cast the spell?
+                if mp_cost > next_hero_mp:
+                    continue
+                # Is the spell off of cooldown?
+                if timer >= 0:
+                    if next_timers[timer] > 0:
+                        continue
+                    next_timers[timer] = duration
+                # 3) Player casts a spell
+                if effects & self.ATTACK > 0:
+                    next_boss_hp -= amount
+                if effects & self.HEAL > 0:
+                    next_hero_hp += amount
+                # 4) Resolve ongoing spell effects at start of boss's turn
+                for i in range(len(next_timers)):
+                    if next_timers[i] < 1:
+                        continue
+                    if i == self.POISON:
+                        next_boss_hp -= spells['Poison'][self.AMOUNT]
+                    elif i == self.RECHARGE:
+                        next_hero_mp += spells['Recharge'][self.AMOUNT]
+                if next_boss_hp < 1:
+                    next_victory_ind = True
+                # 5) Update spell effect timers at start of boss's turn
+                for i in range(len(next_timers)):
+                    next_timers[i] = max(0, next_timers[i] - 1)
+                # 6) Boss attacks player
+                hero_def = 0
+                if next_timers[self.SHIELD] > 0:
+                    hero_def = spells['Shield'][self.AMOUNT]
+                next_hero_hp -= min(max_hero_hp, max(1, boss['Damage'] - hero_def))
+                if next_hero_hp < 1 and not next_victory_ind:
+                    continue
+                state = (next_mp_spent, next_boss_hp, next_hero_hp, next_hero_mp, *next_timers, next_victory_ind, next_spell_name)
+                heapq.heappush(work, state)
+        result = min_mp_spent
+        # 611 is too low
         return result
     
     def solve2(self, boss, spells):
@@ -114,17 +182,17 @@ class Day22: # Wizard Simulator 20XX
     
     def main(self):
         spells = {
-            # Spell: (Cost, Effect, Amount, Duration)
-            'Magic Missile': (53, 'Damage', 4, 0),
-            'Drain': (73, 'Damage Heal', 2, 0),
-            'Shield': (113, 'Armor', 7, 6),
-            'Poison': (173, 'Damage', 4, 6),
-            'Recharge': (229, 'Mana', 101, 5),
+            # Spell: (Cost, Instant Effect Bitmask, Amount, Duration, Timer Index)
+            'Magic Missile': (53, self.ATTACK, 4, 0, self.NO_TIMER),
+            'Drain': (73, self.ATTACK | self.HEAL, 2, 0, self.NO_TIMER),
+            'Shield': (113, self.STATUS, 7, 6, self.SHIELD),
+            'Poison': (173, self.STATUS, 4, 6, self.POISON),
+            'Recharge': (229, self.STATUS, 101, 5, self.RECHARGE),
         }
         raw_input_lines = get_raw_input_lines()
         boss = self.get_boss(raw_input_lines)
         solutions = (
-            self.solve(boss, spells),
+            self.solve(boss, spells, 10, 250),
             self.solve2(boss, spells),
             )
         result = solutions
