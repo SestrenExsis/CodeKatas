@@ -130,6 +130,7 @@ class WizardSim:
     def hero_turn(self, chosen_spell):
         self.tick()
         heapq.heappush(self.spells, (self.time + chosen_spell.duration, chosen_spell))
+        self.hero.mana -= chosen_spell.mana_cost
         self.total_mana_spent += chosen_spell.mana_cost
 
     def boss_turn(self):
@@ -145,22 +146,22 @@ class Day22Obj: # Wizard Simulator 20XX
         # spell_name: (mana_cost, effect, power, duration)
         'Magic Missile': WizardSim.Spell(53, 'hurt', 4, 1),
         'Drain': WizardSim.Spell(73, 'drain', 2, 1),
-        'Shield': WizardSim.Spell(113, 'armor', 4, 6),
-        'Poison': WizardSim.Spell(173, 'hurt', 4, 6),
-        'Recharge': WizardSim.Spell(229, 'mana', 4, 5),
+        'Shield': WizardSim.Spell(113, 'armor', 7, 6),
+        'Poison': WizardSim.Spell(173, 'hurt', 3, 6),
+        'Recharge': WizardSim.Spell(229, 'mana', 101, 5),
     }
 
-    def get_boss(self, raw_input_lines: List[str]):
-        boss = {}
+    def get_boss_stats(self, raw_input_lines: List[str]):
+        boss_stats = {}
         for raw_input_line in raw_input_lines:
             stat, raw_value = raw_input_line.split(': ')
             value = int(raw_value)
-            boss[stat] = value
-        result = boss
+            boss_stats[stat] = value
+        result = boss_stats
         return result
     
-    def solve(self, boss, spellbook, hero_hp, hero_mp) -> bool:
-        sim = WizardSim(hero_hp, hero_mp, boss['Hit Points'], boss['Damage'])
+    def solve(self, spellbook, hero_hp, hero_mp, boss_hp, boss_dmg) -> bool:
+        sim = WizardSim(hero_hp, hero_mp, boss_hp, boss_dmg)
         min_mana_spent = float('inf')
         work = []
         for spell_name, spell in spellbook.items():
@@ -168,7 +169,7 @@ class Day22Obj: # Wizard Simulator 20XX
         while len(work) > 0:
             total_mana_spent, sim, spell = heapq.heappop(work)
             sim.hero_turn(spellbook[spell])
-            if sim.hero.hp < 1:
+            if sim.hero.hp < 1 or sim.hero.mana < 1:
                 continue
             sim.boss_turn()
             if sim.boss.hp < 1:
@@ -181,18 +182,23 @@ class Day22Obj: # Wizard Simulator 20XX
         result = min_mana_spent
         return result
     
-    def solve2(self, boss, spells):
-        result = len(spells)
+    def solve2(self, spellbook, hero_hp, hero_mp, boss_hp, boss_dmg):
+        result = len(spellbook)
         return result
     
     def main(self):
+        assert self.solve(self.spellbook, 10, 250, 13, 8) == 226
+        assert self.solve(self.spellbook, 10, 250, 14, 8) == 641
         raw_input_lines = get_raw_input_lines()
-        boss = self.get_boss(raw_input_lines)
+        boss_stats = self.get_boss_stats(raw_input_lines)
+        boss_hp = boss_stats['Hit Points']
+        boss_dmg = boss_stats['Damage']
         solutions = (
-            self.solve(boss, self.spellbook, 10, 250),
-            self.solve2(boss, self.spellbook),
+            self.solve(self.spellbook, 50, 500, boss_hp, boss_dmg),
+            self.solve2(self.spellbook, 50, 500, boss_hp, boss_dmg),
             )
         result = solutions
+        # 854 is too low!
         return result
 
 class Day22: # Wizard Simulator 20XX
