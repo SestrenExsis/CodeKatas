@@ -81,11 +81,17 @@ class WizardSim:
         self.hero = self.Hero(hero_hp, hero_mana)
         self.boss = self.Boss(boss_hp, boss_damage)
         self.spells = []
-        self.log = []
+        self.logs = ['\n---NEW SIM---']
+        self.debug = True
+        self.outcome = None
 
     def __lt__(self, other):
         result = self.total_mana_spent < other.total_mana_spent
         return result
+    
+    def log(self, message: str):
+        if self.debug:
+            self.logs.append(message)
 
     class Hero:
         def __init__(self, hp: int, mana: int):
@@ -123,32 +129,46 @@ class WizardSim:
                 hero.mana += self.power
     
     def tick(self):
-        self.log.append('- Player has {} hit points, {} armor, {} mana'.format(
+        self.log('- Player has {} hit point{}, {} armor, {} mana'.format(
             self.hero.hp,
+            '' if self.hero.hp == 1 else 's',
             self.hero.defense,
             self.hero.mana,
         ))
-        self.log.append('- Boss has {} hit points'.format(
+        self.log('- Boss has {} hit point{}'.format(
             self.boss.hp,
+            '' if self.boss.hp == 1 else 's',
         ))
         self.time += 1
-        self.hero.defense = 0
         for _, spell in self.spells:
             spell.apply(self.hero, self.boss)
+        if self.outcome is None and self.boss.hp < 1:
+            self.outcome = 'WON'
         while len(self.spells) > 0 and self.spells[0][0] <= self.time:
-            heapq.heappop(self.spells)
+            _, expired_spell = heapq.heappop(self.spells)
+            if expired_spell.duration > 1:
+                self.log('{} wears off.'.format(expired_spell.name))
+                if expired_spell.effect == 'armor':
+                    self.hero.defense = 0
     
     def hero_turn(self, chosen_spell):
-        self.log.append('-- Player turn --')
+        self.log('\n-- Player turn --')
         self.tick()
         heapq.heappush(self.spells, (self.time + chosen_spell.duration, chosen_spell))
         self.hero.mana -= chosen_spell.mana_cost
+        if self.outcome is None and self.hero.mana < 0:
+            self.outcome = 'LOST'
         self.total_mana_spent += chosen_spell.mana_cost
+        self.log('Player casts {}.'.format(chosen_spell.name))
 
     def boss_turn(self):
-        self.log.append('-- Boss turn --')
+        self.log('\n-- Boss turn --')
         self.tick()
-        self.hero.hp -= max(1, self.boss.damage - self.hero.defense)
+        dmg = max(1, self.boss.damage - self.hero.defense)
+        self.hero.hp -= dmg
+        if self.outcome is None and self.hero.hp < 1:
+            self.outcome = 'LOST'
+        self.log('Boss attacks for {} damage'.format(dmg))
 
 class Day22Obj: # Wizard Simulator 20XX
     '''
@@ -182,12 +202,15 @@ class Day22Obj: # Wizard Simulator 20XX
         while len(work) > 0:
             total_mana_spent, sim, spell = heapq.heappop(work)
             sim.hero_turn(spellbook[spell])
-            if sim.hero.hp < 1 or sim.hero.mana < 1:
-                continue
             sim.boss_turn()
-            if sim.boss.hp < 1:
+            if sim.outcome is None:
+                pass
+            elif sim.outcome == 'LOST':
+                continue
+            elif sim.outcome == 'WON':
+                sim.log('This kills the boss, and the player wins.')
                 min_mana_spent = total_mana_spent
-                for entry in sim.log:
+                for entry in sim.logs:
                     print(entry)
                 break
             for next_spell_name, next_spell in spellbook.items():
