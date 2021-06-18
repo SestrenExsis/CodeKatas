@@ -81,6 +81,7 @@ class WizardSim:
         self.hero = self.Hero(hero_hp, hero_mana)
         self.boss = self.Boss(boss_hp, boss_damage)
         self.spells = []
+        self.log = []
 
     def __lt__(self, other):
         result = self.total_mana_spent < other.total_mana_spent
@@ -98,11 +99,13 @@ class WizardSim:
             self.damage = damage
     
     class Spell:
-        def __init__(self, mana_cost: int, effect: str, power: int, duration: int):
+        def __init__(self, name: str, mana_cost: int, effect: str, power: int, duration: int, extra_description: str):
+            self.name = name
             self.mana_cost = mana_cost
             self.effect = effect
             self.power = power
             self.duration = duration
+            self.extra_description = extra_description
 
         def __lt__(self, other):
             result = self.mana_cost < other.mana_cost
@@ -120,6 +123,14 @@ class WizardSim:
                 hero.mana += self.power
     
     def tick(self):
+        self.log.append('- Player has {} hit points, {} armor, {} mana'.format(
+            self.hero.hp,
+            self.hero.defense,
+            self.hero.mana,
+        ))
+        self.log.append('- Boss has {} hit points'.format(
+            self.boss.hp,
+        ))
         self.time += 1
         self.hero.defense = 0
         for _, spell in self.spells:
@@ -128,12 +139,14 @@ class WizardSim:
             heapq.heappop(self.spells)
     
     def hero_turn(self, chosen_spell):
+        self.log.append('-- Player turn --')
         self.tick()
         heapq.heappush(self.spells, (self.time + chosen_spell.duration, chosen_spell))
         self.hero.mana -= chosen_spell.mana_cost
         self.total_mana_spent += chosen_spell.mana_cost
 
     def boss_turn(self):
+        self.log.append('-- Boss turn --')
         self.tick()
         self.hero.hp -= max(1, self.boss.damage - self.hero.defense)
 
@@ -143,12 +156,12 @@ class Day22Obj: # Wizard Simulator 20XX
     https://adventofcode.com/2015/day/22
     '''
     spellbook = {
-        # spell_name: (mana_cost, effect, power, duration)
-        'Magic Missile': WizardSim.Spell(53, 'hurt', 4, 1),
-        'Drain': WizardSim.Spell(73, 'drain', 2, 1),
-        'Shield': WizardSim.Spell(113, 'armor', 7, 6),
-        'Poison': WizardSim.Spell(173, 'hurt', 3, 6),
-        'Recharge': WizardSim.Spell(229, 'mana', 101, 5),
+        # spell_name: (mana_cost, effect, power, duration, extra_description)
+        'Magic Missile': WizardSim.Spell('Magic Missile', 53, 'hurt', 4, 1, ', dealing 4 damage'),
+        'Drain': WizardSim.Spell('Drain', 73, 'drain', 2, 1, ', dealing 2 damage, and healing 2 hit points.'),
+        'Shield': WizardSim.Spell('Shield', 113, 'armor', 7, 6, 'increasing armor by 7.'),
+        'Poison': WizardSim.Spell('Poison', 173, 'hurt', 3, 6, '.'),
+        'Recharge': WizardSim.Spell('Recharge', 229, 'mana', 101, 5, '.'),
     }
 
     def get_boss_stats(self, raw_input_lines: List[str]):
@@ -174,6 +187,8 @@ class Day22Obj: # Wizard Simulator 20XX
             sim.boss_turn()
             if sim.boss.hp < 1:
                 min_mana_spent = total_mana_spent
+                for entry in sim.log:
+                    print(entry)
                 break
             for next_spell_name, next_spell in spellbook.items():
                 mp = next_spell.mana_cost
