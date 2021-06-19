@@ -80,10 +80,11 @@ class WizardSim:
         self.total_mana_spent = 0
         self.hero = self.Hero(hero_hp, hero_mana)
         self.boss = self.Boss(boss_hp, boss_damage)
+        self.active_spells = set()
         self.spells = []
         self.logs = ['\n---NEW SIM---']
         self.debug = True
-        self.outcome = None
+        self.min_mana_to_win = None
 
     def __lt__(self, other):
         result = self.total_mana_spent < other.total_mana_spent
@@ -142,22 +143,27 @@ class WizardSim:
         self.time += 1
         for _, spell in self.spells:
             spell.apply(self.hero, self.boss)
-        if self.outcome is None and self.boss.hp < 1:
-            self.outcome = 'WON'
+        if self.min_mana_to_win is None and self.boss.hp < 1:
+            self.min_mana_to_win = self.total_mana_spent
         while len(self.spells) > 0 and self.spells[0][0] <= self.time:
             _, expired_spell = heapq.heappop(self.spells)
             if expired_spell.duration > 1:
                 self.log('{} wears off.'.format(expired_spell.name))
                 if expired_spell.effect == 'armor':
                     self.hero.defense = 0
+                assert expired_spell.name in self.active_spells
+                self.active_spells.remove(expired_spell.name)
     
     def hero_turn(self, chosen_spell):
         self.log('\n-- Player turn --')
         self.tick()
+        if chosen_spell.name in self.active_spells:
+            self.min_mana_to_win = float('inf')
         heapq.heappush(self.spells, (self.time + chosen_spell.duration, chosen_spell))
+        self.active_spells.add(chosen_spell.name)
         self.hero.mana -= chosen_spell.mana_cost
-        if self.outcome is None and self.hero.mana < 0:
-            self.outcome = 'LOST'
+        if self.min_mana_to_win is None and self.hero.mana < 0:
+            self.min_mana_to_win = float('inf')
         self.total_mana_spent += chosen_spell.mana_cost
         self.log('Player casts {}.'.format(chosen_spell.name))
 
@@ -166,8 +172,8 @@ class WizardSim:
         self.tick()
         dmg = max(1, self.boss.damage - self.hero.defense)
         self.hero.hp -= dmg
-        if self.outcome is None and self.hero.hp < 1:
-            self.outcome = 'LOST'
+        if self.min_mana_to_win is None and self.hero.hp < 1:
+            self.min_mana_to_win = float('inf')
         self.log('Boss attacks for {} damage'.format(dmg))
 
 class Day22Obj: # Wizard Simulator 20XX
@@ -195,21 +201,21 @@ class Day22Obj: # Wizard Simulator 20XX
     
     def solve(self, spellbook, hero_hp, hero_mp, boss_hp, boss_dmg) -> bool:
         sim = WizardSim(hero_hp, hero_mp, boss_hp, boss_dmg)
-        min_mana_spent = float('inf')
+        min_mana_to_win = float('inf')
         work = []
         for spell_name, spell in spellbook.items():
             heapq.heappush(work, (spell.mana_cost, copy.deepcopy(sim), spell_name))
         while len(work) > 0:
-            total_mana_spent, sim, spell = heapq.heappop(work)
-            sim.hero_turn(spellbook[spell])
+            total_mana_spent, sim, spell_name = heapq.heappop(work)
+            sim.hero_turn(spellbook[spell_name])
             sim.boss_turn()
-            if sim.outcome is None:
+            if sim.min_mana_to_win is None:
                 pass
-            elif sim.outcome == 'LOST':
+            elif sim.min_mana_to_win >= float('inf'):
                 continue
-            elif sim.outcome == 'WON':
+            else:
                 sim.log('This kills the boss, and the player wins.')
-                min_mana_spent = total_mana_spent
+                min_mana_to_win = sim.min_mana_to_win
                 for entry in sim.logs:
                     print(entry)
                 break
@@ -217,7 +223,7 @@ class Day22Obj: # Wizard Simulator 20XX
                 mp = next_spell.mana_cost
                 next_sim = copy.deepcopy(sim)
                 heapq.heappush(work, (total_mana_spent + mp, next_sim, next_spell_name))
-        result = min_mana_spent
+        result = min_mana_to_win
         return result
     
     def solve2(self, spellbook, hero_hp, hero_mp, boss_hp, boss_dmg):
@@ -237,6 +243,7 @@ class Day22Obj: # Wizard Simulator 20XX
             )
         result = solutions
         # 854 is too low!
+        # 1329 is not the right answer!
         return result
 
 class Day22: # Wizard Simulator 20XX
