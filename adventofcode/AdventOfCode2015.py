@@ -83,7 +83,7 @@ class WizardSim:
         self.active_spells = set()
         self.spells = []
         self.logs = ['\n---NEW SIM---']
-        self.debug = True
+        self.debug = False
         self.min_mana_to_win = None
 
     def __lt__(self, other):
@@ -106,13 +106,12 @@ class WizardSim:
             self.damage = damage
     
     class Spell:
-        def __init__(self, name: str, mana_cost: int, effect: str, power: int, duration: int, extra_description: str):
+        def __init__(self, name: str, mana_cost: int, effect: str, power: int, duration: int):
             self.name = name
             self.mana_cost = mana_cost
             self.effect = effect
             self.power = power
             self.duration = duration
-            self.extra_description = extra_description
 
         def __lt__(self, other):
             result = self.mana_cost < other.mana_cost
@@ -155,12 +154,15 @@ class WizardSim:
                 self.active_spells.remove(expired_spell.name)
     
     def hero_turn(self, chosen_spell):
-        self.log('\n-- Player turn --')
+        self.log('\n-- Player turn -- {}'.format(self.total_mana_spent))
         self.tick()
         if chosen_spell.name in self.active_spells:
             self.min_mana_to_win = float('inf')
-        heapq.heappush(self.spells, (self.time + chosen_spell.duration, chosen_spell))
-        self.active_spells.add(chosen_spell.name)
+        if chosen_spell.duration == 0:
+            chosen_spell.apply(self.hero, self.boss)
+        else:
+            heapq.heappush(self.spells, (self.time + chosen_spell.duration, chosen_spell))
+            self.active_spells.add(chosen_spell.name)
         self.hero.mana -= chosen_spell.mana_cost
         if self.min_mana_to_win is None and self.hero.mana < 0:
             self.min_mana_to_win = float('inf')
@@ -168,7 +170,7 @@ class WizardSim:
         self.log('Player casts {}.'.format(chosen_spell.name))
 
     def boss_turn(self):
-        self.log('\n-- Boss turn --')
+        self.log('\n-- Boss turn -- {}'.format(self.total_mana_spent))
         self.tick()
         dmg = max(1, self.boss.damage - self.hero.defense)
         self.hero.hp -= dmg
@@ -176,18 +178,18 @@ class WizardSim:
             self.min_mana_to_win = float('inf')
         self.log('Boss attacks for {} damage'.format(dmg))
 
-class Day22Obj: # Wizard Simulator 20XX
+class Day22: # Wizard Simulator 20XX
     '''
     Wizard Simulator 20XX
     https://adventofcode.com/2015/day/22
     '''
     spellbook = {
-        # spell_name: (mana_cost, effect, power, duration, extra_description)
-        'Magic Missile': WizardSim.Spell('Magic Missile', 53, 'hurt', 4, 1, ', dealing 4 damage'),
-        'Drain': WizardSim.Spell('Drain', 73, 'drain', 2, 1, ', dealing 2 damage, and healing 2 hit points.'),
-        'Shield': WizardSim.Spell('Shield', 113, 'armor', 7, 6, 'increasing armor by 7.'),
-        'Poison': WizardSim.Spell('Poison', 173, 'hurt', 3, 6, '.'),
-        'Recharge': WizardSim.Spell('Recharge', 229, 'mana', 101, 5, '.'),
+        # spell_name: (mana_cost, effect, power, duration)
+        'Magic Missile': WizardSim.Spell('Magic Missile', 53, 'hurt', 4, 0),
+        'Drain': WizardSim.Spell('Drain', 73, 'drain', 2, 0),
+        'Shield': WizardSim.Spell('Shield', 113, 'armor', 7, 6),
+        'Poison': WizardSim.Spell('Poison', 173, 'hurt', 3, 6),
+        'Recharge': WizardSim.Spell('Recharge', 229, 'mana', 101, 5),
     }
 
     def get_boss_stats(self, raw_input_lines: List[str]):
@@ -231,8 +233,8 @@ class Day22Obj: # Wizard Simulator 20XX
         return result
     
     def main(self):
-        assert self.solve(self.spellbook, 10, 250, 13, 8) == 226
-        assert self.solve(self.spellbook, 10, 250, 14, 8) == 641
+        # assert self.solve(self.spellbook, 10, 250, 13, 8) == 226
+        # assert self.solve(self.spellbook, 10, 250, 14, 8) == 641
         raw_input_lines = get_raw_input_lines()
         boss_stats = self.get_boss_stats(raw_input_lines)
         boss_hp = boss_stats['Hit Points']
@@ -240,152 +242,6 @@ class Day22Obj: # Wizard Simulator 20XX
         solutions = (
             self.solve(self.spellbook, 50, 500, boss_hp, boss_dmg),
             self.solve2(self.spellbook, 50, 500, boss_hp, boss_dmg),
-            )
-        result = solutions
-        # 854 is too low!
-        # 1329 is not the right answer!
-        return result
-
-class Day22: # Wizard Simulator 20XX
-    '''
-    Wizard Simulator 20XX
-    https://adventofcode.com/2015/day/22
-    
-    Battle:
-    Hero:
-    Spell:
-    SpellEffect:
-    Boss:
-
-    '''
-    # Spell Info Indexes
-    COST = 0
-    EFFECTS = 1
-    AMOUNT = 2
-    DURATION = 3
-    TIMER = 4
-
-    # Spell Instant Effect Bitmasks
-    STATUS = 0b0000
-    ATTACK = 0b0001
-    HEAL   = 0b0010
-
-    # Spell Timer Indexes
-    NO_TIMER = -1
-    SHIELD   = 0
-    POISON   = 1
-    RECHARGE = 2
-
-    def get_boss(self, raw_input_lines: List[str]):
-        boss = {}
-        for raw_input_line in raw_input_lines:
-            stat, raw_value = raw_input_line.split(': ')
-            value = int(raw_value)
-            boss[stat] = value
-        result = boss
-        return result
-    
-    def solve(self, boss, spells, hero_hp, hero_mp) -> bool:
-        # TODO: Figure out if the hero has an upper limit to their HP?
-        max_hero_hp = hero_hp
-        min_mp_spent = None
-        # mp_spent, boss_hp, hero_hp, hero_mp, shield_t, poison_t, recharge_t, win_ind, prev_spell_name
-        work = [(0, boss['Hit Points'], hero_hp, hero_mp, 0, 0, 0, False, None)]
-        while len(work) > 0 and min_mp_spent is None:
-            '''
-            Steps in combat:
-                Player's turn:
-                    1) Resolve ongoing spell effects at start of player's turn
-                    2) Update spell effect timers at start of player's turn
-                    3) Player casts a spell
-                Boss's turn:
-                    4) Resolve ongoing spell effects at start of boss's turn
-                    5) Update spell effect timers at start of boss's turn
-                    6) Boss attacks player
-            '''
-            print(work[0])
-            mp_spent, boss_hp, hero_hp, hero_mp, t0, t1, t2, victory_ind, prev_spell_name = heapq.heappop(work)
-            if victory_ind is True:
-                min_mp_spent = mp_spent
-                break
-            timers = [t0, t1, t2]
-            if hero_hp < 1:
-                continue
-            # 1) Resolve ongoing spell effects at start of player's turn
-            for i in range(len(timers)):
-                if timers[i] < 1:
-                    continue
-                if i == self.POISON:
-                    boss_hp -= spells['Poison'][self.AMOUNT]
-                elif i == self.RECHARGE:
-                    hero_mp += spells['Recharge'][self.AMOUNT]
-            # 2) Update spell timers at start of player's turn
-            for i in range(len(timers)):
-                timers[i] = max(0, timers[i] - 1)
-            # Choose next spell to cast
-            for next_spell_name, next_spell in spells.items():
-                mp_cost, effects, amount, duration, timer = next_spell
-                next_mp_spent = mp_spent + mp_cost
-                next_hero_hp = hero_hp
-                next_hero_mp = hero_mp
-                next_boss_hp = boss_hp
-                next_victory_ind = victory_ind
-                next_timers = timers[:]
-                # Does the hero have the mana to cast the spell?
-                if mp_cost > next_hero_mp:
-                    continue
-                # Is the spell off of cooldown?
-                if timer >= 0:
-                    if next_timers[timer] > 0:
-                        continue
-                    next_timers[timer] = duration
-                # 3) Player casts a spell
-                if effects & self.ATTACK > 0:
-                    next_boss_hp -= amount
-                if effects & self.HEAL > 0:
-                    next_hero_hp += amount
-                # 4) Resolve ongoing spell effects at start of boss's turn
-                for i in range(len(next_timers)):
-                    if next_timers[i] < 1:
-                        continue
-                    if i == self.POISON:
-                        next_boss_hp -= spells['Poison'][self.AMOUNT]
-                    elif i == self.RECHARGE:
-                        next_hero_mp += spells['Recharge'][self.AMOUNT]
-                if next_boss_hp < 1:
-                    next_victory_ind = True
-                # 5) Update spell effect timers at start of boss's turn
-                for i in range(len(next_timers)):
-                    next_timers[i] = max(0, next_timers[i] - 1)
-                # 6) Boss attacks player
-                hero_def = 0
-                if next_timers[self.SHIELD] > 0:
-                    hero_def = spells['Shield'][self.AMOUNT]
-                next_hero_hp -= min(max_hero_hp, max(1, boss['Damage'] - hero_def))
-                state = (next_mp_spent, next_boss_hp, next_hero_hp, next_hero_mp, *next_timers, next_victory_ind, next_spell_name)
-                heapq.heappush(work, state)
-        result = min_mp_spent
-        # 611 is too low
-        return result
-    
-    def solve2(self, boss, spells):
-        result = len(spells)
-        return result
-    
-    def main(self):
-        spells = {
-            # Spell: (Cost, Instant Effect Bitmask, Amount, Duration, Timer Index)
-            'Magic Missile': (53, self.ATTACK, 4, 0, self.NO_TIMER),
-            'Drain': (73, self.ATTACK | self.HEAL, 2, 0, self.NO_TIMER),
-            'Shield': (113, self.STATUS, 7, 6, self.SHIELD),
-            'Poison': (173, self.STATUS, 4, 6, self.POISON),
-            'Recharge': (229, self.STATUS, 101, 5, self.RECHARGE),
-        }
-        raw_input_lines = get_raw_input_lines()
-        boss = self.get_boss(raw_input_lines)
-        solutions = (
-            self.solve(boss, spells, 10, 250),
-            self.solve2(boss, spells),
             )
         result = solutions
         return result
@@ -1913,7 +1769,7 @@ if __name__ == '__main__':
        19: (Day19, 'Medicine for Rudolph'),
        20: (Day20, 'Infinite Elves and Infinite Houses'),
        21: (Day21, 'RPG Simulator 20XX'),
-       22: (Day22Obj, 'Wizard Simulator 20XX'),
+       22: (Day22, 'Wizard Simulator 20XX'),
     #    23: (Day23, '???'),
     #    24: (Day24, '???'),
     #    25: (Day25, '???'),
