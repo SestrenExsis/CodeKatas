@@ -99,6 +99,7 @@ class WizardSim:
             self.hp = hp
             self.mana = mana
             self.defense = 0
+            self.cursed = False
     
     class Boss:
         def __init__(self, hp: int, damage: int):
@@ -155,8 +156,13 @@ class WizardSim:
     
     def hero_turn(self, chosen_spell):
         self.log('\n-- Player turn -- {}'.format(self.total_mana_spent))
+        if self.hero.cursed:
+            self.hero.hp -= 1
         self.tick()
-        if chosen_spell.name in self.active_spells:
+        if (
+            self.min_mana_to_win is None and self.hero.hp < 1 or
+            chosen_spell.name in self.active_spells
+        ):
             self.min_mana_to_win = float('inf')
         if chosen_spell.duration == 0:
             chosen_spell.apply(self.hero, self.boss)
@@ -201,8 +207,7 @@ class Day22: # Wizard Simulator 20XX
         result = boss_stats
         return result
     
-    def solve(self, spellbook, hero_hp, hero_mp, boss_hp, boss_dmg) -> bool:
-        sim = WizardSim(hero_hp, hero_mp, boss_hp, boss_dmg)
+    def get_min_mana_to_win(self, spellbook, sim: WizardSim) -> int:
         min_mana_to_win = float('inf')
         work = []
         for spell_name, spell in spellbook.items():
@@ -228,20 +233,25 @@ class Day22: # Wizard Simulator 20XX
         result = min_mana_to_win
         return result
     
-    def solve2(self, spellbook, hero_hp, hero_mp, boss_hp, boss_dmg):
-        result = len(spellbook)
+    def solve_slowly(self, spellbook, hero_hp, hero_mp, boss_hp, boss_dmg) -> int:
+        sim = WizardSim(hero_hp, hero_mp, boss_hp, boss_dmg)
+        result = self.get_min_mana_to_win(spellbook, sim)
+        return result
+    
+    def solve_slowly2(self, spellbook, hero_hp, hero_mp, boss_hp, boss_dmg):
+        sim = WizardSim(hero_hp, hero_mp, boss_hp, boss_dmg)
+        sim.hero.cursed = True
+        result = self.get_min_mana_to_win(spellbook, sim)
         return result
     
     def main(self):
-        # assert self.solve(self.spellbook, 10, 250, 13, 8) == 226
-        # assert self.solve(self.spellbook, 10, 250, 14, 8) == 641
         raw_input_lines = get_raw_input_lines()
         boss_stats = self.get_boss_stats(raw_input_lines)
         boss_hp = boss_stats['Hit Points']
         boss_dmg = boss_stats['Damage']
         solutions = (
-            self.solve(self.spellbook, 50, 500, boss_hp, boss_dmg),
-            self.solve2(self.spellbook, 50, 500, boss_hp, boss_dmg),
+            self.solve_slowly(self.spellbook, 50, 500, boss_hp, boss_dmg),
+            self.solve_slowly2(self.spellbook, 50, 500, boss_hp, boss_dmg),
             )
         result = solutions
         return result
