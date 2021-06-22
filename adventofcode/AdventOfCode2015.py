@@ -32,35 +32,6 @@ def get_raw_input_lines() -> list:
             break
     return raw_input_lines
 
-class Template: # Template
-    '''
-    Template
-    https://adventofcode.com/2015/day/?
-    '''
-    def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
-        for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
-        return result
-    
-    def solve(self, parsed_input):
-        result = len(parsed_input)
-        return result
-    
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
-        return result
-    
-    def main(self):
-        raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
-        solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
-            )
-        result = solutions
-        return result
-
 class WizardSim:
     '''
     If at any point, the boss has less than 1 HP, the player wins
@@ -183,6 +154,112 @@ class WizardSim:
         if self.min_mana_to_win is None and self.hero.hp < 1:
             self.min_mana_to_win = float('inf')
         self.log('Boss attacks for {} damage'.format(dmg))
+
+class Template: # Template
+    '''
+    Template
+    https://adventofcode.com/2015/day/?
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day23: # Opening the Turing Lock
+    '''
+    Opening the Turing Lock
+    https://adventofcode.com/2015/day/23
+    '''
+    def get_program(self, raw_input_lines: List[str]):
+        program = []
+        for raw_input_line in raw_input_lines:
+            instruction = raw_input_line[:3]
+            raw_parameters = raw_input_line[4:]
+            parameters = list(raw_parameters.split(', '))
+            for i in range(len(parameters)):
+                if parameters[i] not in ('a', 'b'):
+                    parameters[i] = int(parameters[i])
+            program.append((instruction, tuple(parameters)))
+        result = program
+        return result
+
+    def run(self, pc, registers, program):
+        while True:
+            if not (0 <= pc < len(program)):
+                break
+            instruction, params = program[pc]
+            if instruction == 'hlf':
+                registers[params[0]] = registers[params[0]] // 2
+                pc += 1
+            elif instruction == 'tpl':
+                registers[params[0]] = 3 * registers[params[0]]
+                pc += 1
+            elif instruction == 'inc':
+                registers[params[0]] += 1
+                pc += 1
+            elif instruction == 'jmp':
+                pc += params[0]
+            elif instruction == 'jie':
+                register = registers[params[0]]
+                if register % 2 == 0:
+                    pc += params[1]
+                else:
+                    pc += 1
+            elif instruction == 'jio':
+                register = registers[params[0]]
+                if register == 1:
+                    pc += params[1]
+                else:
+                    pc += 1
+    
+    def solve(self, program):
+        pc = 0
+        registers = {
+            'a': 0,
+            'b': 0,
+        }
+        self.run(pc, registers, program)
+        result = registers['b']
+        return result
+    
+    def solve2(self, program):
+        pc = 0
+        registers = {
+            'a': 1,
+            'b': 0,
+        }
+        self.run(pc, registers, program)
+        result = registers['b']
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        program = self.get_program(raw_input_lines)
+        solutions = (
+            self.solve(program),
+            self.solve2(program),
+            )
+        result = solutions
+        return result
 
 class Day22: # Wizard Simulator 20XX
     '''
@@ -1780,7 +1857,7 @@ if __name__ == '__main__':
        20: (Day20, 'Infinite Elves and Infinite Houses'),
        21: (Day21, 'RPG Simulator 20XX'),
        22: (Day22, 'Wizard Simulator 20XX'),
-    #    23: (Day23, '???'),
+       23: (Day23, 'Opening the Turing Lock'),
     #    24: (Day24, '???'),
     #    25: (Day25, '???'),
         }
