@@ -184,6 +184,49 @@ class Template: # Template
         result = solutions
         return result
 
+class Day25: # Let It Snow
+    '''
+    Let It Snow
+    https://adventofcode.com/2015/day/25
+    '''
+    def get_coordinate(self, raw_input_lines: List[str]):
+        row = None
+        col = None
+        tokens = raw_input_lines[0].split(' ')
+        for token in tokens:
+            if token[:-1].isdigit():
+                if row is None:
+                    row = int(token[:-1])
+                else:
+                    col = int(token[:-1])
+        result = (row, col)
+        return result
+    
+    def solve(self, target_row, target_col):
+        SEED = 20151125
+        MULTIPLIER = 252533
+        MODULO = 33554393
+        num = SEED
+        nums = {}
+        row = 1
+        while (target_row, target_col) not in nums:
+            for offset in range(row):
+                nums[(row - offset, offset + 1)] = num
+                num = (MULTIPLIER * num) % MODULO
+            row += 1
+        result = nums[(target_row, target_col)]
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        coordinate = self.get_coordinate(raw_input_lines)
+        solutions = (
+            self.solve(*coordinate),
+            'Snow begins to fall.',
+            )
+        result = solutions
+        return result
+
 class Day24: # It Hangs in the Balance
     '''
     It Hangs in the Balance
@@ -1919,7 +1962,7 @@ if __name__ == '__main__':
        22: (Day22, 'Wizard Simulator 20XX'),
        23: (Day23, 'Opening the Turing Lock'),
        24: (Day24, 'It Hangs in the Balance'),
-    #    25: (Day25, '???'),
+       25: (Day25, 'Let It Snow'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('day', help='Solve for a given day', type=int)
