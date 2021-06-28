@@ -184,6 +184,66 @@ class Template: # Template
         result = solutions
         return result
 
+class Day24: # It Hangs in the Balance
+    '''
+    It Hangs in the Balance
+    https://adventofcode.com/2015/day/24
+    * Split into three groups
+    * All three groups must weigh the same
+    * Group 1 has fewest number of packages possible given above constraints
+    * Group 1 has smallest product of weights possible given above constraints
+    '''
+    def get_weights(self, raw_input_lines: List[str]):
+        weights = []
+        for raw_input_line in raw_input_lines:
+            weights.append(int(raw_input_line))
+        result = weights
+        return result
+    
+    def solve(self, weights):
+        total_weight = sum(weights)
+        group_weight = total_weight // 3
+        assert group_weight == total_weight / 3
+        min_quantum_entanglement = float('inf')
+        for first_group_len in range(1, 8):
+            for combo in itertools.combinations(weights, first_group_len):
+                # NOTE: We are assuming that the rest can be split into two even groups
+                # TODO: Verify if remainder can be split into two even groups
+                if sum(combo) == total_weight / 3:
+                    min_quantum_entanglement = min(
+                        min_quantum_entanglement,
+                        functools.reduce(lambda a, b: a * b, list(combo)),
+                    )
+        result = min_quantum_entanglement
+        return result
+    
+    def solve2(self, weights):
+        total_weight = sum(weights)
+        group_weight = total_weight // 4
+        assert group_weight == total_weight / 4
+        min_quantum_entanglement = float('inf')
+        for first_group_len in range(1, 8):
+            for combo in itertools.combinations(weights, first_group_len):
+                # NOTE: We are assuming that the rest can be split into two even groups
+                # TODO: Verify if remainder can be split into three even groups
+                if sum(combo) == total_weight / 4:
+                    min_quantum_entanglement = min(
+                        min_quantum_entanglement,
+                        functools.reduce(lambda a, b: a * b, list(combo)),
+                    )
+        result = min_quantum_entanglement
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        weights = self.get_weights(raw_input_lines)
+        solutions = (
+            self.solve(weights),
+            self.solve2(weights),
+            )
+        result = solutions
+        return result
+
 class Day23: # Opening the Turing Lock
     '''
     Opening the Turing Lock
@@ -1858,7 +1918,7 @@ if __name__ == '__main__':
        21: (Day21, 'RPG Simulator 20XX'),
        22: (Day22, 'Wizard Simulator 20XX'),
        23: (Day23, 'Opening the Turing Lock'),
-    #    24: (Day24, '???'),
+       24: (Day24, 'It Hangs in the Balance'),
     #    25: (Day25, '???'),
         }
     parser = argparse.ArgumentParser()
