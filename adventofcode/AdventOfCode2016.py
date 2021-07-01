@@ -61,6 +61,63 @@ class Template: # Template
         result = solutions
         return result
 
+class Day02: # Bathroom Security
+    '''
+    Bathroom Security
+    https://adventofcode.com/2016/day/2
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        moves = {
+            'U': (-1,  0),
+            'D': ( 1,  0),
+            'L': ( 0, -1),
+            'R': ( 0,  1),
+        }
+        keypad = {
+            (0, 0): '1',
+            (0, 1): '2',
+            (0, 2): '3',
+            (1, 0): '4',
+            (1, 1): '5',
+            (1, 2): '6',
+            (2, 0): '7',
+            (2, 1): '8',
+            (2, 2): '9',
+        }
+        row = 1
+        col = 1
+        bathroom_code = []
+        for instructions in parsed_input:
+            for move in instructions:
+                next_row = row + moves[move][0]
+                next_col = col + moves[move][1]
+                if (next_row, next_col) in keypad:
+                    row = next_row
+                    col = next_col
+            bathroom_code.append(keypad[(row, col)])
+        result = ''.join(bathroom_code)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day01: # No Time for a Taxicab
     '''
     No Time for a Taxicab
@@ -138,7 +195,7 @@ if __name__ == '__main__':
     '''
     solvers = {
         1: (Day01, 'No Time for a Taxicab'),
-    #     2: (Day02, '???'),
+        2: (Day02, 'Bathroom Security'),
     #     3: (Day03, '???'),
     #     4: (Day04, '???'),
     #     5: (Day05, '???'),
