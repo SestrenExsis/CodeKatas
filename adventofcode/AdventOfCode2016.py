@@ -66,6 +66,13 @@ class Day02: # Bathroom Security
     Bathroom Security
     https://adventofcode.com/2016/day/2
     '''
+    moves = {
+        'U': (-1,  0),
+        'D': ( 1,  0),
+        'L': ( 0, -1),
+        'R': ( 0,  1),
+    }
+
     def get_parsed_input(self, raw_input_lines: List[str]):
         result = []
         for raw_input_line in raw_input_lines:
@@ -73,12 +80,6 @@ class Day02: # Bathroom Security
         return result
     
     def solve(self, parsed_input):
-        moves = {
-            'U': (-1,  0),
-            'D': ( 1,  0),
-            'L': ( 0, -1),
-            'R': ( 0,  1),
-        }
         keypad = {
             (0, 0): '1',
             (0, 1): '2',
@@ -95,8 +96,8 @@ class Day02: # Bathroom Security
         bathroom_code = []
         for instructions in parsed_input:
             for move in instructions:
-                next_row = row + moves[move][0]
-                next_col = col + moves[move][1]
+                next_row = row + self.moves[move][0]
+                next_col = col + self.moves[move][1]
                 if (next_row, next_col) in keypad:
                     row = next_row
                     col = next_col
@@ -105,7 +106,33 @@ class Day02: # Bathroom Security
         return result
     
     def solve2(self, parsed_input):
-        result = len(parsed_input)
+        keypad = {
+            (0, 2): '1',
+            (1, 1): '2',
+            (1, 2): '3',
+            (1, 3): '4',
+            (2, 0): '5',
+            (2, 1): '6',
+            (2, 2): '7',
+            (2, 3): '8',
+            (2, 4): '9',
+            (3, 1): 'A',
+            (3, 2): 'B',
+            (3, 3): 'C',
+            (4, 2): 'D',
+        }
+        row = 1
+        col = 1
+        bathroom_code = []
+        for instructions in parsed_input:
+            for move in instructions:
+                next_row = row + self.moves[move][0]
+                next_col = col + self.moves[move][1]
+                if (next_row, next_col) in keypad:
+                    row = next_row
+                    col = next_col
+            bathroom_code.append(keypad[(row, col)])
+        result = ''.join(bathroom_code)
         return result
     
     def main(self):
