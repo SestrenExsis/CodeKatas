@@ -66,26 +66,46 @@ class Day01: # No Time for a Taxicab
     No Time for a Taxicab
     https://adventofcode.com/2016/day/1
     '''
-    def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
-        for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
+    def get_instructions(self, raw_input_lines: List[str]):
+        instructions = []
+        for raw_input_line in raw_input_lines[0].split(', '):
+            rotation = raw_input_line[:1]
+            blocks = int(raw_input_line[1:])
+            instructions.append((rotation, blocks))
+        result = instructions
         return result
     
-    def solve(self, parsed_input):
-        result = len(parsed_input)
+    def solve(self, instructions):
+        rotations = {
+            'L': -1,
+            'R':  1,
+        }
+        directions = {
+            0: (-1,  0), # North
+            1: ( 0,  1), # East
+            2: ( 1,  0), # South
+            3: ( 0, -1), # West
+        }
+        row = 0
+        col = 0
+        facing = 0
+        for rotation, blocks in instructions:
+            facing = (facing + rotations[rotation]) % len(directions)
+            row += blocks * directions[facing][0]
+            col += blocks * directions[facing][1]
+        result = abs(row) + abs(col)
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, instructions):
+        result = len(instructions)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        instructions = self.get_instructions(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(instructions),
+            self.solve2(instructions),
             )
         result = solutions
         return result
