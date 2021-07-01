@@ -66,6 +66,18 @@ class Day01: # No Time for a Taxicab
     No Time for a Taxicab
     https://adventofcode.com/2016/day/1
     '''
+    rotations = {
+        'L': -1,
+        'R':  1,
+    }
+
+    directions = {
+        0: (-1,  0), # North
+        1: ( 0,  1), # East
+        2: ( 1,  0), # South
+        3: ( 0, -1), # West
+    }
+
     def get_instructions(self, raw_input_lines: List[str]):
         instructions = []
         for raw_input_line in raw_input_lines[0].split(', '):
@@ -76,28 +88,37 @@ class Day01: # No Time for a Taxicab
         return result
     
     def solve(self, instructions):
-        rotations = {
-            'L': -1,
-            'R':  1,
-        }
-        directions = {
-            0: (-1,  0), # North
-            1: ( 0,  1), # East
-            2: ( 1,  0), # South
-            3: ( 0, -1), # West
-        }
         row = 0
         col = 0
         facing = 0
         for rotation, blocks in instructions:
-            facing = (facing + rotations[rotation]) % len(directions)
-            row += blocks * directions[facing][0]
-            col += blocks * directions[facing][1]
+            facing = (facing + self.rotations[rotation]) % len(self.directions)
+            row += blocks * self.directions[facing][0]
+            col += blocks * self.directions[facing][1]
         result = abs(row) + abs(col)
         return result
     
     def solve2(self, instructions):
-        result = len(instructions)
+        row = 0
+        col = 0
+        facing = 0
+        visits = set()
+        visits.add((row, col))
+        repeat_visit = None
+        for rotation, blocks in instructions:
+            facing = (facing + self.rotations[rotation]) % len(self.directions)
+            target_row = row + blocks * self.directions[facing][0]
+            target_col = col + blocks * self.directions[facing][1]
+            while row != target_row or col != target_col:
+                row += self.directions[facing][0]
+                col += self.directions[facing][1]
+                if (row, col) in visits:
+                    repeat_visit = (row, col)
+                    break
+                visits.add((row, col))
+            if repeat_visit is not None:
+                break
+        result = abs(repeat_visit[0]) + abs(repeat_visit[1])
         return result
     
     def main(self):
