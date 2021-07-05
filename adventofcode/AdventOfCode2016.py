@@ -61,6 +61,45 @@ class Template: # Template
         result = solutions
         return result
 
+class Day03: # Squares With Three Sides
+    '''
+    Squares With Three Sides
+    https://adventofcode.com/2016/day/3
+    '''
+    def get_triangles(self, raw_input_lines: List[str]):
+        triangles = []
+        for raw_input_line in raw_input_lines:
+            triangle = tuple(map(int, raw_input_line.split()))
+            triangles.append(triangle)
+        result = triangles
+        return result
+    
+    def solve(self, triangles):
+        possible_count = 0
+        for a, b, c in triangles:
+            if all([
+                (a + b) > c,
+                (b + c) > a,
+                (a + c) > b,
+            ]):
+                possible_count += 1
+        result = possible_count
+        return result
+    
+    def solve2(self, triangles):
+        result = len(triangles)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        triangles = self.get_triangles(raw_input_lines)
+        solutions = (
+            self.solve(triangles),
+            self.solve2(triangles),
+            )
+        result = solutions
+        return result
+
 class Day02: # Bathroom Security
     '''
     Bathroom Security
@@ -223,7 +262,7 @@ if __name__ == '__main__':
     solvers = {
         1: (Day01, 'No Time for a Taxicab'),
         2: (Day02, 'Bathroom Security'),
-    #     3: (Day03, '???'),
+        3: (Day03, 'Squares With Three Sides'),
     #     4: (Day04, '???'),
     #     5: (Day05, '???'),
     #     6: (Day06, '???'),
