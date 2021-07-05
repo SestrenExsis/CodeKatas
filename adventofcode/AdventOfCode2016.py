@@ -61,6 +61,54 @@ class Template: # Template
         result = solutions
         return result
 
+class Day04: # Security Through Obscurity
+    '''
+    Security Through Obscurity
+    https://adventofcode.com/2016/day/4
+    '''
+    def get_rooms(self, raw_input_lines: List[str]):
+        rooms = {}
+        for raw_input_line in raw_input_lines:
+            prefix, suffix = raw_input_line.split('[')
+            parts = prefix.split('-')
+            encrypted_name = '-'.join(parts[:-1])
+            sector_id = int(parts[-1])
+            checksum = suffix[:-1]
+            rooms[encrypted_name] = (sector_id, checksum)
+        result = rooms
+        return result
+    
+    def solve(self, rooms):
+        sector_ids_of_real_rooms = []
+        for encrypted_name, (sector_id, checksum) in rooms.items():
+            char_counts = collections.Counter(encrypted_name)
+            checksum_chars = []
+            for char, count in char_counts.items():
+                if char in 'abcdefghijklmnopqrstuvwxyz':
+                    heapq.heappush(checksum_chars, (-count, char))
+            room_checksum = ''
+            for _ in range(5):
+                _, char = heapq.heappop(checksum_chars)
+                room_checksum += char
+            if room_checksum == checksum:
+                sector_ids_of_real_rooms.append(sector_id)
+        result = sum(sector_ids_of_real_rooms)
+        return result
+    
+    def solve2(self, rooms):
+        result = len(rooms)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        rooms = self.get_rooms(raw_input_lines)
+        solutions = (
+            self.solve(rooms),
+            self.solve2(rooms),
+            )
+        result = solutions
+        return result
+
 class Day03: # Squares With Three Sides
     '''
     Squares With Three Sides
@@ -286,7 +334,7 @@ if __name__ == '__main__':
         1: (Day01, 'No Time for a Taxicab'),
         2: (Day02, 'Bathroom Security'),
         3: (Day03, 'Squares With Three Sides'),
-    #     4: (Day04, '???'),
+        4: (Day04, 'Security Through Obscurity'),
     #     5: (Day05, '???'),
     #     6: (Day06, '???'),
     #     7: (Day07, '???'),
