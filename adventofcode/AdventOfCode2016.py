@@ -74,6 +74,16 @@ class Day03: # Squares With Three Sides
         result = triangles
         return result
     
+    def get_points(self, raw_input_lines: List[str]):
+        points = {}
+        for row, raw_input_line in enumerate(raw_input_lines):
+            a, b, c = tuple(map(int, raw_input_line.split()))
+            points[(row, 0)] = a
+            points[(row, 1)] = b
+            points[(row, 2)] = c
+        result = points
+        return result
+    
     def solve(self, triangles):
         possible_count = 0
         for a, b, c in triangles:
@@ -86,16 +96,29 @@ class Day03: # Squares With Three Sides
         result = possible_count
         return result
     
-    def solve2(self, triangles):
-        result = len(triangles)
+    def solve2(self, points):
+        possible_count = 0
+        for col in range(3):
+            for row_group in range(len(points) // 9):
+                a = points[(3 * row_group + 0, col)]
+                b = points[(3 * row_group + 1, col)]
+                c = points[(3 * row_group + 2, col)]
+                if all([
+                    (a + b) > c,
+                    (b + c) > a,
+                    (a + c) > b,
+                ]):
+                    possible_count += 1
+        result = possible_count
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         triangles = self.get_triangles(raw_input_lines)
+        points = self.get_points(raw_input_lines)
         solutions = (
             self.solve(triangles),
-            self.solve2(triangles),
+            self.solve2(points),
             )
         result = solutions
         return result
