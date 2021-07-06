@@ -78,6 +78,20 @@ class Day04: # Security Through Obscurity
         result = rooms
         return result
     
+    def decrypt(self, encrypted_name, shift_amount):
+        def shift(char):
+            return chr(ord('a') + (ord(char) - ord('a') + shift_amount) % 26)
+        shift_amount %= 26
+        decrypted_chars = []
+        for char in encrypted_name:
+            if char == '-':
+                decrypted_chars.append(' ')
+            else:
+                decrypted_char = shift(char)
+                decrypted_chars.append(decrypted_char)
+        result = ''.join(decrypted_chars)
+        return result
+    
     def solve(self, rooms):
         sector_ids_of_real_rooms = []
         for encrypted_name, (sector_id, checksum) in rooms.items():
@@ -96,7 +110,12 @@ class Day04: # Security Through Obscurity
         return result
     
     def solve2(self, rooms):
-        result = len(rooms)
+        decrypted_names = {}
+        for encrypted_name, (sector_id, checksum) in rooms.items():
+            decrypted_name = self.decrypt(encrypted_name, sector_id % 26)
+            decrypted_names[decrypted_name] = sector_id
+        target_sector_id = decrypted_names['northpole object storage']
+        result = target_sector_id
         return result
     
     def main(self):
