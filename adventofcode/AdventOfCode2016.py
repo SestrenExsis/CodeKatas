@@ -83,7 +83,20 @@ class Day05: # How About a Nice Game of Chess?
         return result
     
     def solve2(self, door_id):
-        result = len(door_id)
+        password = {}
+        num = 0
+        while len(password) < 8:
+            input_string = door_id + str(num)
+            message = hashlib.md5(input_string.encode('utf-8')).hexdigest()
+            if message[:5] == '00000':
+                position = int(message[5], base=16)
+                if position not in password and position < 8:
+                    password[position] = message[6]
+            num += 1
+        result = ''.join(
+            password[position] for
+            position in sorted(password.keys())
+            )
         return result
     
     def main(self):
