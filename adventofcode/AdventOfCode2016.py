@@ -61,6 +61,41 @@ class Template: # Template
         result = solutions
         return result
 
+class Day05: # How About a Nice Game of Chess?
+    '''
+    How About a Nice Game of Chess?
+    https://adventofcode.com/2016/day/5
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = raw_input_lines[0]
+        return result
+    
+    def solve(self, door_id):
+        password = []
+        num = 0
+        while len(password) < 8:
+            input_string = door_id + str(num)
+            message = hashlib.md5(input_string.encode('utf-8')).hexdigest()
+            if message[:5] == '00000':
+                password.append(message[5])
+            num += 1
+        result = ''.join(password)
+        return result
+    
+    def solve2(self, door_id):
+        result = len(door_id)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        door_id = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(door_id),
+            self.solve2(door_id),
+            )
+        result = solutions
+        return result
+
 class Day04: # Security Through Obscurity
     '''
     Security Through Obscurity
@@ -354,7 +389,7 @@ if __name__ == '__main__':
         2: (Day02, 'Bathroom Security'),
         3: (Day03, 'Squares With Three Sides'),
         4: (Day04, 'Security Through Obscurity'),
-    #     5: (Day05, '???'),
+        5: (Day05, 'How About a Nice Game of Chess?'),
     #     6: (Day06, '???'),
     #     7: (Day07, '???'),
     #     8: (Day08, '???'),
