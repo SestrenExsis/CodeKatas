@@ -61,6 +61,51 @@ class Template: # Template
         result = solutions
         return result
 
+class Day06: # Signals and Noise
+    '''
+    Signals and Noise
+    https://adventofcode.com/2016/day/6
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        cols = len(parsed_input[0])
+        counts = []
+        for word in parsed_input:
+            for col, char in enumerate(word):
+                counts.append(dict())
+                if char not in counts[col]:
+                    counts[col][char] = 0
+                counts[col][char] += 1
+        message = []
+        for col in range(cols):
+            most_common = [0, '?']
+            for char, count in counts[col].items():
+                if count > most_common[0]:
+                    most_common[0] = count
+                    most_common[1] = char
+            message.append(most_common[1])
+        result = ''.join(message)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day05: # How About a Nice Game of Chess?
     '''
     How About a Nice Game of Chess?
@@ -403,7 +448,7 @@ if __name__ == '__main__':
         3: (Day03, 'Squares With Three Sides'),
         4: (Day04, 'Security Through Obscurity'),
         5: (Day05, 'How About a Nice Game of Chess?'),
-    #     6: (Day06, '???'),
+        6: (Day06, 'Signals and Noise'),
     #     7: (Day07, '???'),
     #     8: (Day08, '???'),
     #     9: (Day09, '???'),
