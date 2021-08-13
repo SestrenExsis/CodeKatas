@@ -93,7 +93,23 @@ class Day06: # Signals and Noise
         return result
     
     def solve2(self, parsed_input):
-        result = len(parsed_input)
+        cols = len(parsed_input[0])
+        counts = []
+        for word in parsed_input:
+            for col, char in enumerate(word):
+                counts.append(dict())
+                if char not in counts[col]:
+                    counts[col][char] = 0
+                counts[col][char] += 1
+        message = []
+        for col in range(cols):
+            least_common = [float('inf'), '?']
+            for char, count in counts[col].items():
+                if count < least_common[0]:
+                    least_common[0] = count
+                    least_common[1] = char
+            message.append(least_common[1])
+        result = ''.join(message)
         return result
     
     def main(self):
