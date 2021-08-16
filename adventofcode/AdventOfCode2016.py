@@ -61,6 +61,61 @@ class Template: # Template
         result = solutions
         return result
 
+class Day07: # Internet Protocol Version 7
+    '''
+    Internet Protocol Version 7
+    https://adventofcode.com/2016/day/7
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        tls_count = 0
+        for line in parsed_input:
+            supports_tls_ind = False
+            hypernet_mode = False
+            queue = collections.deque()
+            for char in line:
+                if char == '[':
+                    hypernet_mode = True
+                elif char == ']':
+                    hypernet_mode = False
+                queue.append(char)
+                while len(queue) > 4:
+                    queue.popleft()
+                if len(queue) == 4:
+                    if (
+                        queue[0] == queue[3] and
+                        queue[1] == queue[2] and
+                        queue[0] != queue[1]
+                    ):
+                        if hypernet_mode:
+                            supports_tls_ind = False
+                            break
+                        else:
+                            supports_tls_ind = True
+            if supports_tls_ind:
+                tls_count += 1
+        result = tls_count
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day06: # Signals and Noise
     '''
     Signals and Noise
@@ -465,7 +520,7 @@ if __name__ == '__main__':
         4: (Day04, 'Security Through Obscurity'),
         5: (Day05, 'How About a Nice Game of Chess?'),
         6: (Day06, 'Signals and Noise'),
-    #     7: (Day07, '???'),
+        7: (Day07, 'Internet Protocol Version 7'),
     #     8: (Day08, '???'),
     #     9: (Day09, '???'),
     #    10: (Day10, '???'),
