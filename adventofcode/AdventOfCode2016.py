@@ -103,7 +103,36 @@ class Day07: # Internet Protocol Version 7
         return result
     
     def solve2(self, parsed_input):
-        result = len(parsed_input)
+        ssl_count = 0
+        for line in parsed_input:
+            supernet_abas = set()
+            hypernet_abas = set()
+            mode = 'supernet'
+            queue = collections.deque()
+            for char in line:
+                if char == '[':
+                    mode = 'hypernet'
+                elif char == ']':
+                    mode = 'supernet'
+                queue.append(char)
+                while len(queue) > 3:
+                    queue.popleft()
+                if len(queue) == 3:
+                    if (
+                        queue[0] == queue[2] and
+                        queue[0] != queue[1] and
+                        queue[1] not in '[]'
+                    ):
+                        if mode == 'supernet':
+                            supernet_abas.add(''.join(queue))
+                        elif mode == 'hypernet':
+                            hypernet_abas.add(''.join(queue))
+            for aba in supernet_abas:
+                bab = aba[1] + aba[0] + aba[1]
+                if bab in hypernet_abas:
+                    ssl_count += 1
+                    break
+        result = ssl_count
         return result
     
     def main(self):
