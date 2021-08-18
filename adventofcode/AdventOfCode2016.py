@@ -73,9 +73,9 @@ class Day08: # Two-Factor Authentication
             instruction = None
             if tokens[0] == 'rect':
                 pair = tokens[1].split('x')
-                row_count = int(pair[0])
-                col_count = int(pair[1])
-                instruction = ('rect', row_count, col_count)
+                col_count = int(pair[0])
+                row_count = int(pair[1])
+                instruction = ('rect', col_count, row_count)
             elif tokens[1] == 'row':
                 row = int(tokens[2].split('=')[1])
                 shift_amount = int(tokens[4])
@@ -87,6 +87,17 @@ class Day08: # Two-Factor Authentication
             instructions.append(instruction)
         result = instructions
         return result
+
+    def print_display(self, display):
+        rows = max(row for row, col in display.keys())
+        cols = max(col for row, col in display.keys())
+        for row in range(rows):
+            row_data = []
+            for col in range(cols):
+                cell = display[(row, col)]
+                row_data.append(cell)
+            print(''.join(row_data))
+        print('')
     
     def solve(self, instructions):
         rows = 6
@@ -95,28 +106,31 @@ class Day08: # Two-Factor Authentication
         for row in range(rows):
             for col in range(cols):
                 display[(row, col)] = '.'
+        # self.print_display(display)
         for operation, a, b in instructions:
+            # print(operation, a, b)
             if operation == 'rect':
-                row_count, col_count = a, b
+                col_count, row_count = a, b
                 for row in range(min(rows, row_count)):
                     for col in range(min(cols, col_count)):
                         display[(row, col)] = '#'
             elif operation == 'rotate_row':
                 row, shift_amount = a, b
-                shifted_row = []
+                shifted_row = {}
                 for col in range(cols):
                     target_col = (col + shift_amount) % cols
-                    shifted_row.append(display[(row, target_col)])
+                    shifted_row[target_col] = display[(row, col)]
                 for col in range(cols):
                     display[(row, col)] = shifted_row[col]
             elif operation == 'rotate_col':
                 col, shift_amount = a, b
-                shifted_col = []
+                shifted_col = {}
                 for row in range(rows):
                     target_row = (row + shift_amount) % rows
-                    shifted_col.append(display[(target_row, col)])
+                    shifted_col[target_row] = display[(row, col)]
                 for row in range(rows):
                     display[(row, col)] = shifted_col[row]
+            # self.print_display(display)
         lit_pixel_count = sum(
             1 for
             cell in display.values() if
