@@ -88,27 +88,12 @@ class Day08: # Two-Factor Authentication
         result = instructions
         return result
 
-    def print_display(self, display):
-        rows = max(row for row, col in display.keys())
-        cols = max(col for row, col in display.keys())
-        for row in range(rows):
-            row_data = []
-            for col in range(cols):
-                cell = display[(row, col)]
-                row_data.append(cell)
-            print(''.join(row_data))
-        print('')
-    
-    def solve(self, instructions):
-        rows = 6
-        cols = 50
+    def get_display(self, instructions, rows, cols):
         display = {}
         for row in range(rows):
             for col in range(cols):
                 display[(row, col)] = '.'
-        # self.print_display(display)
         for operation, a, b in instructions:
-            # print(operation, a, b)
             if operation == 'rect':
                 col_count, row_count = a, b
                 for row in range(min(rows, row_count)):
@@ -130,7 +115,11 @@ class Day08: # Two-Factor Authentication
                     shifted_col[target_row] = display[(row, col)]
                 for row in range(rows):
                     display[(row, col)] = shifted_col[row]
-            # self.print_display(display)
+        result = display
+        return result
+    
+    def solve(self, instructions):
+        display = self.get_display(instructions, 6, 50)
         lit_pixel_count = sum(
             1 for
             cell in display.values() if
@@ -140,7 +129,17 @@ class Day08: # Two-Factor Authentication
         return result
     
     def solve2(self, instructions):
-        result = len(instructions)
+        display = self.get_display(instructions, 6, 50)
+        display_string = []
+        rows = max(row for row, col in display.keys())
+        cols = max(col for row, col in display.keys())
+        for row in range(rows + 1):
+            row_data = []
+            for col in range(cols + 1):
+                cell = display[(row, col)]
+                row_data.append(cell)
+            display_string.append(''.join(row_data))
+        result = '\n' + '\n'.join(display_string)
         return result
     
     def main(self):
