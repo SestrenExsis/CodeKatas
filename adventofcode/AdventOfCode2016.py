@@ -61,6 +61,84 @@ class Template: # Template
         result = solutions
         return result
 
+class Day08: # Two-Factor Authentication
+    '''
+    Two-Factor Authentication
+    https://adventofcode.com/2016/day/8
+    '''
+    def get_instructions(self, raw_input_lines: List[str]):
+        instructions = []
+        for raw_input_line in raw_input_lines:
+            tokens = raw_input_line.split(' ')
+            instruction = None
+            if tokens[0] == 'rect':
+                pair = tokens[1].split('x')
+                row_count = int(pair[0])
+                col_count = int(pair[1])
+                instruction = ('rect', row_count, col_count)
+            elif tokens[1] == 'row':
+                row = int(tokens[2].split('=')[1])
+                shift_amount = int(tokens[4])
+                instruction = ('rotate_row', row, shift_amount)
+            elif tokens[1] == 'column':
+                col = int(tokens[2].split('=')[1])
+                shift_amount = int(tokens[4])
+                instruction = ('rotate_col', col, shift_amount)
+            instructions.append(instruction)
+        result = instructions
+        return result
+    
+    def solve(self, instructions):
+        rows = 6
+        cols = 50
+        display = {}
+        for row in range(rows):
+            for col in range(cols):
+                display[(row, col)] = '.'
+        for operation, a, b in instructions:
+            if operation == 'rect':
+                row_count, col_count = a, b
+                for row in range(min(rows, row_count)):
+                    for col in range(min(cols, col_count)):
+                        display[(row, col)] = '#'
+            elif operation == 'rotate_row':
+                row, shift_amount = a, b
+                shifted_row = []
+                for col in range(cols):
+                    target_col = (col + shift_amount) % cols
+                    shifted_row.append(display[(row, target_col)])
+                for col in range(cols):
+                    display[(row, col)] = shifted_row[col]
+            elif operation == 'rotate_col':
+                col, shift_amount = a, b
+                shifted_col = []
+                for row in range(rows):
+                    target_row = (row + shift_amount) % rows
+                    shifted_col.append(display[(target_row, col)])
+                for row in range(rows):
+                    display[(row, col)] = shifted_col[row]
+        lit_pixel_count = sum(
+            1 for
+            cell in display.values() if
+            cell == '#'
+            )
+        result = lit_pixel_count
+        return result
+    
+    def solve2(self, instructions):
+        result = len(instructions)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        instructions = self.get_instructions(raw_input_lines)
+        solutions = (
+            self.solve(instructions),
+            self.solve2(instructions),
+            )
+        result = solutions
+        return result
+
 class Day07: # Internet Protocol Version 7
     '''
     Internet Protocol Version 7
@@ -550,7 +628,7 @@ if __name__ == '__main__':
         5: (Day05, 'How About a Nice Game of Chess?'),
         6: (Day06, 'Signals and Noise'),
         7: (Day07, 'Internet Protocol Version 7'),
-    #     8: (Day08, '???'),
+        8: (Day08, 'Two-Factor Authentication'),
     #     9: (Day09, '???'),
     #    10: (Day10, '???'),
     #    11: (Day11, '???'),
