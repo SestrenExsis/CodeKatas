@@ -94,7 +94,29 @@ class Day09: # Explosives in Cyberspace
         return result
     
     def solve2(self, parsed_input):
-        result = len(parsed_input)
+        '''
+        (25x3)(3x3)ABC(2x3)XY(5x2)PQRSTX(18x9)(3x2)TWO(5x7)SEVEN
+                                                   111     66666
+                   999     99     666661           888     33333
+        9*3 + 9*2 + 6*5 + 1 + 18*3 + 63*5 = 445
+        '''
+        counts = [0] * len(parsed_input)
+        cursor = len(counts) - 1
+        while cursor >= 0:
+            if parsed_input[cursor] == ')':
+                end = cursor
+                while parsed_input[cursor] != '(':
+                    cursor -= 1
+                start = cursor + 1
+                section = parsed_input[start:end]
+                size, repeat = map(int, section.split('x'))
+                for i in range(end + 1, end + size + 1):
+                    counts[i] *= repeat
+                cursor -= 1
+            else:
+                counts[cursor] = 1
+                cursor -= 1
+        result = sum(counts)
         return result
     
     def main(self):
