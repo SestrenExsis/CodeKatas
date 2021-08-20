@@ -61,6 +61,52 @@ class Template: # Template
         result = solutions
         return result
 
+class Day09: # Explosives in Cyberspace
+    '''
+    Explosives in Cyberspace
+    https://adventofcode.com/2016/day/9
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = raw_input_lines[0]
+        return result
+    
+    def solve(self, parsed_input):
+        cursor = 0
+        length = 0
+        while cursor < len(parsed_input):
+            if parsed_input[cursor] == '(':
+                cursor += 1
+                size = 0
+                while parsed_input[cursor] != 'x':
+                    size = 10 * size + int(parsed_input[cursor])
+                    cursor += 1
+                cursor += 1
+                repeat = 0
+                while parsed_input[cursor] != ')':
+                    repeat = 10 * repeat + int(parsed_input[cursor])
+                    cursor += 1
+                length += size * repeat
+                cursor += size + 1
+            else:
+                length += 1
+                cursor += 1
+        result = length
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day08: # Two-Factor Authentication
     '''
     Two-Factor Authentication
@@ -642,7 +688,7 @@ if __name__ == '__main__':
         6: (Day06, 'Signals and Noise'),
         7: (Day07, 'Internet Protocol Version 7'),
         8: (Day08, 'Two-Factor Authentication'),
-    #     9: (Day09, '???'),
+        9: (Day09, 'Explosives in Cyberspace'),
     #    10: (Day10, '???'),
     #    11: (Day11, '???'),
     #    12: (Day12, '???'),
