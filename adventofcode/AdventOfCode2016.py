@@ -61,6 +61,87 @@ class Template: # Template
         result = solutions
         return result
 
+class Day10: # Balance Bots
+    '''
+    Balance Bots
+    https://adventofcode.com/2016/day/10
+    '''
+    class Bot:
+        def __init__(self, bot_id):
+            self.bot_id = bot_id
+            self.chips = []
+            self.low_target = None
+            self.high_target = None
+
+    def get_bots(self, raw_input_lines: List[str]):
+        bots = {}
+        for raw_input_line in raw_input_lines:
+            parts = raw_input_line.split(' ')
+            if parts[0] == 'value':
+                chip = int(parts[1])
+                bot_id = int(parts[5])
+                if bot_id not in bots:
+                    bots[bot_id] = self.Bot(bot_id)
+                heapq.heappush(bots[bot_id].chips, chip)
+            elif parts[0] == 'bot':
+                bot_id = int(parts[1])
+                if bot_id not in bots:
+                    bots[bot_id] = self.Bot(bot_id)
+                low_type = parts[5]
+                low_id = int(parts[6])
+                bots[bot_id].low_target = (low_type, low_id)
+                high_type = parts[10]
+                high_id = int(parts[11])
+                bots[bot_id].high_target = (high_type, high_id)
+        result = bots
+        return result
+    
+    def solve(self, bots):
+        '''
+        what is the number of the bot that is responsible for comparing
+        value-61 microchips with value-17 microchips?
+        '''
+        target_bot_id = None
+        while True:
+            active_ind = False
+            for bot in bots.values():
+                if len(bot.chips) == 2:
+                    if min(bot.chips) == 17 and max(bot.chips) == 61:
+                        target_bot_id = bot.bot_id
+                        break
+                if (
+                    len(bot.chips) == 2 and
+                    bot.low_target is not None and
+                    bot.high_target is not None
+                ):
+                    active_ind = True
+                    low_chip = heapq.heappop(bot.chips)
+                    high_chip = heapq.heappop(bot.chips)
+                    if bot.low_target[0] == 'bot':
+                        other_bot_id = bot.low_target[1]
+                        heapq.heappush(bots[other_bot_id].chips, low_chip)
+                    if bot.high_target[0] == 'bot':
+                        other_bot_id = bot.high_target[1]
+                        heapq.heappush(bots[other_bot_id].chips, high_chip)
+            if not active_ind:
+                break
+        result = target_bot_id
+        return result
+    
+    def solve2(self, bots):
+        result = len(bots)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        bots = self.get_bots(raw_input_lines)
+        solutions = (
+            self.solve(copy.deepcopy(bots)),
+            self.solve2(bots),
+            )
+        result = solutions
+        return result
+
 class Day09: # Explosives in Cyberspace
     '''
     Explosives in Cyberspace
@@ -711,7 +792,7 @@ if __name__ == '__main__':
         7: (Day07, 'Internet Protocol Version 7'),
         8: (Day08, 'Two-Factor Authentication'),
         9: (Day09, 'Explosives in Cyberspace'),
-    #    10: (Day10, '???'),
+       10: (Day10, 'Balance Bots'),
     #    11: (Day11, '???'),
     #    12: (Day12, '???'),
     #    13: (Day13, '???'),
