@@ -129,7 +129,36 @@ class Day10: # Balance Bots
         return result
     
     def solve2(self, bots):
-        result = len(bots)
+        '''
+        What is the value of multiplying outputs 0, 1, and 2?
+        '''
+        outputs = {}
+        while True:
+            active_ind = False
+            for bot in bots.values():
+                if (
+                    len(bot.chips) == 2 and
+                    bot.low_target is not None and
+                    bot.high_target is not None
+                ):
+                    active_ind = True
+                    low_chip = heapq.heappop(bot.chips)
+                    high_chip = heapq.heappop(bot.chips)
+                    if bot.low_target[0] == 'bot':
+                        other_bot_id = bot.low_target[1]
+                        heapq.heappush(bots[other_bot_id].chips, low_chip)
+                    elif bot.low_target[0] == 'output':
+                        output_id = bot.low_target[1]
+                        outputs[output_id] = low_chip
+                    if bot.high_target[0] == 'bot':
+                        other_bot_id = bot.high_target[1]
+                        heapq.heappush(bots[other_bot_id].chips, high_chip)
+                    elif bot.high_target[0] == 'output':
+                        output_id = bot.high_target[1]
+                        outputs[output_id] = high_chip
+            if not active_ind:
+                break
+        result = outputs[0] * outputs[1] * outputs[2]
         return result
     
     def main(self):
