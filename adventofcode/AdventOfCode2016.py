@@ -61,6 +61,138 @@ class Template: # Template
         result = solutions
         return result
 
+class Day11: # Radioisotope Thermoelectric Generators
+    '''
+    Radioisotope Thermoelectric Generators
+    https://adventofcode.com/2016/day/11
+    Rules:
+    - You and the elevator start on the first floor
+    - A microchip is powered only if it is on the same floor as its corresponding RTG
+    - You cannot leave unpowered microchips in the same area as another RTG
+    - The elevator can move between floors one at a time
+    - The elevator can carry one or two devices at a time only
+    Goal:
+    - Find the minimum number of steps to get all objects to the fourth floor
+    '''
+    def get_state(self, raw_input_lines: List[str]):
+        '''
+        Each row contains the state of all types on that floor
+        Floors:
+            0 = What floor the elevator is on
+            1 = 1st floor
+            2 = 2nd floor
+            3 = 3rd floor
+            4 = 4th floor
+        Types:
+            0 = thulium
+            1 = plutonium
+            2 = promethium
+            3 = ruthenium
+            4 = strontium
+        States:
+            0 = No microchip or generator
+            1 = Microchip only
+            2 = Generator only
+            3 = Both a microchip and a generator
+        '''
+        state = (
+            (1, ), 
+            (3, 2, 0, 0, 2),
+            (0, 1, 0, 0, 1),
+            (0, 0, 3, 3, 0),
+            (0, 0, 0, 0, 0),
+        )
+        result = state
+        return result
+    
+    def solve(self, initial_state):
+        '''
+        States:
+            0 = No microchip or generator (Protected, Harmless)
+            1 = Microchip only (Unprotected, Harmless)
+            2 = Generator only (Protected, Harmful)
+            3 = Both a microchip and a generator (Protected, Harmful)
+        No floor may contain a 1 if it contains either a 2 or a 3,
+        which represents an unshielded microchip that is in the
+        presence of another generator
+        '''
+        seen = set()
+        min_step_count = float('inf')
+        work = collections.deque()
+        work.append((0, initial_state))
+        while len(work) > 0:
+            step_count, state = work.pop()
+            if state in seen:
+                continue
+            seen.add(state)
+            # Do not allow unprotected devices to be
+            # on the same floor as harmful ones
+            valid_ind = True
+            for floor in (1, 2, 3, 4):
+                states = set(state[floor])
+                if 1 in states and (2 in states or 3 in states):
+                    valid_ind = False
+                    break
+            if not valid_ind:
+                continue
+            # The goal is to get all the devices to the fourth floor
+            if state[4] == (3, 3, 3, 3, 3):
+                min_step_count = step_count
+                break
+            floor = state[0][0]
+            devices = [
+                (0, 1), (0, 2),
+                (1, 1), (1, 2),
+                (2, 1), (2, 2),
+                (3, 1), (3, 2),
+                (4, 1), (4, 2),
+            ]
+            for device_count in (1, 2):
+                # Exactly one or two devices from the current floor
+                # can be taken each step
+                choices = itertools.combinations(
+                    devices,
+                    device_count,
+                )
+                for choice in choices:
+                    # The elevator moves up or down one floor per step
+                    for next_floor in (floor - 1, floor + 1):
+                        if next_floor < 1 or next_floor > 4:
+                            continue
+                        temp = []
+                        for data in state:
+                            temp.append(list(data))
+                        temp[0][0] = next_floor
+                        valid_ind = True
+                        for dtype, dvalue in choice:
+                            if temp[floor][dtype] & dvalue == 0:
+                                valid_ind = False
+                                break
+                            temp[floor][dtype] -= dvalue
+                            temp[next_floor][dtype] += dvalue
+                        if valid_ind:
+                            next_state = tuple(
+                                tuple(data) for
+                                data in temp
+                            )
+                            work.appendleft((step_count + 1, next_state))
+        result = min_step_count
+        return result
+    
+    def solve2(self, state):
+        result = len(state)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        state = self.get_state(raw_input_lines)
+        solutions = (
+            self.solve(state),
+            self.solve2(state),
+            )
+        result = solutions
+        return result
+
 class Day10: # Balance Bots
     '''
     Balance Bots
@@ -822,7 +954,7 @@ if __name__ == '__main__':
         8: (Day08, 'Two-Factor Authentication'),
         9: (Day09, 'Explosives in Cyberspace'),
        10: (Day10, 'Balance Bots'),
-    #    11: (Day11, '???'),
+       11: (Day11, 'Radioisotope Thermoelectric Generators'),
     #    12: (Day12, '???'),
     #    13: (Day13, '???'),
     #    14: (Day14, '???'),
