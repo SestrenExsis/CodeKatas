@@ -95,13 +95,46 @@ class Day11: # Radioisotope Thermoelectric Generators
             2 = Generator only
             3 = Both a microchip and a generator
         '''
-        state = (
-            (1, ), 
-            (3, 2, 0, 0, 2),
-            (0, 1, 0, 0, 1),
-            (0, 0, 3, 3, 0),
-            (0, 0, 0, 0, 0),
-        )
+        ignored_words = {
+            'The',
+            'floor',
+            'contains',
+            'a',
+            'compatible',
+            'and',
+            'relevant',
+        }
+        floor_count = len(raw_input_lines)
+        device_type_count = 0
+        device_types = {}
+        devices = set()
+        for floor, raw_input_line in enumerate(raw_input_lines, start=1):
+            line = ''.join(
+                ' ' if char == '-' else char for char in
+                raw_input_line if
+                char not in '.,'
+            )
+            tokens = list(
+                word for word in
+                line.split(' ') if
+                word not in ignored_words
+            )
+            for i, token in enumerate(tokens):
+                if token in ('generator', 'microchip'):
+                    device_type = tokens[i - 1]
+                    if device_type not in device_types:
+                        device_types[device_type] = device_type_count
+                        device_type_count += 1
+                    device_type_id = device_types[device_type]
+                    device_value = 1
+                    if token == 'generator':
+                        device_value = 2
+                    devices.add((floor, device_type_id, device_value))
+        state = [[1]]
+        for _ in range(floor_count):
+            state.append([0] * device_type_count)
+        for floor, device_type_id, device_value in devices:
+            state[floor][device_type_id] += device_value
         result = state
         return result
     
@@ -116,6 +149,7 @@ class Day11: # Radioisotope Thermoelectric Generators
         which represents an unshielded microchip that is in the
         presence of another generator
         '''
+        initial_state = tuple(tuple(data) for data in initial_state)
         seen = set()
         min_step_count = float('inf')
         work = collections.deque()
@@ -179,16 +213,89 @@ class Day11: # Radioisotope Thermoelectric Generators
         result = min_step_count
         return result
     
-    def solve2(self, state):
-        result = len(state)
+    def solve2(self, initial_state):
+        '''
+        States:
+            0 = No microchip or generator (Protected, Harmless)
+            1 = Microchip only (Unprotected, Harmless)
+            2 = Generator only (Protected, Harmful)
+            3 = Both a microchip and a generator (Protected, Harmful)
+        No floor may contain a 1 if it contains either a 2 or a 3,
+        which represents an unshielded microchip that is in the
+        presence of another generator
+        '''
+        initial_state = tuple(tuple(data) for data in initial_state)
+        seen = set()
+        min_step_count = float('inf')
+        work = collections.deque()
+        work.append((0, initial_state))
+        while len(work) > 0:
+            step_count, state = work.pop()
+            if state in seen:
+                continue
+            seen.add(state)
+            # Do not allow unprotected devices to be
+            # on the same floor as harmful ones
+            valid_ind = True
+            for floor in (1, 2, 3, 4):
+                states = set(state[floor])
+                if 1 in states and (2 in states or 3 in states):
+                    valid_ind = False
+                    break
+            if not valid_ind:
+                continue
+            # The goal is to get all the devices to the fourth floor
+            if state[4] == (3, 3, 3, 3, 3):
+                min_step_count = step_count
+                break
+            floor = state[0][0]
+            devices = [
+                (0, 1), (0, 2),
+                (1, 1), (1, 2),
+                (2, 1), (2, 2),
+                (3, 1), (3, 2),
+                (4, 1), (4, 2),
+            ]
+            for device_count in (1, 2):
+                # Exactly one or two devices from the current floor
+                # can be taken each step
+                choices = itertools.combinations(
+                    devices,
+                    device_count,
+                )
+                for choice in choices:
+                    # The elevator moves up or down one floor per step
+                    for next_floor in (floor - 1, floor + 1):
+                        if next_floor < 1 or next_floor > 4:
+                            continue
+                        temp = []
+                        for data in state:
+                            temp.append(list(data))
+                        temp[0][0] = next_floor
+                        valid_ind = True
+                        for dtype, dvalue in choice:
+                            if temp[floor][dtype] & dvalue == 0:
+                                valid_ind = False
+                                break
+                            temp[floor][dtype] -= dvalue
+                            temp[next_floor][dtype] += dvalue
+                        if valid_ind:
+                            next_state = tuple(
+                                tuple(data) for
+                                data in temp
+                            )
+                            work.appendleft((step_count + 1, next_state))
+        result = min_step_count
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         state = self.get_state(raw_input_lines)
+        device_type_count = len(state)
+        state2 = copy.deepcopy(state)
         solutions = (
             self.solve(state),
-            self.solve2(state),
+            self.solve2(state2),
             )
         result = solutions
         return result
