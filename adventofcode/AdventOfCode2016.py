@@ -138,7 +138,7 @@ class Day11: # Radioisotope Thermoelectric Generators
         result = state
         return result
     
-    def solve(self, initial_state):
+    def solve_slow(self, initial_state, devices):
         '''
         States:
             0 = No microchip or generator (Protected, Harmless)
@@ -170,17 +170,10 @@ class Day11: # Radioisotope Thermoelectric Generators
             if not valid_ind:
                 continue
             # The goal is to get all the devices to the fourth floor
-            if state[4] == (3, 3, 3, 3, 3):
+            if set(state[4]) == {3}:
                 min_step_count = step_count
                 break
             floor = state[0][0]
-            devices = [
-                (0, 1), (0, 2),
-                (1, 1), (1, 2),
-                (2, 1), (2, 2),
-                (3, 1), (3, 2),
-                (4, 1), (4, 2),
-            ]
             for device_count in (1, 2):
                 # Exactly one or two devices from the current floor
                 # can be taken each step
@@ -213,27 +206,32 @@ class Day11: # Radioisotope Thermoelectric Generators
         result = min_step_count
         return result
     
-    def solve2(self, initial_state):
+    def canonicalize(self, state) -> Tuple:
+        canonical_state = []
+        canonical_state.append([state[0][0]])
+        transposed = list(map(list, zip(*state[1:])))
+        for data in sorted(transposed):
+            canonical_state.append(data)
+        result = tuple(tuple(data) for data in canonical_state)
+        return result
+    
+    def solve_fast(self, initial_state, devices):
         '''
-        States:
-            0 = No microchip or generator (Protected, Harmless)
-            1 = Microchip only (Unprotected, Harmless)
-            2 = Generator only (Protected, Harmful)
-            3 = Both a microchip and a generator (Protected, Harmful)
-        No floor may contain a 1 if it contains either a 2 or a 3,
-        which represents an unshielded microchip that is in the
-        presence of another generator
+        Use sorted transpose of the state when checking for states
+        that have been seen before, since they are all equivalent
         '''
         initial_state = tuple(tuple(data) for data in initial_state)
         seen = set()
         min_step_count = float('inf')
         work = collections.deque()
         work.append((0, initial_state))
+        max_step_count = 0
         while len(work) > 0:
             step_count, state = work.pop()
-            if state in seen:
+            canonical_state = self.canonicalize(state)
+            if canonical_state in seen:
                 continue
-            seen.add(state)
+            seen.add(canonical_state)
             # Do not allow unprotected devices to be
             # on the same floor as harmful ones
             valid_ind = True
@@ -245,17 +243,10 @@ class Day11: # Radioisotope Thermoelectric Generators
             if not valid_ind:
                 continue
             # The goal is to get all the devices to the fourth floor
-            if state[4] == (3, 3, 3, 3, 3):
+            if set(state[4]) == {3}:
                 min_step_count = step_count
                 break
             floor = state[0][0]
-            devices = [
-                (0, 1), (0, 2),
-                (1, 1), (1, 2),
-                (2, 1), (2, 2),
-                (3, 1), (3, 2),
-                (4, 1), (4, 2),
-            ]
             for device_count in (1, 2):
                 # Exactly one or two devices from the current floor
                 # can be taken each step
@@ -291,11 +282,33 @@ class Day11: # Radioisotope Thermoelectric Generators
     def main(self):
         raw_input_lines = get_raw_input_lines()
         state = self.get_state(raw_input_lines)
-        device_type_count = len(state)
+        devices = [
+            (0, 1), (0, 2),
+            (1, 1), (1, 2),
+            (2, 1), (2, 2),
+            (3, 1), (3, 2),
+            (4, 1), (4, 2),
+        ]
         state2 = copy.deepcopy(state)
+        devices2 = [
+            (0, 1), (0, 2),
+            (1, 1), (1, 2),
+            (2, 1), (2, 2),
+            (3, 1), (3, 2),
+            (4, 1), (4, 2),
+            (5, 1), (5, 2),
+            (6, 1), (6, 2),
+        ]
+        device_type_count = len(state)
+        for i in range(1, len(state2)):
+            device_value = 0
+            if i == 1:
+                device_value = 3
+            state2[i].append(device_value)
+            state2[i].append(device_value)
         solutions = (
-            self.solve(state),
-            self.solve2(state2),
+            self.solve_fast(state, devices),
+            self.solve_fast(state2, devices2),
             )
         result = solutions
         return result
