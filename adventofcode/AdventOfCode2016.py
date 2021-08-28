@@ -61,6 +61,41 @@ class Template: # Template
         result = solutions
         return result
 
+class Day12: # Leonardo's Monorail
+    '''
+    Leonardo's Monorail
+    https://adventofcode.com/2016/day/12
+    '''
+    def get_instructions(self, raw_input_lines: List[str]):
+        instructions = []
+        for raw_input_line in raw_input_lines:
+            parts = raw_input_line.split(' ')
+            for i in range(len(parts)):
+                if parts[i].isdigit():
+                    parts[i] = int(parts[i])
+            instruction = tuple(parts)
+            instructions.append(instruction)
+        result = instructions
+        return result
+    
+    def solve(self, instructions):
+        result = len(instructions)
+        return result
+    
+    def solve2(self, instructions):
+        result = len(instructions)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        instructions = self.get_instructions(raw_input_lines)
+        solutions = (
+            self.solve(instructions),
+            self.solve2(instructions),
+            )
+        result = solutions
+        return result
+
 class Day11: # Radioisotope Thermoelectric Generators
     '''
     Radioisotope Thermoelectric Generators
@@ -1075,7 +1110,7 @@ if __name__ == '__main__':
         9: (Day09, 'Explosives in Cyberspace'),
        10: (Day10, 'Balance Bots'),
        11: (Day11, 'Radioisotope Thermoelectric Generators'),
-    #    12: (Day12, '???'),
+       12: (Day12, 'Leonardo''s Monorail'),
     #    13: (Day13, '???'),
     #    14: (Day14, '???'),
     #    15: (Day15, '???'),
