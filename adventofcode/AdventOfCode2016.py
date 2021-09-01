@@ -71,15 +71,40 @@ class Day12: # Leonardo's Monorail
         for raw_input_line in raw_input_lines:
             parts = raw_input_line.split(' ')
             for i in range(len(parts)):
-                if parts[i].isdigit():
+                try:
                     parts[i] = int(parts[i])
+                except ValueError:
+                    pass
             instruction = tuple(parts)
             instructions.append(instruction)
         result = instructions
         return result
     
     def solve(self, instructions):
-        result = len(instructions)
+        pc = 0
+        registers = {'a': 0, 'b': 0, 'c': 0, 'd': 0}
+        while pc < len(instructions):
+            instruction = instructions[pc]
+            op = instruction[0]
+            if op == 'cpy':
+                x = instruction[1]
+                y = instruction[2]
+                x_val = x if type(x) is int else registers[x]
+                registers[y] = x_val
+            elif op == 'inc':
+                x = instruction[1]
+                registers[x] += 1
+            elif op == 'dec':
+                x = instruction[1]
+                registers[x] -= 1
+            elif op == 'jnz':
+                x = instruction[1]
+                y = instruction[2]
+                x_val = x if type(x) is int else registers[x]
+                if x_val != 0:
+                    pc += y - 1
+            pc += 1
+        result = registers['a']
         return result
     
     def solve2(self, instructions):
