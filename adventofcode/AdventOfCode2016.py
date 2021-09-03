@@ -38,9 +38,7 @@ class Template: # Template
     https://adventofcode.com/2016/day/?
     '''
     def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
-        for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
+        result = int(raw_input_lines[0])
         return result
     
     def solve(self, parsed_input):
@@ -57,6 +55,75 @@ class Template: # Template
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day13: # A Maze of Twisty Little Cubicles
+    '''
+    A Maze of Twisty Little Cubicles
+    https://adventofcode.com/2016/day/13
+    '''
+    offset = 0
+
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        self.offset = int(raw_input_lines[0])
+    
+    def hamming(self, num):
+        weight = 0
+        while num > 0:
+            weight += num & 1
+            num >>= 1
+        result = weight
+        return result
+    
+    @functools.lru_cache(maxsize=1024)
+    def wall(self, row, col):
+        num = col ** 2 + 3 * col + 2 * col * row + row + row ** 2
+        num += self.offset
+        weight = self.hamming(num)
+        result = weight % 2 == 1
+        return result
+    
+    def solve(self, target_row, target_col):
+        min_steps = float('inf')
+        work = collections.deque()
+        work.append((0, 1, 1))
+        visited = set()
+        while len(work) > 0:
+            steps, row, col = work.pop()
+            if (row, col) == (target_row, target_col):
+                min_steps = steps
+                break
+            if (row, col) in visited:
+                continue
+            visited.add((row, col))
+            for (next_row, next_col) in (
+                (row + 1, col),
+                (row - 1, col),
+                (row, col + 1),
+                (row, col - 1),
+            ):
+                if (
+                    next_row < 0 or
+                    next_col < 0 or
+                    self.wall(next_row, next_col)
+                ):
+                    continue
+                work.appendleft((steps + 1, next_row, next_col))
+        result = min_steps
+        return result
+    
+    def solve2(self):
+        result = -1
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(39, 31),
+            self.solve2(),
             )
         result = solutions
         return result
@@ -1144,7 +1211,7 @@ if __name__ == '__main__':
        10: (Day10, 'Balance Bots'),
        11: (Day11, 'Radioisotope Thermoelectric Generators'),
        12: (Day12, 'Leonardo''s Monorail'),
-    #    13: (Day13, '???'),
+       13: (Day13, 'A Maze of Twisty Little Cubicles'),
     #    14: (Day14, '???'),
     #    15: (Day15, '???'),
     #    16: (Day16, '???'),
