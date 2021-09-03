@@ -115,7 +115,30 @@ class Day13: # A Maze of Twisty Little Cubicles
         return result
     
     def solve2(self):
-        result = -1
+        work = collections.deque()
+        work.append((0, 1, 1))
+        visited = set()
+        while len(work) > 0:
+            steps, row, col = work.pop()
+            if steps > 50:
+                continue
+            if (row, col) in visited:
+                continue
+            visited.add((row, col))
+            for (next_row, next_col) in (
+                (row + 1, col),
+                (row - 1, col),
+                (row, col + 1),
+                (row, col - 1),
+            ):
+                if (
+                    next_row < 0 or
+                    next_col < 0 or
+                    self.wall(next_row, next_col)
+                ):
+                    continue
+                work.appendleft((steps + 1, next_row, next_col))
+        result = len(visited)
         return result
     
     def main(self):
