@@ -79,10 +79,9 @@ class Day12: # Leonardo's Monorail
             instructions.append(instruction)
         result = instructions
         return result
-    
-    def solve(self, instructions):
+
+    def run(self, registers, instructions):
         pc = 0
-        registers = {'a': 0, 'b': 0, 'c': 0, 'd': 0}
         while pc < len(instructions):
             instruction = instructions[pc]
             op = instruction[0]
@@ -107,8 +106,17 @@ class Day12: # Leonardo's Monorail
         result = registers['a']
         return result
     
+    def solve(self, instructions):
+        registers = {'a': 0, 'b': 0, 'c': 0, 'd': 0}
+        self.run(registers, instructions)
+        result = registers['a']
+        return result
+    
     def solve2(self, instructions):
-        result = len(instructions)
+        registers = {'a': 0, 'b': 0, 'c': 0, 'd': 0}
+        registers['c'] = 1
+        self.run(registers, instructions)
+        result = registers['a']
         return result
     
     def main(self):
