@@ -61,6 +61,53 @@ class Template: # Template
         result = solutions
         return result
 
+class Day15: # Timing is Everything
+    '''
+    Timing is Everything
+    https://adventofcode.com/2016/day/15
+    '''
+    def get_discs(self, raw_input_lines: List[str]):
+        discs = []
+        for raw_input_line in raw_input_lines:
+            parts = raw_input_line.split(' ')
+            size = int(parts[3])
+            offset = int(parts[11][:-1])
+            discs.append((size, offset))
+        result = discs
+        return result
+    
+    def solve(self, discs):
+        for i, (size, offset) in enumerate(discs):
+            offset += i + 1
+            discs[i] = (size, offset)
+        t = 0
+        while True:
+            valid_ind = True
+            for size, offset in discs:
+                if (offset + t) % size != 0:
+                    valid_ind = False
+                    break
+            if valid_ind:
+                break
+            t += 1
+        result = t
+        return result
+    
+    def solve2(self, discs):
+        discs.append((11, 0))
+        result = self.solve(discs)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        discs = self.get_discs(raw_input_lines)
+        solutions = (
+            self.solve(copy.deepcopy(discs)),
+            self.solve2(copy.deepcopy(discs)),
+            )
+        result = solutions
+        return result
+
 class Day14: # One-Time Pad
     '''
     One-Time Pad
@@ -1298,7 +1345,7 @@ if __name__ == '__main__':
        12: (Day12, 'Leonardo''s Monorail'),
        13: (Day13, 'A Maze of Twisty Little Cubicles'),
        14: (Day14, 'One-Time Pad'),
-    #    15: (Day15, '???'),
+       15: (Day15, 'Timing is Everything'),
     #    16: (Day16, '???'),
     #    17: (Day17, '???'),
     #    18: (Day18, '???'),
