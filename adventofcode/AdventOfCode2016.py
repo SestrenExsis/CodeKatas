@@ -70,14 +70,16 @@ class Day14: # One-Time Pad
         result = raw_input_lines[0]
         return result
     
-    def solve(self, salt):
+    def solve(self, salt, repeat=1):
         keys = []
         index = 0
         hashes = collections.deque()
         quintuples_in_range = collections.defaultdict(int)
         while len(keys) < 64:
             message = salt + str(index)
-            hash = hashlib.md5(message.encode('utf-8')).hexdigest()
+            hash = message
+            for _ in range(repeat + 1):
+                hash = hashlib.md5(hash.encode('utf-8')).hexdigest()
             triples = set()
             for i in range(len(hash) - 2):
                 candidate = hash[i: i + 3]
@@ -107,19 +109,14 @@ class Day14: # One-Time Pad
                     keys.append(key)
             index += 1
         result = keys[64 - 1]
-        # 35171 is too low
-        return result
-    
-    def solve2(self, salt):
-        result = len(salt)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         salt = self.get_salt(raw_input_lines)
         solutions = (
-            self.solve(salt),
-            self.solve2(salt),
+            self.solve(salt, 1),
+            self.solve(salt, 2016),
             )
         result = solutions
         return result
