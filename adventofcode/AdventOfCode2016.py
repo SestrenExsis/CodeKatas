@@ -38,7 +38,9 @@ class Template: # Template
     https://adventofcode.com/2016/day/?
     '''
     def get_parsed_input(self, raw_input_lines: List[str]):
-        result = int(raw_input_lines[0])
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
         return result
     
     def solve(self, parsed_input):
@@ -55,6 +57,69 @@ class Template: # Template
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day14: # One-Time Pad
+    '''
+    One-Time Pad
+    https://adventofcode.com/2016/day/14
+    '''
+    def get_salt(self, raw_input_lines: List[str]):
+        result = raw_input_lines[0]
+        return result
+    
+    def solve(self, salt):
+        keys = []
+        index = 0
+        hashes = collections.deque()
+        quintuples_in_range = collections.defaultdict(int)
+        while len(keys) < 64:
+            message = salt + str(index)
+            hash = hashlib.md5(message.encode('utf-8')).hexdigest()
+            triples = set()
+            for i in range(len(hash) - 2):
+                candidate = hash[i: i + 3]
+                if len(set(candidate)) == 1:
+                    triple = candidate[0]
+                    triples.add(triple)
+                    break
+            quintuples = set()
+            for i in range(len(hash) - 4):
+                candidate = hash[i: i + 5]
+                if len(set(candidate)) == 1:
+                    quintuple = candidate[0]
+                    if quintuple not in quintuples:
+                        quintuples_in_range[quintuple] += 1
+                    quintuples.add(quintuple)
+            hashes.append((index, hash, triples, quintuples))
+            while len(hashes) >= 1000:
+                key, hash, triples, quintuples = hashes.popleft()
+                for quintuple in quintuples:
+                    quintuples_in_range[quintuple] -= 1
+                qs = set(
+                    q for q, count in
+                    quintuples_in_range.items() if
+                    count > 0
+                )
+                if len(triples & qs) > 0:
+                    keys.append(key)
+            index += 1
+        result = keys[64 - 1]
+        # 35171 is too low
+        return result
+    
+    def solve2(self, salt):
+        result = len(salt)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        salt = self.get_salt(raw_input_lines)
+        solutions = (
+            self.solve(salt),
+            self.solve2(salt),
             )
         result = solutions
         return result
@@ -1235,7 +1300,7 @@ if __name__ == '__main__':
        11: (Day11, 'Radioisotope Thermoelectric Generators'),
        12: (Day12, 'Leonardo''s Monorail'),
        13: (Day13, 'A Maze of Twisty Little Cubicles'),
-    #    14: (Day14, '???'),
+       14: (Day14, 'One-Time Pad'),
     #    15: (Day15, '???'),
     #    16: (Day16, '???'),
     #    17: (Day17, '???'),
