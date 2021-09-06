@@ -61,6 +61,50 @@ class Template: # Template
         result = solutions
         return result
 
+class Day16: # Dragon Checksum
+    '''
+    Dragon Checksum
+    https://adventofcode.com/2016/day/16
+    '''
+    def get_initial_state(self, raw_input_lines: List[str]):
+        initial_state = list(map(int, raw_input_lines[0]))
+        result = initial_state
+        return result
+    
+    def solve(self, initial_state, disk_length):
+        state = initial_state
+        while len(state) < disk_length:
+            a = state
+            b = [1 - x for x in reversed(a)]
+            state = a + [0] + b
+        checksum = state[:disk_length]
+        while True:
+            half_len = len(checksum) // 2
+            next_checksum = checksum[:half_len]
+            for i in range(half_len):
+                index = 2 * i
+                value = 1 - (abs(checksum[index] - checksum[index + 1]))
+                next_checksum[i] = value
+            checksum = next_checksum[:]
+            if len(checksum) % 2 == 1:
+                break
+        result = ''.join(map(str, checksum))
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        initial_state = self.get_initial_state(raw_input_lines)
+        solutions = (
+            self.solve(initial_state[:], 272),
+            self.solve2(initial_state),
+            )
+        result = solutions
+        return result
+
 class Day15: # Timing is Everything
     '''
     Timing is Everything
@@ -1346,7 +1390,7 @@ if __name__ == '__main__':
        13: (Day13, 'A Maze of Twisty Little Cubicles'),
        14: (Day14, 'One-Time Pad'),
        15: (Day15, 'Timing is Everything'),
-    #    16: (Day16, '???'),
+       16: (Day16, 'Dragon Checksum'),
     #    17: (Day17, '???'),
     #    18: (Day18, '???'),
     #    19: (Day19, '???'),
