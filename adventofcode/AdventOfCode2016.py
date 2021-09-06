@@ -91,16 +91,12 @@ class Day16: # Dragon Checksum
         result = ''.join(map(str, checksum))
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
-        return result
-    
     def main(self):
         raw_input_lines = get_raw_input_lines()
         initial_state = self.get_initial_state(raw_input_lines)
         solutions = (
             self.solve(initial_state[:], 272),
-            self.solve2(initial_state),
+            self.solve(initial_state[:], 35_651_584),
             )
         result = solutions
         return result
