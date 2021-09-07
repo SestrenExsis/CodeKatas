@@ -106,7 +106,38 @@ class Day17: # Two Steps Forward
         return result
     
     def solve2(self, passcode):
-        result = len(passcode)
+        rows = 4
+        cols = 4
+        directions = {
+            'U': (-1, 0, 0),
+            'D': ( 1, 0, 1),
+            'L': ( 0,-1, 2),
+            'R': ( 0, 1, 3),
+        }
+        longest_path = None
+        work = collections.deque()
+        work.append((0, 0, 0, '')) # (distance, row, col, path)
+        while len(work) > 0:
+            distance, row, col, path = work.pop()
+            if row == 3 and col == 3:
+                if longest_path is None or longest_path[0] < distance:
+                    longest_path = (distance, path)
+                continue
+            input_string = (passcode + path).encode('utf-8')
+            hash = hashlib.md5(input_string).hexdigest()[:4]
+            for direction in directions:
+                row_offset, col_offset, index = directions[direction]
+                next_row = row + row_offset
+                next_col = col + col_offset
+                if (
+                    0 <= next_row < rows and
+                    0 <= next_col < cols and
+                    hash[index] in 'bcdef'
+                ):
+                    work.appendleft(
+                        (distance + 1, next_row, next_col, path + direction),
+                    )
+        result = longest_path
         return result
     
     def main(self):
@@ -1445,7 +1476,7 @@ if __name__ == '__main__':
        14: (Day14, 'One-Time Pad'),
        15: (Day15, 'Timing is Everything'),
        16: (Day16, 'Dragon Checksum'),
-       17: (Day17, 'Two Steps Forward''),
+       17: (Day17, 'Two Steps Forward'),
     #    18: (Day18, '???'),
     #    19: (Day19, '???'),
     #    20: (Day20, '???'),
