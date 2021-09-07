@@ -71,11 +71,11 @@ class Day18: # Like a Rogue
         result = first_row
         return result
     
-    def solve(self, first_row):
+    def solve(self, first_row, rows):
         traps = {'^^.', '.^^', '^..', '..^'}
         safe_tile_count = sum(1 for char in first_row if char == '.')
         prev_row = first_row
-        for _ in range(39):
+        for _ in range(rows - 1):
             row = []
             for i in range(len(prev_row)):
                 left = '.' if i < 1 else prev_row[i - 1]
@@ -89,16 +89,12 @@ class Day18: # Like a Rogue
         result = safe_tile_count
         return result
     
-    def solve2(self, first_row):
-        result = len(first_row)
-        return result
-    
     def main(self):
         raw_input_lines = get_raw_input_lines()
         first_row = self.get_first_row(raw_input_lines)
         solutions = (
-            self.solve(first_row),
-            self.solve2(first_row),
+            self.solve(first_row, 40),
+            self.solve(first_row, 400_000),
             )
         result = solutions
         return result
