@@ -61,6 +61,48 @@ class Template: # Template
         result = solutions
         return result
 
+class Day18: # Like a Rogue
+    '''
+    Like a Rogue
+    https://adventofcode.com/2016/day/18
+    '''
+    def get_first_row(self, raw_input_lines: List[str]):
+        first_row = raw_input_lines[0]
+        result = first_row
+        return result
+    
+    def solve(self, first_row):
+        traps = {'^^.', '.^^', '^..', '..^'}
+        safe_tile_count = sum(1 for char in first_row if char == '.')
+        prev_row = first_row
+        for _ in range(39):
+            row = []
+            for i in range(len(prev_row)):
+                left = '.' if i < 1 else prev_row[i - 1]
+                center = prev_row[i]
+                right = '.' if i >= len(prev_row) - 1 else prev_row[i + 1]
+                key = left + center + right
+                cell = '^' if key in traps else '.'
+                row.append(cell)
+            prev_row = ''.join(row)
+            safe_tile_count += sum(1 for char in prev_row if char == '.')
+        result = safe_tile_count
+        return result
+    
+    def solve2(self, first_row):
+        result = len(first_row)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        first_row = self.get_first_row(raw_input_lines)
+        solutions = (
+            self.solve(first_row),
+            self.solve2(first_row),
+            )
+        result = solutions
+        return result
+
 class Day17: # Two Steps Forward
     '''
     Two Steps Forward
@@ -137,7 +179,7 @@ class Day17: # Two Steps Forward
                     work.appendleft(
                         (distance + 1, next_row, next_col, path + direction),
                     )
-        result = longest_path
+        result = longest_path[1]
         return result
     
     def main(self):
@@ -1477,7 +1519,7 @@ if __name__ == '__main__':
        15: (Day15, 'Timing is Everything'),
        16: (Day16, 'Dragon Checksum'),
        17: (Day17, 'Two Steps Forward'),
-    #    18: (Day18, '???'),
+       18: (Day18, 'Like a Rogue'),
     #    19: (Day19, '???'),
     #    20: (Day20, '???'),
     #    21: (Day21, '???'),
