@@ -61,6 +61,51 @@ class Template: # Template
         result = solutions
         return result
 
+class Day19: # An Elephant Named Joseph
+    '''
+    An Elephant Named Joseph
+    https://adventofcode.com/2016/day/?
+    '''
+    class Node():
+        def __init__(self, node_id):
+            self.node_id = node_id
+            self.value = 1
+            self.next = None
+
+    def get_elf_count(self, raw_input_lines: List[str]):
+        result = int(raw_input_lines[0])
+        return result
+    
+    def solve(self, elf_count):
+        current_elf = self.Node(1)
+        prev_elf = current_elf
+        for elf_id in range(2, elf_count + 1):
+            elf = self.Node(elf_id)
+            prev_elf.next = elf
+            prev_elf = elf
+        prev_elf.next = current_elf
+        while current_elf.next != current_elf:
+            next_elf = current_elf.next
+            current_elf.value += next_elf.value
+            current_elf.next = next_elf.next
+            current_elf = next_elf
+        result = current_elf.node_id
+        return result
+    
+    def solve2(self, elf_count):
+        result = elf_count
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        elf_count = self.get_elf_count(raw_input_lines)
+        solutions = (
+            self.solve(elf_count),
+            self.solve2(elf_count),
+            )
+        result = solutions
+        return result
+
 class Day18: # Like a Rogue
     '''
     Like a Rogue
@@ -1516,7 +1561,7 @@ if __name__ == '__main__':
        16: (Day16, 'Dragon Checksum'),
        17: (Day17, 'Two Steps Forward'),
        18: (Day18, 'Like a Rogue'),
-    #    19: (Day19, '???'),
+       19: (Day19, 'An Elephant Named Joseph'),
     #    20: (Day20, '???'),
     #    21: (Day21, '???'),
     #    22: (Day22, '???'),
