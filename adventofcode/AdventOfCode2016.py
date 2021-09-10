@@ -92,13 +92,52 @@ class Day19: # An Elephant Named Joseph
         result = current_elf.node_id
         return result
     
+    def solve2_slowly(self, elf_count):
+        current_elf = self.Node(1)
+        prev_elf = current_elf
+        for elf_id in range(2, elf_count + 1):
+            elf = self.Node(elf_id)
+            prev_elf.next = elf
+            prev_elf = elf
+        prev_elf.next = current_elf
+        while current_elf.next != current_elf:
+            across_elf = current_elf
+            for _ in range(elf_count // 2):
+                across_elf = across_elf.next
+                prev_elf = prev_elf.next
+            current_elf.value += across_elf.value
+            prev_elf.next = across_elf.next
+            prev_elf = current_elf
+            current_elf = current_elf.next
+            elf_count -= 1
+        result = current_elf.node_id
+        return result
+    
     def solve2(self, elf_count):
-        result = elf_count
+        '''
+        The pattern appears to be:
+        index starts at 1 and increments by 1
+        solution starts at 1
+        solution increments by 1 if it is less than half the index
+        solution increments by 2 if it is >= half the index
+        solution starts over at 1 if it is >= index
+        '''
+        elf_id = 1
+        for i in range(1, elf_count + 1):
+            if elf_id >= i // 2:
+                elf_id += 2
+            else:
+                elf_id += 1
+            if elf_id > i:
+                elf_id = 1
+        result = elf_id
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         elf_count = self.get_elf_count(raw_input_lines)
+        for i in range(2, 100):
+            assert self.solve2_slowly(i) == self.solve2(i)
         solutions = (
             self.solve(elf_count),
             self.solve2(elf_count),
