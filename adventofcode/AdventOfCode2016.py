@@ -61,6 +61,58 @@ class Template: # Template
         result = solutions
         return result
 
+class Day20: # Firewall Rules
+    '''
+    Firewall Rules
+    https://adventofcode.com/2016/day/20
+    '''
+    def get_banned_ranges(self, raw_input_lines: List[str]):
+        banned_ranges = set()
+        for raw_input_line in raw_input_lines:
+            banned_range = tuple(map(int, raw_input_line.split('-')))
+            banned_ranges.add(banned_range)
+        result = banned_ranges
+        return result
+    
+    def solve(self, banned_ranges):
+        '''
+        The lowest-valued IP that is not blocked must occur adjacent to
+        the boundaries of one of the blocked ranges. In other words, if
+        a blocked range is A-B, then the only possible candidates could be
+        A - 1 or B + 1
+        '''
+        candidates = set()
+        for a, b in banned_ranges:
+            candidates.add(a - 1)
+            candidates.add(b + 1)
+        min_valid_ip = float('inf')
+        for candidate in candidates:
+            if candidate < 0 or candidate > 4294967295:
+                continue
+            valid_ind = True
+            for lower, upper in banned_ranges:
+                if lower <= candidate <= upper:
+                    valid_ind = False
+                    break
+            if valid_ind:
+                min_valid_ip = min(min_valid_ip, candidate)
+        result = min_valid_ip
+        return result
+    
+    def solve2(self, banned_ranges):
+        result = len(banned_ranges)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        banned_ranges = self.get_banned_ranges(raw_input_lines)
+        solutions = (
+            self.solve(banned_ranges),
+            self.solve2(banned_ranges),
+            )
+        result = solutions
+        return result
+
 class Day19: # An Elephant Named Joseph
     '''
     An Elephant Named Joseph
@@ -1601,7 +1653,7 @@ if __name__ == '__main__':
        17: (Day17, 'Two Steps Forward'),
        18: (Day18, 'Like a Rogue'),
        19: (Day19, 'An Elephant Named Joseph'),
-    #    20: (Day20, '???'),
+       20: (Day20, 'Firewall Rules'),
     #    21: (Day21, '???'),
     #    22: (Day22, '???'),
     #    23: (Day23, '???'),
