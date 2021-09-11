@@ -66,6 +66,9 @@ class Day20: # Firewall Rules
     Firewall Rules
     https://adventofcode.com/2016/day/20
     '''
+    MIN_IP = 0
+    MAX_IP = 4294967295
+
     def get_banned_ranges(self, raw_input_lines: List[str]):
         banned_ranges = set()
         for raw_input_line in raw_input_lines:
@@ -87,7 +90,7 @@ class Day20: # Firewall Rules
             candidates.add(b + 1)
         min_valid_ip = float('inf')
         for candidate in candidates:
-            if candidate < 0 or candidate > 4294967295:
+            if candidate < self.MIN_IP or candidate > self.MAX_IP:
                 continue
             valid_ind = True
             for lower, upper in banned_ranges:
@@ -100,7 +103,15 @@ class Day20: # Firewall Rules
         return result
     
     def solve2(self, banned_ranges):
-        result = len(banned_ranges)
+        valid_ip_count = 0
+        current_ip = self.MIN_IP
+        for a, b in sorted(banned_ranges):
+            if a > current_ip:
+                valid_ip_count += a - current_ip - 1
+            current_ip = max(current_ip, b)
+        if current_ip < self.MAX_IP:
+            valid_ip_count += self.MAX_IP - current_ip
+        result = valid_ip_count
         return result
     
     def main(self):
