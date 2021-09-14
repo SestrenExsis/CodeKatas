@@ -61,6 +61,104 @@ class Template: # Template
         result = solutions
         return result
 
+class Day21: # Scrambled Letters and Hash
+    '''
+    Scrambled Letters and Hash
+    https://adventofcode.com/2016/day/21
+    '''
+    def get_instructions(self, raw_input_lines: List[str]):
+        instructions = []
+        for raw_input_line in raw_input_lines:
+            '''
+            swap position X with position Y
+            swap letter A with letter B
+            rotate left X steps
+            rotate right X steps
+            rotate based on position of letter A
+            reverse positions X through Y
+            move position X to position Y
+            '''
+            instruction = None
+            parts = raw_input_line.split(' ')
+            if parts[0] == 'swap' and parts[1] == 'position':
+                x = int(parts[2])
+                y = int(parts[5])
+                instruction = ('swap position', x, y)
+            elif parts[0] == 'swap' and parts[1] == 'letter':
+                a = parts[2]
+                b = parts[5]
+                instruction = ('swap letter', a, b)
+            elif parts[0] == 'rotate' and parts[1] == 'left':
+                x = int(parts[2])
+                instruction = ('rotate left', x)
+            elif parts[0] == 'rotate' and parts[1] == 'right':
+                x = int(parts[2])
+                instruction = ('rotate right', x)
+            elif parts[0] == 'rotate' and parts[1] == 'based':
+                a = parts[6]
+                instruction = ('rotate base', a)
+            elif parts[0] == 'reverse':
+                x = int(parts[2])
+                y = int(parts[4])
+                instruction = ('reverse', x, y)
+            elif parts[0] == 'move':
+                x = int(parts[2])
+                y = int(parts[5])
+                instruction = ('move', x, y)
+            instructions.append(instruction)
+        result = instructions
+        return result
+    
+    def solve(self, instructions):
+        password = list('abcdefgh')
+        for instruction in instructions:
+            if instruction[0] == 'swap position':
+                x, y = instruction[1], instruction[2]
+                password[x], password[y] = password[y], password[x]
+            elif instruction[0] == 'swap letter':
+                a, b = instruction[1], instruction[2]
+                x = password.index(a)
+                y = password.index(b)
+                password[x], password[y] = password[y], password[x]
+            elif instruction[0] == 'rotate left':
+                x = instruction[1] % len(password)
+                password = password[x:] + password[:x]
+            elif instruction[0] == 'rotate right':
+                x = instruction[1] % len(password)
+                password = password[:-x] + password[-x:]
+            elif instruction[0] == 'rotate base':
+                a = instruction[1]
+                pos = password.index(a)
+                index = (pos + 1 + (0 if pos < 4 else 1)) % len(password)
+                password = password[:-index] + password[-index:]
+            elif instruction[0] == 'reverse':
+                x, y = instruction[1], instruction[2]
+                while x < y:
+                    x += 1
+                    password[x], password[y] = password[y], password[x]
+                    y -= 1
+            elif instruction[0] == 'move':
+                x, y = instruction[1], instruction[2]
+                char = password[x]
+                password = password[:x] + password[x + 1:]
+                password = password[:y] + [char] + password[y:]
+        result = ''.join(password)
+        return result
+    
+    def solve2(self, instructions):
+        result = len(instructions)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        instructions = self.get_instructions(raw_input_lines)
+        solutions = (
+            self.solve(instructions),
+            self.solve2(instructions),
+            )
+        result = solutions
+        return result
+
 class Day20: # Firewall Rules
     '''
     Firewall Rules
@@ -1665,7 +1763,7 @@ if __name__ == '__main__':
        18: (Day18, 'Like a Rogue'),
        19: (Day19, 'An Elephant Named Joseph'),
        20: (Day20, 'Firewall Rules'),
-    #    21: (Day21, '???'),
+       21: (Day21, 'Scrambled Letters and Hash'),
     #    22: (Day22, '???'),
     #    23: (Day23, '???'),
     #    24: (Day24, '???'),
