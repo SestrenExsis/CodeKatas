@@ -109,40 +109,40 @@ class Day21: # Scrambled Letters and Hash
         result = instructions
         return result
     
-    def solve(self, instructions):
-        password = list('abcdefgh')
+    def solve(self, password, instructions):
+        chars = list(password)
         for instruction in instructions:
             if instruction[0] == 'swap position':
                 x, y = instruction[1], instruction[2]
-                password[x], password[y] = password[y], password[x]
+                chars[x], chars[y] = chars[y], chars[x]
             elif instruction[0] == 'swap letter':
                 a, b = instruction[1], instruction[2]
-                x = password.index(a)
-                y = password.index(b)
-                password[x], password[y] = password[y], password[x]
+                x = chars.index(a)
+                y = chars.index(b)
+                chars[x], chars[y] = chars[y], chars[x]
             elif instruction[0] == 'rotate left':
-                x = instruction[1] % len(password)
-                password = password[x:] + password[:x]
+                x = instruction[1] % len(chars)
+                chars = chars[x:] + chars[:x]
             elif instruction[0] == 'rotate right':
-                x = instruction[1] % len(password)
-                password = password[:-x] + password[-x:]
+                x = instruction[1] % len(chars)
+                chars = chars[-x:] + chars[:-x]
             elif instruction[0] == 'rotate base':
                 a = instruction[1]
-                pos = password.index(a)
-                index = (pos + 1 + (0 if pos < 4 else 1)) % len(password)
-                password = password[:-index] + password[-index:]
+                pos = chars.index(a)
+                index = (pos + 1 + (0 if pos < 4 else 1)) % len(chars)
+                chars = chars[-index:] + chars[:-index]
             elif instruction[0] == 'reverse':
                 x, y = instruction[1], instruction[2]
                 while x < y:
+                    chars[x], chars[y] = chars[y], chars[x]
                     x += 1
-                    password[x], password[y] = password[y], password[x]
                     y -= 1
             elif instruction[0] == 'move':
                 x, y = instruction[1], instruction[2]
-                char = password[x]
-                password = password[:x] + password[x + 1:]
-                password = password[:y] + [char] + password[y:]
-        result = ''.join(password)
+                char = chars[x]
+                chars = chars[:x] + chars[x + 1:]
+                chars = chars[:y] + [char] + chars[y:]
+        result = ''.join(chars)
         return result
     
     def solve2(self, instructions):
@@ -153,7 +153,7 @@ class Day21: # Scrambled Letters and Hash
         raw_input_lines = get_raw_input_lines()
         instructions = self.get_instructions(raw_input_lines)
         solutions = (
-            self.solve(instructions),
+            self.solve('abcdefgh', instructions),
             self.solve2(instructions),
             )
         result = solutions
