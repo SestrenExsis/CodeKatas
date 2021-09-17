@@ -61,6 +61,58 @@ class Template: # Template
         result = solutions
         return result
 
+class Day22: # Grid Computing
+    '''
+    Grid Computing
+    https://adventofcode.com/2016/day/22
+    '''
+    def get_grid(self, raw_input_lines: List[str]):
+        grid = {}
+        for raw_input_line in raw_input_lines[2:]:
+            parts = raw_input_line.split()
+            parts0 = parts[0].split('-')
+            col = int(parts0[1][1:])
+            row = int(parts0[2][1:])
+            size = int(parts[1][:-1])
+            used = int(parts[2][:-1])
+            avail = int(parts[3][:-1])
+            use_pct = int(parts[4][:-1])
+            grid[(row, col)] = {
+                'size': size,
+                'used': used,
+                'avail': avail,
+                'use_pct': use_pct
+            }
+        result = grid
+        return result
+    
+    def solve(self, grid):
+        viable_pair_count = 0
+        for node_a, node_a_data in grid.items():
+            if node_a_data['used'] < 1:
+                continue
+            for node_b, node_b_data in grid.items():
+                if node_b == node_a:
+                    continue
+                if node_a_data['used'] <= node_b_data['avail']:
+                    viable_pair_count += 1
+        result = viable_pair_count
+        return result
+    
+    def solve2(self, grid):
+        result = len(grid)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        grid = self.get_grid(raw_input_lines)
+        solutions = (
+            self.solve(grid),
+            self.solve2(grid),
+            )
+        result = solutions
+        return result
+
 class Day21: # Scrambled Letters and Hash
     '''
     Scrambled Letters and Hash
@@ -1829,7 +1881,7 @@ if __name__ == '__main__':
        19: (Day19, 'An Elephant Named Joseph'),
        20: (Day20, 'Firewall Rules'),
        21: (Day21, 'Scrambled Letters and Hash'),
-    #    22: (Day22, '???'),
+       22: (Day22, 'Grid Computing'),
     #    23: (Day23, '???'),
     #    24: (Day24, '???'),
     #    25: (Day25, '???'),
