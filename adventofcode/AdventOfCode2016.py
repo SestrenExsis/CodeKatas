@@ -142,11 +142,76 @@ class Day21: # Scrambled Letters and Hash
                 char = chars[x]
                 chars = chars[:x] + chars[x + 1:]
                 chars = chars[:y] + [char] + chars[y:]
+            elif instruction[0] == 'inverse rotate base':
+                a = instruction[1]
+                pos = chars.index(a)
+                index = pos
+                if pos == 1:
+                    index = 7
+                elif pos == 3:
+                    index = 6
+                elif pos == 5:
+                    index = 5
+                elif pos == 7:
+                    index = 4
+                elif pos == 2:
+                    index = 2
+                elif pos == 4:
+                    index = 1
+                elif pos == 6:
+                    index = 0
+                elif pos == 0:
+                    index = 7
+                chars = chars[-index:] + chars[:-index]
         result = ''.join(chars)
         return result
     
-    def solve2(self, instructions):
-        result = len(instructions)
+    def solve2(self, scrambled_password, instructions):
+        '''
+        What are the inverses of the following functions?
+            swap position X with position Y:
+                swap position X with position Y
+            swap letter A with letter B:
+                swap letter A with letter B ???
+            rotate left X steps:
+                rotate right X steps
+            rotate right X steps:
+                rotate left X steps
+            rotate based on position of letter A:
+                if you found the target letter at:
+                    ... 1, it was originally at 0, so rotate left 1
+                    ... 3, it was originally at 1, so rotate left 2
+                    ... 5, it was originally at 2, so rotate left 3
+                    ... 7, it was originally at 3, so rotate left 4
+                    ... 2, it was originally at 4, so rotate right 2
+                    ... 4, it was originally at 5, so rotate right 1
+                    ... 6, it was originally at 6, so do nothing
+                    ... 0, it was originally at 7, so rotate left 1
+            reverse positions X through Y:
+                reverse positions X through Y
+            move position X to position Y:
+                move position Y to position X
+        '''
+        inverse_instructions = []
+        for instruction in reversed(instructions):
+            parts = list(instruction)
+            if instruction[0] == 'swap position':
+                pass
+            elif instruction[0] == 'swap letter':
+                pass
+            elif instruction[0] == 'rotate left':
+                parts[0] = 'rotate right'
+            elif instruction[0] == 'rotate right':
+                parts[0] = 'rotate left'
+            elif instruction[0] == 'rotate base':
+                parts[0] = 'inverse rotate base'
+            elif instruction[0] == 'reverse':
+                pass
+            elif instruction[0] == 'move':
+                parts[1], parts[2] = parts[2], parts[1]
+            inverse_instruction = tuple(parts)
+            inverse_instructions.append(inverse_instruction)
+        result = self.solve(scrambled_password, inverse_instructions)
         return result
     
     def main(self):
@@ -154,7 +219,7 @@ class Day21: # Scrambled Letters and Hash
         instructions = self.get_instructions(raw_input_lines)
         solutions = (
             self.solve('abcdefgh', instructions),
-            self.solve2(instructions),
+            self.solve2('fbgdceah', instructions),
             )
         result = solutions
         return result
