@@ -17,6 +17,38 @@ import random
 import re
 import time
 from typing import Dict, List, Set, Tuple
+
+class AssembunnyVM: # Virtual Machine for running Assembunny code
+    def __init__(self, instructions):
+        self.instructions = instructions
+        self.registers = {'a': 0, 'b': 0, 'c': 0, 'd': 0}
+        self.pc = 0
+
+    def run(self):
+        self.pc = 0
+        while self.pc < len(self.instructions):
+            instruction = self.instructions[self.pc]
+            op = instruction[0]
+            if op == 'cpy':
+                x = instruction[1]
+                y = instruction[2]
+                x_val = x if type(x) is int else self.registers[x]
+                self.registers[y] = x_val
+            elif op == 'inc':
+                x = instruction[1]
+                self.registers[x] += 1
+            elif op == 'dec':
+                x = instruction[1]
+                self.registers[x] -= 1
+            elif op == 'jnz':
+                x = instruction[1]
+                y = instruction[2]
+                x_val = x if type(x) is int else self.registers[x]
+                if x_val != 0:
+                    self.pc += y - 1
+            self.pc += 1
+        result = self.registers['a']
+        return result
     
 def get_raw_input_lines() -> list:
     raw_input_lines = []
@@ -61,7 +93,36 @@ class Template: # Template
         result = solutions
         return result
 
-class Day22: # Grid Computing
+class Day23: # Safe Cracking
+    '''
+    Safe Cracking
+    https://adventofcode.com/2016/day/23
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day22Incomplete: # Grid Computing
     '''
     Grid Computing
     https://adventofcode.com/2016/day/22
@@ -85,6 +146,14 @@ class Day22: # Grid Computing
             }
         result = grid
         return result
+
+    def show_grid(self, grid, rows, cols):
+        for row in range(rows):
+            row_data = []
+            for col in range(cols):
+                cell = grid[(row, col)]
+                row_data.append(str(cell['used']) + '/' + str(cell['size']))
+            print(' '.join(row_data))
     
     def solve(self, grid):
         viable_pair_count = 0
@@ -106,6 +175,9 @@ class Day22: # Grid Computing
     def main(self):
         raw_input_lines = get_raw_input_lines()
         grid = self.get_grid(raw_input_lines)
+        rows = max(row for row, _ in grid.keys())
+        cols = max(col for _, col in grid.keys())
+        self.show_grid(grid, rows, cols)
         solutions = (
             self.solve(grid),
             self.solve2(grid),
@@ -807,44 +879,18 @@ class Day12: # Leonardo's Monorail
             instructions.append(instruction)
         result = instructions
         return result
-
-    def run(self, registers, instructions):
-        pc = 0
-        while pc < len(instructions):
-            instruction = instructions[pc]
-            op = instruction[0]
-            if op == 'cpy':
-                x = instruction[1]
-                y = instruction[2]
-                x_val = x if type(x) is int else registers[x]
-                registers[y] = x_val
-            elif op == 'inc':
-                x = instruction[1]
-                registers[x] += 1
-            elif op == 'dec':
-                x = instruction[1]
-                registers[x] -= 1
-            elif op == 'jnz':
-                x = instruction[1]
-                y = instruction[2]
-                x_val = x if type(x) is int else registers[x]
-                if x_val != 0:
-                    pc += y - 1
-            pc += 1
-        result = registers['a']
-        return result
     
     def solve(self, instructions):
-        registers = {'a': 0, 'b': 0, 'c': 0, 'd': 0}
-        self.run(registers, instructions)
-        result = registers['a']
+        vm = AssembunnyVM(instructions)
+        vm.run()
+        result = vm.registers['a']
         return result
     
     def solve2(self, instructions):
-        registers = {'a': 0, 'b': 0, 'c': 0, 'd': 0}
-        registers['c'] = 1
-        self.run(registers, instructions)
-        result = registers['a']
+        vm = AssembunnyVM(instructions)
+        vm.registers['c'] = 1
+        vm.run()
+        result = vm.registers['a']
         return result
     
     def main(self):
@@ -1881,8 +1927,8 @@ if __name__ == '__main__':
        19: (Day19, 'An Elephant Named Joseph'),
        20: (Day20, 'Firewall Rules'),
        21: (Day21, 'Scrambled Letters and Hash'),
-       22: (Day22, 'Grid Computing'),
-    #    23: (Day23, '???'),
+       22: (Day22Incomplete, 'Grid Computing'),
+       23: (Day23, 'Safe Cracking'),
     #    24: (Day24, '???'),
     #    25: (Day25, '???'),
         }
