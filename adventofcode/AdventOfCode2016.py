@@ -19,10 +19,22 @@ import time
 from typing import Dict, List, Set, Tuple
 
 class AssembunnyVM: # Virtual Machine for running Assembunny code
-    def __init__(self, instructions):
-        self.instructions = instructions
+    def __init__(self):
+        self.instructions = []
         self.registers = {'a': 0, 'b': 0, 'c': 0, 'd': 0}
         self.pc = 0
+    
+    def load_raw_input(self, raw_input_lines: List[str]):
+        self.instructions = []
+        for raw_input_line in raw_input_lines:
+            parts = raw_input_line.split(' ')
+            for i in range(len(parts)):
+                try:
+                    parts[i] = int(parts[i])
+                except ValueError:
+                    pass
+            instruction = tuple(parts)
+            self.instructions.append(instruction)
 
     def run(self):
         self.pc = 0
@@ -33,19 +45,40 @@ class AssembunnyVM: # Virtual Machine for running Assembunny code
                 x = instruction[1]
                 y = instruction[2]
                 x_val = x if type(x) is int else self.registers[x]
-                self.registers[y] = x_val
+                if type(y) is str and y in self.registers:
+                    self.registers[y] = x_val
             elif op == 'inc':
                 x = instruction[1]
-                self.registers[x] += 1
+                if type(x) is str and x in self.registers:
+                    self.registers[x] += 1
             elif op == 'dec':
                 x = instruction[1]
-                self.registers[x] -= 1
+                if type(x) is str and x in self.registers:
+                    self.registers[x] -= 1
             elif op == 'jnz':
                 x = instruction[1]
                 y = instruction[2]
                 x_val = x if type(x) is int else self.registers[x]
+                y_val = y if type(y) is int else self.registers[y]
                 if x_val != 0:
-                    self.pc += y - 1
+                    self.pc += y_val - 1
+            elif op == 'tgl':
+                x = instruction[1]
+                x_val = x if type(x) is int else self.registers[x]
+                target_pc = self.pc + x_val
+                try:
+                    instruction = list(self.instructions[target_pc])
+                    if instruction[0] == 'inc':
+                        instruction[0] = 'dec'
+                    elif len(instruction) == 2:
+                        instruction[0] = 'inc'
+                    elif instruction[0] == 'jnz':
+                        instruction[0] = 'cpy'
+                    elif len(instruction) == 3:
+                        instruction[0] = 'jnz'
+                    self.instructions[target_pc] = tuple(instruction)
+                except IndexError:
+                    pass
             self.pc += 1
         result = self.registers['a']
         return result
@@ -98,14 +131,12 @@ class Day23: # Safe Cracking
     Safe Cracking
     https://adventofcode.com/2016/day/23
     '''
-    def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
-        for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
-        return result
-    
-    def solve(self, parsed_input):
-        result = len(parsed_input)
+    def solve(self, raw_input_lines):
+        vm = AssembunnyVM()
+        vm.load_raw_input(raw_input_lines)
+        vm.registers['a'] = 7
+        vm.run()
+        result = vm.registers['a']
         return result
     
     def solve2(self, parsed_input):
@@ -114,10 +145,9 @@ class Day23: # Safe Cracking
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(raw_input_lines),
+            self.solve2(raw_input_lines),
             )
         result = solutions
         return result
@@ -866,28 +896,16 @@ class Day12: # Leonardo's Monorail
     Leonardo's Monorail
     https://adventofcode.com/2016/day/12
     '''
-    def get_instructions(self, raw_input_lines: List[str]):
-        instructions = []
-        for raw_input_line in raw_input_lines:
-            parts = raw_input_line.split(' ')
-            for i in range(len(parts)):
-                try:
-                    parts[i] = int(parts[i])
-                except ValueError:
-                    pass
-            instruction = tuple(parts)
-            instructions.append(instruction)
-        result = instructions
-        return result
-    
-    def solve(self, instructions):
-        vm = AssembunnyVM(instructions)
+    def solve(self, raw_input_lines):
+        vm = AssembunnyVM()
+        vm.load_raw_input(raw_input_lines)
         vm.run()
         result = vm.registers['a']
         return result
     
-    def solve2(self, instructions):
-        vm = AssembunnyVM(instructions)
+    def solve2(self, raw_input_lines):
+        vm = AssembunnyVM()
+        vm.load_raw_input(raw_input_lines)
         vm.registers['c'] = 1
         vm.run()
         result = vm.registers['a']
@@ -895,10 +913,9 @@ class Day12: # Leonardo's Monorail
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        instructions = self.get_instructions(raw_input_lines)
         solutions = (
-            self.solve(instructions),
-            self.solve2(instructions),
+            self.solve(raw_input_lines),
+            self.solve2(raw_input_lines),
             )
         result = solutions
         return result
