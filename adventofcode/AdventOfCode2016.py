@@ -37,6 +37,32 @@ class AssembunnyVM: # Virtual Machine for running Assembunny code
             instruction = tuple(parts)
             self.instructions.append(instruction)
     
+    def __indirect(self, command):
+        parts = command.split(' ')
+        x = parts[1]
+        try:
+            x = int(x)
+        except (TypeError, ValueError):
+            pass
+        y = None
+        try:
+            y = int(parts[2])
+        except (TypeError, ValueError):
+            y = parts[2]
+        op_str = parts[0]
+        if op_str == 'cpy':
+            self.__cpy(x, y)
+        elif op_str == 'add':
+            self.__add(x, y)
+        elif op_str == 'sub':
+            self.__sub(x, y)
+        elif op_str == 'mul':
+            self.__mul(x, y)
+        elif op_str == 'jnz':
+            self.__jnz(x, y)
+        elif op_str == 'tgl':
+            self.__tgl(x, y)
+    
     def __cpy(self, x, y):
         x_val = x if type(x) is int else self.registers[x]
         if type(y) is str and y in self.registers:
@@ -46,6 +72,16 @@ class AssembunnyVM: # Virtual Machine for running Assembunny code
         y_val = y if type(y) is int else self.registers[y]
         if type(x) is str and x in self.registers:
             self.registers[x] += y_val
+    
+    def __sub(self, x, y):
+        y_val = y if type(y) is int else self.registers[y]
+        if type(x) is str and x in self.registers:
+            self.registers[x] -= y_val
+    
+    def __mul(self, x, y):
+        y_val = y if type(y) is int else self.registers[y]
+        if type(x) is str and x in self.registers:
+            self.registers[x] *= y_val
     
     def __jnz(self, x, y):
         x_val = x if type(x) is int else self.registers[x]
@@ -91,7 +127,15 @@ class AssembunnyVM: # Virtual Machine for running Assembunny code
         start_time = time.time()
         self.pc = 0
         while self.pc < len(self.instructions):
-            self.step()
+            try:
+                injection = self.injections[self.pc]
+                N = len(injection)
+                final_pc = injection[0]
+                for command in injection[1:]:
+                    self.__indirect(command)
+                self.pc = final_pc
+            except (AttributeError, KeyError):
+                self.step()
             elapsed_time = time.time() - start_time
             if elapsed_time >= time_limit:
                 break
@@ -154,17 +198,18 @@ class Day23: # Safe Cracking
         vm.registers['a'] = 7
         vm.run()
         result = vm.registers['a']
-        print('cycles:', vm.cycle_count)
         return result
     
     def solve2(self, raw_input_lines):
         vm = AssembunnyVM()
         vm.load_raw_input(raw_input_lines)
+        vm.injections = {
+            5: (9, 'sub a a', 'add a c', 'mul a d', 'sub c c', 'sub d d'),
+        }
         vm.registers['a'] = 12
         result = None
-        if vm.run(5.0):
+        if vm.run(60.0):
             result = vm.registers['a']
-        print('cycles:', vm.cycle_count)
         return result
     
     def main(self):
