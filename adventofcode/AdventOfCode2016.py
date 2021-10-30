@@ -20,6 +20,7 @@ from typing import Dict, List, Set, Tuple
 
 class AssembunnyVM: # Virtual Machine for running Assembunny code
     def __init__(self):
+        self.cycle_count = 0
         self.instructions = []
         self.registers = {'a': 0, 'b': 0, 'c': 0, 'd': 0}
         self.pc = 0
@@ -35,53 +36,63 @@ class AssembunnyVM: # Virtual Machine for running Assembunny code
                     pass
             instruction = tuple(parts)
             self.instructions.append(instruction)
+    
+    def __cpy(self, x, y):
+        x_val = x if type(x) is int else self.registers[x]
+        if type(y) is str and y in self.registers:
+            self.registers[y] = x_val
+    
+    def __inc(self, x):
+        if type(x) is str and x in self.registers:
+            self.registers[x] += 1
+    
+    def __dec(self, x):
+        if type(x) is str and x in self.registers:
+            self.registers[x] -= 1
+    
+    def __jnz(self, x, y):
+        x_val = x if type(x) is int else self.registers[x]
+        y_val = y if type(y) is int else self.registers[y]
+        if x_val != 0:
+            self.pc += y_val - 1
+    
+    def __tgl(self, x):
+        x_val = x if type(x) is int else self.registers[x]
+        target_pc = self.pc + x_val
+        try:
+            instruction = list(self.instructions[target_pc])
+            if instruction[0] == 'inc':
+                instruction[0] = 'dec'
+            elif len(instruction) == 2:
+                instruction[0] = 'inc'
+            elif instruction[0] == 'jnz':
+                instruction[0] = 'cpy'
+            elif len(instruction) == 3:
+                instruction[0] = 'jnz'
+            self.instructions[target_pc] = tuple(instruction)
+        except IndexError:
+            pass
 
-    def run(self):
+    def step(self):
+        instruction = self.instructions[self.pc]
+        op = instruction[0]
+        if op == 'cpy':
+            self.__cpy(instruction[1], instruction[2])
+        elif op == 'inc':
+            self.__inc(instruction[1])
+        elif op == 'dec':
+            self.__dec(instruction[1])
+        elif op == 'jnz':
+            self.__jnz(instruction[1], instruction[2])
+        elif op == 'tgl':
+            self.__tgl(instruction[1])
+        self.pc += 1
+        self.cycle_count += 1
+
+    def run(self, injections: dict=None):
         self.pc = 0
         while self.pc < len(self.instructions):
-            instruction = self.instructions[self.pc]
-            op = instruction[0]
-            if op == 'cpy':
-                x = instruction[1]
-                y = instruction[2]
-                x_val = x if type(x) is int else self.registers[x]
-                if type(y) is str and y in self.registers:
-                    self.registers[y] = x_val
-            elif op == 'inc':
-                x = instruction[1]
-                if type(x) is str and x in self.registers:
-                    self.registers[x] += 1
-            elif op == 'dec':
-                x = instruction[1]
-                if type(x) is str and x in self.registers:
-                    self.registers[x] -= 1
-            elif op == 'jnz':
-                x = instruction[1]
-                y = instruction[2]
-                x_val = x if type(x) is int else self.registers[x]
-                y_val = y if type(y) is int else self.registers[y]
-                if x_val != 0:
-                    self.pc += y_val - 1
-            elif op == 'tgl':
-                x = instruction[1]
-                x_val = x if type(x) is int else self.registers[x]
-                target_pc = self.pc + x_val
-                try:
-                    instruction = list(self.instructions[target_pc])
-                    if instruction[0] == 'inc':
-                        instruction[0] = 'dec'
-                    elif len(instruction) == 2:
-                        instruction[0] = 'inc'
-                    elif instruction[0] == 'jnz':
-                        instruction[0] = 'cpy'
-                    elif len(instruction) == 3:
-                        instruction[0] = 'jnz'
-                    self.instructions[target_pc] = tuple(instruction)
-                except IndexError:
-                    pass
-            self.pc += 1
-        result = self.registers['a']
-        return result
+            self.step()
     
 def get_raw_input_lines() -> list:
     raw_input_lines = []
@@ -139,15 +150,19 @@ class Day23: # Safe Cracking
         result = vm.registers['a']
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, raw_input_lines):
+        vm = AssembunnyVM()
+        vm.load_raw_input(raw_input_lines)
+        vm.registers['a'] = 12
+        vm.run()
+        result = vm.registers['a']
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         solutions = (
             self.solve(raw_input_lines),
-            self.solve2(raw_input_lines),
+            0, # self.solve2(raw_input_lines),
             )
         result = solutions
         return result
@@ -899,6 +914,9 @@ class Day12: # Leonardo's Monorail
     def solve(self, raw_input_lines):
         vm = AssembunnyVM()
         vm.load_raw_input(raw_input_lines)
+        injections = {
+            5: ('a += c, c = 0', 7),
+        }
         vm.run()
         result = vm.registers['a']
         return result
