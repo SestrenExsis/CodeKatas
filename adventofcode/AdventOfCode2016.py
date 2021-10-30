@@ -42,13 +42,10 @@ class AssembunnyVM: # Virtual Machine for running Assembunny code
         if type(y) is str and y in self.registers:
             self.registers[y] = x_val
     
-    def __inc(self, x):
+    def __add(self, x, y):
+        y_val = y if type(y) is int else self.registers[y]
         if type(x) is str and x in self.registers:
-            self.registers[x] += 1
-    
-    def __dec(self, x):
-        if type(x) is str and x in self.registers:
-            self.registers[x] -= 1
+            self.registers[x] += y_val
     
     def __jnz(self, x, y):
         x_val = x if type(x) is int else self.registers[x]
@@ -79,9 +76,9 @@ class AssembunnyVM: # Virtual Machine for running Assembunny code
         if op == 'cpy':
             self.__cpy(instruction[1], instruction[2])
         elif op == 'inc':
-            self.__inc(instruction[1])
+            self.__add(instruction[1], 1)
         elif op == 'dec':
-            self.__dec(instruction[1])
+            self.__add(instruction[1], -1)
         elif op == 'jnz':
             self.__jnz(instruction[1], instruction[2])
         elif op == 'tgl':
