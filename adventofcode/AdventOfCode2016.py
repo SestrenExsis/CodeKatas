@@ -89,10 +89,19 @@ class AssembunnyVM: # Virtual Machine for running Assembunny code
         self.pc += 1
         self.cycle_count += 1
 
-    def run(self, injections: dict=None):
+    def run(self, time_limit:float=float('inf')) -> bool:
+        halt_ind = False
+        start_time = time.time()
         self.pc = 0
         while self.pc < len(self.instructions):
             self.step()
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= time_limit:
+                break
+        else:
+            halt_ind = True
+        result = halt_ind
+        return result
     
 def get_raw_input_lines() -> list:
     raw_input_lines = []
@@ -148,21 +157,24 @@ class Day23: # Safe Cracking
         vm.registers['a'] = 7
         vm.run()
         result = vm.registers['a']
+        print('cycles:', vm.cycle_count)
         return result
     
     def solve2(self, raw_input_lines):
         vm = AssembunnyVM()
         vm.load_raw_input(raw_input_lines)
         vm.registers['a'] = 12
-        vm.run()
-        result = vm.registers['a']
+        result = None
+        if vm.run(5.0):
+            result = vm.registers['a']
+        print('cycles:', vm.cycle_count)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         solutions = (
             self.solve(raw_input_lines),
-            0, # self.solve2(raw_input_lines),
+            self.solve2(raw_input_lines),
             )
         result = solutions
         return result
