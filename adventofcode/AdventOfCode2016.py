@@ -177,6 +177,91 @@ class Template: # Template
         result = solutions
         return result
 
+class Day24: # Air Duct Spelunking
+    '''
+    Air Duct Spelunking
+    https://adventofcode.com/2016/day/24
+    '''
+    raw_input_lines = []
+    grid = {}
+    rows = 0
+    cols = 0
+    points = {}
+
+    def get_raw_input_lines(self, raw_input_lines: List[str]):
+        self.raw_input_lines = raw_input_lines
+    
+    def refresh_layout(self):
+        self.rows = len(self.raw_input_lines)
+        self.cols = len(self.raw_input_lines[0])
+        self.grid = {}
+        self.points = {}
+        for row, raw_input_line in enumerate(self.raw_input_lines):
+            for col, cell in enumerate(raw_input_line):
+                if cell in '0123456879':
+                    self.points[(row, col)] = 2 ** int(cell)
+                    cell = '.'
+                self.grid[(row, col)] = cell
+    
+    def solve(self):
+        self.refresh_layout()
+        # Calculate the distance between all of the points of interest
+        distances = {}
+        for (start_row, start_col), source in self.points.items():
+            visits = set()
+            work = collections.deque()
+            work.append((0, start_row, start_col))
+            while len(work) > 0:
+                distance, row, col = work.pop()
+                if (row, col) in visits or self.grid[(row, col)] != '.':
+                    continue
+                visits.add((row, col))
+                try:
+                    if (row, col) in self.points:
+                        target = self.points[(row, col)]
+                        distances[(source, target)] = distance
+                    for (nrow, ncol) in (
+                        (row - 1, col),
+                        (row + 1, col),
+                        (row, col - 1),
+                        (row, col + 1),
+                    ):
+                        work.appendleft((distance + 1, nrow, ncol))
+                except KeyError:
+                    continue
+        # Calculate the minimum distance needed to visit all points
+        min_distance = float('inf')
+        goal = sum((2 ** i for i in range(len(self.points))))
+        work = [(0, 1, 1)]
+        while len(work) > 0:
+            distance, progress, position = heapq.heappop(work)
+            if progress == goal:
+                min_distance = distance
+                break
+            for i in range(len(self.points)):
+                next_position = 2 ** i
+                if next_position & progress > 0:
+                    continue
+                next_distance = distance + distances[(position, next_position)]
+                next_progress = progress | next_position
+                heapq.heappush(work, (next_distance, next_progress, next_position))
+        result = min_distance
+        return result
+    
+    def solve2(self):
+        self.refresh_layout()
+        result = len(self.grid)
+        return result
+    
+    def main(self):
+        self.raw_input_lines = get_raw_input_lines()
+        solutions = (
+            self.solve(),
+            self.solve2(),
+            )
+        result = solutions
+        return result
+
 class Day23: # Safe Cracking
     '''
     Safe Cracking
@@ -2008,7 +2093,7 @@ if __name__ == '__main__':
        21: (Day21, 'Scrambled Letters and Hash'),
        22: (Day22Incomplete, 'Grid Computing'),
        23: (Day23, 'Safe Cracking'),
-    #    24: (Day24, '???'),
+       24: (Day24, 'Air Duct Spelunking'),
     #    25: (Day25, '???'),
         }
     parser = argparse.ArgumentParser()
