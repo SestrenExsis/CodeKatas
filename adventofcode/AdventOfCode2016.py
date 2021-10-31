@@ -122,27 +122,17 @@ class AssembunnyVM: # Virtual Machine for running Assembunny code
         self.pc += 1
         self.cycle_count += 1
 
-    def run(self, time_limit:float=float('inf')) -> bool:
-        halt_ind = False
-        start_time = time.time()
+    def run(self):
         self.pc = 0
         while self.pc < len(self.instructions):
             try:
                 injection = self.injections[self.pc]
-                N = len(injection)
                 final_pc = injection[0]
                 for command in injection[1:]:
                     self.__indirect(command)
                 self.pc = final_pc
             except (AttributeError, KeyError):
                 self.step()
-            elapsed_time = time.time() - start_time
-            if elapsed_time >= time_limit:
-                break
-        else:
-            halt_ind = True
-        result = halt_ind
-        return result
     
 def get_raw_input_lines() -> list:
     raw_input_lines = []
@@ -208,8 +198,8 @@ class Day23: # Safe Cracking
         }
         vm.registers['a'] = 12
         result = None
-        if vm.run(60.0):
-            result = vm.registers['a']
+        vm.run()
+        result = vm.registers['a']
         return result
     
     def main(self):
