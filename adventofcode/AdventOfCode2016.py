@@ -203,9 +203,7 @@ class Day24: # Air Duct Spelunking
                     cell = '.'
                 self.grid[(row, col)] = cell
     
-    def solve(self):
-        self.refresh_layout()
-        # Calculate the distance between all of the points of interest
+    def get_distances(self):
         distances = {}
         for (start_row, start_col), source in self.points.items():
             visits = set()
@@ -229,6 +227,12 @@ class Day24: # Air Duct Spelunking
                         work.appendleft((distance + 1, nrow, ncol))
                 except KeyError:
                     continue
+        result = distances
+        return result
+    
+    def solve(self):
+        self.refresh_layout()
+        distances = self.get_distances()
         # Calculate the minimum distance needed to visit all points
         min_distance = float('inf')
         goal = sum((2 ** i for i in range(len(self.points))))
@@ -250,7 +254,29 @@ class Day24: # Air Duct Spelunking
     
     def solve2(self):
         self.refresh_layout()
-        result = len(self.grid)
+        distances = self.get_distances()
+        '''
+        Calculate the minimum distance needed to visit all points
+        and then return to (0, 0)
+        '''
+        min_distance = float('inf')
+        goal = sum((2 ** i for i in range(len(self.points))))
+        work = [(0, 0, 1)]
+        while len(work) > 0:
+            distance, progress, position = heapq.heappop(work)
+            if progress == goal and position == 1:
+                min_distance = distance
+                break
+            for i in range(len(self.points)):
+                next_position = 2 ** i
+                if next_position == position:
+                    continue
+                if next_position & progress > 0:
+                    continue
+                next_distance = distance + distances[(position, next_position)]
+                next_progress = progress | next_position
+                heapq.heappush(work, (next_distance, next_progress, next_position))
+        result = min_distance
         return result
     
     def main(self):
