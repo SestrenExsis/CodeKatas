@@ -2231,7 +2231,7 @@ if __name__ == '__main__':
        22: (Day22Incomplete, 'Grid Computing'),
        23: (Day23, 'Safe Cracking'),
        24: (Day24, 'Air Duct Spelunking'),
-       25: (Day25, 'Clock Signal'),
+       25: (Day25Incomplete, 'Clock Signal'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('day', help='Solve for a given day', type=int)
