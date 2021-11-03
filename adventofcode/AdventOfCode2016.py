@@ -61,7 +61,9 @@ class AssembunnyVM: # Virtual Machine for running Assembunny code
         elif op_str == 'jnz':
             self.__jnz(x, y)
         elif op_str == 'tgl':
-            self.__tgl(x, y)
+            self.__tgl(x)
+        elif op_str == 'out':
+            self.__out(x)
     
     def __cpy(self, x, y):
         x_val = x if type(x) is int else self.registers[x]
@@ -105,26 +107,37 @@ class AssembunnyVM: # Virtual Machine for running Assembunny code
             self.instructions[target_pc] = tuple(instruction)
         except IndexError:
             pass
+    
+    def __out(self, x) -> int:
+        x_val = x if type(x) is int else self.registers[x]
+        result = x_val
+        return result
 
-    def step(self):
+    def step(self) -> int:
+        result = None
         instruction = self.instructions[self.pc]
         op = instruction[0]
         if op == 'cpy':
-            self.__cpy(instruction[1], instruction[2])
+            result = self.__cpy(instruction[1], instruction[2])
         elif op == 'inc':
-            self.__add(instruction[1], 1)
+            result = self.__add(instruction[1], 1)
         elif op == 'dec':
-            self.__add(instruction[1], -1)
+            result = self.__add(instruction[1], -1)
         elif op == 'jnz':
-            self.__jnz(instruction[1], instruction[2])
+            result = self.__jnz(instruction[1], instruction[2])
         elif op == 'tgl':
-            self.__tgl(instruction[1])
+            result = self.__tgl(instruction[1])
+        elif op == 'out':
+            result = self.__out(instruction[1])
         self.pc += 1
         self.cycle_count += 1
+        return result
 
-    def run(self):
+    def run(self, interrupt_on_op: str=None) -> int:
+        result = None
         self.pc = 0
         while self.pc < len(self.instructions):
+            op = self.instructions[self.pc][0]
             try:
                 injection = self.injections[self.pc]
                 final_pc = injection[0]
@@ -132,7 +145,10 @@ class AssembunnyVM: # Virtual Machine for running Assembunny code
                     self.__indirect(command)
                 self.pc = final_pc
             except (AttributeError, KeyError):
-                self.step()
+                result = self.step()
+            if op == interrupt_on_op:
+                break
+        return result
     
 def get_raw_input_lines() -> list:
     raw_input_lines = []
@@ -173,6 +189,75 @@ class Template: # Template
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day25: # Clock Signal
+    '''
+    Clock Signal
+    https://adventofcode.com/2016/day/25
+
+    What is the lowest positive integer that can be used to
+    initialize register a and cause the code to output
+    a clock signal of 0, 1, 0, 1... repeating forever?
+    '''
+    
+    def brute_force(self, raw_input_lines):
+        min_viable_seed = float('inf')
+        template = AssembunnyVM()
+        template.load_raw_input(raw_input_lines)
+        for seed in range(1_000_000):
+            vm = AssembunnyVM()
+            vm.instructions = template.instructions[:]
+            vm.registers['a'] = seed
+            expected_clock = 0
+            for i in range(1_000):
+                clock = vm.run('out')
+                if clock != expected_clock:
+                    break
+                expected_clock = 1 - expected_clock
+            else:
+                min_viable_seed = seed
+                break
+            print(seed, i)
+        result = min_viable_seed
+        return result
+    
+    def solve(self, raw_input_lines):
+        min_viable_seed = float('inf')
+        template = AssembunnyVM()
+        template.load_raw_input(raw_input_lines)
+        for seed in range(1_000_000):
+            vm = AssembunnyVM()
+            vm.instructions = template.instructions[:]
+            vm.injections = {
+                3: (7, 'cpy b d', 'mul d c', 'add d a', 'sub b b', 'sub c c'),
+                13: (20, '', ''),
+            }
+            vm.registers['a'] = seed
+            expected_clock = 0
+            for i in range(1_000):
+                clock = vm.run('out')
+                if clock != expected_clock:
+                    break
+                expected_clock = 1 - expected_clock
+            else:
+                min_viable_seed = seed
+                break
+            print(seed, i)
+        result = min_viable_seed
+        return result
+    
+    def solve2(self, raw_input_lines):
+        result = len(raw_input_lines)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        solutions = (
+            self.solve(raw_input_lines),
+            self.solve2(raw_input_lines),
             )
         result = solutions
         return result
@@ -305,7 +390,7 @@ class Day23: # Safe Cracking
         vm = AssembunnyVM()
         vm.load_raw_input(raw_input_lines)
         vm.injections = {
-            5: (9, 'sub a a', 'add a c', 'mul a d', 'sub c c', 'sub d d'),
+            5: (9, 'cpy c a', 'mul a d', 'sub c c', 'sub d d'),
         }
         vm.registers['a'] = 12
         result = None
@@ -2120,7 +2205,7 @@ if __name__ == '__main__':
        22: (Day22Incomplete, 'Grid Computing'),
        23: (Day23, 'Safe Cracking'),
        24: (Day24, 'Air Duct Spelunking'),
-    #    25: (Day25, '???'),
+       25: (Day25, 'Clock Signal'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('day', help='Solve for a given day', type=int)
