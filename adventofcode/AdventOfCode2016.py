@@ -58,6 +58,10 @@ class AssembunnyVM: # Virtual Machine for running Assembunny code
             self.__sub(x, y)
         elif op_str == 'mul':
             self.__mul(x, y)
+        elif op_str == 'div':
+            self.__div(x, y)
+        elif op_str == 'mod':
+            self.__mod(x, y)
         elif op_str == 'jnz':
             self.__jnz(x, y)
         elif op_str == 'tgl':
@@ -84,6 +88,16 @@ class AssembunnyVM: # Virtual Machine for running Assembunny code
         y_val = y if type(y) is int else self.registers[y]
         if type(x) is str and x in self.registers:
             self.registers[x] *= y_val
+    
+    def __div(self, x, y):
+        y_val = y if type(y) is int else self.registers[y]
+        if type(x) is str and x in self.registers:
+            self.registers[x] //= y_val
+    
+    def __mod(self, x, y):
+        y_val = y if type(y) is int else self.registers[y]
+        if type(x) is str and x in self.registers:
+            self.registers[x] = self.registers[x] % y_val
     
     def __jnz(self, x, y):
         x_val = x if type(x) is int else self.registers[x]
@@ -193,7 +207,7 @@ class Template: # Template
         result = solutions
         return result
 
-class Day25: # Clock Signal
+class Day25Incomplete: # Clock Signal
     '''
     Clock Signal
     https://adventofcode.com/2016/day/25
@@ -224,7 +238,7 @@ class Day25: # Clock Signal
         result = min_viable_seed
         return result
     
-    def solve(self, raw_input_lines):
+    def solve(self, raw_input_lines, check_rate: float=0.0):
         min_viable_seed = float('inf')
         template = AssembunnyVM()
         template.load_raw_input(raw_input_lines)
@@ -233,19 +247,31 @@ class Day25: # Clock Signal
             vm.instructions = template.instructions[:]
             vm.injections = {
                 3: (7, 'cpy b d', 'mul d c', 'add d a', 'sub b b', 'sub c c'),
-                13: (20, '', ''),
+                9: (27, 'cpy a b', 'div a 2', 'mod b 2', 'sub c c'),
             }
             vm.registers['a'] = seed
             expected_clock = 0
+            vm2 = None
+            if check_rate > 0.0 and random.random() < check_rate:
+                vm2 = AssembunnyVM()
+                vm2.instructions = template.instructions[:]
+                vm2.registers['a'] = seed
             for i in range(1_000):
                 clock = vm.run('out')
+                if vm2 is not None:
+                    try:
+                        clock2 = vm2.run('out')
+                        assert clock == clock2
+                    except AssertionError:
+                        print('INVALID:', seed, i)
                 if clock != expected_clock:
                     break
                 expected_clock = 1 - expected_clock
             else:
                 min_viable_seed = seed
                 break
-            print(seed, i)
+            if i >= 10:
+                print(seed, i)
         result = min_viable_seed
         return result
     
