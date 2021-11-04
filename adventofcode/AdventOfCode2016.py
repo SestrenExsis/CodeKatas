@@ -458,15 +458,45 @@ class Day22Incomplete: # Grid Computing
         result = grid
         return result
 
-    def show_grid(self, grid, rows, cols):
+    def show_grid(self, grid, rows, cols, target_row, target_col):
         for row in range(rows):
             row_data = []
             for col in range(cols):
-                cell = grid[(row, col)]
-                row_data.append(str(cell['used']) + '/' + str(cell['size']))
-            print(' '.join(row_data))
+                cell_data = grid[(row, col)]
+                cell = '.'
+                used = cell_data['used']
+                size = cell_data['size']
+                if row == target_row and col == target_col:
+                    cell = 'G'
+                elif size > 99:
+                    cell = '#'
+                elif used == 0:
+                    cell = 'O'
+                row_data.append(cell)
+            print(''.join(row_data))
     
     def solve(self, grid):
+        min_small_used, max_small_used = float('inf'), float('-inf')
+        min_small_size, max_small_size = float('inf'), float('-inf')
+        min_large_used, max_large_used = float('inf'), float('-inf')
+        min_large_size, max_large_size = float('inf'), float('-inf')
+        for data in grid.values():
+            used = data['used']
+            size = data['size']
+            if used >= 100:
+                min_large_used = min(min_large_used, used)
+                max_large_used = max(max_large_used, used)
+                min_large_size = min(min_large_size, size)
+                max_large_size = max(max_large_size, size)
+            else:
+                min_small_used = min(min_small_used, used)
+                max_small_used = max(max_small_used, used)
+                min_small_size = min(min_small_size, size)
+                max_small_size = max(max_small_size, size)
+        print('small_used:', (min_small_used, max_small_used))
+        print('small_size:', (min_small_size, max_small_size))
+        print('large_used:', (min_large_used, max_large_used))
+        print('large_size:', (min_large_size, max_large_size))
         viable_pair_count = 0
         for node_a, node_a_data in grid.items():
             if node_a_data['used'] < 1:
@@ -486,9 +516,9 @@ class Day22Incomplete: # Grid Computing
     def main(self):
         raw_input_lines = get_raw_input_lines()
         grid = self.get_grid(raw_input_lines)
-        rows = max(row for row, _ in grid.keys())
-        cols = max(col for _, col in grid.keys())
-        self.show_grid(grid, rows, cols)
+        rows = 1 + max(row for row, _ in grid.keys())
+        cols = 1 + max(col for _, col in grid.keys())
+        self.show_grid(grid, rows, cols, 0, cols - 1)
         solutions = (
             self.solve(grid),
             self.solve2(grid),
