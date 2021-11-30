@@ -52,6 +52,43 @@ class Template: # Template
         result = solutions
         return result
 
+class Day02: # Corruption Checksum
+    '''
+    https://adventofcode.com/2017/day/2
+    '''
+    def get_spreadsheet(self, raw_input_lines: List[str]):
+        spreadsheet = []
+        for raw_input_line in raw_input_lines:
+            row_data = []
+            for cell in raw_input_line.split('\t'):
+                num = int(cell)
+                row_data.append(num)
+            spreadsheet.append(row_data)
+        result = spreadsheet
+        return result
+    
+    def solve(self, spreadsheet):
+        checksum = 0
+        for row_data in spreadsheet:
+            diff = abs(max(row_data) - min(row_data))
+            checksum += diff
+        result = checksum
+        return result
+    
+    def solve2(self, spreadsheet):
+        result = len(spreadsheet)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        spreadsheet = self.get_spreadsheet(raw_input_lines)
+        solutions = (
+            self.solve(spreadsheet),
+            self.solve2(spreadsheet),
+            )
+        result = solutions
+        return result
+
 class Day01: # Inverse Captcha
     '''
     https://adventofcode.com/2017/day/1
@@ -100,7 +137,7 @@ if __name__ == '__main__':
     '''
     solvers = {
         1: (Day01, 'Inverse Captcha'),
-    #     2: (Day02, 'XXX'),
+        2: (Day02, 'Corruption Checksum'),
     #     3: (Day03, 'XXX'),
     #     4: (Day04, 'XXX'),
     #     5: (Day05, 'XXX'),
