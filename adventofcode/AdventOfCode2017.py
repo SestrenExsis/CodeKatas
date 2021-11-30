@@ -72,7 +72,15 @@ class Day01: # Inverse Captcha
         return result
     
     def solve2(self, parsed_input):
-        result = len(parsed_input)
+        N = len(parsed_input)
+        captcha = 0
+        for i in range(len(parsed_input)):
+            j = (i + N // 2) % N
+            digit = int(parsed_input[i])
+            other_digit = int(parsed_input[j])
+            if digit == other_digit:
+                captcha += digit
+        result = captcha
         return result
     
     def main(self):
