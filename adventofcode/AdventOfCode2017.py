@@ -52,6 +52,56 @@ class Template: # Template
         result = solutions
         return result
 
+class Day03: # Spiral Memory
+    '''
+    https://adventofcode.com/2017/day/3
+    '''
+    def solve(self, target_square):
+        # Each square-shaped ring adds a predictable amount of numbers
+        size = 1
+        squares_per_layer = [1]
+        total_squares = 1
+        while total_squares < target_square:
+            size += 2
+            next_squares = size ** 2 - total_squares
+            squares_per_layer.append(next_squares)
+            total_squares += next_squares
+        # On each layer of the square-shaped ring, the maximum distance 
+        # ping pongs between size - 1 at the corners and half that distance
+        # at the midpoint of each side
+        max_distance = size - 1
+        min_distance = max_distance // 2
+        distance = max_distance
+        direction = -1
+        square = sum(squares_per_layer)
+        while square > target_square:
+            distance += direction
+            if distance == min_distance:
+                direction = 1
+            elif distance == max_distance:
+                direction = -1
+            square -= 1
+        result = distance
+        return result
+    
+    def solve2(self, target_square):
+        result = target_square
+        return result
+    
+    def main(self):
+        assert self.solve(1) == 0
+        assert self.solve(12) == 3
+        assert self.solve(23) == 2
+        assert self.solve(1024) == 31
+        raw_input_lines = get_raw_input_lines()
+        target_square = int(raw_input_lines[0])
+        solutions = (
+            self.solve(target_square),
+            self.solve2(target_square),
+            )
+        result = solutions
+        return result
+
 class Day02: # Corruption Checksum
     '''
     https://adventofcode.com/2017/day/2
@@ -151,7 +201,7 @@ if __name__ == '__main__':
     solvers = {
         1: (Day01, 'Inverse Captcha'),
         2: (Day02, 'Corruption Checksum'),
-    #     3: (Day03, 'XXX'),
+        3: (Day03, 'Spiral Memory'),
     #     4: (Day04, 'XXX'),
     #     5: (Day05, 'XXX'),
     #     6: (Day06, 'XXX'),
