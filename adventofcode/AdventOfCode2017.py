@@ -76,7 +76,20 @@ class Day02: # Corruption Checksum
         return result
     
     def solve2(self, spreadsheet):
-        result = len(spreadsheet)
+        total = 0
+        for row_data in spreadsheet:
+            nums = set()
+            found_ind = False
+            for num in sorted(row_data):
+                for divisor in nums:
+                    if num % divisor == 0:
+                        total += num // divisor
+                        found_ind = True
+                        break
+                if found_ind:
+                    break
+                nums.add(num)
+        result = total
         return result
     
     def main(self):
