@@ -52,54 +52,53 @@ class Template: # Template
         result = solutions
         return result
 
-class Day02: # Template
+class Day02: # Dive!
     '''
     https://adventofcode.com/2021/day/2
     '''
-    def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
+    def get_commands(self, raw_input_lines: List[str]):
+        commands = []
         for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
+            command, raw_amount = raw_input_line.split(' ')
+            amount = int(raw_amount)
+            commands.append((command, amount))
+        result = commands
         return result
     
-    def solve(self, parsed_input):
+    def solve(self, commands):
         x_pos = 0
         depth = 0
-        for line in parsed_input:
-            a, b = line.split(' ')
-            amount = int(b)
-            if a == 'forward':
+        for command, amount in commands:
+            if command == 'forward':
                 x_pos += amount
-            elif a == 'down':
+            elif command == 'down':
                 depth += amount
-            elif a == 'up':
+            elif command == 'up':
                 depth -= amount
         result = x_pos * depth
         return result
     
-    def solve2(self, parsed_input):
+    def solve2(self, commands):
         x_pos = 0
         depth = 0
         aim = 0
-        for line in parsed_input:
-            a, b = line.split(' ')
-            amount = int(b)
-            if a == 'forward':
+        for command, amount in commands:
+            if command == 'forward':
                 x_pos += amount
                 depth += aim * amount
-            elif a == 'down':
+            elif command == 'down':
                 aim += amount
-            elif a == 'up':
+            elif command == 'up':
                 aim -= amount
         result = x_pos * depth
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        commands = self.get_commands(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(commands),
+            self.solve2(commands),
             )
         result = solutions
         return result
@@ -151,7 +150,7 @@ if __name__ == '__main__':
     '''
     solvers = {
         1: (Day01, 'Sonar Sweep'),
-        2: (Day02, 'XXX'),
+        2: (Day02, 'Dive!'),
     #     3: (Day03, 'XXX'),
     #     4: (Day04, 'XXX'),
     #     5: (Day05, 'XXX'),
