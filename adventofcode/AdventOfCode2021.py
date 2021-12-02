@@ -52,6 +52,58 @@ class Template: # Template
         result = solutions
         return result
 
+class Day02: # Template
+    '''
+    https://adventofcode.com/2021/day/2
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        x_pos = 0
+        depth = 0
+        for line in parsed_input:
+            a, b = line.split(' ')
+            amount = int(b)
+            if a == 'forward':
+                x_pos += amount
+            elif a == 'down':
+                depth += amount
+            elif a == 'up':
+                depth -= amount
+        result = x_pos * depth
+        return result
+    
+    def solve2(self, parsed_input):
+        x_pos = 0
+        depth = 0
+        aim = 0
+        for line in parsed_input:
+            a, b = line.split(' ')
+            amount = int(b)
+            if a == 'forward':
+                x_pos += amount
+                depth += aim * amount
+            elif a == 'down':
+                aim += amount
+            elif a == 'up':
+                aim -= amount
+        result = x_pos * depth
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day01: # Sonar Sweep
     '''
     https://adventofcode.com/2021/day/1
@@ -99,7 +151,7 @@ if __name__ == '__main__':
     '''
     solvers = {
         1: (Day01, 'Sonar Sweep'),
-    #     2: (Day02, 'XXX'),
+        2: (Day02, 'XXX'),
     #     3: (Day03, 'XXX'),
     #     4: (Day04, 'XXX'),
     #     5: (Day05, 'XXX'),
