@@ -52,6 +52,91 @@ class Template: # Template
         result = solutions
         return result
 
+class Day03: # Binary Diagnostic
+    '''
+    https://adventofcode.com/2021/day/3
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        N = len(parsed_input)
+        counts = [0] * len(parsed_input[0])
+        for line in parsed_input:
+            for i, char in enumerate(line):
+                if char == '1':
+                    counts[i] += 1
+        gamma_chars = []
+        epsilon_chars = []
+        for i, count in enumerate(counts):
+            if count >= N // 2:
+                gamma_chars.append('1')
+                epsilon_chars.append('0')
+            else:
+                gamma_chars.append('0')
+                epsilon_chars.append('1')
+        gamma = int(''.join(gamma_chars), 2)
+        epsilon = int(''.join(epsilon_chars), 2)
+        power = gamma * epsilon
+        result = power
+        return result
+    
+    def solve2(self, parsed_input):
+        N = len(parsed_input[0])
+        nums = sorted(parsed_input)
+        for num in nums:
+            print(num)
+        # Calculate oxygen generator rating
+        # majority per bit, 1s win in ties
+        left = 0
+        right = len(nums)
+        for i in range(N):
+            counts = [0, 0]
+            for num in nums[left:right]:
+                digit = int(num[i])
+                counts[digit] += 1
+            assert sum(counts) == right - left
+            if counts[1] >= counts[0]:
+                left += counts[0]
+            else:
+                right -= counts[1]
+        oxy = int(nums[left], 2)
+        assert left == right - 1
+        # Calculate C02 scrubber rating
+        # minority per bit, 0s win in ties
+        left = 0
+        right = len(nums)
+        for i in range(N):
+            if left == right - 1:
+                break
+            counts = [0, 0]
+            for num in nums[left:right]:
+                digit = int(num[i])
+                counts[digit] += 1
+            assert sum(counts) == right - left
+            if counts[0] <= counts[1]:
+                right -= counts[1]
+            else:
+                left += counts[0]
+        co2 = int(nums[left], 2)
+        assert left == right - 1
+        life_support = oxy * co2
+        result = life_support
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day02: # Dive!
     '''
     https://adventofcode.com/2021/day/2
@@ -151,7 +236,7 @@ if __name__ == '__main__':
     solvers = {
         1: (Day01, 'Sonar Sweep'),
         2: (Day02, 'Dive!'),
-    #     3: (Day03, 'XXX'),
+        3: (Day03, 'Binary Diagnostic'),
     #     4: (Day04, 'XXX'),
     #     5: (Day05, 'XXX'),
     #     6: (Day06, 'XXX'),
