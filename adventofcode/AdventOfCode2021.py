@@ -108,7 +108,48 @@ class Day04: # Giant Squid
         return result
     
     def solve2(self, boards, numbers):
-        result = len(numbers)
+        rows = len(boards[0])
+        cols = len(boards[0][0])
+        called_numbers = set()
+        winning_board_ids = set()
+        latest_win = {
+            'board_id': -1,
+            'round_id': -1,
+            'number': -1,
+        }
+        for round_id, number in enumerate(numbers, start=1):
+            called_numbers.add(number)
+            for board_id in range(len(boards)):
+                if board_id in winning_board_ids:
+                    continue
+                for row in range(rows):
+                    nums = set(boards[board_id][row])
+                    if len(nums & called_numbers) == rows:
+                        latest_win = {
+                            'board_id': board_id,
+                            'round_id': round_id,
+                            'number': number,
+                        }
+                        winning_board_ids.add(board_id)
+                for col in range(cols):
+                    nums = set()
+                    for row in range(rows):
+                        nums.add(boards[board_id][row][col])
+                    if len(nums & called_numbers) == rows:
+                        latest_win = {
+                            'board_id': board_id,
+                            'round_id': round_id,
+                            'number': number,
+                        }
+                        winning_board_ids.add(board_id)
+        called_numbers = set(numbers[:latest_win['round_id']])
+        latest_winning_board_score = 0
+        for row in range(rows):
+            for col in range(cols):
+                number = boards[latest_win['board_id']][row][col]
+                if number not in called_numbers:
+                    latest_winning_board_score += number
+        result = latest_win['number'] * latest_winning_board_score
         return result
     
     def main(self):
