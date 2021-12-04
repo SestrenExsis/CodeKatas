@@ -85,8 +85,51 @@ class Day03: # Spiral Memory
         return result
     
     def solve2(self, target_square):
-        result = target_square
-        return result
+        squares = {
+            (0, 0): 1,
+        }
+        def get_value(row, col):
+            if (row, col) not in squares:
+                value = 0
+                for (nrow, ncol) in (
+                    (row - 1, col - 1),
+                    (row - 1, col),
+                    (row - 1, col + 1),
+                    (row, col - 1),
+                    (row, col + 1),
+                    (row + 1, col - 1),
+                    (row + 1, col),
+                    (row + 1, col + 1),
+                ):
+                    if (nrow, ncol) in squares:
+                        value += squares[(nrow, ncol)]
+                squares[(row, col)] = value
+            return squares[(row, col)]
+        row, col = (0, 1)
+        direction = 'UP'
+        while True:
+            get_value(row, col)
+            if squares[(row, col)] > target_square:
+                return squares[row, col]
+            if abs(row) == abs(col): # Change direction at each corner
+                if direction == 'UP':
+                    direction = 'LEFT'
+                elif direction == 'LEFT':
+                    direction = 'DOWN'
+                elif direction == 'DOWN':
+                    direction = 'RIGHT'
+                elif direction == 'RIGHT':
+                    col += 1
+                    get_value(row, col)
+                    direction = 'UP'
+            if direction == 'UP':
+                row -= 1
+            elif direction == 'LEFT':
+                col -= 1
+            elif direction == 'DOWN':
+                row += 1
+            elif direction == 'RIGHT':
+                col += 1
     
     def main(self):
         assert self.solve(1) == 0
