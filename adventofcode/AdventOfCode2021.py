@@ -52,6 +52,34 @@ class Template: # Template
         result = solutions
         return result
 
+class Day04: # Template
+    '''
+    https://adventofcode.com/2021/day/4
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day03: # Binary Diagnostic
     '''
     https://adventofcode.com/2021/day/3
@@ -87,8 +115,6 @@ class Day03: # Binary Diagnostic
     def solve2(self, parsed_input):
         N = len(parsed_input[0])
         nums = sorted(parsed_input)
-        for num in nums:
-            print(num)
         # Calculate oxygen generator rating
         # majority per bit, 1s win in ties
         left = 0
@@ -237,7 +263,7 @@ if __name__ == '__main__':
         1: (Day01, 'Sonar Sweep'),
         2: (Day02, 'Dive!'),
         3: (Day03, 'Binary Diagnostic'),
-    #     4: (Day04, 'XXX'),
+        4: (Day04, 'XXX'),
     #     5: (Day05, 'XXX'),
     #     6: (Day06, 'XXX'),
     #     7: (Day07, 'XXX'),
