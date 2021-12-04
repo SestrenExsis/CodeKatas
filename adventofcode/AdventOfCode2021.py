@@ -52,30 +52,71 @@ class Template: # Template
         result = solutions
         return result
 
-class Day04: # Template
+class Day04: # Giant Squid
     '''
     https://adventofcode.com/2021/day/4
     '''
-    def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
-        for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
+    def get_bingo_subsystem(self, raw_input_lines: List[str]):
+        numbers = []
+        for num_str in raw_input_lines[0].split(','):
+            number = int(num_str)
+            numbers.append(number)
+        boards = []
+        board = []
+        for raw_input_line in raw_input_lines[1:]:
+            if len(raw_input_line) == 0:
+                if len(board) > 0:
+                    boards.append(board)
+                board = []
+            else:
+                board_row = list(map(int, raw_input_line.split()))
+                board.append(board_row)
+        if len(board) > 0:
+            boards.append(board)
+        result = (boards, numbers)
         return result
     
-    def solve(self, parsed_input):
-        result = len(parsed_input)
+    def solve(self, boards, numbers):
+        rows = len(boards[0])
+        cols = len(boards[0][0])
+        called_numbers = set()
+        winning_board_id = -1
+        latest_number = -1
+        for latest_number in numbers:
+            called_numbers.add(latest_number)
+            for board_id in range(len(boards)):
+                for row in range(rows):
+                    nums = set(boards[board_id][row])
+                    if len(nums & called_numbers) == rows:
+                        winning_board_id = board_id
+                        break
+                for col in range(cols):
+                    nums = set()
+                    for row in range(rows):
+                        nums.add(boards[board_id][row][col])
+                    if len(nums & called_numbers) == rows:
+                        winning_board_id = board_id
+                        break
+            if winning_board_id >= 0:
+                break
+        winning_board_score = 0
+        for row in range(rows):
+            for col in range(cols):
+                if boards[winning_board_id][row][col] not in called_numbers:
+                    winning_board_score += boards[winning_board_id][row][col]
+        result = latest_number * winning_board_score
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, boards, numbers):
+        result = len(numbers)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        boards, numbers = self.get_bingo_subsystem(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(boards, numbers),
+            self.solve2(boards, numbers),
             )
         result = solutions
         return result
@@ -263,7 +304,7 @@ if __name__ == '__main__':
         1: (Day01, 'Sonar Sweep'),
         2: (Day02, 'Dive!'),
         3: (Day03, 'Binary Diagnostic'),
-        4: (Day04, 'XXX'),
+        4: (Day04, 'Giant Squid'),
     #     5: (Day05, 'XXX'),
     #     6: (Day06, 'XXX'),
     #     7: (Day07, 'XXX'),
