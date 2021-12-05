@@ -76,11 +76,28 @@ class Day05: # Hydrothermal Venture
             for row in range(start[0], end[0] + 1):
                 for col in range(start[1], end[1] + 1):
                     points[(row, col)] += 1
-        result = sum(1 for point, count in points.items() if count > 1)
+        result = sum(1 for count in points.values() if count > 1)
         return result
     
     def solve2(self, vents):
-        result = len(vents)
+        points = collections.defaultdict(int)
+        for start, end in vents:
+            row_delta = 0
+            if end[0] > start[0]:
+                row_delta = 1
+            elif end[0] < start[0]:
+                row_delta = -1
+            col_delta = 0
+            if end[1] > start[1]:
+                col_delta = 1
+            elif end[1] < start[1]:
+                col_delta = -1
+            distance = 1 + max(abs(end[0] - start[0]), abs(end[1] - start[1]))
+            for step in range(distance):
+                row = start[0] + step * row_delta
+                col = start[1] + step * col_delta
+                points[(row, col)] += 1
+        result = sum(1 for count in points.values() if count > 1)
         return result
     
     def main(self):
