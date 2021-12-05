@@ -52,6 +52,47 @@ class Template: # Template
         result = solutions
         return result
 
+class Day05: # Hydrothermal Venture
+    '''
+    https://adventofcode.com/2021/day/5
+    '''
+    def get_vents(self, raw_input_lines: List[str]):
+        vents = []
+        for raw_input_line in raw_input_lines:
+            a, b = raw_input_line.split(' -> ')
+            start = tuple(reversed(tuple(map(int, a.split(',')))))
+            end = tuple(reversed(tuple(map(int, b.split(',')))))
+            vents.append(tuple(sorted((start, end))))
+        result = vents
+        return result
+    
+    def solve(self, vents):
+        orthogonal_vents = []
+        for start, end in vents:
+            if start[0] == end[0] or start[1] == end[1]:
+                orthogonal_vents.append((start, end))
+        points = collections.defaultdict(int)
+        for start, end in orthogonal_vents:
+            for row in range(start[0], end[0] + 1):
+                for col in range(start[1], end[1] + 1):
+                    points[(row, col)] += 1
+        result = sum(1 for point, count in points.items() if count > 1)
+        return result
+    
+    def solve2(self, vents):
+        result = len(vents)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        vents = self.get_vents(raw_input_lines)
+        solutions = (
+            self.solve(vents),
+            self.solve2(vents),
+            )
+        result = solutions
+        return result
+
 class Day04: # Giant Squid
     '''
     https://adventofcode.com/2021/day/4
@@ -346,7 +387,7 @@ if __name__ == '__main__':
         2: (Day02, 'Dive!'),
         3: (Day03, 'Binary Diagnostic'),
         4: (Day04, 'Giant Squid'),
-    #     5: (Day05, 'XXX'),
+        5: (Day05, 'Hydrothermal Venture'),
     #     6: (Day06, 'XXX'),
     #     7: (Day07, 'XXX'),
     #     8: (Day08, 'XXX'),
