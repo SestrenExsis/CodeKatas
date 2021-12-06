@@ -61,27 +61,11 @@ class Day06: # Lanternfish
         result = starting_fish
         return result
     
-    def solve(self, starting_fish):
+    def solve(self, starting_fish, day_count):
         fish_timers = collections.defaultdict(int)
         for fish in starting_fish:
             fish_timers[fish] += 1
-        for _ in range(80):
-            next_fish_timers = collections.defaultdict(int)
-            for timer, count in fish_timers.items():
-                if timer == 0:
-                    next_fish_timers[8] += count
-                    next_fish_timers[6] += count
-                else:
-                    next_fish_timers[timer - 1] += count
-            fish_timers = next_fish_timers
-        result = sum(fish_timers.values())
-        return result
-    
-    def solve2(self, starting_fish):
-        fish_timers = collections.defaultdict(int)
-        for fish in starting_fish:
-            fish_timers[fish] += 1
-        for _ in range(256):
+        for _ in range(day_count):
             next_fish_timers = collections.defaultdict(int)
             for timer, count in fish_timers.items():
                 if timer == 0:
@@ -97,8 +81,8 @@ class Day06: # Lanternfish
         raw_input_lines = get_raw_input_lines()
         starting_fish = self.get_starting_fish(raw_input_lines)
         solutions = (
-            self.solve(starting_fish),
-            self.solve2(starting_fish),
+            self.solve(starting_fish, 80),
+            self.solve(starting_fish, 256),
             )
         result = solutions
         return result
