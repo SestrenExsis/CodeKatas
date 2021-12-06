@@ -52,6 +52,50 @@ class Template: # Template
         result = solutions
         return result
 
+class Day04: # High-Entropy Passphrases
+    '''
+    https://adventofcode.com/2017/day/4
+    '''
+    def get_passphrases(self, raw_input_lines: List[str]):
+        passphrases = []
+        for raw_input_line in raw_input_lines:
+            passphrase = tuple(raw_input_line.split(' '))
+            passphrases.append(passphrase)
+        result = passphrases
+        return result
+    
+    def solve(self, passphrases):
+        valid_passphrase_count = 0
+        for passphrase in passphrases:
+            if len(passphrase) == len(set(passphrase)):
+                valid_passphrase_count +=1
+        result = valid_passphrase_count
+        return result
+    
+    def solve2(self, passphrases):
+        valid_passphrase_count = 0
+        for passphrase in passphrases:
+            anagrams = set()
+            for word in passphrase:
+                anagram = ''.join(sorted(word))
+                if anagram in anagrams:
+                    break
+                anagrams.add(anagram)
+            else:
+                valid_passphrase_count += 1
+        result = valid_passphrase_count
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        passphrases = self.get_passphrases(raw_input_lines)
+        solutions = (
+            self.solve(passphrases),
+            self.solve2(passphrases),
+            )
+        result = solutions
+        return result
+
 class Day03: # Spiral Memory
     '''
     https://adventofcode.com/2017/day/3
@@ -245,7 +289,7 @@ if __name__ == '__main__':
         1: (Day01, 'Inverse Captcha'),
         2: (Day02, 'Corruption Checksum'),
         3: (Day03, 'Spiral Memory'),
-    #     4: (Day04, 'XXX'),
+        4: (Day04, 'High-Entropy Passphrases'),
     #     5: (Day05, 'XXX'),
     #     6: (Day06, 'XXX'),
     #     7: (Day07, 'XXX'),
