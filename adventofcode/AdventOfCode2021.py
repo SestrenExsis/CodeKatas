@@ -52,6 +52,57 @@ class Template: # Template
         result = solutions
         return result
 
+class Day06: # Lanternfish
+    '''
+    https://adventofcode.com/2021/day/6
+    '''
+    def get_starting_fish(self, raw_input_lines: List[str]):
+        starting_fish = list(map(int, raw_input_lines[0].split(',')))
+        result = starting_fish
+        return result
+    
+    def solve(self, starting_fish):
+        fish_timers = collections.defaultdict(int)
+        for fish in starting_fish:
+            fish_timers[fish] += 1
+        for _ in range(80):
+            next_fish_timers = collections.defaultdict(int)
+            for timer, count in fish_timers.items():
+                if timer == 0:
+                    next_fish_timers[8] += count
+                    next_fish_timers[6] += count
+                else:
+                    next_fish_timers[timer - 1] += count
+            fish_timers = next_fish_timers
+        result = sum(fish_timers.values())
+        return result
+    
+    def solve2(self, starting_fish):
+        fish_timers = collections.defaultdict(int)
+        for fish in starting_fish:
+            fish_timers[fish] += 1
+        for _ in range(256):
+            next_fish_timers = collections.defaultdict(int)
+            for timer, count in fish_timers.items():
+                if timer == 0:
+                    next_fish_timers[8] += count
+                    next_fish_timers[6] += count
+                else:
+                    next_fish_timers[timer - 1] += count
+            fish_timers = next_fish_timers
+        result = sum(fish_timers.values())
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        starting_fish = self.get_starting_fish(raw_input_lines)
+        solutions = (
+            self.solve(starting_fish),
+            self.solve2(starting_fish),
+            )
+        result = solutions
+        return result
+
 class Day05: # Hydrothermal Venture
     '''
     https://adventofcode.com/2021/day/5
@@ -405,7 +456,7 @@ if __name__ == '__main__':
         3: (Day03, 'Binary Diagnostic'),
         4: (Day04, 'Giant Squid'),
         5: (Day05, 'Hydrothermal Venture'),
-    #     6: (Day06, 'XXX'),
+        6: (Day06, 'Lanternfish'),
     #     7: (Day07, 'XXX'),
     #     8: (Day08, 'XXX'),
     #     9: (Day09, 'XXX'),
