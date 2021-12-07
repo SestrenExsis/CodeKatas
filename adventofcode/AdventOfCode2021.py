@@ -52,6 +52,50 @@ class Template: # Template
         result = solutions
         return result
 
+class Day07: # Template
+    '''
+    https://adventofcode.com/2021/day/7
+    '''
+    def get_crabs(self, raw_input_lines: List[str]):
+        result = list(map(int, raw_input_lines[0].split(',')))
+        return result
+    
+    def solve(self, crabs):
+        min_col = min(crabs)
+        max_col = max(crabs)
+        min_cost = float('inf')
+        for target_col in range(min_col, max_col + 1):
+            cost = 0
+            for col in crabs:
+                cost += abs(col - target_col)
+            min_cost = min(min_cost, cost)
+        result = min_cost
+        return result
+    
+    def solve2(self, crabs):
+        min_col = min(crabs)
+        max_col = max(crabs)
+        min_cost = float('inf')
+        for target_col in range(min_col, max_col + 1):
+            print(target_col)
+            cost = 0
+            for col in crabs:
+                steps = abs(col - target_col)
+                cost += sum(range(1, steps + 1))
+            min_cost = min(min_cost, cost)
+        result = min_cost
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        crabs = self.get_crabs(raw_input_lines)
+        solutions = (
+            self.solve(crabs),
+            self.solve2(crabs),
+            )
+        result = solutions
+        return result
+
 class Day06: # Lanternfish
     '''
     https://adventofcode.com/2021/day/6
@@ -441,7 +485,7 @@ if __name__ == '__main__':
         4: (Day04, 'Giant Squid'),
         5: (Day05, 'Hydrothermal Venture'),
         6: (Day06, 'Lanternfish'),
-    #     7: (Day07, 'XXX'),
+        7: (Day07, 'XXX'),
     #     8: (Day08, 'XXX'),
     #     9: (Day09, 'XXX'),
     #    10: (Day10, 'XXX'),
