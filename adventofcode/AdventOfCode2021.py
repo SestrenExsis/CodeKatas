@@ -52,7 +52,7 @@ class Template: # Template
         result = solutions
         return result
 
-class Day07: # Template
+class Day07: # The Treachery of Whales
     '''
     https://adventofcode.com/2021/day/7
     '''
@@ -75,13 +75,15 @@ class Day07: # Template
     def solve2(self, crabs):
         min_col = min(crabs)
         max_col = max(crabs)
+        triangle_sums = [0]
+        for num in range(1, abs(max_col - min_col + 1)):
+            triangle_sums.append(triangle_sums[-1] + num)
         min_cost = float('inf')
         for target_col in range(min_col, max_col + 1):
-            print(target_col)
             cost = 0
             for col in crabs:
                 steps = abs(col - target_col)
-                cost += sum(range(1, steps + 1))
+                cost += triangle_sums[steps]
             min_cost = min(min_cost, cost)
         result = min_cost
         return result
@@ -485,7 +487,7 @@ if __name__ == '__main__':
         4: (Day04, 'Giant Squid'),
         5: (Day05, 'Hydrothermal Venture'),
         6: (Day06, 'Lanternfish'),
-        7: (Day07, 'XXX'),
+        7: (Day07, 'The Treachery of Whales'),
     #     8: (Day08, 'XXX'),
     #     9: (Day09, 'XXX'),
     #    10: (Day10, 'XXX'),
