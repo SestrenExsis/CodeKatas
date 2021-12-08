@@ -52,6 +52,44 @@ class Template: # Template
         result = solutions
         return result
 
+class Day08: # Seven Segment Search
+    '''
+    https://adventofcode.com/2021/day/8
+    '''
+    def get_entries(self, raw_input_lines: List[str]):
+        entries = []
+        for raw_input_line in raw_input_lines:
+            parts = raw_input_line.split(' ')
+            unique_signal_patterns = parts[:10]
+            output_value = parts[-4:]
+            entry = (unique_signal_patterns, output_value)
+            entries.append(entry)
+        result = entries
+        return result
+    
+    def solve(self, entries):
+        easy_digits = []
+        for _, output_value in entries:
+            for element in output_value:
+                if len(element) in (2, 3, 4, 7):
+                    easy_digits.append(element)
+        result = len(easy_digits)
+        return result
+    
+    def solve2(self, entries):
+        result = len(entries)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        entries = self.get_entries(raw_input_lines)
+        solutions = (
+            self.solve(entries),
+            self.solve2(entries),
+            )
+        result = solutions
+        return result
+
 class Day07: # The Treachery of Whales
     '''
     https://adventofcode.com/2021/day/7
@@ -488,7 +526,7 @@ if __name__ == '__main__':
         5: (Day05, 'Hydrothermal Venture'),
         6: (Day06, 'Lanternfish'),
         7: (Day07, 'The Treachery of Whales'),
-    #     8: (Day08, 'XXX'),
+        8: (Day08, 'XXX'),
     #     9: (Day09, 'XXX'),
     #    10: (Day10, 'XXX'),
     #    11: (Day11, 'XXX'),
