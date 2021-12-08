@@ -55,6 +55,21 @@ class Template: # Template
 class Day08: # Seven Segment Search
     '''
     https://adventofcode.com/2021/day/8
+
+    2 of 7 segments (1):    1
+    3 of 7 segments (1):                7
+    4 of 7 segments (1):          4
+    5 of 7 segments (3):      2 3   5
+    6 of 7 segments (3):  0           6     9
+    7 of 7 segments (1):  8
+
+    Has canonical A:  0   2 3   5 6 7 8 9
+    Has canonical B:  0       4 5 6   8 9
+    Has canonical C:  0 1 2 3 4     7 8 9
+    Has canonical D:      2 3 4 5 6   8 9
+    Has canonical E:  0   2       6   8
+    Has canonical F:  0 1   3 4 5 6 7 8 9
+    Has canonical G:  0   2 3   5 6   8 9
     '''
     def get_entries(self, raw_input_lines: List[str]):
         entries = []
@@ -76,8 +91,62 @@ class Day08: # Seven Segment Search
         result = len(easy_digits)
         return result
     
+    def decode_output(self, patterns, output) -> int:
+        digits_in_segment_count = {
+            2: {'1', },
+            3: {'7', },
+            4: {'4', },
+            5: {'2', '3', '5', },
+            6: {'0', '6', '9', },
+            7: {'8', },
+        }
+        # Let D be the non-canonical segments found in a given digit string
+        S = {}
+        S['0123456789'] = set('abcdefg')
+        for segment_count, digits in digits_in_segment_count.items():
+            code = ''.join(sorted(digits))
+            if code not in S:
+                # Start with all possible segments
+                S[code] = set('abcdefg')
+            for pattern in patterns:
+                # Take the intersection of each pattern with the same length
+                if len(pattern) == segment_count:
+                    S[code] &= set(pattern)
+        # Let C be the non-canonical candidate segments for a canonical lookup
+        # i.e., C['a'] returns the non-canonical segments that could be
+        # a candidate for canonical segment 'a'
+        C = {}
+        C['f'] = S['069'] & S['1']
+        C['c'] = S['1'] - C['f']
+        C['d'] = S['235'] & S['4']
+        S['0'] = S['0123456789'] - C['d']
+        S['6'] = S['0123456789'] - C['c']
+        C['e'] = S['0123456789'] - S['069'] - C['d'] - C['c']
+        S['9'] = S['0123456789'] - C['e']
+        C['b'] = (S['0'] & S['4']) - S['1']
+        S['3'] = S['235'] | S['1']
+        S['2'] = S['235'] | C['c'] | C['e']
+        S['5'] = S['235'] | C['b'] | C['f']
+        # Let D be the inverse of S for single digit lookups
+        # i.e., the keys will be the segment keys that produce a digit value
+        D = {}
+        for digits, segments in S.items():
+            if len(digits) == 1:
+                key = ''.join(sorted(segments))
+                D[key] = next(iter(digits))
+        decoded_output = 0
+        for segment_code in output:
+            key = ''.join(sorted(set(segment_code)))
+            decoded_output = 10 * decoded_output + int(D[key])
+        result = decoded_output
+        return result
+    
     def solve2(self, entries):
-        result = len(entries)
+        decoded_outputs = []
+        for patterns, output in entries:
+            decoded_output = self.decode_output(patterns, output)
+            decoded_outputs.append(decoded_output)
+        result = sum(decoded_outputs)
         return result
     
     def main(self):
