@@ -100,7 +100,11 @@ class Day08: # Seven Segment Search
             6: {'0', '6', '9', },
             7: {'8', },
         }
-        # Let D be the non-canonical segments found in a given digit string
+        # Let S be the non-canonical segments found in a given string
+        # A string can be one of the following:
+        #   a segment ('a' through 'f')
+        #   a digit ('0' through '9')
+        #   the intersection of multiple digits (e.g., '025')
         S = {}
         for segment_count, digits in digits_in_segment_count.items():
             code = ''.join(sorted(digits))
@@ -111,20 +115,16 @@ class Day08: # Seven Segment Search
                 # Take the intersection of each pattern with the same length
                 if len(pattern) == segment_count:
                     S[code] &= set(pattern)
-        # Let C be the non-canonical candidate segments for a canonical lookup
-        # i.e., C['a'] returns the non-canonical segments that could be
-        # a candidate for canonical segment 'a'
-        C = {}
         S['3'] = S['235'] | S['1']
-        C['d'] = S['235'] & S['4']
-        S['0'] = S['8'] - C['d']
-        C['f'] = S['069'] & S['1']
-        C['c'] = S['1'] - C['f']
-        S['6'] = S['8'] - C['c']
+        S['d'] = S['235'] & S['4']
+        S['0'] = S['8'] - S['d']
+        S['f'] = S['069'] & S['1']
+        S['c'] = S['1'] - S['f']
+        S['6'] = S['8'] - S['c']
         S['9'] = S['069'] | S['4']
-        S['5'] = S['9'] - C['c']
-        C['e'] = S['8'] - S['9']
-        S['2'] = S['235'] | C['c'] | C['e']
+        S['5'] = S['9'] - S['c']
+        S['e'] = S['8'] - S['9']
+        S['2'] = S['235'] | S['c'] | S['e']
         # Let D be the inverse of S for single digit lookups
         # i.e., the keys will be the segment keys that produce a digit value
         D = {}
