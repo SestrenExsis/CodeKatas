@@ -89,7 +89,39 @@ class Day09: # Smoke Basin
         return result
     
     def solve2(self, height_map):
-        result = len(height_map)
+        rows = len(height_map)
+        cols = len(height_map[0])
+        unvisited = set()
+        for row in range(rows):
+            for col in range(cols):
+                unvisited.add((row, col))
+        basins = []
+        while len(unvisited) > 0:
+            row, col = unvisited.pop()
+            if height_map[row][col] == 9:
+                continue
+            basin = 0
+            work = [(row, col)]
+            while len(work) > 0:
+                row, col = work.pop()
+                basin += 1
+                for (nrow, ncol) in (
+                    (row - 1, col    ),
+                    (row + 1, col    ),
+                    (row    , col - 1),
+                    (row    , col + 1),
+                ):
+                    if (
+                        0 <= nrow < rows and
+                        0 <= ncol < cols and
+                        (nrow, ncol) in unvisited and
+                        height_map[nrow][ncol] != 9
+                    ):
+                        unvisited.remove((nrow, ncol))
+                        work.append((nrow, ncol))
+            basins.append(basin)
+        basins.sort()
+        result = basins[-1] * basins[-2] * basins[-3]
         return result
     
     def main(self):
