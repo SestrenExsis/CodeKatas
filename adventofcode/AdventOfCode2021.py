@@ -102,7 +102,6 @@ class Day08: # Seven Segment Search
         }
         # Let D be the non-canonical segments found in a given digit string
         S = {}
-        S['0123456789'] = set('abcdefg')
         for segment_count, digits in digits_in_segment_count.items():
             code = ''.join(sorted(digits))
             if code not in S:
@@ -116,17 +115,16 @@ class Day08: # Seven Segment Search
         # i.e., C['a'] returns the non-canonical segments that could be
         # a candidate for canonical segment 'a'
         C = {}
+        S['3'] = S['235'] | S['1']
+        C['d'] = S['235'] & S['4']
+        S['0'] = S['8'] - C['d']
         C['f'] = S['069'] & S['1']
         C['c'] = S['1'] - C['f']
-        C['d'] = S['235'] & S['4']
-        S['0'] = S['0123456789'] - C['d']
-        S['6'] = S['0123456789'] - C['c']
-        C['e'] = S['0123456789'] - S['069'] - C['d'] - C['c']
-        S['9'] = S['0123456789'] - C['e']
-        C['b'] = (S['0'] & S['4']) - S['1']
-        S['3'] = S['235'] | S['1']
+        S['6'] = S['8'] - C['c']
+        S['9'] = S['069'] | S['4']
+        S['5'] = S['9'] - C['c']
+        C['e'] = S['8'] - S['9']
         S['2'] = S['235'] | C['c'] | C['e']
-        S['5'] = S['235'] | C['b'] | C['f']
         # Let D be the inverse of S for single digit lookups
         # i.e., the keys will be the segment keys that produce a digit value
         D = {}
