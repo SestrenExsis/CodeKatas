@@ -52,6 +52,56 @@ class Template: # Template
         result = solutions
         return result
 
+class Day09: # Smoke Basin
+    '''
+    https://adventofcode.com/2021/day/9
+    '''
+    def get_height_map(self, raw_input_lines: List[str]):
+        height_map = []
+        for raw_input_line in raw_input_lines:
+            row_data = []
+            for cell in raw_input_line:
+                row_data.append(int(cell))
+            height_map.append(row_data)
+        result = height_map
+        return result
+    
+    def solve(self, height_map):
+        rows = len(height_map)
+        cols = len(height_map[0])
+        low_point_risk_levels = []
+        for row in range(rows):
+            for col in range(cols):
+                low_point = height_map[row][col]
+                for (nrow, ncol) in (
+                    (row - 1, col    ),
+                    (row + 1, col    ),
+                    (row    , col - 1),
+                    (row    , col + 1),
+                ):
+                    if not (0 <= nrow < rows and 0 <= ncol < cols):
+                        continue
+                    if height_map[nrow][ncol] <= low_point:
+                        break
+                else:
+                    low_point_risk_levels.append(1 + low_point)
+        result = sum(low_point_risk_levels)
+        return result
+    
+    def solve2(self, height_map):
+        result = len(height_map)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        height_map = self.get_height_map(raw_input_lines)
+        solutions = (
+            self.solve(height_map),
+            self.solve2(height_map),
+            )
+        result = solutions
+        return result
+
 class Day08: # Seven Segment Search
     '''
     https://adventofcode.com/2021/day/8
@@ -593,8 +643,8 @@ if __name__ == '__main__':
         5: (Day05, 'Hydrothermal Venture'),
         6: (Day06, 'Lanternfish'),
         7: (Day07, 'The Treachery of Whales'),
-        8: (Day08, 'XXX'),
-    #     9: (Day09, 'XXX'),
+        8: (Day08, 'Seven Segment Search'),
+        9: (Day09, 'Smoke Basin'),
     #    10: (Day10, 'XXX'),
     #    11: (Day11, 'XXX'),
     #    12: (Day12, 'XXX'),
