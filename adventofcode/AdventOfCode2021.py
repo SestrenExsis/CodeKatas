@@ -62,7 +62,7 @@ class Day10: # Syntax Scoring
             result.append(raw_input_line)
         return result
     
-    def solve(self, parsed_input):
+    def solve(self, lines):
         values = {
             ')': 3,
             ']': 57,
@@ -76,7 +76,7 @@ class Day10: # Syntax Scoring
             '>': '<',
         }
         score = 0
-        for line in parsed_input:
+        for line in lines:
             stack = []
             for char in line:
                 if char in '([{<':
@@ -89,16 +89,54 @@ class Day10: # Syntax Scoring
         result = score
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, lines):
+        values = {
+            ')': 1,
+            ']': 2,
+            '}': 3,
+            '>': 4,
+        }
+        opens = {
+            ')': '(',
+            ']': '[',
+            '}': '{',
+            '>': '<',
+        }
+        closes = {
+            '(': ')',
+            '[': ']',
+            '{': '}',
+            '<': '>',
+        }
+        scores = []
+        for line in lines:
+            corrupt_ind = False
+            stack = []
+            for char in line:
+                if char in '([{<':
+                    stack.append(char)
+                elif char in ')]}>':
+                    if len(stack) < 1 or stack[-1] != opens[char]:
+                        corrupt_ind = True
+                        break
+                    stack.pop()
+            if corrupt_ind:
+                continue
+            print(''.join(stack))
+            score = 0
+            while len(stack) > 0:
+                char = closes[stack.pop()]
+                score = 5 * score + values[char]
+            scores.append(score)
+        result = sorted(scores)[len(scores) // 2]
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        lines = self.get_parsed_input(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(lines),
+            self.solve2(lines),
             )
         result = solutions
         return result
