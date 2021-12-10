@@ -52,6 +52,57 @@ class Template: # Template
         result = solutions
         return result
 
+class Day10: # Syntax Scoring
+    '''
+    https://adventofcode.com/2021/day/10
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        values = {
+            ')': 3,
+            ']': 57,
+            '}': 1197,
+            '>': 25137,
+        }
+        pairs = {
+            ')': '(',
+            ']': '[',
+            '}': '{',
+            '>': '<',
+        }
+        score = 0
+        for line in parsed_input:
+            stack = []
+            for char in line:
+                if char in '([{<':
+                    stack.append(char)
+                elif char in ')]}>':
+                    if len(stack) < 1 or stack[-1] != pairs[char]:
+                        score += values[char]
+                        break
+                    stack.pop()
+        result = score
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day09: # Smoke Basin
     '''
     https://adventofcode.com/2021/day/9
@@ -677,7 +728,7 @@ if __name__ == '__main__':
         7: (Day07, 'The Treachery of Whales'),
         8: (Day08, 'Seven Segment Search'),
         9: (Day09, 'Smoke Basin'),
-    #    10: (Day10, 'XXX'),
+       10: (Day10, 'Syntax Scoring'),
     #    11: (Day11, 'XXX'),
     #    12: (Day12, 'XXX'),
     #    13: (Day13, 'XXX'),
