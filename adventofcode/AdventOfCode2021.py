@@ -52,6 +52,114 @@ class Template: # Template
         result = solutions
         return result
 
+class Day11: # Dumbo Octopus
+    '''
+    https://adventofcode.com/2021/day/11
+    '''
+    def get_octopuses(self, raw_input_lines: List[str]):
+        octopuses = {}
+        for row, raw_input_line in enumerate(raw_input_lines):
+            for col, cell in enumerate(raw_input_line):
+                octopuses[(row, col)] = int(cell)
+        result = octopuses
+        return result
+    
+    def solve(self, octopuses):
+        flash_count = 0
+        for _ in range(100):
+            flashes = set()
+            # Increase energies by 1
+            for octopus in octopuses.keys():
+                octopuses[octopus] += 1
+                if octopuses[octopus] > 9:
+                    flashes.add(octopus)
+            # Propogate flashing of octopuses at 10+ energy
+            flashes_left = set(flashes)
+            while len(flashes_left) > 0:
+                new_flashes = set()
+                for (row, col) in flashes_left:
+                    for (nrow, ncol) in (
+                        (row - 1, col - 1),
+                        (row - 1, col + 0),
+                        (row - 1, col + 1),
+                        (row + 0, col - 1),
+                        (row + 0, col + 1),
+                        (row + 1, col - 1),
+                        (row + 1, col + 0),
+                        (row + 1, col + 1),
+                    ):
+                        if (
+                            (nrow, ncol) in octopuses and
+                            (nrow, ncol) not in flashes and
+                            (nrow, ncol) not in new_flashes
+                        ):
+                            octopuses[(nrow, ncol)] += 1
+                            if octopuses[(nrow, ncol)] > 9:
+                                new_flashes.add((nrow, ncol))
+                flashes.update(new_flashes)
+                flashes_left = new_flashes
+            # Reset flashed octopuses to 0 energy
+            for flash in flashes:
+                octopuses[flash] = 0
+            flash_count += len(flashes)
+        result = flash_count
+        return result
+    
+    def solve2(self, octopuses):
+        target_turn_id = None
+        turn_id = 1
+        while True:
+            flashes = set()
+            # Increase energies by 1
+            for octopus in octopuses.keys():
+                octopuses[octopus] += 1
+                if octopuses[octopus] > 9:
+                    flashes.add(octopus)
+            # Propogate flashing of octopuses at 10+ energy
+            flashes_left = set(flashes)
+            while len(flashes_left) > 0:
+                new_flashes = set()
+                for (row, col) in flashes_left:
+                    for (nrow, ncol) in (
+                        (row - 1, col - 1),
+                        (row - 1, col + 0),
+                        (row - 1, col + 1),
+                        (row + 0, col - 1),
+                        (row + 0, col + 1),
+                        (row + 1, col - 1),
+                        (row + 1, col + 0),
+                        (row + 1, col + 1),
+                    ):
+                        if (
+                            (nrow, ncol) in octopuses and
+                            (nrow, ncol) not in flashes and
+                            (nrow, ncol) not in new_flashes
+                        ):
+                            octopuses[(nrow, ncol)] += 1
+                            if octopuses[(nrow, ncol)] > 9:
+                                new_flashes.add((nrow, ncol))
+                flashes.update(new_flashes)
+                flashes_left = new_flashes
+            # Reset flashed octopuses to 0 energy
+            for flash in flashes:
+                octopuses[flash] = 0
+            if len(flashes) == len(octopuses):
+                target_turn_id = turn_id
+                break
+            turn_id += 1
+        result = target_turn_id
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        octopuses = self.get_octopuses(raw_input_lines)
+        solutions = (
+            self.solve(copy.deepcopy(octopuses)),
+            self.solve2(copy.deepcopy(octopuses)),
+            )
+        result = solutions
+        return result
+
 class Day10: # Syntax Scoring
     '''
     https://adventofcode.com/2021/day/10
@@ -767,7 +875,7 @@ if __name__ == '__main__':
         8: (Day08, 'Seven Segment Search'),
         9: (Day09, 'Smoke Basin'),
        10: (Day10, 'Syntax Scoring'),
-    #    11: (Day11, 'XXX'),
+       11: (Day11, 'XXX'),
     #    12: (Day12, 'XXX'),
     #    13: (Day13, 'XXX'),
     #    14: (Day14, 'XXX'),
