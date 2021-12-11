@@ -64,17 +64,20 @@ class Day11: # Dumbo Octopus
         result = octopuses
         return result
     
-    def solve(self, octopuses):
-        flash_count = 0
-        for _ in range(100):
-            flashes = set()
+    class Simulation:
+        def __init__(self, octopuses):
+            self.octopuses = copy.deepcopy(octopuses)
+            self.flashes = set()
+
+        def step(self):
+            self.flashes = set()
             # Increase energies by 1
-            for octopus in octopuses.keys():
-                octopuses[octopus] += 1
-                if octopuses[octopus] > 9:
-                    flashes.add(octopus)
+            for octopus in self.octopuses.keys():
+                self.octopuses[octopus] += 1
+                if self.octopuses[octopus] > 9:
+                    self.flashes.add(octopus)
             # Propogate flashing of octopuses at 10+ energy
-            flashes_left = set(flashes)
+            flashes_left = set(self.flashes)
             while len(flashes_left) > 0:
                 new_flashes = set()
                 for (row, col) in flashes_left:
@@ -89,61 +92,35 @@ class Day11: # Dumbo Octopus
                         (row + 1, col + 1),
                     ):
                         if (
-                            (nrow, ncol) in octopuses and
-                            (nrow, ncol) not in flashes and
+                            (nrow, ncol) in self.octopuses and
+                            (nrow, ncol) not in self.flashes and
                             (nrow, ncol) not in new_flashes
                         ):
-                            octopuses[(nrow, ncol)] += 1
-                            if octopuses[(nrow, ncol)] > 9:
+                            self.octopuses[(nrow, ncol)] += 1
+                            if self.octopuses[(nrow, ncol)] > 9:
                                 new_flashes.add((nrow, ncol))
-                flashes.update(new_flashes)
+                self.flashes.update(new_flashes)
                 flashes_left = new_flashes
             # Reset flashed octopuses to 0 energy
-            for flash in flashes:
-                octopuses[flash] = 0
-            flash_count += len(flashes)
+            for flash in self.flashes:
+                self.octopuses[flash] = 0
+    
+    def solve(self, octopuses):
+        flash_count = 0
+        sim = self.Simulation(octopuses)
+        for _ in range(100):
+            sim.step()
+            flash_count += len(sim.flashes)
         result = flash_count
         return result
     
     def solve2(self, octopuses):
         target_turn_id = None
         turn_id = 1
+        sim = self.Simulation(octopuses)
         while True:
-            flashes = set()
-            # Increase energies by 1
-            for octopus in octopuses.keys():
-                octopuses[octopus] += 1
-                if octopuses[octopus] > 9:
-                    flashes.add(octopus)
-            # Propogate flashing of octopuses at 10+ energy
-            flashes_left = set(flashes)
-            while len(flashes_left) > 0:
-                new_flashes = set()
-                for (row, col) in flashes_left:
-                    for (nrow, ncol) in (
-                        (row - 1, col - 1),
-                        (row - 1, col + 0),
-                        (row - 1, col + 1),
-                        (row + 0, col - 1),
-                        (row + 0, col + 1),
-                        (row + 1, col - 1),
-                        (row + 1, col + 0),
-                        (row + 1, col + 1),
-                    ):
-                        if (
-                            (nrow, ncol) in octopuses and
-                            (nrow, ncol) not in flashes and
-                            (nrow, ncol) not in new_flashes
-                        ):
-                            octopuses[(nrow, ncol)] += 1
-                            if octopuses[(nrow, ncol)] > 9:
-                                new_flashes.add((nrow, ncol))
-                flashes.update(new_flashes)
-                flashes_left = new_flashes
-            # Reset flashed octopuses to 0 energy
-            for flash in flashes:
-                octopuses[flash] = 0
-            if len(flashes) == len(octopuses):
+            sim.step()
+            if len(sim.flashes) == len(octopuses):
                 target_turn_id = turn_id
                 break
             turn_id += 1
