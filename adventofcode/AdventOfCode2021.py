@@ -52,6 +52,78 @@ class Template: # Template
         result = solutions
         return result
 
+class Day12: # Passage Pathing
+    '''
+    https://adventofcode.com/2021/day/12
+    '''
+    def get_passages(self, raw_input_lines: List[str]):
+        passages = collections.defaultdict(set)
+        for raw_input_line in raw_input_lines:
+            a, b = raw_input_line.split('-')
+            passages[a].add(b)
+            passages[b].add(a)
+        result = passages
+        return result
+    
+    def solve(self, passages):
+        small_caves = set()
+        for passage in passages:
+            if passage[0] in 'abcdefghijklmnopqrstuvwxyz':
+                small_caves.add(passage)
+        paths = set()
+        work = [(['start'], set())]
+        while len(work) > 0:
+            path, visited = work.pop()
+            passage = path[-1]
+            if passage == 'end':
+                paths.add(tuple(path))
+            visited.add(passage)
+            for next_passage in passages[passage]:
+                if next_passage in visited and next_passage in small_caves:
+                    continue
+                work.append((path + [next_passage], set(visited)))
+        result = len(paths)
+        return result
+    
+    def solve2(self, passages):
+        small_caves = set()
+        for passage in passages:
+            if passage[0] in 'abcdefghijklmnopqrstuvwxyz':
+                small_caves.add(passage)
+        paths = set()
+        work = [(['start'], set(), True)]
+        while len(work) > 0:
+            path, visited, spare_visit = work.pop()
+            passage = path[-1]
+            if passage == 'end':
+                paths.add(tuple(path))
+                continue
+            visited.add(passage)
+            for next_passage in passages[passage]:
+                next_spare_visit = spare_visit
+                if next_passage in visited and next_passage in small_caves:
+                    if spare_visit and next_passage not in ('start', 'end'):
+                        next_spare_visit = False
+                    else:
+                        continue
+                work.append((
+                    path + [next_passage],
+                    set(visited),
+                    next_spare_visit,
+                ))
+        result = len(paths)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        passages = self.get_passages(raw_input_lines)
+        solutions = (
+            self.solve(passages),
+            self.solve2(passages),
+            )
+        result = solutions
+        return result
+
 class Day11: # Dumbo Octopus
     '''
     https://adventofcode.com/2021/day/11
@@ -852,8 +924,8 @@ if __name__ == '__main__':
         8: (Day08, 'Seven Segment Search'),
         9: (Day09, 'Smoke Basin'),
        10: (Day10, 'Syntax Scoring'),
-       11: (Day11, 'XXX'),
-    #    12: (Day12, 'XXX'),
+       11: (Day11, 'Dumbo Octopus'),
+       12: (Day12, 'XXX'),
     #    13: (Day13, 'XXX'),
     #    14: (Day14, 'XXX'),
     #    15: (Day15, 'XXX'),
