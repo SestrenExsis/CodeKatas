@@ -76,8 +76,6 @@ class Day13: # Transparent Origami
     def solve(self, dots, folds):
         fold_axis, fold_line = folds[0]
         next_dots = set()
-        rows = max(y for x, y in dots)
-        cols = max(x for x, y in dots)
         for col, row in dots:
             next_dot = (col, row)
             if fold_axis == 'x' and col > fold_line:
@@ -87,19 +85,42 @@ class Day13: # Transparent Origami
                 next_row = 2 * fold_line - row
                 next_dot = (col, next_row)
             next_dots.add(next_dot)
-        result = len(dots), len(next_dots)
+        result = len(next_dots)
         return result
     
     def solve2(self, dots, folds):
-        result = len(folds)
+        for fold_axis, fold_line in folds:
+            next_dots = set()
+            for col, row in dots:
+                next_dot = (col, row)
+                if fold_axis == 'x' and col > fold_line:
+                    next_col = 2 * fold_line - col
+                    next_dot = (next_col, row)
+                elif fold_axis == 'y' and row > fold_line:
+                    next_row = 2 * fold_line - row
+                    next_dot = (col, next_row)
+                next_dots.add(next_dot)
+            dots = next_dots
+        max_row = max(row for col, row in dots)
+        max_col = max(col for col, row in dots)
+        code = ['']
+        for row in range(max_row + 1):
+            line = []
+            for col in range(max_col + 1):
+                cell = '.'
+                if (col, row) in dots:
+                    cell = '#'
+                line.append(cell)
+            code.append(''.join(line))
+        result = '\n'.join(code)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         dots, folds = self.get_dots_and_folds(raw_input_lines)
         solutions = (
-            self.solve(dots, folds),
-            self.solve2(dots, folds),
+            self.solve(copy.deepcopy(dots), folds),
+            self.solve2(copy.deepcopy(dots), folds),
             )
         result = solutions
         return result
