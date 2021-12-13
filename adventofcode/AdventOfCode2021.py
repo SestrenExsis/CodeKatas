@@ -52,6 +52,58 @@ class Template: # Template
         result = solutions
         return result
 
+class Day13: # Transparent Origami
+    '''
+    https://adventofcode.com/2021/day/13
+    '''
+    def get_dots_and_folds(self, raw_input_lines: List[str]):
+        dots = set()
+        folds = []
+        result = []
+        for raw_input_line in raw_input_lines:
+            if len(raw_input_line) < 1:
+                pass
+            elif raw_input_line[0] == 'f':
+                a, b = raw_input_line.split('=')
+                fold = (a[-1], int(b))
+                folds.append(fold)
+            else:
+                dot = tuple(map(int, raw_input_line.split(',')))
+                dots.add(dot)
+        result = (dots, folds)
+        return result
+    
+    def solve(self, dots, folds):
+        fold_axis, fold_line = folds[0]
+        next_dots = set()
+        rows = max(y for x, y in dots)
+        cols = max(x for x, y in dots)
+        for col, row in dots:
+            next_dot = (col, row)
+            if fold_axis == 'x' and col > fold_line:
+                next_col = 2 * fold_line - col
+                next_dot = (next_col, row)
+            elif fold_axis == 'y' and row > fold_line:
+                next_row = 2 * fold_line - row
+                next_dot = (col, next_row)
+            next_dots.add(next_dot)
+        result = len(dots), len(next_dots)
+        return result
+    
+    def solve2(self, dots, folds):
+        result = len(folds)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        dots, folds = self.get_dots_and_folds(raw_input_lines)
+        solutions = (
+            self.solve(dots, folds),
+            self.solve2(dots, folds),
+            )
+        result = solutions
+        return result
+
 class Day12: # Passage Pathing
     '''
     https://adventofcode.com/2021/day/12
@@ -925,8 +977,8 @@ if __name__ == '__main__':
         9: (Day09, 'Smoke Basin'),
        10: (Day10, 'Syntax Scoring'),
        11: (Day11, 'Dumbo Octopus'),
-       12: (Day12, 'XXX'),
-    #    13: (Day13, 'XXX'),
+       12: (Day12, 'Passage Pathing'),
+       13: (Day13, 'Transparent Origami'),
     #    14: (Day14, 'XXX'),
     #    15: (Day15, 'XXX'),
     #    16: (Day16, 'XXX'),
