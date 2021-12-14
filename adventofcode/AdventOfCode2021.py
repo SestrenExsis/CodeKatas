@@ -52,6 +52,96 @@ class Template: # Template
         result = solutions
         return result
 
+class Day14: # Template
+    '''
+    https://adventofcode.com/2021/day/14
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        template = raw_input_lines[0]
+        insertions = {}
+        for raw_input_line in raw_input_lines[2:]:
+            a, b = raw_input_line.split(' -> ')
+            insertions[a] = b
+        result = template, insertions
+        return result
+    
+    def solve(self, template, insertions):
+        for _ in range(10):
+            next_template = []
+            for i in range(1, len(template)):
+                pair = template[i - 1:i + 1]
+                if template[i - 1:i + 1] in insertions:
+                    next_template.append(pair[0] + insertions[pair])
+                else:
+                    next_template.append(pair[0])
+            next_template.append(template[-1])
+            template = ''.join(next_template)
+        counts = collections.Counter(template)
+        max_count = float('-inf')
+        min_count = float('inf')
+        for count in counts.values():
+            max_count = max(max_count, count)
+            min_count = min(min_count, count)
+        result = max_count - min_count
+        return result
+    
+    def solve2_slowly(self, template, insertions):
+        for step in range(40):
+            next_template = []
+            for i in range(1, len(template)):
+                pair = template[i - 1:i + 1]
+                if template[i - 1:i + 1] in insertions:
+                    next_template.append(pair[0] + insertions[pair])
+                else:
+                    next_template.append(pair[0])
+            next_template.append(template[-1])
+            template = ''.join(next_template)
+        counts = collections.Counter(template)
+        max_count = float('-inf')
+        min_count = float('inf')
+        for char, count in counts.items():
+            max_count = max(max_count, count)
+            min_count = min(min_count, count)
+        result = max_count - min_count
+        return result
+    
+    def solve2(self, template, insertions):
+        pairs = collections.defaultdict(int)
+        for i in range(1, len(template)):
+            pair = template[i - 1:i + 1]
+            pairs[pair] += 1
+        for step in range(40):
+            next_pairs = collections.defaultdict(int)
+            for pair, count in pairs.items():
+                if pair in insertions:
+                    a, b, c = pair[0], insertions[pair], pair[1]
+                    next_pairs[a + b] += count
+                    next_pairs[b + c] += count
+                else:
+                    next_pairs[pair] += count
+            pairs = next_pairs
+        counts = collections.defaultdict(int)
+        for pair, count in pairs.items():
+            counts[pair[0]] += count
+        counts[template[-1]] += 1
+        max_count = float('-inf')
+        min_count = float('inf')
+        for _, count in counts.items():
+            max_count = max(max_count, count)
+            min_count = min(min_count, count)
+        result = max_count - min_count
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        template, insertions = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(template, insertions),
+            self.solve2(template, insertions),
+            )
+        result = solutions
+        return result
+
 class Day13: # Transparent Origami
     '''
     https://adventofcode.com/2021/day/13
@@ -1000,7 +1090,7 @@ if __name__ == '__main__':
        11: (Day11, 'Dumbo Octopus'),
        12: (Day12, 'Passage Pathing'),
        13: (Day13, 'Transparent Origami'),
-    #    14: (Day14, 'XXX'),
+       14: (Day14, 'XXX'),
     #    15: (Day15, 'XXX'),
     #    16: (Day16, 'XXX'),
     #    17: (Day17, 'XXX'),
