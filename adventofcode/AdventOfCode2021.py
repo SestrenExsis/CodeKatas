@@ -7,6 +7,7 @@ import argparse
 import collections
 import copy
 import functools
+import heapq
 import operator
 from typing import Dict, List, Set, Tuple
     
@@ -52,7 +53,59 @@ class Template: # Template
         result = solutions
         return result
 
-class Day14: # Template
+class Day15: # Chiton
+    '''
+    https://adventofcode.com/2021/day/15
+    '''
+    def get_grid(self, raw_input_lines: List[str]):
+        grid = []
+        for raw_input_line in raw_input_lines:
+            grid.append(raw_input_line)
+        result = grid
+        return result
+    
+    def solve(self, grid):
+        rows = len(grid)
+        cols = len(grid[0])
+        visits = {}
+        work = [(0, 0, 0)]
+        min_cost = float('inf')
+        while len(work) > 0:
+            cost, row, col = heapq.heappop(work)
+            if (row, col) == (rows - 1, cols - 1):
+                min_cost = cost
+                break
+            if (row, col) in visits and visits[(row, col)] <= cost:
+                continue
+            visits[(row, col)] = cost
+            for (nrow, ncol) in (
+                (row - 1, col),
+                (row + 1, col),
+                (row, col - 1),
+                (row, col + 1),
+            ):
+                if not (0 <= nrow < rows and 0 <= ncol < cols):
+                    continue
+                ncost = cost + int(grid[nrow][ncol])
+                heapq.heappush(work, (ncost, nrow, ncol))
+        result = min_cost
+        return result
+    
+    def solve2(self, grid):
+        result = len(grid)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        grid = self.get_grid(raw_input_lines)
+        solutions = (
+            self.solve(grid),
+            self.solve2(grid),
+            )
+        result = solutions
+        return result
+
+class Day14: # Extended Polymerization
     '''
     https://adventofcode.com/2021/day/14
     '''
@@ -86,7 +139,7 @@ class Day14: # Template
         return result
     
     def solve2_slowly(self, template, insertions):
-        for step in range(40):
+        for _ in range(40):
             next_template = []
             for i in range(1, len(template)):
                 pair = template[i - 1:i + 1]
@@ -110,7 +163,7 @@ class Day14: # Template
         for i in range(1, len(template)):
             pair = template[i - 1:i + 1]
             pairs[pair] += 1
-        for step in range(40):
+        for _ in range(40):
             next_pairs = collections.defaultdict(int)
             for pair, count in pairs.items():
                 if pair in insertions:
@@ -1090,8 +1143,8 @@ if __name__ == '__main__':
        11: (Day11, 'Dumbo Octopus'),
        12: (Day12, 'Passage Pathing'),
        13: (Day13, 'Transparent Origami'),
-       14: (Day14, 'XXX'),
-    #    15: (Day15, 'XXX'),
+       14: (Day14, 'Extended Polymerization'),
+       15: (Day15, 'Chiton'),
     #    16: (Day16, 'XXX'),
     #    17: (Day17, 'XXX'),
     #    18: (Day18, 'XXX'),
