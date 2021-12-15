@@ -68,7 +68,7 @@ class Day15: # Chiton
         rows = len(grid)
         cols = len(grid[0])
         visits = {}
-        work = [(0, 0, 0)]
+        work = [(0, 0, 0)] # (cost, row, col)
         min_cost = float('inf')
         while len(work) > 0:
             cost, row, col = heapq.heappop(work)
@@ -91,8 +91,36 @@ class Day15: # Chiton
         result = min_cost
         return result
     
-    def solve2(self, grid):
-        result = len(grid)
+    def solve2(self, grid, size: int=5):
+        subrows = len(grid)
+        subcols = len(grid[0])
+        rows = size * subrows
+        cols = size * subcols
+        visits = {}
+        work = [(0, 0, 0)] # (cost, row, col)
+        min_cost = float('inf')
+        while len(work) > 0:
+            cost, row, col = heapq.heappop(work)
+            if (row, col) == (rows - 1, cols - 1):
+                min_cost = cost
+                break
+            if (row, col) in visits and visits[(row, col)] <= cost:
+                continue
+            visits[(row, col)] = cost
+            for (nrow, ncol) in (
+                (row - 1, col),
+                (row + 1, col),
+                (row, col - 1),
+                (row, col + 1),
+            ):
+                if not (0 <= nrow < rows and 0 <= ncol < cols):
+                    continue
+                r1, r2 = divmod(nrow, subrows)
+                c1, c2 = divmod(ncol, subcols)
+                cost2 = 1 + (int(grid[r2][c2]) + r1 + c1 - 1) % 9
+                ncost = cost + cost2
+                heapq.heappush(work, (ncost, nrow, ncol))
+        result = min_cost
         return result
     
     def main(self):
