@@ -52,6 +52,80 @@ class Template: # Template
         result = solutions
         return result
 
+class Day06: # Memory Reallocation
+    '''
+    https://adventofcode.com/2017/day/6
+    '''
+    def get_banks(self, raw_input_lines: List[str]):
+        banks = []
+        for index, element in enumerate(raw_input_lines[0].split()):
+            banks.append(int(element))
+        result = banks
+        return result
+    
+    def solve(self, banks):
+        seen = set()
+        redistribution_count = 0
+        configuration = tuple(banks)
+        while configuration not in seen:
+            seen.add(configuration)
+            max_value = max(banks)
+            index = 0
+            while True:
+                if banks[index] == max_value:
+                    break
+                index += 1
+            blocks = banks[index]
+            banks[index] = 0
+            for i in range(1, blocks + 1):
+                j = (index + i) % len(banks)
+                banks[j] += 1
+            configuration = tuple(banks)
+            redistribution_count += 1
+        result = redistribution_count
+        return result
+    
+    def solve2(self, banks):
+        cycle_start = None
+        cycle_size = 0
+        seen = set()
+        redistribution_count = 0
+        configuration = tuple(banks)
+        while True:
+            if configuration in seen and cycle_start is None:
+                cycle_start = configuration
+                cycle_size = 1
+            elif cycle_start is not None and configuration == cycle_start:
+                break
+            else:
+                cycle_size += 1
+            seen.add(configuration)
+            max_value = max(banks)
+            index = 0
+            while True:
+                if banks[index] == max_value:
+                    break
+                index += 1
+            blocks = banks[index]
+            banks[index] = 0
+            for i in range(1, blocks + 1):
+                j = (index + i) % len(banks)
+                banks[j] += 1
+            configuration = tuple(banks)
+            redistribution_count += 1
+        result = cycle_size
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        banks = self.get_banks(raw_input_lines)
+        solutions = (
+            self.solve(banks),
+            self.solve2(banks),
+            )
+        result = solutions
+        return result
+
 class Day05: # A Maze of Twisty Trampolines, All Alike
     '''
     https://adventofcode.com/2017/day/5
@@ -338,7 +412,7 @@ if __name__ == '__main__':
         3: (Day03, 'Spiral Memory'),
         4: (Day04, 'High-Entropy Passphrases'),
         5: (Day05, 'A Maze of Twisty Trampolines, All Alike'),
-    #     6: (Day06, 'XXX'),
+        6: (Day06, 'Memory Reallocation'),
     #     7: (Day07, 'XXX'),
     #     8: (Day08, 'XXX'),
     #     9: (Day09, 'XXX'),
