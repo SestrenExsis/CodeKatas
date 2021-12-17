@@ -83,7 +83,8 @@ class Day16: # Packet Decoder
             result = num
             return result
         
-        def read_packet(self):
+        def read_packet(self) -> int:
+            value = 0
             version = self.read_bits(3)
             self.versions.append(version)
             packet_type_id = self.read_bits(3)
@@ -94,19 +95,44 @@ class Day16: # Packet Decoder
                     literal = 16 * literal + (group & 15)
                     if group < 16:
                         break
+                value = literal
             else: # operator
+                sub_packets = []
                 length_type_id = self.read_bits(1)
                 if length_type_id == 0:
                     packet_length = self.read_bits(15)
                     end = self.cursor + packet_length
                     while self.cursor < end:
-                        self.read_packet()
+                        sub_packet = self.read_packet()
+                        sub_packets.append(sub_packet)
                 elif length_type_id == 1:
                     sub_packet_count = self.read_bits(11)
                     for _ in range(sub_packet_count):
-                        self.read_packet()
+                        sub_packet = self.read_packet()
+                        sub_packets.append(sub_packet)
                 else:
                     raise ValueError('Length type ID is invalid')
+                if packet_type_id == 0:
+                    value = sum(sub_packets)
+                elif packet_type_id == 1:
+                    value = 1
+                    for sub_packet in sub_packets:
+                        value *= sub_packet
+                elif packet_type_id == 2:
+                    value = min(sub_packets)
+                elif packet_type_id == 3:
+                    value = max(sub_packets)
+                elif packet_type_id == 5:
+                    assert len(sub_packets) == 2
+                    value = 1 if sub_packets[0] > sub_packets[1] else 0
+                elif packet_type_id == 6:
+                    assert len(sub_packets) == 2
+                    value = 1 if sub_packets[0] < sub_packets[1] else 0
+                elif packet_type_id == 7:
+                    assert len(sub_packets) == 2
+                    value = 1 if sub_packets[0] == sub_packets[1] else 0
+            result = value
+            return result
 
     def solve(self, transmission):
         stream = self.BitStream(transmission)
@@ -115,7 +141,8 @@ class Day16: # Packet Decoder
         return result
     
     def solve2(self, transmission):
-        result = len(transmission)
+        stream = self.BitStream(transmission)
+        result = stream.read_packet()
         return result
     
     def main(self):
