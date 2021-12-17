@@ -53,6 +53,81 @@ class Template: # Template
         result = solutions
         return result
 
+class Day16: # Packet Decoder
+    '''
+    https://adventofcode.com/2021/day/16
+    '''
+    def get_transmission(self, raw_input_lines: List[str]):
+        transmission = raw_input_lines[0]
+        result = transmission
+        return result
+    
+    class BitStream:
+        def __init__(self, hexchars):
+            self.versions = []
+            self.bits = collections.deque()
+            self.chars = hexchars
+            for char in self.chars:
+                num = int(char, 16)
+                for power in (8, 4, 2, 1):
+                    bit = (num & power) // power
+                    self.bits.append(bit)
+            self.cursor = 0
+        
+        def read_bits(self, size) -> int:
+            num = 0
+            for _ in range(size):
+                bit = self.bits[self.cursor]
+                num = 2 * num + bit
+                self.cursor += 1
+            result = num
+            return result
+        
+        def read_packet(self):
+            version = self.read_bits(3)
+            self.versions.append(version)
+            packet_type_id = self.read_bits(3)
+            if packet_type_id == 4: # literal
+                literal = 0
+                while True:
+                    group = self.read_bits(5)
+                    literal = 16 * literal + (group & 15)
+                    if group < 16:
+                        break
+            else: # operator
+                length_type_id = self.read_bits(1)
+                if length_type_id == 0:
+                    packet_length = self.read_bits(15)
+                    end = self.cursor + packet_length
+                    while self.cursor < end:
+                        self.read_packet()
+                elif length_type_id == 1:
+                    sub_packet_count = self.read_bits(11)
+                    for _ in range(sub_packet_count):
+                        self.read_packet()
+                else:
+                    raise ValueError('Length type ID is invalid')
+
+    def solve(self, transmission):
+        stream = self.BitStream(transmission)
+        stream.read_packet()
+        result = sum(stream.versions)
+        return result
+    
+    def solve2(self, transmission):
+        result = len(transmission)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        transmission = self.get_transmission(raw_input_lines)
+        solutions = (
+            self.solve(transmission),
+            self.solve2(transmission),
+            )
+        result = solutions
+        return result
+
 class Day15: # Chiton
     '''
     https://adventofcode.com/2021/day/15
@@ -1173,7 +1248,7 @@ if __name__ == '__main__':
        13: (Day13, 'Transparent Origami'),
        14: (Day14, 'Extended Polymerization'),
        15: (Day15, 'Chiton'),
-    #    16: (Day16, 'XXX'),
+       16: (Day16, 'Packet Decoder'),
     #    17: (Day17, 'XXX'),
     #    18: (Day18, 'XXX'),
     #    19: (Day19, 'XXX'),
