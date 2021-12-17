@@ -52,6 +52,53 @@ class Template: # Template
         result = solutions
         return result
 
+class Day05: # A Maze of Twisty Trampolines, All Alike
+    '''
+    https://adventofcode.com/2017/day/5
+    '''
+    def get_offsets(self, raw_input_lines: List[str]):
+        offsets = {}
+        for index, raw_input_line in enumerate(raw_input_lines):
+            offset = int(raw_input_line)
+            offsets[index] = offset
+        result = offsets
+        return result
+    
+    def solve(self, offsets):
+        position = 0
+        step_count = 0
+        while 0 <= position < len(offsets):
+            offset = offsets[position]
+            offsets[position] += 1
+            position += offset
+            step_count += 1
+        result = step_count
+        return result
+    
+    def solve2(self, offsets):
+        position = 0
+        step_count = 0
+        while 0 <= position < len(offsets):
+            offset = offsets[position]
+            if offset >= 3:
+                offsets[position] -= 1
+            else:
+                offsets[position] += 1
+            position += offset
+            step_count += 1
+        result = step_count
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        offsets = self.get_offsets(raw_input_lines)
+        solutions = (
+            self.solve(copy.deepcopy(offsets)),
+            self.solve2(copy.deepcopy(offsets)),
+            )
+        result = solutions
+        return result
+
 class Day04: # High-Entropy Passphrases
     '''
     https://adventofcode.com/2017/day/4
@@ -290,7 +337,7 @@ if __name__ == '__main__':
         2: (Day02, 'Corruption Checksum'),
         3: (Day03, 'Spiral Memory'),
         4: (Day04, 'High-Entropy Passphrases'),
-    #     5: (Day05, 'XXX'),
+        5: (Day05, 'A Maze of Twisty Trampolines, All Alike'),
     #     6: (Day06, 'XXX'),
     #     7: (Day07, 'XXX'),
     #     8: (Day08, 'XXX'),
