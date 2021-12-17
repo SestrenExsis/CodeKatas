@@ -53,6 +53,83 @@ class Template: # Template
         result = solutions
         return result
 
+class Day17: # Template
+    '''
+    https://adventofcode.com/2021/day/17
+    '''
+    def get_area(self, raw_input_lines: List[str]):
+        a, b, c, d = raw_input_lines[0].split()
+        c1, c2 = c.split('..')
+        min_x = int(c1.split('=')[1])
+        max_x = int(c2[:-1])
+        d1, d2 = d.split('..')
+        min_y = int(d1.split('=')[1])
+        max_y = int(d2)
+        result = (min_x, max_x, min_y, max_y)
+        return result
+    
+    def solve(self, min_x, max_x, min_y, max_y):
+        highest_valid_y = float('-inf')
+        for vel_x in range(-100, 100 + 1):
+            for vel_y in range(-100, 100 + 1):
+                vx = vel_x
+                vy = vel_y
+                valid_ind = False
+                x, y = 0, 0
+                highest_y = float('-inf')
+                for _ in range(10_000):
+                    x += vx
+                    y += vy
+                    if vx > 0:
+                        vx -= 1
+                    elif vx < 0:
+                        vx += 1
+                    vy -= 1
+                    highest_y = max(highest_y, y)
+                    if min_x <= x <= max_x and min_y <= y <= max_y:
+                        valid_ind = True
+                    if y < min_y and vy < 0:
+                        break
+                if valid_ind:
+                    highest_valid_y = max(highest_valid_y, highest_y)
+        result = highest_valid_y
+        return result
+    
+    def solve2(self, min_x, max_x, min_y, max_y):
+        valid_velocities = set()
+        for vel_x in range(-100, 500 + 1):
+            for vel_y in range(-500, 500 + 1):
+                vx = vel_x
+                vy = vel_y
+                valid_ind = False
+                x, y = 0, 0
+                for _ in range(1_000):
+                    x += vx
+                    y += vy
+                    if vx > 0:
+                        vx -= 1
+                    elif vx < 0:
+                        vx += 1
+                    vy -= 1
+                    if min_x <= x <= max_x and min_y <= y <= max_y:
+                        valid_ind = True
+                    if y < min_y and vy < 0:
+                        break
+                if valid_ind:
+                    valid_velocities.add((vel_x, vel_y))
+        result = len(valid_velocities)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        area = self.get_area(raw_input_lines)
+        solutions = (
+            self.solve(*area),
+            self.solve2(*area),
+            )
+        result = solutions
+        return result
+
 class Day16: # Packet Decoder
     '''
     https://adventofcode.com/2021/day/16
@@ -1276,7 +1353,7 @@ if __name__ == '__main__':
        14: (Day14, 'Extended Polymerization'),
        15: (Day15, 'Chiton'),
        16: (Day16, 'Packet Decoder'),
-    #    17: (Day17, 'XXX'),
+       17: (Day17, 'XXX'),
     #    18: (Day18, 'XXX'),
     #    19: (Day19, 'XXX'),
     #    20: (Day20, 'XXX'),
