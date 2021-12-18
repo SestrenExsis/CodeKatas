@@ -53,7 +53,198 @@ class Template: # Template
         result = solutions
         return result
 
-class Day17: # Template
+class Day18: # Template
+    '''
+    https://adventofcode.com/2021/day/18
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def explode(self, num: str, index: int) -> str:
+        # print('explode', num, index, num[index])
+        left = index
+        while left > 0 and num[left - 1] in ',0123456789':
+            left -= 1
+        right = index
+        while right < len(num) - 1 and num[right + 1] in ',0123456789':
+            right += 1
+        left_side = num[:left - 1]
+        right_side = num[right + 2:]
+        pair = tuple(map(int, num[left:right + 1].split(',')))
+        # print(left_side, '...', pair, '...', right_side)
+        L2 = len(left_side) - 1
+        while L2 > 0:
+            if left_side[L2] in '0123456789':
+                L1 = L2
+                while L1 > 0 and left_side[L1 - 1] in '0123456789':
+                    L1 -= 1
+                newNum = str(int(left_side[L1:L2 + 1]) + pair[0])
+                left_side = left_side[:L1] + newNum + left_side[L2 + 1:]
+                break
+            L2 -= 1
+        # print(left_side, '...', pair, '...', right_side)
+        R1 = 0
+        while R1 < len(right_side):
+            if right_side[R1] in '0123456789':
+                R2 = R1
+                while R2 < len(right_side) and right_side[R2 + 1] in '0123456789':
+                    R2 += 1
+                newNum = str(int(right_side[R1:R2 + 1]) + pair[1])
+                right_side = right_side[:R1] + newNum + right_side[R2 + 1:]
+                break
+            R1 += 1
+        # print(left_side, '...', '0', '...', right_side)
+        num = left_side + '0' + right_side
+        result = num
+        return result
+    
+    def split(self, num: str, index: int) -> str:
+        # print('split', num, index, num[index])
+        left = index
+        while left > 0 and num[left - 1] in '0123456789':
+            left -= 1
+        right = index
+        while right < len(num) - 1 and num[right + 1] in '0123456789':
+            right += 1
+        value = int(num[left:right + 1])
+        a = value // 2
+        b = value - a
+        num = num[:left] + '[' + str(a) + ',' + str(b) + ']' + num[right + 1:]
+        result = num
+        return result
+    
+    def reduce(self, num: str) -> str:
+        # print('reduce', num)
+        '''
+        Explode the first pair that is 4 layers deep
+        If no explosions, split the first number that is 10 or greater
+        '''
+        while True:
+            # Check for explosions
+            explosion_ind = False
+            depth = 0
+            for index, char in enumerate(num):
+                if char == '[':
+                    depth += 1
+                elif char == ']':
+                    depth -= 1
+                if depth >= 4 and char == ']':
+                    num = self.explode(num, index - 1)
+                    explosion_ind = True
+                    break
+            # print('explosions', explosion_ind, index)
+            # If no explosions, check for splits
+            if explosion_ind:
+                continue
+            split_ind = False
+            value = 0
+            for index, char in enumerate(num):
+                if char in '0123456789':
+                    value = 10 * value + int(char)
+                else:
+                    value = 0
+                if value >= 10:
+                    # print(' value', value, 'at index', index)
+                    num = self.split(num, index)
+                    split_ind = True
+                    break
+            if not explosion_ind and not split_ind:
+                break
+        # print('result', num)
+        result = num
+        return result
+
+    def add(self, numA: str, numB: str) -> str:
+        print('add', numA, numB)
+        reducedA = numA
+        while True:
+            reducedA = self.reduce(numA)
+            if reducedA == numA:
+                break
+            numA = reducedA
+        while True:
+            reducedB = self.reduce(numB)
+            if reducedB == numB:
+                break
+            numA = reducedB
+        result = self.reduce('[' + numA + ',' + numB + ']')
+        print('  equals ', result)
+        return result
+    
+    def magnitude(self, num: str) -> int:
+        magnitude = 0
+        while True:
+            repeat_ind = False
+            left = 0
+            right = 0
+            for char in num:
+                if char == '[':
+                    left = right
+                elif char == ']':
+                    repeat_ind = True
+                    break
+                right += 1
+            if repeat_ind:
+                pair = tuple(map(int, num[left + 1:right].split(',')))
+                magnitude = 3 * pair[0] + 2 * pair[1]
+                num = num[:left] + str(magnitude) + num[right + 1:]
+            else:
+                break
+        result = magnitude
+        return result
+    
+    def solve(self, nums):
+        # 14223 is too high
+        numA = nums[0]
+        for numB in nums[1:]:
+            numA = self.add(numA, numB)
+        result = self.magnitude(numA)
+        return result
+    
+    def solve2(self, nums):
+        result = len(nums)
+        return result
+    
+    def test(self):
+        print('Explosion tests ...', end='')
+        assert self.explode('[[[[[9,8],1],2],3],4]', 7) == '[[[[0,9],2],3],4]'
+        assert self.explode('[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]', 7) == '[[[[0,7],4],[7,[[8,4],9]]],[1,1]]'
+        print('... PASSED!!')
+        print('Split tests ...', end='')
+        assert self.split('[[[[0,7],4],[15,[0,13]]],[1,1]]', 14) == '[[[[0,7],4],[[7,8],[0,13]]],[1,1]]'
+        assert self.split('[[[[0,7],4],[[7,8],[0,13]]],[1,1]]', 23) == '[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]'
+        print('... PASSED!!')
+        print('Magnitude tests ...', end='')
+        assert self.magnitude('[[1,2],[[3,4],5]]') == 143
+        assert self.magnitude('[[[[0,7],4],[[7,8],[6,0]]],[8,1]]') == 1384
+        assert self.magnitude('[[[[1,1],[2,2]],[3,3]],[4,4]]') == 445
+        assert self.magnitude('[[[[3,0],[5,3]],[4,4]],[5,5]]') == 791
+        assert self.magnitude('[[[[5,0],[7,4]],[5,5]],[6,6]]') == 1137
+        assert self.magnitude('[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]') == 3488
+        print('... PASSED!!')
+        print('Add tests ...', end='')
+        assert self.add('[[[[4,3],4],4],[7,[[8,4],9]]]','[1,1]') == '[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]'
+        assert self.add('[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]','[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]') == '[[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]]'
+        print('... PASSED!!')
+        print('Reduce tests ...', end='')
+        assert self.reduce('[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]') == '[[[[0,7],4],[[7,8],[6,0]]],[8,1]]'
+        print('... PASSED!!')
+    
+    def main(self):
+        self.test()
+        raw_input_lines = get_raw_input_lines()
+        nums = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(nums),
+            self.solve2(nums),
+            )
+        result = solutions
+        return result
+
+class Day17: # Trick Shot
     '''
     https://adventofcode.com/2021/day/17
     '''
@@ -1467,8 +1658,8 @@ if __name__ == '__main__':
        14: (Day14, 'Extended Polymerization'),
        15: (Day15, 'Chiton'),
        16: (Day16, 'Packet Decoder'),
-       17: (Day17, 'XXX'),
-    #    18: (Day18, 'XXX'),
+       17: (Day17, 'Trick Shot'),
+       18: (Day18, 'XXX'),
     #    19: (Day19, 'XXX'),
     #    20: (Day20, 'XXX'),
     #    21: (Day21, 'XXX'),
