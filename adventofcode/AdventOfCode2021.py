@@ -84,6 +84,40 @@ class Day17: # Template
         result = (min_x, max_x, min_y, max_y)
         return result
     
+    def find_valid_x_vels(self, lower_bound: int, upper_bound: int) -> set:
+        valid_x_vels = set()
+        for initial_x_vel in range(upper_bound + 1, -1, -1):
+            valid_ind = False
+            x = 0
+            x_vel = initial_x_vel
+            while x_vel > 0:
+                x += x_vel
+                x_vel -= 1
+                if lower_bound <= x <= upper_bound:
+                    valid_ind = True
+                    break
+            if valid_ind:
+                valid_x_vels.add(x_vel)
+        result = valid_x_vels
+        return result
+    
+    def find_valid_y_vels(self, lower_bound: int, upper_bound: int) -> set:
+        valid_y_vels = set()
+        for initial_y_vel in range(upper_bound + 1, -1, -1):
+            valid_ind = False
+            y = 0
+            y_vel = initial_y_vel
+            while y_vel > 0:
+                y += y_vel
+                y_vel -= 1
+                if lower_bound <= y <= upper_bound:
+                    valid_ind = True
+                    break
+            if valid_ind:
+                valid_y_vels.add(y_vel)
+        result = valid_y_vels
+        return result
+    
     def solve(self, x_min, x_max, y_min, y_max):
         valid_x_vels = set()
         for x_vel in range(-100, 100 + 1):
