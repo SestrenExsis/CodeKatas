@@ -57,6 +57,22 @@ class Day17: # Template
     '''
     https://adventofcode.com/2021/day/17
     '''
+    class Simulation:
+        def __init__(self, x_vel: int, y_vel: int):
+            self.x = 0
+            self.y = 0
+            self.x_vel = x_vel
+            self.y_vel = y_vel
+        
+        def step(self):
+            self.x += self.x_vel
+            self.y += self.y_vel
+            if self.x_vel > 0:
+                self.x_vel -= 1
+            elif self.x_vel < 0:
+                self.x_vel += 1
+            self.y_vel -= 1
+
     def get_area(self, raw_input_lines: List[str]):
         a, b, c, d = raw_input_lines[0].split()
         c1, c2 = c.split('..')
@@ -68,55 +84,119 @@ class Day17: # Template
         result = (min_x, max_x, min_y, max_y)
         return result
     
-    def solve(self, min_x, max_x, min_y, max_y):
+    def solve(self, x_min, x_max, y_min, y_max):
+        valid_x_vels = set()
+        for x_vel in range(-100, 100 + 1):
+            sim = self.Simulation(x_vel, 0)
+            valid_ind = False
+            for _ in range(x_vel + 1):
+                sim.step()
+                if x_min <= sim.x <= x_max:
+                    valid_ind = True
+                    break
+            if valid_ind:
+                valid_x_vels.add(x_vel)
+        valid_y_vels = set()
+        for y_vel in range(-100, 100 + 1):
+            sim = self.Simulation(0, y_vel)
+            valid_ind = False
+            for _ in range(10_000):
+                sim.step()
+                if y_min <= sim.y <= y_max:
+                    valid_ind = True
+                    break
+            if valid_ind:
+                valid_y_vels.add(y_vel)
         highest_valid_y = float('-inf')
-        for vel_x in range(-100, 100 + 1):
-            for vel_y in range(-100, 100 + 1):
-                vx = vel_x
-                vy = vel_y
+        for x_vel in valid_x_vels:
+            for y_vel in valid_y_vels:
+                sim = self.Simulation(x_vel, y_vel)
                 valid_ind = False
-                x, y = 0, 0
                 highest_y = float('-inf')
                 for _ in range(10_000):
-                    x += vx
-                    y += vy
-                    if vx > 0:
-                        vx -= 1
-                    elif vx < 0:
-                        vx += 1
-                    vy -= 1
-                    highest_y = max(highest_y, y)
-                    if min_x <= x <= max_x and min_y <= y <= max_y:
+                    sim.step()
+                    highest_y = max(highest_y, sim.y)
+                    if x_min <= sim.x <= x_max and y_min <= sim.y <= y_max:
                         valid_ind = True
-                    if y < min_y and vy < 0:
+                    if sim.y < y_min and sim.y_vel < 0:
                         break
                 if valid_ind:
                     highest_valid_y = max(highest_valid_y, highest_y)
         result = highest_valid_y
         return result
     
-    def solve2(self, min_x, max_x, min_y, max_y):
+    def solve2(self, x_min, x_max, y_min, y_max):
+        valid_x_vels = set()
+        for x_vel in range(x_max + 1):
+            sim = self.Simulation(x_vel, 0)
+            valid_ind = False
+            for _ in range(x_vel + 1):
+                sim.step()
+                if x_min <= sim.x <= x_max:
+                    valid_ind = True
+                    break
+            if valid_ind:
+                valid_x_vels.add(x_vel)
+        valid_y_vels = set()
+        for y_vel in range(-100, 500 + 1):
+            sim = self.Simulation(0, y_vel)
+            valid_ind = False
+            for _ in range(10_000):
+                sim.step()
+                if y_min <= sim.y <= y_max:
+                    valid_ind = True
+                    break
+            if valid_ind:
+                valid_y_vels.add(y_vel)
         valid_velocities = set()
-        for vel_x in range(-100, 500 + 1):
-            for vel_y in range(-500, 500 + 1):
-                vx = vel_x
-                vy = vel_y
+        for x_vel in valid_x_vels:
+            for y_vel in valid_y_vels:
+                sim = self.Simulation(x_vel, y_vel)
                 valid_ind = False
-                x, y = 0, 0
-                for _ in range(1_000):
-                    x += vx
-                    y += vy
-                    if vx > 0:
-                        vx -= 1
-                    elif vx < 0:
-                        vx += 1
-                    vy -= 1
-                    if min_x <= x <= max_x and min_y <= y <= max_y:
+                for _ in range(10_000):
+                    sim.step()
+                    if x_min <= sim.x <= x_max and y_min <= sim.y <= y_max:
                         valid_ind = True
-                    if y < min_y and vy < 0:
+                    if sim.y < y_min and sim.y_vel < 0:
                         break
                 if valid_ind:
-                    valid_velocities.add((vel_x, vel_y))
+                    valid_velocities.add((x_vel, y_vel))
+        result = len(valid_velocities)
+        return result
+    
+    def solve_slowly(self, x_min, x_max, y_min, y_max):
+        highest_valid_y = float('-inf')
+        for x_vel in range(-100, 100 + 1):
+            for y_vel in range(-100, 100 + 1):
+                sim = self.Simulation(x_vel, y_vel)
+                valid_ind = False
+                highest_y = float('-inf')
+                for _ in range(10_000):
+                    sim.step()
+                    highest_y = max(highest_y, sim.y)
+                    if x_min <= sim.x <= x_max and y_min <= sim.y <= y_max:
+                        valid_ind = True
+                    if sim.y < y_min and sim.y_vel < 0:
+                        break
+                if valid_ind:
+                    highest_valid_y = max(highest_valid_y, highest_y)
+        result = highest_valid_y
+        return result
+    
+    def solve2_slowly(self, x_min, x_max, y_min, y_max):
+        valid_velocities = set()
+        for x_vel in range(-100, 500 + 1):
+            for y_vel in range(-500, 500 + 1):
+                sim = self.Simulation(x_vel, y_vel)
+                valid_ind = False
+                for _ in range(1_000):
+                    sim.step()
+                    if x_min <= sim.x <= x_max and y_min <= sim.y <= y_max:
+                        valid_ind = True
+                    if sim.y < y_min and sim.y_vel < 0:
+                        break
+                if valid_ind:
+                    valid_velocities.add((x_vel, y_vel))
         result = len(valid_velocities)
         return result
     
