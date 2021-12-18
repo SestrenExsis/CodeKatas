@@ -182,7 +182,14 @@ class Day18: # Template
         return result
     
     def solve2(self, nums):
-        result = len(nums)
+        max_magnitude = 0
+        for i, numA in enumerate(nums):
+            for j, numB in enumerate(nums):
+                if i == j:
+                    continue
+                magnitude = self.magnitude(self.add(numA, numB))
+                max_magnitude = max(max_magnitude, magnitude)
+        result = max_magnitude
         return result
     
     def test(self):
