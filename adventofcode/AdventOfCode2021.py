@@ -53,7 +53,94 @@ class Template: # Template
         result = solutions
         return result
 
-class Day19: # Template
+class Day20: # Trench Map
+    '''
+    https://adventofcode.com/2021/day/20
+    '''
+    def get_image_info(self, raw_input_lines: List[str]):
+        image_enhancement_algorithm = set()
+        for index, cell in enumerate(raw_input_lines[0]):
+            if cell == '#':
+                image_enhancement_algorithm.add(index)
+        image = set()
+        for row, raw_input_line in enumerate(raw_input_lines[2:]):
+            for col, cell in enumerate(raw_input_line):
+                if cell == '#':
+                    image.add((row, col))
+        result = image_enhancement_algorithm, image
+        return result
+    
+    def visualize(self, image):
+        min_row = min(row for row, _ in image)
+        max_row = max(row for row, _ in image)
+        min_col = min(col for _, col in image)
+        max_col = max(col for _, col in image)
+        for row in range(min_row, max_row + 1):
+            row_data = []
+            for col in range(min_col, max_col + 1):
+                cell = '.'
+                if (row, col) in image:
+                    cell = '#'
+                row_data.append(cell)
+            print(''.join(row_data))
+    
+    def solve(self, image_enhancement_algorithm, input_image, enhancement_count):
+        image = set(input_image)
+        # self.visualize(image)
+        for enhancement_id in range(enhancement_count):
+            min_row = min(row for row, _ in image)
+            max_row = max(row for row, _ in image)
+            min_col = min(col for _, col in image)
+            max_col = max(col for _, col in image)
+            next_image = set()
+            for row in range(min_row - 3, max_row + 4):
+                for col in range(min_col - 3, max_col + 4):
+                    index = 0
+                    for (r, c, value) in (
+                        (row - 1, col - 1, 256),
+                        (row - 1, col + 0, 128),
+                        (row - 1, col + 1, 64),
+                        (row + 0, col - 1, 32),
+                        (row + 0, col + 0, 16),
+                        (row + 0, col + 1, 8),
+                        (row + 1, col - 1, 4),
+                        (row + 1, col + 0, 2),
+                        (row + 1, col + 1, 1),
+                    ):
+                        if (
+                            (r, c) in image or
+                            enhancement_id % 2 == 1 and
+                            0 in image_enhancement_algorithm and
+                            (
+                                row <= min_row or
+                                row >= max_row or
+                                col <= min_col or
+                                col >= max_col
+                            )
+                        ):
+                            index += value
+                    if index in image_enhancement_algorithm:
+                        next_image.add((row, col))
+            image = next_image
+            # self.visualize(image)
+        result = len(image)
+        return result
+    
+    # def solve2(self, image_enhancement_algorithm, input_image):
+    #     result = len(image_enhancement_algorithm)
+    #     return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        image_enhancement_algorithm, input_image = self.get_image_info(raw_input_lines)
+        solutions = (
+            self.solve(image_enhancement_algorithm, input_image, 2),
+            self.solve(image_enhancement_algorithm, input_image, 50),
+            )
+        result = solutions
+        return result
+
+class Day19Incomplete: # Beacon Scanner
     '''
     https://adventofcode.com/2021/day/19
     '''
@@ -1760,8 +1847,8 @@ if __name__ == '__main__':
        16: (Day16, 'Packet Decoder'),
        17: (Day17, 'Trick Shot'),
        18: (Day18, 'Snailfish'),
-       19: (Day19, 'XXX'),
-    #    20: (Day20, 'XXX'),
+       19: (Day19Incomplete, 'Beacon Scanner'),
+       20: (Day20, 'Trench Map'),
     #    21: (Day21, 'XXX'),
     #    22: (Day22, 'XXX'),
     #    23: (Day23, 'XXX'),
