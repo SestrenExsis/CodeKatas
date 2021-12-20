@@ -53,7 +53,120 @@ class Template: # Template
         result = solutions
         return result
 
-class Day18: # Template
+class Day19: # Template
+    '''
+    https://adventofcode.com/2021/day/19
+    '''
+    def get_scanners(self, raw_input_lines: List[str]):
+        scanners = collections.defaultdict(list)
+        scanner_id = -1
+        for raw_input_line in raw_input_lines:
+            if 'scanner' in raw_input_line:
+                scanner_id = int(raw_input_line.split(' ')[2])
+            elif ',' in raw_input_line:
+                scan = tuple(map(int, raw_input_line.split(',')))
+                scanners[scanner_id].append(scan)
+        result = scanners
+        return result
+    
+    def compress(self, scan):
+        compressed = []
+        for val in scan:
+            compressed.append(val)
+            if compressed[-1] == 0:
+                compressed[-1] = -1
+            if (
+                len(compressed) > 1 and
+                compressed[-1] < 0 and
+                compressed[-2] < 0
+            ):
+                num = compressed.pop()
+                compressed[-1] += num
+        result = tuple(compressed)
+        return result
+    
+    def solve(self, scanners):
+        scans = {}
+        for scanner_id, scanner_scans in scanners.items():
+            scan_a = [0] * (2 * 1000 + 1)
+            scan_b = [0] * (2 * 1000 + 1)
+            scan_c = [0] * (2 * 1000 + 1)
+            for a, b, c in scanner_scans:
+                scan_a[a + 1_000] += 1
+                scan_b[b + 1_000] += 1
+                scan_c[c + 1_000] += 1
+            compressed_a = self.compress(scan_a)
+            compressed_b = self.compress(scan_b)
+            compressed_c = self.compress(scan_c)
+            scans[(scanner_id, 1)] = compressed_a
+            scans[(scanner_id, 2)] = compressed_b
+            scans[(scanner_id, 3)] = compressed_c
+        merged_scans = {}
+        for _ in range(3):
+            key, scan = scans.popitem()
+            merged_scans[key] = scan
+        while len(scans) > 0:
+            print(len(scans))
+            next_merged_scans = {}
+            merged_keys = {}
+            for keyA, scanA in merged_scans.items():
+                # Assume no scan detected a beacon at the edges of the scan range
+                assert scanA[0] < 0
+                assert scanA[-1] < 0
+                for keyB, scanB in scans.items():
+                    if keyB[0] == keyA[0]: # Can't self-merge
+                        continue
+                    for flipA, flipB in (
+                        (False, False),
+                        (False, True),
+                        (True, False),
+                        (True, True),
+                    ):
+                        if flipA:
+                            scanA = scanA[::-1]
+                        if flipB:
+                            scanB = scanB[::-1]
+                        min_overlap = 1
+                        beacon_count = 0
+                        while beacon_count < 12:
+                            reading = scanB[min_overlap]
+                            if reading > 0:
+                                beacon_count += reading
+                            min_overlap += 1
+                        merge_ind = False
+                        max_overlap = min(len(scanA), len(scanB))
+                        # Attempt to merge scanA with scanB
+                        # aaaaaaAAA
+                        #       BBBbbbbbbb
+                        # ccccccCCCccccccc
+                        for overlap in range(min_overlap, max_overlap):
+                            pass
+                            keyA[:-min_overlap]
+                        if merge_ind:
+                            merged_keys.add(keyB)
+                            next_merged_scans[keyA] = merged_scan
+                for key in merged_keys:
+                    scans.remove(key)
+            merged_scans = next_merged_scans
+        key = next(iter(scans.keys()))
+        result = sum(reading for reading in scans[key] if reading > 0)
+        return result
+    
+    def solve2(self, scanners):
+        result = len(scanners)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        scanners = self.get_scanners(raw_input_lines)
+        solutions = (
+            self.solve(scanners),
+            self.solve2(scanners),
+            )
+        result = solutions
+        return result
+
+class Day18: # Snailfish
     '''
     https://adventofcode.com/2021/day/18
     '''
@@ -1646,8 +1759,8 @@ if __name__ == '__main__':
        15: (Day15, 'Chiton'),
        16: (Day16, 'Packet Decoder'),
        17: (Day17, 'Trick Shot'),
-       18: (Day18, 'XXX'),
-    #    19: (Day19, 'XXX'),
+       18: (Day18, 'Snailfish'),
+       19: (Day19, 'XXX'),
     #    20: (Day20, 'XXX'),
     #    21: (Day21, 'XXX'),
     #    22: (Day22, 'XXX'),
