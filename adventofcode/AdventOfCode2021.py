@@ -86,7 +86,6 @@ class Day20: # Trench Map
     
     def solve(self, image_enhancement_algorithm, input_image, enhancement_count):
         image = set(input_image)
-        # self.visualize(image)
         for enhancement_id in range(enhancement_count):
             min_row = min(row for row, _ in image)
             max_row = max(row for row, _ in image)
@@ -122,13 +121,8 @@ class Day20: # Trench Map
                     if index in image_enhancement_algorithm:
                         next_image.add((row, col))
             image = next_image
-            # self.visualize(image)
         result = len(image)
         return result
-    
-    # def solve2(self, image_enhancement_algorithm, input_image):
-    #     result = len(image_enhancement_algorithm)
-    #     return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
@@ -173,6 +167,84 @@ class Day19Incomplete: # Beacon Scanner
         return result
     
     def solve(self, scanners):
+        # 723 is too high
+        # Start with one scan as the reference point for all others
+        _, scan = scanners.popitem()
+        master_scan = collections.defaultdict(int)
+        for coordinate in scan:
+            master_scan[coordinate] += 1
+        # Merge all scans into the master scan
+        while len(scanners) > 0:
+            merged_keys = set()
+            for scan_key, scan in scanners.items():
+                # Try all 24 orientations for an incoming scan
+                for (a, b, c, d, e, f, g, h, i) in (
+                    ( 1,  0,  0,    0,  1,  0,    0,  0,  1),
+                    (-1,  0,  0,    0, -1,  0,    0,  0,  1),
+                    (-1,  0,  0,    0,  1,  0,    0,  0, -1),
+                    ( 1,  0,  0,    0, -1,  0,    0,  0, -1),
+                    (-1,  0,  0,    0,  0,  1,    0,  1,  0),
+                    ( 1,  0,  0,    0,  0, -1,    0,  1,  0),
+                    ( 1,  0,  0,    0,  0,  1,    0, -1,  0),
+                    (-1,  0,  0,    0,  0, -1,    0, -1,  0),
+                    ( 0, -1,  0,    1,  0,  0,    0,  0,  1),
+                    ( 0,  1,  0,   -1,  0,  0,    0,  0,  1),
+                    ( 0,  1,  0,    1,  0,  0,    0,  0, -1),
+                    ( 0, -1,  0,   -1,  0,  0,    0,  0, -1),
+                    ( 0,  1,  0,    0,  0,  1,    1,  0,  0),
+                    ( 0, -1,  0,    0,  0, -1,    1,  0,  0),
+                    ( 0, -1,  0,    0,  0,  1,   -1,  0,  0),
+                    ( 0,  1,  0,    0,  0, -1,   -1,  0,  0),
+                    ( 0,  0,  1,    1,  0,  0,    0,  1,  0),
+                    ( 0,  0, -1,   -1,  0,  0,    0,  1,  0),
+                    ( 0,  0, -1,    1,  0,  0,    0, -1,  0),
+                    ( 0,  0,  1,   -1,  0,  0,    0, -1,  0),
+                    ( 0,  0, -1,    0,  1,  0,    1,  0,  0),
+                    ( 0,  0,  1,    0, -1,  0,    1,  0,  0),
+                    ( 0,  0,  1,    0,  1,  0,   -1,  0,  0),
+                    ( 0,  0, -1,    0, -1,  0,   -1,  0,  0),
+                ):
+                    # Try every pair of beacons as an offset
+                    match_found = False
+                    for (x0, y0, z0) in scan:
+                        x1 = a * x0 + b * y0 + c * z0
+                        y1 = d * x0 + e * y0 + f * z0
+                        z1 = g * x0 + h * y0 + i * z0
+                        # A pair is (x1, y1, z1) and (x2, y2, z2)
+                        for (x2, y2, z2) in master_scan:
+                            dx = x1 - x2
+                            dy = y1 - y2
+                            dz = z1 - z2
+                            # Look for matching beacons
+                            match_count = 0
+                            coords = collections.defaultdict(int)
+                            for x3, y3, z3 in scan:
+                                x = (a * x3 + b * y3 + c * z3) - dx
+                                y = (d * x3 + e * y3 + f * z3) - dy
+                                z = (g * x3 + h * y3 + i * z3) - dz
+                                coords[(x, y, z)] += 1
+                                if (x, y, z) in master_scan:
+                                    match_count += 1
+                            # If 12 or more match, then merge into master
+                            if match_count >= 12:
+                                merged_keys.add(scan_key)
+                                for coord in coords:
+                                    master_scan[coord] += coords[coord]
+                                match_found = True
+                                break
+                        if match_found:
+                            break
+                    # END of "for (x0, y0, z0) ..."
+                    if match_found:
+                        break
+                # END of "for (a, b, c, d, e, ..."
+            # Delete scans that have been merged into the master
+            for scan_key in merged_keys:
+                del scanners[scan_key]
+        result = len(master_scan)
+        return result
+
+    def solve_old_method(self, scanners):
         scans = {}
         for scanner_id, scanner_scans in scanners.items():
             scan_a = [0] * (2 * 1000 + 1)
