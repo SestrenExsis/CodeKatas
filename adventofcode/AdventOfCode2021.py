@@ -178,22 +178,6 @@ class Day19: # Beacon Scanner
         result = scanners
         return result
     
-    def compress(self, scan):
-        compressed = []
-        for val in scan:
-            compressed.append(val)
-            if compressed[-1] == 0:
-                compressed[-1] = -1
-            if (
-                len(compressed) > 1 and
-                compressed[-1] < 0 and
-                compressed[-2] < 0
-            ):
-                num = compressed.pop()
-                compressed[-1] += num
-        result = tuple(compressed)
-        return result
-    
     def get_master_scan(self, scanners):
         # Start with one scan as the reference point for all others
         _, scan = scanners.popitem()
