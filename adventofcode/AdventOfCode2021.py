@@ -45,10 +45,10 @@ class Template: # Template
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        starts = self.get_parsed_input(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(starts),
+            self.solve2(starts),
             )
         result = solutions
         return result
@@ -58,17 +58,78 @@ class Day21: # Template
     https://adventofcode.com/2021/day/21
     '''
     def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
-        for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
+        pos1 = int(raw_input_lines[0].split(' ')[-1]) - 1
+        pos2 = int(raw_input_lines[1].split(' ')[-1]) - 1
+        result = (pos1, pos2)
         return result
     
-    def solve(self, parsed_input):
-        result = len(parsed_input)
+    def solve(self, starts):
+        scores = [0, 0]
+        positions = [starts[0], starts[1]]
+        roll_count = 0
+        curr_player_id = 0
+        while max(scores) < 1000:
+            a = 1 + (roll_count) % 100
+            b = 1 + (roll_count + 1) % 100
+            c = 1 + (roll_count + 2) % 100
+            new_pos = (positions[curr_player_id] + a + b + c) % 10
+            positions[curr_player_id] = new_pos
+            score = 1 + new_pos
+            scores[curr_player_id] += score
+            roll_count += 3
+            curr_player_id = 1 - curr_player_id
+        result = min(scores) * roll_count
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, starts):
+        # player_id: count
+        wins = collections.defaultdict(int)
+        # (max_score, score1, score2, pos1, pos2, turn, count)
+        work = [(0, 0, 0, starts[0], starts[1], 1, 1)]
+        while len(work) > 0:
+            element = heapq.heappop(work)
+            max_score, score1, score2, pos1, pos2, turn, count = element
+            max_score *= -1
+            score1 *= -1
+            score2 *= -1
+            if max_score >= 21:
+                winning_player = 1 if score1 > score2 else 2
+                wins[winning_player] += count
+                continue
+            for roll, occurrences in (
+                (3, 1),
+                (4, 3),
+                (5, 6),
+                (6, 7),
+                (7, 6),
+                (8, 3),
+                (9, 1),
+            ):
+                npos1 = pos1
+                npos2 = pos2
+                nscore1 = score1
+                nscore2 = score2
+                nturn = turn
+                ncount = occurrences * count
+                if turn == 1:
+                    nturn = 2
+                    npos1 = (npos1 + roll) % 10
+                    nscore1 += 1 + npos1
+                elif turn == 2:
+                    nturn = 1
+                    npos2 = (npos2 + roll) % 10
+                    nscore2 += 1 + npos2
+                nmax_score = max(nscore1, nscore2)
+                heapq.heappush(work, (
+                    -nmax_score,
+                    -nscore1,
+                    -nscore2,
+                    npos1,
+                    npos2,
+                    nturn,
+                    ncount,
+                ))
+        result = max(wins.values())
         return result
     
     def main(self):
