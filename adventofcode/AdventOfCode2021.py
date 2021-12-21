@@ -166,10 +166,12 @@ class Day19Incomplete: # Beacon Scanner
         result = tuple(compressed)
         return result
     
-    def solve(self, scanners):
-        # 723 is too high
+    def get_master_scan(self, scanners):
         # Start with one scan as the reference point for all others
         _, scan = scanners.popitem()
+        scanner_coords = {
+            (0, 0, 0),
+        }
         master_scan = collections.defaultdict(int)
         for coordinate in scan:
             master_scan[coordinate] += 1
@@ -227,6 +229,7 @@ class Day19Incomplete: # Beacon Scanner
                                     match_count += 1
                             # If 12 or more match, then merge into master
                             if match_count >= 12:
+                                scanner_coords.add((dx, dy, dz))
                                 merged_keys.add(scan_key)
                                 for coord in coords:
                                     master_scan[coord] += coords[coord]
@@ -234,93 +237,40 @@ class Day19Incomplete: # Beacon Scanner
                                 break
                         if match_found:
                             break
-                    # END of "for (x0, y0, z0) ..."
                     if match_found:
                         break
-                # END of "for (a, b, c, d, e, ..."
             # Delete scans that have been merged into the master
             for scan_key in merged_keys:
                 del scanners[scan_key]
-        result = len(master_scan)
-        return result
-
-    def solve_old_method(self, scanners):
-        scans = {}
-        for scanner_id, scanner_scans in scanners.items():
-            scan_a = [0] * (2 * 1000 + 1)
-            scan_b = [0] * (2 * 1000 + 1)
-            scan_c = [0] * (2 * 1000 + 1)
-            for a, b, c in scanner_scans:
-                scan_a[a + 1_000] += 1
-                scan_b[b + 1_000] += 1
-                scan_c[c + 1_000] += 1
-            compressed_a = self.compress(scan_a)
-            compressed_b = self.compress(scan_b)
-            compressed_c = self.compress(scan_c)
-            scans[(scanner_id, 1)] = compressed_a
-            scans[(scanner_id, 2)] = compressed_b
-            scans[(scanner_id, 3)] = compressed_c
-        merged_scans = {}
-        for _ in range(3):
-            key, scan = scans.popitem()
-            merged_scans[key] = scan
-        while len(scans) > 0:
-            print(len(scans))
-            next_merged_scans = {}
-            merged_keys = {}
-            for keyA, scanA in merged_scans.items():
-                # Assume no scan detected a beacon at the edges of the scan range
-                assert scanA[0] < 0
-                assert scanA[-1] < 0
-                for keyB, scanB in scans.items():
-                    if keyB[0] == keyA[0]: # Can't self-merge
-                        continue
-                    for flipA, flipB in (
-                        (False, False),
-                        (False, True),
-                        (True, False),
-                        (True, True),
-                    ):
-                        if flipA:
-                            scanA = scanA[::-1]
-                        if flipB:
-                            scanB = scanB[::-1]
-                        min_overlap = 1
-                        beacon_count = 0
-                        while beacon_count < 12:
-                            reading = scanB[min_overlap]
-                            if reading > 0:
-                                beacon_count += reading
-                            min_overlap += 1
-                        merge_ind = False
-                        max_overlap = min(len(scanA), len(scanB))
-                        # Attempt to merge scanA with scanB
-                        # aaaaaaAAA
-                        #       BBBbbbbbbb
-                        # ccccccCCCccccccc
-                        for overlap in range(min_overlap, max_overlap):
-                            pass
-                            keyA[:-min_overlap]
-                        if merge_ind:
-                            merged_keys.add(keyB)
-                            next_merged_scans[keyA] = merged_scan
-                for key in merged_keys:
-                    scans.remove(key)
-            merged_scans = next_merged_scans
-        key = next(iter(scans.keys()))
-        result = sum(reading for reading in scans[key] if reading > 0)
+        result = (master_scan, scanner_coords)
         return result
     
-    def solve2(self, scanners):
-        result = len(scanners)
+    def solve(self, master_scan):
+        result = len(master_scan)
+        return result
+    
+    def solve2(self, scanner_coords):
+        max_manhattan_distance = 0
+        for x1, y1, z1 in scanner_coords:
+            for x2, y2, z2 in scanner_coords:
+                dx = abs(x2 - x1)
+                dy = abs(y2 - y1)
+                dz = abs(z2 - z1)
+                manhattan_distance = dx + dy + dz
+                max_manhattan_distance = max(
+                    max_manhattan_distance,
+                    manhattan_distance,
+                )
+        result = max_manhattan_distance
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         scanners = self.get_scanners(raw_input_lines)
+        master_scan, scanner_coords = self.get_master_scan(scanners)
         solutions = (
-            self.solve(scanners),
-            self.solve2(scanners),
+            self.solve(master_scan),
+            self.solve2(scanner_coords),
             )
         result = solutions
         return result
