@@ -53,6 +53,34 @@ class Template: # Template
         result = solutions
         return result
 
+class Day21: # Template
+    '''
+    https://adventofcode.com/2021/day/21
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day20: # Trench Map
     '''
     https://adventofcode.com/2021/day/20
@@ -134,7 +162,7 @@ class Day20: # Trench Map
         result = solutions
         return result
 
-class Day19Incomplete: # Beacon Scanner
+class Day19: # Beacon Scanner
     '''
     https://adventofcode.com/2021/day/19
     '''
@@ -1869,9 +1897,9 @@ if __name__ == '__main__':
        16: (Day16, 'Packet Decoder'),
        17: (Day17, 'Trick Shot'),
        18: (Day18, 'Snailfish'),
-       19: (Day19Incomplete, 'Beacon Scanner'),
+       19: (Day19, 'Beacon Scanner'),
        20: (Day20, 'Trench Map'),
-    #    21: (Day21, 'XXX'),
+       21: (Day21, 'XXX'),
     #    22: (Day22, 'XXX'),
     #    23: (Day23, 'XXX'),
     #    24: (Day24, 'XXX'),
