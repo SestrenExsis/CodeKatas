@@ -53,6 +53,105 @@ class Template: # Template
         result = solutions
         return result
 
+class Day22: # Template
+    '''
+    https://adventofcode.com/2021/day/22
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        steps = []
+        for raw_input_line in raw_input_lines:
+            action, parts = raw_input_line.split(' ')
+            xx, yy, zz = parts.split(',')
+            x1, x2 = tuple(map(int, xx[2:].split('..')))
+            y1, y2 = tuple(map(int, yy[2:].split('..')))
+            z1, z2 = tuple(map(int, zz[2:].split('..')))
+            steps.append((action, x1, x2, y1, y2, z1, z2))
+        result = steps
+        return result
+    
+    def solve(self, steps):
+        activity = set()
+        for action, x1, x2, y1, y2, z1, z2 in steps:
+            for x in range(x1, x2 + 1):
+                if not (-50 <= x <= 50):
+                    break
+                for y in range(y1, y2 + 1):
+                    if not (-50 <= y <= 50):
+                        break
+                    for z in range(z1, z2 + 1):
+                        if not (-50 <= z <= 50):
+                            break
+                        if action == 'on':
+                            activity.add((x, y, z))
+                        elif action == 'off':
+                            activity.discard((x, y, z))
+        result = len(activity)
+        return result
+    
+    def solve2(self, steps):
+        x_cuts = set()
+        y_cuts = set()
+        z_cuts = set()
+        for _, x1, x2, y1, y2, z1, z2 in steps:
+            x_cuts.add(x1)
+            x_cuts.add(x2 + 1)
+            y_cuts.add(y1)
+            y_cuts.add(y2 + 1)
+            z_cuts.add(z1)
+            z_cuts.add(z2 + 1)
+        x_segments = list(sorted(x_cuts))
+        y_segments = list(sorted(y_cuts))
+        z_segments = list(sorted(z_cuts))
+        activity = set()
+        for i, (action, x1, x2, y1, y2, z1, z2) in enumerate(steps):
+            # Calculate x segments covered
+            x_start = 0
+            while x_segments[x_start] < x1:
+                x_start += 1
+            x_end = len(x_segments) - 1
+            while x_segments[x_end] > x2 + 1:
+                x_end -= 1
+            # Calculate y segments covered
+            y_start = 0
+            while y_segments[y_start] < y1:
+                y_start += 1
+            y_end = len(y_segments) - 1
+            while y_segments[y_end] > y2 + 1:
+                y_end -= 1
+            # Calculate z segments covered
+            z_start = 0
+            while z_segments[z_start] < z1:
+                z_start += 1
+            z_end = len(z_segments) - 1
+            while z_segments[z_end] > z2 + 1:
+                z_end -= 1
+            # Turn on or off all segments
+            for xx in range(x_start, x_end):
+                for yy in range(y_start, y_end):
+                    for zz in range(z_start, z_end):
+                        if action == 'on':
+                            activity.add((xx, yy, zz))
+                        elif action == 'off':
+                            activity.discard((xx, yy, zz))
+        total_area = 0
+        for x, y, z in activity:
+            area_x = x_segments[x + 1] - x_segments[x]
+            area_y = y_segments[y + 1] - y_segments[y]
+            area_z = z_segments[z + 1] - z_segments[z]
+            total_area += area_x * area_y * area_z
+        result = total_area
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        steps = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(steps),
+            self.solve2(steps),
+            )
+        result = solutions
+        return result
+
 class Day21: # Template
     '''
     https://adventofcode.com/2021/day/21
@@ -1944,8 +2043,8 @@ if __name__ == '__main__':
        18: (Day18, 'Snailfish'),
        19: (Day19, 'Beacon Scanner'),
        20: (Day20, 'Trench Map'),
-       21: (Day21, 'XXX'),
-    #    22: (Day22, 'XXX'),
+       21: (Day21, 'Dirac Dice'),
+       22: (Day22, 'XXX'),
     #    23: (Day23, 'XXX'),
     #    24: (Day24, 'XXX'),
     #    25: (Day25, 'XXX'),
