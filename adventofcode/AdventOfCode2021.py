@@ -102,8 +102,80 @@ class Day22: # Template
         x_segments = list(sorted(x_cuts))
         y_segments = list(sorted(y_cuts))
         z_segments = list(sorted(z_cuts))
+        compressed_steps = []
+        for action, x1, x2, y1, y2, z1, z2 in steps:
+            print(action, x1, x2, y1, y2, z1, z2)
+            # Calculate x segments covered
+            x_start = 0
+            while x_segments[x_start] < x1:
+                x_start += 1
+            x_end = len(x_segments) - 1
+            while x_segments[x_end] > x2 + 1:
+                x_end -= 1
+            # Calculate y segments covered
+            y_start = 0
+            while y_segments[y_start] < y1:
+                y_start += 1
+            y_end = len(y_segments) - 1
+            while y_segments[y_end] > y2 + 1:
+                y_end -= 1
+            # Calculate z segments covered
+            z_start = 0
+            while z_segments[z_start] < z1:
+                z_start += 1
+            z_end = len(z_segments) - 1
+            while z_segments[z_end] > z2 + 1:
+                z_end -= 1
+            # Compress steps
+            compressed_steps.append((
+                action == 'on',
+                x_start, x_end,
+                y_start, y_end,
+                z_start, z_end,
+            ))
+        total_area = 0
+        # activity = set()
+        for xi in range(len(x_segments)):
+            print(xi, total_area)
+            for yi in range(len(y_segments)):
+                for zi in range(len(z_segments)):
+                    active = False
+                    for action, x1, x2, y1, y2, z1, z2 in reversed(compressed_steps):
+                        if x1 <= xi < x2 and y1 <= yi < y2 and z1 <= zi < z2:
+                            active = action
+                            break
+                    if active:
+                        area_x = x_segments[xi + 1] - x_segments[xi]
+                        area_y = y_segments[yi + 1] - y_segments[yi]
+                        area_z = z_segments[zi + 1] - z_segments[zi]
+                        total_area += area_x * area_y * area_z
+                        # activity.add((xi, yi, zi))
+        # total_area = 0
+        # for xi, yi, zi in activity:
+        #     area_x = x_segments[xi + 1] - x_segments[xi]
+        #     area_y = y_segments[yi + 1] - y_segments[yi]
+        #     area_z = z_segments[zi + 1] - z_segments[zi]
+        #     total_area += area_x * area_y * area_z
+        result = total_area
+        return result
+    
+    def solve2_slowly(self, steps):
+        x_cuts = set()
+        y_cuts = set()
+        z_cuts = set()
+        for _, x1, x2, y1, y2, z1, z2 in steps:
+            x_cuts.add(x1)
+            x_cuts.add(x2 + 1)
+            y_cuts.add(y1)
+            y_cuts.add(y2 + 1)
+            z_cuts.add(z1)
+            z_cuts.add(z2 + 1)
+        x_segments = list(sorted(x_cuts))
+        y_segments = list(sorted(y_cuts))
+        z_segments = list(sorted(z_cuts))
         activity = set()
         for i, (action, x1, x2, y1, y2, z1, z2) in enumerate(steps):
+            print(i, len(activity))
             # Calculate x segments covered
             x_start = 0
             while x_segments[x_start] < x1:
