@@ -134,7 +134,6 @@ class Day22: # Template
                 z_start, z_end,
             ))
         total_area = 0
-        # activity = set()
         for xi in range(len(x_segments)):
             print(xi, total_area)
             for yi in range(len(y_segments)):
@@ -149,13 +148,6 @@ class Day22: # Template
                         area_y = y_segments[yi + 1] - y_segments[yi]
                         area_z = z_segments[zi + 1] - z_segments[zi]
                         total_area += area_x * area_y * area_z
-                        # activity.add((xi, yi, zi))
-        # total_area = 0
-        # for xi, yi, zi in activity:
-        #     area_x = x_segments[xi + 1] - x_segments[xi]
-        #     area_y = y_segments[yi + 1] - y_segments[yi]
-        #     area_z = z_segments[zi + 1] - z_segments[zi]
-        #     total_area += area_x * area_y * area_z
         result = total_area
         return result
     
