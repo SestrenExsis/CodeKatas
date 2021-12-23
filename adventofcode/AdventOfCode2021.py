@@ -45,38 +45,154 @@ class Template: # Template
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        starts = self.get_parsed_input(raw_input_lines)
+        parsed_input = self.get_parsed_input(raw_input_lines)
         solutions = (
-            self.solve(starts),
-            self.solve2(starts),
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
             )
         result = solutions
         return result
 
-class Day23: # Template
+class Day23: # Amphipod
     '''
     https://adventofcode.com/2021/day/23
+    A = 1
+    B = 10
+    C = 100
+    D = 1000
     '''
     def get_parsed_input(self, raw_input_lines: List[str]):
         result = []
+        cols = len(raw_input_lines[0])
         for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
+            row_data = raw_input_line
+            while len(row_data) < cols:
+                row_data += ' '
+            result.append(row_data)
+            print(row_data + '|')
+        return result
+
+    def get_diagram(self, raw_input_lines: List[str]):
+        cols = len(raw_input_lines[0])
+        result = []
+        for raw_input_line in raw_input_lines:
+            row_data = raw_input_line
+            while len(row_data) < cols:
+                row_data += ' '
+            result.append(row_data)
         return result
     
-    def solve(self, parsed_input):
-        result = len(parsed_input)
+    def get_progress(self, state):
+        progress = 0
+        for (index, char) in (
+            (29, 'A'),
+            (42, 'A'),
+            (31, 'B'),
+            (44, 'B'),
+            (33, 'C'),
+            (46, 'C'),
+            (35, 'D'),
+            (48, 'D'),
+        ):
+            if state[index] == char:
+                progress += 1
+        result = progress
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve(self, diagram):
+        # 18480
+        # 19540
+        # 16940
+        # 14346
+        costs = {
+            'A': 1,
+            'B': 10,
+            'C': 100,
+            'D': 1000,
+        }
+        rows = len(diagram)
+        cols = len(diagram[0])
+        initial_state = ''.join(diagram)
+        goal_state = ''.join([
+            '#############',
+            '#...........#',
+            '###A#B#C#D###',
+            '  #A#B#C#D#  ',
+            '  #########  ',
+        ])
+        valid_move_indices = {
+            14, 15,     17,     19,     21,     23, 24,
+                    29,     31,     33,     35,
+                    42,     44,     46,     48,
+        }
+        min_cost = float('inf')
+        work = [(0, -self.get_progress(initial_state), initial_state)]
+        states_seen = {}
+        while len(work) > 0:
+            if len(work) > 10_000_000:
+                break
+            cost, progress, state = heapq.heappop(work)
+            # print('')
+            # print('-', state, cost, progress, len(work), len(states_seen))
+            if state == goal_state:
+                min_cost = cost
+                break
+            if state in states_seen and states_seen[state] <= cost:
+                continue
+            states_seen[state] = cost
+            # Find all the amphipods
+            moves = []
+            for index in range(len(state)):
+                if state[index] in 'ABCD':
+                    # (cost, initial_index, index)
+                    moves.append((cost, index, index))
+            # Generate all possible next moves
+            moves_seen = {}
+            while len(moves) > 0:
+                cost, initial_index, index = moves.pop()
+                if (
+                    (initial_index, index) in moves_seen and
+                    moves_seen[(initial_index, index)] >= cost
+                ):
+                    continue
+                moves_seen[(initial_index, index)] = cost
+                if index != initial_index and index in valid_move_indices:
+                    next_state_chars = list(state)
+                    next_state_chars[initial_index] = '.'
+                    next_state_chars[index] = state[initial_index]
+                    next_state = ''.join(next_state_chars)
+                    next_progress = self.get_progress(next_state)
+                    heapq.heappush(work, (cost, -next_progress, next_state))
+                    # print(' ', next_state)
+                row, col = divmod(index, cols)
+                for (next_row, next_col) in (
+                    (row - 1, col),
+                    (row + 1, col),
+                    (row, col - 1),
+                    (row, col + 1),
+                ):
+                    next_index = next_row * cols + next_col
+                    next_cost = cost + costs[state[initial_index]]
+                    if (
+                        0 <= next_row < rows and
+                        0 <= next_col < cols and
+                        state[next_index] == '.' and
+                        (initial_index, next_index) not in moves_seen
+                    ):
+                        moves.append((next_cost, initial_index, next_index))
+        result = min_cost
+        return result
+    
+    def solve2(self, diagram):
+        result = len(diagram)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        starts = self.get_parsed_input(raw_input_lines)
+        diagram = self.get_diagram(raw_input_lines)
         solutions = (
-            self.solve(starts),
-            self.solve2(starts),
+            self.solve(diagram),
+            self.solve2(diagram),
             )
         result = solutions
         return result
