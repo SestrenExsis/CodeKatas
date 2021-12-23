@@ -53,7 +53,35 @@ class Template: # Template
         result = solutions
         return result
 
-class Day22: # Template
+class Day23: # Template
+    '''
+    https://adventofcode.com/2021/day/23
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        starts = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(starts),
+            self.solve2(starts),
+            )
+        result = solutions
+        return result
+
+class Day22: # Reactor Reboot
     '''
     https://adventofcode.com/2021/day/22
     '''
@@ -216,7 +244,7 @@ class Day22: # Template
         result = solutions
         return result
 
-class Day21: # Template
+class Day21: # Dirac Dice
     '''
     https://adventofcode.com/2021/day/21
     '''
@@ -2108,8 +2136,8 @@ if __name__ == '__main__':
        19: (Day19, 'Beacon Scanner'),
        20: (Day20, 'Trench Map'),
        21: (Day21, 'Dirac Dice'),
-       22: (Day22, 'XXX'),
-    #    23: (Day23, 'XXX'),
+       22: (Day22, 'Reactor Reboot'),
+       23: (Day23, 'XXX'),
     #    24: (Day24, 'XXX'),
     #    25: (Day25, 'XXX'),
         }
