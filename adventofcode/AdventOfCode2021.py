@@ -56,60 +56,111 @@ class Template: # Template
 class Day23: # Amphipod
     '''
     https://adventofcode.com/2021/day/23
-    A = 1
-    B = 10
-    C = 100
-    D = 1000
     '''
-    def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
-        cols = len(raw_input_lines[0])
-        for raw_input_line in raw_input_lines:
-            row_data = raw_input_line
-            while len(row_data) < cols:
-                row_data += ' '
-            result.append(row_data)
-            print(row_data + '|')
-        return result
+    amphipods = {
+        'A': (1, 1),
+        'B': (2, 10),
+        'C': (3, 100),
+        'D': (4, 1000),
+    }
+    halls =  {0, 1, 3, 5, 7, 9, 10}
+    entries = {2, 4, 6, 8}
 
-    def get_diagram(self, raw_input_lines: List[str]):
-        cols = len(raw_input_lines[0])
-        result = []
-        for raw_input_line in raw_input_lines:
-            row_data = raw_input_line
-            while len(row_data) < cols:
-                row_data += ' '
-            result.append(row_data)
+    def get_initial_state(self, raw_input_lines: List[str]):
+        state = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        for raw_input_line in reversed(raw_input_lines[2:4]):
+            state[2] = 10 * state[2] + self.amphipods[raw_input_line[3]][0]
+            state[4] = 10 * state[2] + self.amphipods[raw_input_line[5]][0]
+            state[6] = 10 * state[2] + self.amphipods[raw_input_line[7]][0]
+            state[8] = 10 * state[2] + self.amphipods[raw_input_line[9]][0]
+        result = tuple(state)
         return result
     
-    def get_progress(self, state):
-        progress = 0
-        for (index, char) in (
-            (29, 'A'),
-            (42, 'A'),
-            (31, 'B'),
-            (44, 'B'),
-            (33, 'C'),
-            (46, 'C'),
-            (35, 'D'),
-            (48, 'D'),
-        ):
-            if state[index] == char:
-                progress += 1
-        result = progress
+    def solve(self, initial_state, max_move_count: int=100):
+        TYPE_COUNT = 4
+        CAPACITY = 2
+        LIMIT = TYPE_COUNT * 10 ** (CAPACITY - 1)
+        goal_state = (0, 0, 11, 0, 22, 0, 33, 0, 44, 0, 0)
+        min_cost = float('inf')
+        work = [(0, 0, initial_state)]
+        debug = 0
+        while len(work) > 0:
+            move_count, cost, state = heapq.heappop(work)
+            if debug % 1000 == 0:
+                print(len(work), move_count, cost, state)
+            debug += 1
+            # Check if we have already reached the goal state
+            if state == goal_state:
+                min_cost = min(min_cost, cost)
+            if move_count > max_move_count:
+                continue
+            # Consider all possible hallway-to-entryway moves
+            for hall_id in self.halls:
+                if state[hall_id] < 1:
+                    continue
+                # The only valid choice for an entry is determined by type
+                amphipod = state[hall_id] % 10
+                entry_id = 2 * amphipod + 2
+                # Check if entryway is already full
+                if state[entry_id] > LIMIT:
+                    continue
+                next_state = list(state)
+                next_state[hall_id] = 0
+                # Check if hallway is blocked
+                start = min(hall_id, entry_id)
+                end = max(hall_id, entry_id)
+                for i in range(start, end + 1):
+                    if i not in self.halls:
+                        continue
+                    if next_state[i] > 0:
+                        break
+                else:
+                    next_state[entry_id] = 10 * next_state[entry_id] + amphipod
+                # Cost is determined by manhattan distance and amphipod type
+                stack = next_state[entry_id]
+                height = CAPACITY if stack == 0 else CAPACITY - len(str(stack))
+                steps = abs(hall_id - entry_id) + height
+                next_cost = cost + steps * (10 ** (amphipod - 1))
+                heapq.heappush(work, (move_count + 1, next_cost, tuple(next_state)))
+            # Consider all possible entryway-to-hallway moves
+            for entry_id in self.entries:
+                next_state = list(state)
+                # Check if entryway is empty or already at its goal
+                if (
+                    next_state[entry_id] < 1 or
+                    next_state[entry_id] == goal_state[entry_id]
+                ):
+                    continue
+                amphipod = next_state[entry_id] % 10
+                # Check if entryway has only amphipods in the correct position
+                if (
+                    len(set(str(next_state[entry_id]))) == 1 and
+                    amphipod == (entry_id // 2 - 2)
+                ):
+                    continue
+                next_state[entry_id] //= 10
+                for hall_id in self.halls:
+                    next_state[hall_id] = amphipod
+                    # Check if hallway is blocked
+                    start = min(hall_id, entry_id)
+                    end = max(hall_id, entry_id)
+                    for i in range(start, end + 1):
+                        if i not in self.halls:
+                            continue
+                        if next_state[i] > 0:
+                            break
+                    else:
+                        next_state[hall_id] = amphipod
+                    # Cost is determined by manhattan distance and amphipod type
+                    stack = next_state[entry_id]
+                    height = CAPACITY if stack == 0 else CAPACITY - len(str(stack))
+                    steps = abs(hall_id - entry_id) + height
+                    next_cost = cost + steps * (10 ** (amphipod - 1))
+                    heapq.heappush(work, (move_count + 1, next_cost, tuple(next_state)))
+        result = min_cost
         return result
     
-    def solve(self, diagram):
-        # 18480
-        # 19540
-        # 16940
-        # 14346
-        costs = {
-            'A': 1,
-            'B': 10,
-            'C': 100,
-            'D': 1000,
-        }
+    def solve_poorly(self, diagram):
         rows = len(diagram)
         cols = len(diagram[0])
         initial_state = ''.join(diagram)
@@ -172,7 +223,7 @@ class Day23: # Amphipod
                     (row, col + 1),
                 ):
                     next_index = next_row * cols + next_col
-                    next_cost = cost + costs[state[initial_index]]
+                    next_cost = cost + self.costs[state[initial_index]]
                     if (
                         0 <= next_row < rows and
                         0 <= next_col < cols and
@@ -183,16 +234,16 @@ class Day23: # Amphipod
         result = min_cost
         return result
     
-    def solve2(self, diagram):
-        result = len(diagram)
+    def solve2(self, rooms):
+        result = len(rooms)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        diagram = self.get_diagram(raw_input_lines)
+        initial_state = self.get_initial_state(raw_input_lines)
         solutions = (
-            self.solve(diagram),
-            self.solve2(diagram),
+            self.solve(initial_state),
+            self.solve2(initial_state),
             )
         result = solutions
         return result
