@@ -53,6 +53,204 @@ class Template: # Template
         result = solutions
         return result
 
+class Day24: # Arithmetic Logic Unit
+    '''
+    https://adventofcode.com/2021/day/24
+    '''
+    def get_program(self, raw_input_lines: List[str]):
+        program = []
+        for raw_input_line in raw_input_lines:
+            parts = raw_input_line.split(' ')
+            instruction = []
+            for part in parts:
+                try:
+                    num = int(part)
+                    instruction.append(num)
+                except ValueError:
+                    instruction.append(part)
+            program.append(tuple(instruction))
+        result = program
+        return result
+    
+    class ALU:
+        def __init__(self, program, input):
+            self.program = program
+            self.pc = 0
+            self.registers = {
+                'w': 0,
+                'x': 0,
+                'y': 0,
+                'z': 0,
+            }
+            self.input = list(reversed(list(map(int, str(input)))))
+            self.legal = True
+        
+        def step(self):
+            if not self.legal:
+                return
+            instruction = self.program[self.pc]
+            op = instruction[0]
+            if op == 'inp':
+                a = instruction[1]
+                value = self.input.pop()
+                self.registers[a] = value
+            elif op == 'add':
+                a, b = instruction[1], instruction[2]
+                operand = b
+                if type(b) is str:
+                    operand = self.registers[b]
+                value = self.registers[a] + operand
+                self.registers[a] = value
+            elif op == 'mul':
+                a, b = instruction[1], instruction[2]
+                operand = b
+                if type(b) is str:
+                    operand = self.registers[b]
+                value = self.registers[a] * operand
+                self.registers[a] = value
+            elif op == 'div':
+                a, b = instruction[1], instruction[2]
+                operand = b
+                if type(b) is str:
+                    operand = self.registers[b]
+                if operand == 0:
+                    self.legal = False
+                    return
+                value = self.registers[a] // operand
+                self.registers[a] = value
+            elif op == 'mod':
+                a, b = instruction[1], instruction[2]
+                operand = b
+                if type(b) is str:
+                    operand = self.registers[b]
+                if self.registers[a] < 0 or operand <= 0:
+                    self.legal = False
+                    return
+                value = self.registers[a] % operand
+                self.registers[a] = value
+            elif op == 'eql':
+                a, b = instruction[1], instruction[2]
+                operand = b
+                if type(b) is str:
+                    operand = self.registers[b]
+                value = 1 if self.registers[a] == operand else 0
+                self.registers[a] = value
+            self.pc += 1
+        
+        def spin(self, spin_count: int=1):
+            for _ in range(spin_count):
+                for _ in range(18):
+                    self.step()
+        
+        def run(self):
+            while self.pc < len(self.program) and self.legal:
+                self.step()
+    
+    def F(self, w, z, param_a, param_b, param_c):
+        '''
+        mul x 0
+        add x z
+        mod x 26
+        div z param_a
+        add x param_b
+        eql x w
+        eql x 0
+        mul y 0
+        add y 25
+        mul y x
+        add y 1
+        mul z y
+        mul y 0
+        add y w
+        add y param_c
+        mul y x
+        add z y
+        -------
+        x = z % 26
+        z = z // param_a
+        x = x + param_b
+        x = 0 if x == w else 1
+        y = 25 * x + 1
+        z = z * y
+        y = x * (w + param_c)
+        result = z + y
+        -------
+        x = 0 if w == (z % 26 + param_b) else 1
+        result = (z // param_a) * (25 * x + 1) + x * (w + param_c)
+        '''
+        result = (z // 26) if param_a else z
+        if w != (z % 26 + param_b):
+            result = 26 * result + w + param_c
+        return result
+    
+    def G(self, inputs):
+        z = 0
+        for i, (param_a, param_b, param_c) in enumerate((
+            (0, 15, 15),
+            (0, 15, 10),
+            (0, 12, 2),
+            (0, 13, 16),
+            (1, -12, 12),
+            (0, 10, 11),
+            (1, -9, 5),
+            (0, 14, 16),
+            (0, 13, 6),
+            (1, -14, 15),
+            (1, -11, 3),
+            (1, -2, 12),
+            (1, -16, 10),
+            (1, -14, 13),
+        )):
+            z = self.F(inputs[i], z, param_a, param_b, param_c)
+        result = z
+        return result
+    
+    def solve_slowly(self, program):
+        '''
+        Model numbers are 14-digit numbers without zeroes, passed
+        left-to-right to the input.
+        Programs are valid if z has a value of 0 at the end.
+        '''
+        max_valid_model_number = float('-inf')
+        for model_number in range(
+            99_999_999_999_999,
+            11_111_111_111_111 - 1,
+            -1,
+        ):
+            if '0' in str(model_number):
+                continue
+            alu = self.ALU(program, model_number)
+            if alu.input[:4] == [9, 9, 9, 9]:
+                print(model_number)
+            alu.run()
+            if alu.legal and alu.registers['z'] == 0:
+                max_valid_model_number = model_number
+                break
+            inputs = list(reversed(list(map(int, str(model_number)))))
+            assert self.G(inputs) == alu.registers['z']
+        result = max_valid_model_number
+        return result
+    
+    def interactive_solver(self, program):
+        while True:
+            user_input = input()
+            alu = self.ALU(program, user_input)
+            for _ in range(18 * len(str(user_input))):
+                alu.step()
+            z = alu.registers['z']
+            stack = []
+            while z > 0:
+                stack.append(z % 26)
+                z //= 26
+            print(' ' * 16, stack)
+    
+    def main(self):
+        # raw_input_lines = get_raw_input_lines()
+        with open('inputs/2021day24.in') as open_file:
+            raw_input_lines = open_file.read().splitlines()
+            program = self.get_program(raw_input_lines)
+            self.interactive_solver(program)
+
 class Day23: # Amphipod
     '''
     https://adventofcode.com/2021/day/23
@@ -2304,8 +2502,8 @@ if __name__ == '__main__':
        20: (Day20, 'Trench Map'),
        21: (Day21, 'Dirac Dice'),
        22: (Day22, 'Reactor Reboot'),
-       23: (Day23, 'XXX'),
-    #    24: (Day24, 'XXX'),
+       23: (Day23, 'Amphipod'),
+       24: (Day24, 'Arithmetic Logic Unit'),
     #    25: (Day25, 'XXX'),
         }
     parser = argparse.ArgumentParser()
