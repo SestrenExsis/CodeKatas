@@ -53,6 +53,67 @@ class Template: # Template
         result = solutions
         return result
 
+class Day25: # Sea Cucumber
+    '''
+    https://adventofcode.com/2021/day/25
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        east = set()
+        south = set()
+        rows = len(raw_input_lines)
+        cols = len(raw_input_lines[0])
+        for row in range(rows):
+            for col in range(cols):
+                if raw_input_lines[row][col] == '>':
+                    east.add((row, col))
+                elif raw_input_lines[row][col] == 'v':
+                    south.add((row, col))
+        result = rows, cols, east, south
+        return result
+    
+    def solve(self, rows, cols, east, south):
+        step_id = 0
+        while True:
+            step_id += 1
+            move_count = 0
+            next_east = set()
+            for (row, col) in east:
+                col2 = (col + 1) % cols
+                if (row, col2) not in east and (row, col2) not in south:
+                    next_east.add((row, col2))
+                    move_count += 1
+                else:
+                    next_east.add((row, col))
+            east = next_east
+            next_south = set()
+            for (row, col) in south:
+                row2 = (row + 1) % rows
+                if (row2, col) not in east and (row2, col) not in south:
+                    next_south.add((row2, col))
+                    move_count += 1
+                else:
+                    next_south.add((row, col))
+            south = next_south
+            print(step_id, move_count)
+            if move_count < 1:
+                break
+        result = step_id
+        return result
+    
+    def solve2(self, rows, cols, east, south):
+        result = len(east), len(south)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        rows, cols, east, south = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(rows, cols, set(east), set(south)),
+            self.solve2(rows, cols, set(east), set(south)),
+            )
+        result = solutions
+        return result
+
 class Day24: # Arithmetic Logic Unit
     '''
     https://adventofcode.com/2021/day/24
@@ -2504,7 +2565,7 @@ if __name__ == '__main__':
        22: (Day22, 'Reactor Reboot'),
        23: (Day23, 'Amphipod'),
        24: (Day24, 'Arithmetic Logic Unit'),
-    #    25: (Day25, 'XXX'),
+       25: (Day25, 'Sea Cucumber'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('day', help='Solve for a given day', type=int)
