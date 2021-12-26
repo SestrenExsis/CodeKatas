@@ -323,6 +323,16 @@ class Day23: # Amphipod
     }
     halls =  {0, 1, 3, 5, 7, 9, 10}
     entries = {2, 4, 6, 8}
+    valid_entryways = {
+        (1, 2): { 0, 1 },
+        (1, 4): { 0, 1, 11, 111 },
+        (2, 2): { 0, 2 },
+        (2, 4): { 0, 2, 22, 222 },
+        (3, 2): { 0, 3 },
+        (3, 4): { 0, 3, 33, 333 },
+        (4, 2): { 0, 4 },
+        (4, 4): { 0, 4, 44, 444 },
+    }
 
     def get_initial_states(self, raw_input_lines: List[str]):
         state = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -347,10 +357,10 @@ class Day23: # Amphipod
                     continue
                 # The only valid choice for an entry is determined by its type
                 amphipod = state[hall_id] % 10
-                assert amphipod in (1, 2, 3, 4)
                 entry_id = 2 * amphipod
+                valid_entryways = self.valid_entryways[(amphipod, capacity)]
                 # Check if entryway is ready for amphipods to move in
-                if not (state[entry_id] in (0, amphipod)):
+                if not (state[entry_id] in valid_entryways):
                     continue
                 next_state = list(state)
                 # Check if hallway is blocked
@@ -379,7 +389,6 @@ class Day23: # Amphipod
     def solve(self, initial_state, goal_state):
         min_cost = float('inf')
         capacity = len(str(goal_state[2]))
-        assert capacity in (2, 4)
         work = [
             (0, tuple(initial_state)),
         ]
@@ -463,6 +472,8 @@ class Day23: # Amphipod
         self.run_tests()
         raw_input_lines = get_raw_input_lines()
         states = self.get_initial_states(raw_input_lines)
+        print(states[0])
+        print(states[1])
         solutions = (
             self.solve(states[0], (0, 0, 11, 0, 22, 0, 33, 0, 44, 0, 0)),
             self.solve(states[1], (0, 0, 1111, 0, 2222, 0, 3333, 0, 4444, 0, 0)),
