@@ -94,14 +94,13 @@ class Day25: # Sea Cucumber
                 else:
                     next_south.add((row, col))
             south = next_south
-            print(step_id, move_count)
             if move_count < 1:
                 break
         result = step_id
         return result
     
-    def solve2(self, rows, cols, east, south):
-        result = len(east), len(south)
+    def solve2(self):
+        result = 'Happy holidays!'
         return result
     
     def main(self):
@@ -109,7 +108,7 @@ class Day25: # Sea Cucumber
         rows, cols, east, south = self.get_parsed_input(raw_input_lines)
         solutions = (
             self.solve(rows, cols, set(east), set(south)),
-            self.solve2(rows, cols, set(east), set(south)),
+            self.solve2(),
             )
         result = solutions
         return result
@@ -325,81 +324,94 @@ class Day23: # Amphipod
     halls =  {0, 1, 3, 5, 7, 9, 10}
     entries = {2, 4, 6, 8}
 
-    def get_initial_state(self, raw_input_lines: List[str]):
+    def get_initial_states(self, raw_input_lines: List[str]):
         state = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         for raw_input_line in reversed(raw_input_lines[2:4]):
             state[2] = 10 * state[2] + self.amphipods[raw_input_line[3]][0]
-            state[4] = 10 * state[2] + self.amphipods[raw_input_line[5]][0]
-            state[6] = 10 * state[2] + self.amphipods[raw_input_line[7]][0]
-            state[8] = 10 * state[2] + self.amphipods[raw_input_line[9]][0]
-        result = tuple(state)
+            state[4] = 10 * state[4] + self.amphipods[raw_input_line[5]][0]
+            state[6] = 10 * state[6] + self.amphipods[raw_input_line[7]][0]
+            state[8] = 10 * state[8] + self.amphipods[raw_input_line[9]][0]
+        state2 = state[:]
+        state2[2] = 1000 * (state2[2] // 10) + 440 + state2[2] % 10
+        state2[4] = 1000 * (state2[4] // 10) + 230 + state2[4] % 10
+        state2[6] = 1000 * (state2[6] // 10) + 120 + state2[6] % 10
+        state2[8] = 1000 * (state2[8] // 10) + 310 + state2[8] % 10
+        result = (tuple(state), tuple(state2))
         return result
     
-    def solve(self, initial_state, max_move_count: int=100):
-        TYPE_COUNT = 4
-        CAPACITY = 2
-        LIMIT = TYPE_COUNT * 10 ** (CAPACITY - 1)
-        goal_state = (0, 0, 11, 0, 22, 0, 33, 0, 44, 0, 0)
-        min_cost = float('inf')
-        work = [(0, 0, initial_state)]
-        debug = 0
-        while len(work) > 0:
-            move_count, cost, state = heapq.heappop(work)
-            if debug % 1000 == 0:
-                print(len(work), move_count, cost, state)
-            debug += 1
-            # Check if we have already reached the goal state
-            if state == goal_state:
-                min_cost = min(min_cost, cost)
-            if move_count > max_move_count:
-                continue
-            # Consider all possible hallway-to-entryway moves
+    def edit_move(self, cost, state, capacity):
+        while True:
+            prev_cost = cost
             for hall_id in self.halls:
                 if state[hall_id] < 1:
                     continue
-                # The only valid choice for an entry is determined by type
+                # The only valid choice for an entry is determined by its type
                 amphipod = state[hall_id] % 10
-                entry_id = 2 * amphipod + 2
-                # Check if entryway is already full
-                if state[entry_id] > LIMIT:
+                assert amphipod in (1, 2, 3, 4)
+                entry_id = 2 * amphipod
+                # Check if entryway is ready for amphipods to move in
+                if not (state[entry_id] in (0, amphipod)):
                     continue
                 next_state = list(state)
-                next_state[hall_id] = 0
                 # Check if hallway is blocked
                 start = min(hall_id, entry_id)
                 end = max(hall_id, entry_id)
                 for i in range(start, end + 1):
-                    if i not in self.halls:
+                    if i == hall_id or i not in self.halls:
                         continue
                     if next_state[i] > 0:
                         break
                 else:
+                    # Cost is determined by manhattan distance and amphipod type
+                    stack = next_state[entry_id]
+                    height = capacity if stack == 0 else capacity - len(str(stack))
+                    steps = abs(hall_id - entry_id) + height
+                    cost += steps * (10 ** (amphipod - 1))
+                    # Move the amphipod
+                    next_state[hall_id] = 0
                     next_state[entry_id] = 10 * next_state[entry_id] + amphipod
-                # Cost is determined by manhattan distance and amphipod type
-                stack = next_state[entry_id]
-                height = CAPACITY if stack == 0 else CAPACITY - len(str(stack))
-                steps = abs(hall_id - entry_id) + height
-                next_cost = cost + steps * (10 ** (amphipod - 1))
-                heapq.heappush(work, (move_count + 1, next_cost, tuple(next_state)))
+                    state = tuple(next_state)
+            if cost == prev_cost:
+                break
+        result = (cost, state)
+        return result
+    
+    def solve(self, initial_state, goal_state):
+        min_cost = float('inf')
+        capacity = len(str(goal_state[2]))
+        assert capacity in (2, 4)
+        work = [
+            (0, tuple(initial_state)),
+        ]
+        debug = 0
+        while len(work) > 0:
+            cost, state = heapq.heappop(work)
+            if debug % 10_000 == 0:
+                print(len(work), cost, state)
+            debug += 1
+            # Check if we have already reached the goal state
+            if state == goal_state:
+                min_cost = cost
+                break
+            next_moves = []
             # Consider all possible entryway-to-hallway moves
             for entry_id in self.entries:
-                next_state = list(state)
                 # Check if entryway is empty or already at its goal
                 if (
-                    next_state[entry_id] < 1 or
-                    next_state[entry_id] == goal_state[entry_id]
+                    state[entry_id] < 1 or
+                    state[entry_id] == goal_state[entry_id]
                 ):
                     continue
-                amphipod = next_state[entry_id] % 10
+                amphipod = state[entry_id] % 10
                 # Check if entryway has only amphipods in the correct position
                 if (
-                    len(set(str(next_state[entry_id]))) == 1 and
-                    amphipod == (entry_id // 2 - 2)
+                    len(set(str(state[entry_id]))) == 1 and
+                    amphipod == 1 + ((entry_id - 2) // 2)
                 ):
                     continue
-                next_state[entry_id] //= 10
                 for hall_id in self.halls:
-                    next_state[hall_id] = amphipod
+                    next_state = list(state)
+                    next_state[entry_id] //= 10
                     # Check if hallway is blocked
                     start = min(hall_id, entry_id)
                     end = max(hall_id, entry_id)
@@ -410,99 +422,50 @@ class Day23: # Amphipod
                             break
                     else:
                         next_state[hall_id] = amphipod
-                    # Cost is determined by manhattan distance and amphipod type
-                    stack = next_state[entry_id]
-                    height = CAPACITY if stack == 0 else CAPACITY - len(str(stack))
-                    steps = abs(hall_id - entry_id) + height
-                    next_cost = cost + steps * (10 ** (amphipod - 1))
-                    heapq.heappush(work, (move_count + 1, next_cost, tuple(next_state)))
+                        # Cost is determined by manhattan distance and amphipod type
+                        stack = next_state[entry_id]
+                        height = capacity if stack == 0 else capacity - len(str(stack))
+                        steps = abs(hall_id - entry_id) + height
+                        next_cost = cost + steps * (10 ** (amphipod - 1))
+                        next_move = (next_cost, tuple(next_state))
+                        next_moves.append(next_move)
+            # Force any amphipods that can reach their goal state to do so
+            for cost, state in next_moves:
+                edited_cost, edited_state = self.edit_move(cost, state, capacity)
+                heapq.heappush(work, (edited_cost, edited_state))
         result = min_cost
         return result
     
-    def solve_poorly(self, diagram):
-        rows = len(diagram)
-        cols = len(diagram[0])
-        initial_state = ''.join(diagram)
-        goal_state = ''.join([
-            '#############',
-            '#...........#',
-            '###A#B#C#D###',
-            '  #A#B#C#D#  ',
-            '  #########  ',
-        ])
-        valid_move_indices = {
-            14, 15,     17,     19,     21,     23, 24,
-                    29,     31,     33,     35,
-                    42,     44,     46,     48,
-        }
-        min_cost = float('inf')
-        work = [(0, -self.get_progress(initial_state), initial_state)]
-        states_seen = {}
-        while len(work) > 0:
-            if len(work) > 10_000_000:
-                break
-            cost, progress, state = heapq.heappop(work)
-            # print('')
-            # print('-', state, cost, progress, len(work), len(states_seen))
-            if state == goal_state:
-                min_cost = cost
-                break
-            if state in states_seen and states_seen[state] <= cost:
-                continue
-            states_seen[state] = cost
-            # Find all the amphipods
-            moves = []
-            for index in range(len(state)):
-                if state[index] in 'ABCD':
-                    # (cost, initial_index, index)
-                    moves.append((cost, index, index))
-            # Generate all possible next moves
-            moves_seen = {}
-            while len(moves) > 0:
-                cost, initial_index, index = moves.pop()
-                if (
-                    (initial_index, index) in moves_seen and
-                    moves_seen[(initial_index, index)] >= cost
-                ):
-                    continue
-                moves_seen[(initial_index, index)] = cost
-                if index != initial_index and index in valid_move_indices:
-                    next_state_chars = list(state)
-                    next_state_chars[initial_index] = '.'
-                    next_state_chars[index] = state[initial_index]
-                    next_state = ''.join(next_state_chars)
-                    next_progress = self.get_progress(next_state)
-                    heapq.heappush(work, (cost, -next_progress, next_state))
-                    # print(' ', next_state)
-                row, col = divmod(index, cols)
-                for (next_row, next_col) in (
-                    (row - 1, col),
-                    (row + 1, col),
-                    (row, col - 1),
-                    (row, col + 1),
-                ):
-                    next_index = next_row * cols + next_col
-                    next_cost = cost + self.costs[state[initial_index]]
-                    if (
-                        0 <= next_row < rows and
-                        0 <= next_col < cols and
-                        state[next_index] == '.' and
-                        (initial_index, next_index) not in moves_seen
-                    ):
-                        moves.append((next_cost, initial_index, next_index))
-        result = min_cost
-        return result
-    
-    def solve2(self, rooms):
-        result = len(rooms)
-        return result
+    def run_tests(self):
+        for (cost, state, expected_cost, expected_state) in (
+            (
+                0, (1, 1,  0, 0, 22, 0, 33, 0, 44, 0, 0),
+                6, (0, 0, 11, 0, 22, 0, 33, 0, 44, 0, 0),
+            ),
+            (
+                0, (1, 1,  0, 0, 22, 0, 33, 0,  0, 4, 4),
+                6006, (0, 0, 11, 0, 22, 0, 33, 0, 44, 0, 0),
+            ),
+            (
+                0, (4, 4,  0, 0, 22, 0, 33, 0,  0, 1, 1),
+                18018, (0, 0, 11, 0, 22, 0, 33, 0, 44, 0, 0),
+            ),
+            (
+                0, (1, 4,  0, 0, 22, 0, 33, 0,  0, 1, 4),
+                12012, (0, 0, 11, 0, 22, 0, 33, 0, 44, 0, 0),
+            ),
+        ):
+            observed_cost, observed_state = self.edit_move(cost, state, 2)
+            assert observed_cost == expected_cost
+            assert observed_state == expected_state
     
     def main(self):
+        self.run_tests()
         raw_input_lines = get_raw_input_lines()
-        initial_state = self.get_initial_state(raw_input_lines)
+        states = self.get_initial_states(raw_input_lines)
         solutions = (
-            self.solve(initial_state),
-            self.solve2(initial_state),
+            self.solve(states[0], (0, 0, 11, 0, 22, 0, 33, 0, 44, 0, 0)),
+            self.solve(states[1], (0, 0, 1111, 0, 2222, 0, 3333, 0, 4444, 0, 0)),
             )
         result = solutions
         return result
