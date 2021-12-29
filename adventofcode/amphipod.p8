@@ -64,43 +64,55 @@ function board:new(depth)
 	)
 end
 -->8
+-- helper functions
+
+function cleanmap()
+	-- clear map
+	for y=3,13 do
+		for x=1,14 do
+			mset(x,y,0)
+		end
+	end
+	-- process tiles
+	for tile in all(_bd.tiles) do
+		for dx=-1,1 do
+			for dy=-1,1 do
+				local x=tile.col+dx
+				local y=tile.row+dy
+				if dx==0 and dy==0 then
+					mset(x,y,tile.typ)
+				elseif mget(x,y)==0 then
+					local typ=56
+					if y<8 then typ=56
+					elseif x==4 then typ=57
+					elseif x==6 then typ=58
+					elseif x==8 then typ=59
+					elseif x==10 then typ=60
+					end
+					mset(x,y,typ)
+				end
+			end
+		end
+	end
+end
+-->8
+-- 
+
 function _init()
 	_bd=board:new(2)
 end
 
 function _update()
-	local refresh=false
+	local dirty=false
 	if btnp(❎) then
 		_bd=board:new(2)
-		refresh=true
+		dirty=true
 	end
 	if btnp(🅾️) then
 		_bd=board:new(4)
-		refresh=true
+		dirty=true
 	end
-	-- refresh map
-	if refresh then
-		-- clear map
-		for y=3,13 do
-			for x=1,14 do
-				mset(x,y,0)
-			end
-		end
-		-- process tiles
-		for tile in all(_bd.tiles) do
-			for dx=-1,1 do
-				for dy=-1,1 do
-					local x=tile.col+dx
-					local y=tile.row+dy
-					if dx==0 and dy==0 then
-						mset(x,y,tile.typ)
-					elseif mget(x,y)==0 then
-						mset(x,y,56)
-					end
-				end
-			end
-		end
-	end
+	if dirty then cleanmap() end
 end
 
 function _draw()
