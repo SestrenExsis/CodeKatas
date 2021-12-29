@@ -17,8 +17,9 @@ cartdata("sestrenexsis_amphipod_1")
  3: lowest score, green
 --]]
 -->8
--- tile
+-- classes
 
+-- tile
 tile={}
 
 function tile:new(r,c,t)
@@ -33,23 +34,21 @@ function tile:new(r,c,t)
 end
 
 -- board
-
 board={}
 
 function board:new(depth)
 	local tiles={}
-	for c=2,12 do
-		if (
-			c==4 or
-			c==6 or
-			c==8 or
-			c==10
-		) then
-			add(tiles,tile:new(5,c,5))
-		else
-			add(tiles,tile:new(5,c,6))
-		end
-	end
+	add(tiles,tile:new(5,2,6))
+	add(tiles,tile:new(5,3,6))
+	add(tiles,tile:new(5,4,5))
+	add(tiles,tile:new(5,5,6))
+	add(tiles,tile:new(5,6,5))
+	add(tiles,tile:new(5,7,6))
+	add(tiles,tile:new(5,8,5))
+	add(tiles,tile:new(5,9,6))
+	add(tiles,tile:new(5,10,5))
+	add(tiles,tile:new(5,11,6))
+	add(tiles,tile:new(5,12,6))
 	for r=1,depth do
 		add(tiles,tile:new(5+r,4,1))
 		add(tiles,tile:new(5+r,6,2))
@@ -65,7 +64,6 @@ function board:new(depth)
 end
 
 -- amphipods
-
 amphipod={}
 
 function amphipod:new(r,c,t)
@@ -112,7 +110,7 @@ function cleanmap()
 	_dirty=false
 end
 
-function getamfs(depth)
+function getamphipods(depth)
 	local res={}
 	for d=1,depth do
 		add(res,amphipod:new(5+d,4,1))
@@ -123,24 +121,29 @@ function getamfs(depth)
 	return res
 end
 -->8
--- 
+-- main
 
 function _init()
 	_row=5
 	_col=2
 	_brd=board:new(2)
-	_amfs=getamfs(2)
+	_amfs=getamphipods(2)
 	_dirty=true
 end
 
 function _update()
+	if btnp(⬅️) then
+		_col-=1
+	elseif btnp(➡️) then
+		_col+=1
+	end
 	if btnp(🅾️) then
 		if rnd()<0.5 then
 			_brd=board:new(2)
-			_amfs=getamfs(2)
+			_amfs=getamphipods(2)
 		else
 			_brd=board:new(4)
-			_amfs=getamfs(4)
+			_amfs=getamphipods(4)
 		end
 		_dirty=true
 	end
