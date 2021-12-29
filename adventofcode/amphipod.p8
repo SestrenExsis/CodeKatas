@@ -89,7 +89,7 @@ function cleanmap()
 		end
 	end
 	-- process tiles
-	for tile in all(_bd.tiles) do
+	for tile in all(_brd.tiles) do
 		for dx=-1,1 do
 			for dy=-1,1 do
 				local x=tile.col+dx
@@ -111,31 +111,37 @@ function cleanmap()
 	end
 	_dirty=false
 end
+
+function getamfs(depth)
+	local res={}
+	for d=1,depth do
+		add(res,amphipod:new(5+d,4,1))
+		add(res,amphipod:new(5+d,6,2))
+		add(res,amphipod:new(5+d,8,3))
+		add(res,amphipod:new(5+d,10,4))
+	end
+	return res
+end
 -->8
 -- 
 
 function _init()
-	_bd=board:new(2)
-	_amfs={
-		amphipod:new(6,4,1),
-		amphipod:new(6,6,2),
-		amphipod:new(6,8,3),
-		amphipod:new(6,10,4),
-		amphipod:new(7,4,1),
-		amphipod:new(7,6,2),
-		amphipod:new(7,8,3),
-		amphipod:new(7,10,4),
-	}
+	_row=5
+	_col=2
+	_brd=board:new(2)
+	_amfs=getamfs(2)
 	_dirty=true
 end
 
 function _update()
-	if btnp(❎) then
-		_bd=board:new(2)
-		_dirty=true
-	end
 	if btnp(🅾️) then
-		_bd=board:new(4)
+		if rnd()<0.5 then
+			_brd=board:new(2)
+			_amfs=getamfs(2)
+		else
+			_brd=board:new(4)
+			_amfs=getamfs(4)
+		end
 		_dirty=true
 	end
 	if _dirty then cleanmap() end
@@ -149,6 +155,7 @@ function _draw()
 		local top=8*amf.row
 		spr(8+amf.typ,lft,top)
 	end
+	spr(7,8*_col,8*_row)
 end
 __gfx__
 00000000111111113333333399999999888888885555555555555555770000770000000000000000000000000000000000000000002222222222222222222200
