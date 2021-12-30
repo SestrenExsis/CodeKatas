@@ -76,6 +76,20 @@ function amphipod:new(r,c,t)
 		obj,{__index=self}
 	)
 end
+
+-- move
+move={}
+
+function move:new(r,c)
+	local obj={
+		row=r,
+		col=c,
+		amf=nil,
+	}
+	return setmetatable(
+		obj,{__index=self}
+	)
+end
 -->8
 -- helper functions
 
@@ -124,40 +138,39 @@ end
 -- main
 
 function _init()
-	_row=5
-	_col=2
+	_mov=move:new(5,2)
 	_brd=board:new(2)
 	_amfs=getamphipods(2)
 	_dirty=true
 end
 
 function _update()
-	local lcol=_col
-	local lrow=_row
+	local ncol=_mov.col
+	local nrow=_mov.row
 	if btnp(⬅️) then
-		_col-=1
+		ncol-=1
 	elseif btnp(➡️) then
-		_col+=1
+		ncol+=1
 	end
 	if btnp(⬆️) then
-		_row-=1
+		nrow-=1
 	elseif btnp(⬇️) then
-		_row+=1
+		nrow+=1
 	end
 	-- check for valid tile
 	local valid=false
 	for tile in all(_brd.tiles) do
 		if (
-			tile.col==_col and
-			tile.row==_row
+			tile.col==ncol and
+			tile.row==nrow
 		) then
 			valid=true
 			break
 		end
 	end
-	if not valid then
-		_col=lcol
-		_row=lrow
+	if valid then
+		_mov.col=ncol
+		_mov.row=nrow
 	end
 	-- recreate board
 	if btnp(🅾️) then
@@ -181,7 +194,7 @@ function _draw()
 		local top=8*amf.row
 		spr(8+amf.typ,lft,top)
 	end
-	spr(7,8*_col,8*_row)
+	spr(7,8*_mov.col,8*_mov.row)
 end
 __gfx__
 00000000111111113333333399999999888888885555555555555555770000770000000000000000000000000000000000000000002222222222222222222200
