@@ -52,6 +52,58 @@ class Template: # Template
         result = solutions
         return result
 
+class Day07: # Recursive Circus
+    '''
+    https://adventofcode.com/2017/day/7
+    '''
+    def get_programs(self, raw_input_lines: List[str]):
+        programs = {}
+        for raw_input_line in raw_input_lines:
+            line = raw_input_line.replace(',', '')
+            parts = line.split(' ')
+            program = parts[0]
+            weight = int(parts[1][1:-1])
+            info = [weight]
+            for item in parts[3:]:
+                info.append(item)
+            programs[program] = tuple(info)
+        result = programs
+        return result
+    
+    def find_bottom_program(self, programs):
+        bases = set()
+        subs = set()
+        for program, program_info in programs.items():
+            if len(program_info) > 1:
+                bases.add(program)
+                for held_program in program_info[1:]:
+                    subs.add(held_program)
+        bottom_program = next(iter(bases - subs))
+        result = bottom_program
+        return result
+    
+    def solve(self, programs):
+        result = self.find_bottom_program(programs)
+        return result
+    
+    def solve2(self, programs):
+        root = self.find_bottom_program(programs)
+        work = []
+        for program, program_info in programs[root]:
+            pass
+        result = len(programs)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        programs = self.get_programs(raw_input_lines)
+        solutions = (
+            self.solve(programs),
+            self.solve2(programs),
+            )
+        result = solutions
+        return result
+
 class Day06: # Memory Reallocation
     '''
     https://adventofcode.com/2017/day/6
@@ -413,7 +465,7 @@ if __name__ == '__main__':
         4: (Day04, 'High-Entropy Passphrases'),
         5: (Day05, 'A Maze of Twisty Trampolines, All Alike'),
         6: (Day06, 'Memory Reallocation'),
-    #     7: (Day07, 'XXX'),
+        7: (Day07, 'Recursive Circus'),
     #     8: (Day08, 'XXX'),
     #     9: (Day09, 'XXX'),
     #    10: (Day10, 'XXX'),
