@@ -132,11 +132,34 @@ function _init()
 end
 
 function _update()
+	local lcol=_col
+	local lrow=_row
 	if btnp(⬅️) then
 		_col-=1
 	elseif btnp(➡️) then
 		_col+=1
 	end
+	if btnp(⬆️) then
+		_row-=1
+	elseif btnp(⬇️) then
+		_row+=1
+	end
+	-- check for valid tile
+	local valid=false
+	for tile in all(_brd.tiles) do
+		if (
+			tile.col==_col and
+			tile.row==_row
+		) then
+			valid=true
+			break
+		end
+	end
+	if not valid then
+		_col=lcol
+		_row=lrow
+	end
+	-- recreate board
 	if btnp(🅾️) then
 		if rnd()<0.5 then
 			_brd=board:new(2)
