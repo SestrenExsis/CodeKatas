@@ -220,6 +220,29 @@ function _draw()
 		fm=8
 	end
 	spr(fm,8*_mov.col,8*_mov.row)
+	local dist=0
+	if _mov.amf!=nil then
+		dist=(
+			abs(_mov.col-_mov.amf.col)+
+			abs(_mov.row-_mov.amf.row)
+		)
+		local typ=_mov.amf.typ
+		local cs={12,11,10,14}
+		local c=cs[typ]
+		local sx=8*_mov.amf.col+3
+		local sy=8*_mov.amf.row+3
+		local ex=8*_mov.col+3
+		local ey=8*_mov.row+3
+		line(sx,sy,sx,ey,2)
+		line(sx,ey,ex,ey,2)
+		line(sx+1,sy,sx+1,ey,2)
+		line(sx+1,ey,ex+1,ey,2)
+		line(sx,sy+1,sx,ey+1,2)
+		line(sx,ey+1,ex,ey+1,2)
+		line(sx+1,sy+1,sx+1,ey+1,2)
+		line(sx+1,ey+1,ex+1,ey+1,2)
+	end
+	print(dist,4,4)
 end
 __gfx__
 00000000111111113333333399999999888888885555555555555555770000770000000000000000000000000000000000000000002222222222222222222200
