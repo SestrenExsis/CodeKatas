@@ -206,20 +206,7 @@ end
 function _draw()
 	cls()
 	map(0,0,0,0,128,128)
-	for amf in all(_amfs) do
-		local lft=8*amf.col
-		local top=8*amf.row
-		local fm=8+amf.typ
-		if amf==_mov.amf then
-			fm=24+amf.typ
-		end
-		spr(fm,lft,top)
-	end
-	local fm=7
-	if btn(❎) then
-		fm=8
-	end
-	spr(fm,8*_mov.col,8*_mov.row)
+	-- draw movement line
 	local dist=0
 	if _mov.amf!=nil then
 		dist=(
@@ -242,6 +229,24 @@ function _draw()
 		line(sx+1,sy+1,sx+1,ey+1,2)
 		line(sx+1,ey+1,ex+1,ey+1,2)
 	end
+	-- draw amphipods
+	for amf in all(_amfs) do
+		local lft=8*amf.col
+		local top=8*amf.row
+		local fm=8+amf.typ
+		if amf==_mov.amf then
+			lft=8*_mov.col
+			top=8*_mov.row
+			fm=24+amf.typ
+		end
+		spr(fm,lft,top)
+	end
+	local fm=7
+	if btn(❎) then
+		fm=8
+	end
+	spr(fm,8*_mov.col,8*_mov.row)
+	-- draw debug
 	print(dist,4,4)
 end
 __gfx__
