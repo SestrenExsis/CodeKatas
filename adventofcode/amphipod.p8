@@ -142,6 +142,7 @@ function _init()
 	_mov=move:new(5,7)
 	_brd=board:new(2)
 	_amfs=getamphipods(2)
+	_costs={0}
 	_dirty=true
 end
 
@@ -221,10 +222,11 @@ function _update()
 		else
 			_mov.amf.col=_mov.col
 			_mov.amf.row=_mov.row
+			_mov.path={}
 			_mov.amf=nil
 		end
 	end
-	-- recreate board
+	-- recreate board if needed
 	if btnp(🅾️) then
 		if rnd()<0.5 then
 			_mov=move:new(5,7)
@@ -238,18 +240,22 @@ function _update()
 		_dirty=true
 	end
 	if _dirty then cleanmap() end
+	-- update costs
+	if _mov.amf==nil then
+		_costs[#_costs]=0
+	else
+		_costs[#_costs]=(
+			abs(_mov.col-_mov.amf.col)+
+			abs(_mov.row-_mov.amf.row)
+		)
+	end
 end
 
 function _draw()
 	cls()
 	map(0,0,0,0,128,128)
 	-- draw movement line
-	local dist=0
 	if _mov.amf!=nil then
-		dist=(
-			abs(_mov.col-_mov.amf.col)+
-			abs(_mov.row-_mov.amf.row)
-		)
 		local typ=_mov.amf.typ
 		local cs={12,11,10,14}
 		local c=cs[typ]
@@ -284,7 +290,7 @@ function _draw()
 	end
 	spr(fm,8*_mov.col,8*_mov.row)
 	-- draw debug
-	print(dist,4,4)
+	print(_costs[#_costs],4,4)
 	for dot in all(_mov.path) do
 		spr(40,8*dot[1],8*dot[2])
 	end
