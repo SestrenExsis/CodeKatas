@@ -142,7 +142,7 @@ function _init()
 	_mov=move:new(5,7)
 	_brd=board:new(2)
 	_amfs=getamphipods(2)
-	_costs={0}
+	_costs={0,0}
 	_dirty=true
 end
 
@@ -242,7 +242,9 @@ function _update()
 	if _dirty then cleanmap() end
 	-- update costs
 	if _mov.amf==nil then
-		_costs[#_costs]=0
+		if _costs[#_costs]>0 then
+			add(_costs,0)
+		end
 	else
 		_costs[#_costs]=(
 			abs(_mov.col-_mov.amf.col)+
@@ -254,24 +256,6 @@ end
 function _draw()
 	cls()
 	map(0,0,0,0,128,128)
-	-- draw movement line
-	if _mov.amf!=nil then
-		local typ=_mov.amf.typ
-		local cs={12,11,10,14}
-		local c=cs[typ]
-		local sx=8*_mov.amf.col+3
-		local sy=8*_mov.amf.row+3
-		local ex=8*_mov.col+3
-		local ey=8*_mov.row+3
-		line(sx,sy,sx,ey,2)
-		line(sx,ey,ex,ey,2)
-		line(sx+1,sy,sx+1,ey,2)
-		line(sx+1,ey,ex+1,ey,2)
-		line(sx,sy+1,sx,ey+1,2)
-		line(sx,ey+1,ex,ey+1,2)
-		line(sx+1,sy+1,sx+1,ey+1,2)
-		line(sx+1,ey+1,ex+1,ey+1,2)
-	end
 	-- draw amphipods
 	for amf in all(_amfs) do
 		local lft=8*amf.col
@@ -290,9 +274,11 @@ function _draw()
 	end
 	spr(fm,8*_mov.col,8*_mov.row)
 	-- draw debug
-	print(_costs[#_costs],4,4)
+	print(_costs[#_costs],4,4,7)
+	print(_costs[#_costs-1],4,10,5)
 	for dot in all(_mov.path) do
-		spr(40,8*dot[1],8*dot[2])
+		local fm=40+_mov.amf.typ
+		spr(fm,8*dot[1],8*dot[2])
 	end
 end
 __gfx__
