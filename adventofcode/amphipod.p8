@@ -71,6 +71,7 @@ function amphipod:new(r,c,t)
 		row=r,
 		col=c,
 		typ=t,
+		cost=10^(t-1),
 	}
 	return setmetatable(
 		obj,{__index=self}
@@ -228,15 +229,12 @@ function _update()
 	end
 	-- recreate board if needed
 	if btnp(🅾️) then
-		if rnd()<0.5 then
-			_mov=move:new(5,7)
-			_brd=board:new(2)
-			_amfs=getamphipods(2)
-		else
-			_mov=move:new(5,7)
-			_brd=board:new(4)
-			_amfs=getamphipods(4)
-		end
+		_mov=move:new(5,7)
+		_costs={0,0}
+		local depth=4
+		if rnd()<0.5 then depth=2 end
+		_brd=board:new(depth)
+		_amfs=getamphipods(depth)
 		_dirty=true
 	end
 	if _dirty then cleanmap() end
@@ -246,10 +244,12 @@ function _update()
 			add(_costs,0)
 		end
 	else
-		_costs[#_costs]=(
+		local cost=_mov.amf.cost
+		local dist=(
 			abs(_mov.col-_mov.amf.col)+
 			abs(_mov.row-_mov.amf.row)
 		)
+		_costs[#_costs]=cost*dist
 	end
 end
 
@@ -273,13 +273,19 @@ function _draw()
 		fm=8
 	end
 	spr(fm,8*_mov.col,8*_mov.row)
-	-- draw debug
-	print(_costs[#_costs],4,4,7)
-	print(_costs[#_costs-1],4,10,5)
+	-- draw movement dots
 	for dot in all(_mov.path) do
 		local fm=40+_mov.amf.typ
 		spr(fm,8*dot[1],8*dot[2])
 	end
+	-- draw debug
+	local total=0
+	for cost in all(_costs) do
+		total+=cost>>16
+	end
+	print(tostr(total,0x2),4,4,7)
+	print(_costs[#_costs],4,10,6)
+	print(_costs[#_costs-1],4,16,5)
 end
 __gfx__
 00000000111111113333333399999999888888885555555555555555770000770000000000000000000000000000000000000000002222222222222222222200
