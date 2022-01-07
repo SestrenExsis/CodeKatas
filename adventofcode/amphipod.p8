@@ -242,8 +242,16 @@ function _update()
 			_mov.amf=nil
 		end
 	end
-	-- todo: undo actions
+	-- reset current move
 	if btnp(🅾️) then
+	-- todo: undo action history
+		if _mov.amf!=nil then
+			_mov.row=_mov.amf.row
+			_mov.col=_mov.amf.col
+			_mov.amf=nil
+			_mov.path={}
+			_costs[#_costs]=0
+		end
 	end
 	-- update costs
 	if _mov.amf==nil then
