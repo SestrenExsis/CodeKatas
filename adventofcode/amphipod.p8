@@ -144,8 +144,22 @@ function restart(depth)
 	cleanmap()
 end
 
-function _init()
+function restart2()
+	menuitem(1,"set depth to 4",
+		restart4
+	)
 	restart(2)
+end
+
+function restart4()
+	menuitem(1,"set depth to 2",
+		restart2
+	)
+	restart(4)
+end
+
+function _init()
+	restart2()
 end
 
 function _update()
@@ -228,11 +242,8 @@ function _update()
 			_mov.amf=nil
 		end
 	end
-	-- recreate board if needed
+	-- todo: undo actions
 	if btnp(🅾️) then
-		local depth=4
-		if rnd()<0.5 then depth=2 end
-		restart(depth)
 	end
 	-- update costs
 	if _mov.amf==nil then
