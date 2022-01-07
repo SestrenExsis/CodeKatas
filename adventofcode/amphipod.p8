@@ -11,10 +11,7 @@ _version=1
 cartdata("sestrenexsis_amphipod_1")
 
 --[[ save data
- 0: lowest score, red
- 1: lowest score, orange
- 2: lowest score, yellow
- 3: lowest score, green
+ 0: lowest score
 --]]
 -->8
 -- classes
@@ -139,16 +136,20 @@ end
 -->8
 -- main
 
-function _init()
+function restart(depth)
 	_mov=move:new(5,7)
-	_brd=board:new(2)
-	_amfs=getamphipods(2)
 	_costs={0,0}
-	_dirty=true
+	_brd=board:new(depth)
+	_amfs=getamphipods(depth)
+	cleanmap()
+end
+
+function _init()
+	restart(2)
 end
 
 function _update()
-	-- check for movement input
+	-- check for input
 	local ncol=_mov.col
 	local nrow=_mov.row
 	if btnp(⬅️) then
@@ -229,15 +230,10 @@ function _update()
 	end
 	-- recreate board if needed
 	if btnp(🅾️) then
-		_mov=move:new(5,7)
-		_costs={0,0}
 		local depth=4
 		if rnd()<0.5 then depth=2 end
-		_brd=board:new(depth)
-		_amfs=getamphipods(depth)
-		_dirty=true
+		restart(depth)
 	end
-	if _dirty then cleanmap() end
 	-- update costs
 	if _mov.amf==nil then
 		if _costs[#_costs]>0 then
@@ -268,6 +264,7 @@ function _draw()
 		end
 		spr(fm,lft,top)
 	end
+	-- draw cursor
 	local fm=7
 	if btn(❎) then
 		fm=8
