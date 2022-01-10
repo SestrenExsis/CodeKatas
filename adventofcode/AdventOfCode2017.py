@@ -56,28 +56,36 @@ class Day07: # Recursive Circus
     '''
     https://adventofcode.com/2017/day/7
     '''
+    class Program:
+        def __init__(self, program_name: str, weight: int, children: set):
+            self.name = program_name
+            self.weight = weight
+            self.children = set(children)
+
     def get_programs(self, raw_input_lines: List[str]):
         programs = {}
         for raw_input_line in raw_input_lines:
             line = raw_input_line.replace(',', '')
             parts = line.split(' ')
-            program = parts[0]
+            program_name = parts[0]
             weight = int(parts[1][1:-1])
-            info = [weight]
+            children = []
             for item in parts[3:]:
-                info.append(item)
-            programs[program] = tuple(info)
+                children.append(item)
+            program = self.Program(program_name, weight, children)
+            programs[program_name] = program
+            # print(program.name, program.weight, program.children)
         result = programs
         return result
     
     def find_bottom_program(self, programs):
         bases = set()
         subs = set()
-        for program, program_info in programs.items():
-            if len(program_info) > 1:
-                bases.add(program)
-                for held_program in program_info[1:]:
-                    subs.add(held_program)
+        for program in programs.values():
+            if len(program.children) > 1:
+                bases.add(program.name)
+            for child in program.children:
+                subs.add(child)
         bottom_program = next(iter(bases - subs))
         result = bottom_program
         return result
@@ -87,11 +95,41 @@ class Day07: # Recursive Circus
         return result
     
     def solve2(self, programs):
-        root = self.find_bottom_program(programs)
-        work = []
-        for program, program_info in programs[root]:
-            pass
-        result = len(programs)
+        programs_to_weigh = set(programs.keys())
+        weights = {}
+        while len(programs_to_weigh) > 0:
+            programs_weighed = set()
+            for program_name in programs_to_weigh:
+                program = programs[program_name]
+                if len(program.children & programs_to_weigh) > 0:
+                    continue
+                weights[program_name] = program.weight
+                for child in program.children:
+                    weights[program_name] += weights[child]
+                programs_weighed.add(program_name)
+            programs_to_weigh -= programs_weighed
+        result = -1
+        work = set(programs.keys())
+        while len(work) > 0:
+            program_name = work.pop()
+            program = programs[program_name]
+            if len(program.children) < 3:
+                continue
+            weight_counts = collections.defaultdict(int)
+            mode_weight = -1
+            for child in program.children:
+                weight_counts[weights[child]] += 1
+            if len(weight_counts) > 1:
+                program_to_change = None
+                for child_name in program.children:
+                    if weight_counts[weights[child_name]] == 1:
+                        program_to_change = child_name
+                    else:
+                        mode_weight = weights[child_name]
+                diff = mode_weight - weights[program_to_change]
+                program = programs[program_to_change]
+                result = program.weight + diff
+                break
         return result
     
     def main(self):
