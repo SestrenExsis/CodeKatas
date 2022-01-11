@@ -71,36 +71,45 @@ class Day08: # I Heard You Like Registers
         result = instructions
         return result
     
+    def execute_instruction(self, registers, instruction):
+        operation, condition = instruction
+        condition_satisfied_ind = False
+        register2, inequality, amount2 = condition
+        if inequality == '<':
+            condition_satisfied_ind = registers[register2] < amount2
+        elif inequality == '<=':
+            condition_satisfied_ind = registers[register2] <= amount2
+        elif inequality == '==':
+            condition_satisfied_ind = registers[register2] == amount2
+        elif inequality == '!=':
+            condition_satisfied_ind = registers[register2] != amount2
+        elif inequality == '>=':
+            condition_satisfied_ind = registers[register2] >= amount2
+        elif inequality == '>':
+            condition_satisfied_ind = registers[register2] > amount2
+        else:
+            raise Exception('Conditional operator not found!')
+        if condition_satisfied_ind:
+            register, operation, amount = operation
+            if operation == 'inc':
+                registers[register] += amount
+            elif operation == 'dec':
+                registers[register] -= amount
+    
     def solve(self, instructions):
         registers = collections.defaultdict(int)
-        for operation, condition in instructions:
-            condition_satisfied_ind = False
-            register2, inequality, amount2 = condition
-            if inequality == '<':
-                condition_satisfied_ind = registers[register2] < amount2
-            elif inequality == '<=':
-                condition_satisfied_ind = registers[register2] <= amount2
-            elif inequality == '==':
-                condition_satisfied_ind = registers[register2] == amount2
-            elif inequality == '!=':
-                condition_satisfied_ind = registers[register2] != amount2
-            elif inequality == '>=':
-                condition_satisfied_ind = registers[register2] >= amount2
-            elif inequality == '>':
-                condition_satisfied_ind = registers[register2] > amount2
-            else:
-                raise Exception('Conditional operator not found!')
-            if condition_satisfied_ind:
-                register, operation, amount = operation
-                if operation == 'inc':
-                    registers[register] += amount
-                elif operation == 'dec':
-                    registers[register] -= amount
+        for instruction in instructions:
+            self.execute_instruction(registers, instruction)
         result = max(registers.values())
         return result
     
     def solve2(self, instructions):
-        result = len(instructions)
+        result = float('-inf')
+        registers = collections.defaultdict(int)
+        for instruction in instructions:
+            self.execute_instruction(registers, instruction)
+            max_register_value = max(registers.values())
+            result = max(result, max_register_value)
         return result
     
     def main(self):
