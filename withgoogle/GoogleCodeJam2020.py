@@ -412,7 +412,7 @@ class PascalWalk: # 2020.1A.2
             print(output_row)
         return output
 
-class SolverC: # 2020.1A.3
+class SquareDance: # 2020.1A.3
     '''
     2020.1A.3 (Square Dance)
     https://codingcompetitions.withgoogle.com/codejam/round/000000000019fd74/00000000002b1355
@@ -427,6 +427,65 @@ class SolverC: # 2020.1A.3
         for test_id in range(1, test_count + 1):
             raw_input = input()
             solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class Expogo: # 2020.1B.A
+    '''
+    2020.1B.A (Expogo)
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000019fef2/00000000002d5b62
+    1, 2, 4, 8, ...
+
+    ****#****
+    ****#****
+    ****#****
+    ****1****
+    ###101###
+    ****1****
+    ****#****
+    ****#****
+    ****#****
+    '''
+    def solve(self, target: tuple):
+        tx, ty = target
+        assert -4 <= tx <= 4
+        assert -4 <= ty <= 4
+        best_moves = 'IMPOSSIBLE'
+        if (abs(tx) + abs(ty)) % 2 == 1:
+            work = [(0, '', 0, 0)]
+            visited = set()
+            while len(work) > 0:
+                (move_count, moves, x, y) = heapq.heappop(work)
+                if (x, y) == (tx, ty):
+                    best_moves = moves
+                    break
+                if (x, y) in visited:
+                    continue
+                visited.add((x, y))
+                if move_count > 3:
+                    continue
+                distance = 2 ** move_count
+                for (move, xx, yy) in (
+                    ('W', x - distance, y),
+                    ('E', x + distance, y),
+                    ('N', x, y + distance),
+                    ('S', x, y - distance),
+                ):
+                    heapq.heappush(work, (move_count + 1, moves + move, xx, yy))
+        result = best_moves
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            target = tuple(map(int, input().split(' ')))
+            solution = self.solve(target)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
@@ -621,7 +680,7 @@ class Template:
 if __name__ == '__main__':
     '''
     Usage
-    python GoogleCodeJam2020.py 2020.1A.3 < inputs/SolverC.in
+    python GoogleCodeJam2020.py 2020.1B.A < inputs/SolverA.in
     '''
     solvers = {
         '2020.Q.1': (Vestigium, 'Vestigium'),
@@ -630,10 +689,10 @@ if __name__ == '__main__':
         # '2020.Q.4': (ESAbATAd, 'ESAbATAd'),
         '2020.Q.5': (Indicium__Incomplete, 'Indicium'),
         '2020.1A.1': (PatternMatching, 'Pattern Matching'),
-        '2020.1A.2': (PascalWalk, 'PascalWalk'),
-        '2020.1A.3': (SolverC, 'SquareDance'),
+        '2020.1A.2': (PascalWalk, 'Pascal Walk'),
+        '2020.1A.3': (SquareDance, 'Square Dance'),
         # '2020.1A.4': (Problem2020_1A_4, 'Problem2020_1A_4'),
-        # '2020.1B.1': (Expogo, 'Expogo'),
+        '2020.1B.A': (Expogo, 'Expogo'),
         # '2020.1B.2': (BlindfoldedBullseye, 'Blindfolded Bullseye'),
         # '2020.1B.3': (JoinTheRanks, 'Join the Ranks'),
         # '2020.1C.1': (OverexcitedFan, 'Overexcited Fan'),
