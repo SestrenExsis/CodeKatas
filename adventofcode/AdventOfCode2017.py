@@ -52,6 +52,67 @@ class Template: # Template
         result = solutions
         return result
 
+class Day08: # I Heard You Like Registers
+    '''
+    https://adventofcode.com/2017/day/8
+    '''
+    def get_instructions(self, raw_input_lines: List[str]):
+        instructions = []
+        for raw_input_line in raw_input_lines:
+            a, b = raw_input_line.split(' if ')
+            register, operation, amount = a.split(' ')
+            amount = int(amount)
+            register2, inequality, amount2 = b.split(' ')
+            amount2 = int(amount2)
+            instructions.append((
+                (register, operation, amount),
+                (register2, inequality, amount2),
+            ))
+        result = instructions
+        return result
+    
+    def solve(self, instructions):
+        registers = collections.defaultdict(int)
+        for operation, condition in instructions:
+            condition_satisfied_ind = False
+            register2, inequality, amount2 = condition
+            if inequality == '<':
+                condition_satisfied_ind = registers[register2] < amount2
+            elif inequality == '<=':
+                condition_satisfied_ind = registers[register2] <= amount2
+            elif inequality == '==':
+                condition_satisfied_ind = registers[register2] == amount2
+            elif inequality == '!=':
+                condition_satisfied_ind = registers[register2] != amount2
+            elif inequality == '>=':
+                condition_satisfied_ind = registers[register2] >= amount2
+            elif inequality == '>':
+                condition_satisfied_ind = registers[register2] > amount2
+            else:
+                raise Exception('Conditional operator not found!')
+            if condition_satisfied_ind:
+                register, operation, amount = operation
+                if operation == 'inc':
+                    registers[register] += amount
+                elif operation == 'dec':
+                    registers[register] -= amount
+        result = max(registers.values())
+        return result
+    
+    def solve2(self, instructions):
+        result = len(instructions)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        instructions = self.get_instructions(raw_input_lines)
+        solutions = (
+            self.solve(instructions),
+            self.solve2(instructions),
+            )
+        result = solutions
+        return result
+
 class Day07: # Recursive Circus
     '''
     https://adventofcode.com/2017/day/7
@@ -504,7 +565,7 @@ if __name__ == '__main__':
         5: (Day05, 'A Maze of Twisty Trampolines, All Alike'),
         6: (Day06, 'Memory Reallocation'),
         7: (Day07, 'Recursive Circus'),
-    #     8: (Day08, 'XXX'),
+        8: (Day08, 'I Heard You Like Registers'),
     #     9: (Day09, 'XXX'),
     #    10: (Day10, 'XXX'),
     #    11: (Day11, 'XXX'),
