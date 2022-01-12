@@ -81,7 +81,24 @@ class Day09: # Stream Processing
         return result
     
     def solve2(self, parsed_input):
-        result = len(parsed_input)
+        garbage_removed = 0
+        stack = [parsed_input[0]]
+        for char in parsed_input[1:]:
+            if stack[-1] == '!':
+                stack.pop()
+            elif char == '}' and stack[-1] == '{':
+                stack.pop()
+            elif char == '{' and stack[-1] == '{':
+                stack.append('{')
+            elif char == '!' and stack[-1] == '<':
+                stack.append('!')
+            elif char == '<' and stack[-1] != '<':
+                stack.append('<')
+            elif char == '>' and stack[-1] == '<':
+                stack.pop()
+            elif stack[-1] == '<':
+                garbage_removed += 1
+        result = garbage_removed
         return result
     
     def main(self):
