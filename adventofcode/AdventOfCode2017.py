@@ -52,6 +52,48 @@ class Template: # Template
         result = solutions
         return result
 
+class Day09: # Stream Processing
+    '''
+    https://adventofcode.com/2017/day/9
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = raw_input_lines[0]
+        return result
+    
+    def solve(self, parsed_input):
+        score = 0
+        stack = [parsed_input[0]]
+        for char in parsed_input[1:]:
+            if stack[-1] == '!':
+                stack.pop()
+            elif char == '}' and stack[-1] == '{':
+                score += len(stack)
+                stack.pop()
+            elif char == '{' and stack[-1] == '{':
+                stack.append('{')
+            elif char == '!' and stack[-1] == '<':
+                stack.append('!')
+            elif char == '<' and stack[-1] != '<':
+                stack.append('<')
+            elif char == '>' and stack[-1] == '<':
+                stack.pop()
+        result = score
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day08: # I Heard You Like Registers
     '''
     https://adventofcode.com/2017/day/8
@@ -575,7 +617,7 @@ if __name__ == '__main__':
         6: (Day06, 'Memory Reallocation'),
         7: (Day07, 'Recursive Circus'),
         8: (Day08, 'I Heard You Like Registers'),
-    #     9: (Day09, 'XXX'),
+        9: (Day09, 'Stream Processing'),
     #    10: (Day10, 'XXX'),
     #    11: (Day11, 'XXX'),
     #    12: (Day12, 'XXX'),
