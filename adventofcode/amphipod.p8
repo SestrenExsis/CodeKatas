@@ -63,12 +63,12 @@ end
 -- amphipods
 amphipod={}
 
-function amphipod:new(r,c,t)
+function amphipod:new(r,c,tp)
 	local obj={
 		row=r,
 		col=c,
-		typ=t,
-		cost=10^(t-1),
+		typ=tp,
+		cost=10^(tp-1),
 	}
 	return setmetatable(
 		obj,{__index=self}
@@ -124,12 +124,25 @@ function cleanmap()
 end
 
 function getamphipods(depth)
+	local bag={}
+	for d=1,depth do
+		for i=1,4 do
+			add(bag,i)
+		end
+	end
 	local res={}
 	for d=1,depth do
-		add(res,amphipod:new(5+d,4,1))
-		add(res,amphipod:new(5+d,6,2))
-		add(res,amphipod:new(5+d,8,3))
-		add(res,amphipod:new(5+d,10,4))
+		for i=1,4 do
+			local idx=1+flr(rnd(#bag))
+			local amf=amphipod:new(
+				5+d,
+				2+2*i,
+				bag[idx]
+			)
+			add(res,amf)
+			bag[idx]=bag[#bag]
+			deli(bag,#bag)
+		end
 	end
 	return res
 end
