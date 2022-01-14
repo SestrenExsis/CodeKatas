@@ -83,7 +83,6 @@ function move:new(r,c)
 		row=r,
 		col=c,
 		amf=nil,
-		path={},
 	}
 	return setmetatable(
 		obj,{__index=self}
@@ -151,6 +150,7 @@ end
 
 function restart(depth)
 	_mov=move:new(5,7)
+	_pth={}
 	_costs={0,0}
 	_brd=board:new(depth)
 	_amfs=getamphipods(depth)
@@ -207,7 +207,7 @@ function _update()
 	) then
 		-- check if backtracking
 		local backtrack=false
-		for dot in all(_mov.path) do
+		for dot in all(_pth) do
 			if (
 				dot[1]==ncol and
 				dot[2]==nrow
@@ -217,19 +217,19 @@ function _update()
 		end
 		if backtrack then
 			-- delete prev dot
-			for i=1,#_mov.path do
-				local dot=_mov.path[i]
+			for i=1,#_pth do
+				local dot=_pth[i]
 				if (
 					dot[1]==ncol and
 					dot[2]==nrow
 				) then
-					deli(_mov.path,i)
+					deli(_pth,i)
 					break
 				end
 			end
 		elseif _mov.amf!=nil then
 			-- add dot
-			add(_mov.path,
+			add(_pth,
 				{_mov.col,_mov.row}
 			)
 		end
@@ -251,7 +251,7 @@ function _update()
 		else
 			_mov.amf.col=_mov.col
 			_mov.amf.row=_mov.row
-			_mov.path={}
+			_pth={}
 			_mov.amf=nil
 		end
 	end
@@ -262,7 +262,7 @@ function _update()
 			_mov.row=_mov.amf.row
 			_mov.col=_mov.amf.col
 			_mov.amf=nil
-			_mov.path={}
+			_pth={}
 			_costs[#_costs]=0
 		end
 	end
@@ -303,7 +303,7 @@ function _draw()
 	end
 	spr(fm,8*_mov.col,8*_mov.row)
 	-- draw movement dots
-	for dot in all(_mov.path) do
+	for dot in all(_pth) do
 		local fm=40+_mov.amf.typ
 		spr(fm,8*dot[1],8*dot[2])
 	end
