@@ -52,6 +52,48 @@ class Template: # Template
         result = solutions
         return result
 
+class Day10: # Knot Hash
+    '''
+    https://adventofcode.com/2017/day/10
+    '''
+    def get_lengths(self, raw_input_lines: List[str]):
+        lengths = list(map(int, raw_input_lines[0].split(',')))
+        result = lengths
+        return result
+    
+    def solve(self, lengths, num_count: int=256):
+        nums = list(range(num_count))
+        cursor = 0
+        skip_size = 0
+        for length in lengths:
+            left = cursor
+            right = cursor + length - 1
+            while left < right:
+                L = left % len(nums)
+                R = right % len(nums)
+                nums[L], nums[R] = nums[R], nums[L]
+                left += 1
+                right -= 1
+            cursor = (cursor + length + skip_size) % len(nums)
+            skip_size += 1
+        result = nums[0] * nums[1]
+        return result
+    
+    def solve2(self, lengths):
+        result = len(lengths)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        lengths = self.get_lengths(raw_input_lines)
+        assert self.solve([3, 4, 1, 5], 5) == 12
+        solutions = (
+            self.solve(lengths),
+            self.solve2(lengths),
+            )
+        result = solutions
+        return result
+
 class Day09: # Stream Processing
     '''
     https://adventofcode.com/2017/day/9
@@ -635,7 +677,7 @@ if __name__ == '__main__':
         7: (Day07, 'Recursive Circus'),
         8: (Day08, 'I Heard You Like Registers'),
         9: (Day09, 'Stream Processing'),
-    #    10: (Day10, 'XXX'),
+       10: (Day10, 'Knot Hash'),
     #    11: (Day11, 'XXX'),
     #    12: (Day12, 'XXX'),
     #    13: (Day13, 'XXX'),
