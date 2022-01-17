@@ -8,6 +8,7 @@ import collections
 import copy
 import functools
 import operator
+import re
 from typing import Dict, List, Set, Tuple
     
 def get_raw_input_lines() -> list:
@@ -48,6 +49,56 @@ class Template: # Template
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day11: # Hex Ed
+    '''
+    https://adventofcode.com/2017/day/11
+    '''
+    def get_path(self, raw_input_lines: List[str]):
+        path = raw_input_lines[0].split(',')
+        result = path
+        return result
+    
+    def solve(self, path):
+        steps = {
+            'n' : ( 0, -1),
+            'ne': ( 1, -1),
+            'se': ( 1,  0),
+            's' : ( 0,  1),
+            'sw': (-1,  1),
+            'nw': (-1,  0),
+        }
+        q = 0
+        r = 0
+        for step in path:
+            q += steps[step][0]
+            r += steps[step][1]
+        step_count = 0
+        if q < 0 and r > 0:
+            step_count += min(abs(q), r)
+            q += step_count
+            r -= step_count
+        elif q > 0 and r < 0:
+            step_count += min(q, abs(r))
+            q -= step_count
+            r += step_count
+        step_count += abs(q) + abs(r)
+        result = step_count
+        return result
+    
+    def solve2(self, path):
+        result = len(path)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        path = self.get_path(raw_input_lines)
+        solutions = (
+            self.solve(path),
+            self.solve2(path),
             )
         result = solutions
         return result
@@ -704,7 +755,7 @@ if __name__ == '__main__':
         8: (Day08, 'I Heard You Like Registers'),
         9: (Day09, 'Stream Processing'),
        10: (Day10, 'Knot Hash'),
-    #    11: (Day11, 'XXX'),
+       11: (Day11, 'Hex Ed'),
     #    12: (Day12, 'XXX'),
     #    13: (Day13, 'XXX'),
     #    14: (Day14, 'XXX'),
