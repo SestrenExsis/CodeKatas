@@ -53,6 +53,48 @@ class Template: # Template
         result = solutions
         return result
 
+class Day12: # Digital Plumber
+    '''
+    https://adventofcode.com/2017/day/12
+    '''
+    def get_graph(self, raw_input_lines: List[str]):
+        graph = {}
+        for raw_input_line in raw_input_lines:
+            a, b = raw_input_line.split(' <-> ')
+            node = int(a)
+            connections = set(map(int, b.split(', ')))
+            connections -= { node }
+            graph[node] = connections
+        result = graph
+        return result
+    
+    def solve(self, graph):
+        nodes_visited = set()
+        work = [0]
+        while len(work) > 0:
+            node = work.pop()
+            nodes_visited.add(node)
+            for next_node in graph[node]:
+                if next_node not in nodes_visited:
+                    work.append(next_node)
+        nodes_visited.add(0)
+        result = len(nodes_visited)
+        return result
+    
+    def solve2(self, graph):
+        result = len(graph)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        graph = self.get_graph(raw_input_lines)
+        solutions = (
+            self.solve(graph),
+            self.solve2(graph),
+            )
+        result = solutions
+        return result
+
 class Day11: # Hex Ed
     '''
     https://adventofcode.com/2017/day/11
@@ -770,7 +812,7 @@ if __name__ == '__main__':
         9: (Day09, 'Stream Processing'),
        10: (Day10, 'Knot Hash'),
        11: (Day11, 'Hex Ed'),
-    #    12: (Day12, 'XXX'),
+       12: (Day12, 'Digital Plumber'),
     #    13: (Day13, 'XXX'),
     #    14: (Day14, 'XXX'),
     #    15: (Day15, 'XXX'),
