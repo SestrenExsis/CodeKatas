@@ -79,8 +79,34 @@ class Day10: # Knot Hash
         result = nums[0] * nums[1]
         return result
     
-    def solve2(self, lengths):
-        result = len(lengths)
+    def solve2(self, chars):
+        lengths = []
+        for char in chars:
+            lengths.append(ord(char))
+        lengths += [17, 31, 73, 47, 23]
+        nums = list(range(256))
+        cursor = 0
+        skip_size = 0
+        for round_id in range(64):
+            for length in lengths:
+                left = cursor
+                right = cursor + length - 1
+                while left < right:
+                    L = left % len(nums)
+                    R = right % len(nums)
+                    nums[L], nums[R] = nums[R], nums[L]
+                    left += 1
+                    right -= 1
+                cursor = (cursor + length + skip_size) % len(nums)
+                skip_size += 1
+        xors = [0] * 16
+        for i in range(16):
+            for j in range(16):
+                xors[i] ^= nums[16 * i + j]
+        chars = []
+        for i in range(16):
+            chars.append(hex(xors[i])[2:])
+        result = ''.join(chars)
         return result
     
     def main(self):
@@ -89,7 +115,7 @@ class Day10: # Knot Hash
         assert self.solve([3, 4, 1, 5], 5) == 12
         solutions = (
             self.solve(lengths),
-            self.solve2(lengths),
+            self.solve2(raw_input_lines[0]),
             )
         result = solutions
         return result
