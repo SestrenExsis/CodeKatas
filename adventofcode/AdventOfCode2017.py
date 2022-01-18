@@ -82,7 +82,18 @@ class Day12: # Digital Plumber
         return result
     
     def solve2(self, graph):
-        result = len(graph)
+        group_count = 0
+        nodes_left = set(graph.keys())
+        while len(nodes_left) > 0:
+            work = [nodes_left.pop()]
+            while len(work) > 0:
+                node = work.pop()
+                for next_node in graph[node]:
+                    if next_node in nodes_left:
+                        work.append(next_node)
+                        nodes_left.remove(next_node)
+            group_count += 1
+        result = group_count
         return result
     
     def main(self):
