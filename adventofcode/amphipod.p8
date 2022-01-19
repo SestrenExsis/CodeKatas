@@ -149,7 +149,9 @@ end
 -- main
 
 function restart(depth)
-	_mov=move:new(5,7)
+	_m={
+		move:new(5,7)
+	}
 	_pth={}
 	_costs={0,0}
 	_brd=board:new(depth)
@@ -177,8 +179,8 @@ end
 
 function _update()
 	-- check for input
-	local ncol=_mov.col
-	local nrow=_mov.row
+	local ncol=_m[#_m].col
+	local nrow=_m[#_m].row
 	if btnp(⬅️) then
 		ncol-=1
 	elseif btnp(➡️) then
@@ -202,8 +204,8 @@ function _update()
 	end
 	if valid and
 	(
-		_mov.col!=ncol or
-		_mov.row!=nrow
+		_m[#_m].col!=ncol or
+		_m[#_m].row!=nrow
 	) then
 		-- check if backtracking
 		local backtrack=false
@@ -227,55 +229,58 @@ function _update()
 					break
 				end
 			end
-		elseif _mov.amf!=nil then
+		elseif _m[#_m].amf!=nil then
 			-- add dot
 			add(_pth,
-				{_mov.col,_mov.row}
+				{
+					_m[#_m].col,
+					_m[#_m].row
+				}
 			)
 		end
-		_mov.col=ncol
-		_mov.row=nrow
+		_m[#_m].col=ncol
+		_m[#_m].row=nrow
 	end
 	-- check for grabbed amphipod
 	if btnp(❎) then
-		if _mov.amf==nil then
+		if _m[#_m].amf==nil then
 			for amf in all(_amfs) do
 				if (
-					amf.col==_mov.col and
-					amf.row==_mov.row
+					amf.col==_m[#_m].col and
+					amf.row==_m[#_m].row
 				) then
-					_mov.amf=amf
+					_m[#_m].amf=amf
 					break
 				end
 			end
 		else
-			_mov.amf.col=_mov.col
-			_mov.amf.row=_mov.row
+			_m[#_m].amf.col=_m[#_m].col
+			_m[#_m].amf.row=_m[#_m].row
 			_pth={}
-			_mov.amf=nil
+			_m[#_m].amf=nil
 		end
 	end
 	-- reset current move
 	if btnp(🅾️) then
 	-- todo: undo action history
-		if _mov.amf!=nil then
-			_mov.row=_mov.amf.row
-			_mov.col=_mov.amf.col
-			_mov.amf=nil
+		if _m[#_m].amf!=nil then
+			_m[#_m].row=_m[#_m].amf.row
+			_m[#_m].col=_m[#_m].amf.col
+			_m[#_m].amf=nil
 			_pth={}
 			_costs[#_costs]=0
 		end
 	end
 	-- update costs
-	if _mov.amf==nil then
+	if _m[#_m].amf==nil then
 		if _costs[#_costs]>0 then
 			add(_costs,0)
 		end
 	else
-		local cost=_mov.amf.cost
+		local cost=_m[#_m].amf.cost
 		local dist=(
-			abs(_mov.col-_mov.amf.col)+
-			abs(_mov.row-_mov.amf.row)
+			abs(_m[#_m].col-_m[#_m].amf.col)+
+			abs(_m[#_m].row-_m[#_m].amf.row)
 		)
 		_costs[#_costs]=cost*dist
 	end
@@ -289,9 +294,9 @@ function _draw()
 		local lft=8*amf.col
 		local top=8*amf.row
 		local fm=8+amf.typ
-		if amf==_mov.amf then
-			lft=8*_mov.col
-			top=8*_mov.row
+		if amf==_m[#_m].amf then
+			lft=8*_m[#_m].col
+			top=8*_m[#_m].row
 			fm=24+amf.typ
 		end
 		spr(fm,lft,top)
@@ -301,10 +306,10 @@ function _draw()
 	if btn(❎) then
 		fm=8
 	end
-	spr(fm,8*_mov.col,8*_mov.row)
+	spr(fm,8*_m[#_m].col,8*_m[#_m].row)
 	-- draw movement dots
 	for dot in all(_pth) do
-		local fm=40+_mov.amf.typ
+		local fm=40+_m[#_m].amf.typ
 		spr(fm,8*dot[1],8*dot[2])
 	end
 	-- draw debug
