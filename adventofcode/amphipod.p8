@@ -254,16 +254,34 @@ function _update()
 				end
 			end
 		else
-			_m[#_m].amf.col=_m[#_m].col
-			_m[#_m].amf.row=_m[#_m].row
+			local row=_m[#_m].row
+			local col=_m[#_m].col
+			_m[#_m].row=_m[#_m].amf.row
+			_m[#_m].col=_m[#_m].amf.col
+			_m[#_m].amf.row=row
+			_m[#_m].amf.col=col
 			_pth={}
-			_m[#_m].amf=nil
+			add(_m,move:new(row,col))
 		end
 	end
 	-- reset current move
 	if btnp(🅾️) then
 	-- todo: undo action history
-		if _m[#_m].amf!=nil then
+		if _m[#_m].amf==nil then
+			if #_m==1 then
+				_m[#_m].row=5
+				_m[#_m].col=7
+			else
+				deli(_m,#_m)
+				deli(_costs,#_costs)
+				local col=_m[#_m].col
+				local row=_m[#_m].row
+				_m[#_m].col=_m[#_m].amf.col
+				_m[#_m].row=_m[#_m].amf.row
+				_m[#_m].amf.col=col
+				_m[#_m].amf.row=row
+			end
+		else
 			_m[#_m].row=_m[#_m].amf.row
 			_m[#_m].col=_m[#_m].amf.col
 			_m[#_m].amf=nil
