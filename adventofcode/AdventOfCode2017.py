@@ -53,6 +53,40 @@ class Template: # Template
         result = solutions
         return result
 
+class Day13: # Packet Scanners
+    '''
+    https://adventofcode.com/2017/day/13
+    '''
+    def get_layers(self, raw_input_lines: List[str]):
+        layers = {}
+        for raw_input_line in raw_input_lines:
+            a, b = raw_input_line.split(': ')
+            layers[int(a)] = int(b)
+        result = layers
+        return result
+    
+    def solve(self, layers):
+        severity = 0
+        for depth, range in layers.items():
+            if depth % (2 * (range - 1)) == 0:
+                severity += depth * range
+        result = severity
+        return result
+    
+    def solve2(self, layers):
+        result = len(layers)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        layers = self.get_layers(raw_input_lines)
+        solutions = (
+            self.solve(layers),
+            self.solve2(layers),
+            )
+        result = solutions
+        return result
+
 class Day12: # Digital Plumber
     '''
     https://adventofcode.com/2017/day/12
@@ -824,7 +858,7 @@ if __name__ == '__main__':
        10: (Day10, 'Knot Hash'),
        11: (Day11, 'Hex Ed'),
        12: (Day12, 'Digital Plumber'),
-    #    13: (Day13, 'XXX'),
+       13: (Day13, 'Packet Scanners'),
     #    14: (Day14, 'XXX'),
     #    15: (Day15, 'XXX'),
     #    16: (Day16, 'XXX'),
