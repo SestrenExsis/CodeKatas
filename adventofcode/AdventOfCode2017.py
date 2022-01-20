@@ -74,7 +74,19 @@ class Day13: # Packet Scanners
         return result
     
     def solve2(self, layers):
-        result = len(layers)
+        min_delay = float('inf')
+        delay = 0
+        while True:
+            detected_ind = False
+            for depth, range in layers.items():
+                if (depth + delay) % (2 * (range - 1)) == 0:
+                    detected_ind = True
+                    break
+            if not detected_ind:
+                min_delay = delay
+                break
+            delay += 1
+        result = min_delay
         return result
     
     def main(self):
