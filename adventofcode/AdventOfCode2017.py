@@ -25,6 +25,41 @@ def get_raw_input_lines() -> list:
             break
     return raw_input_lines
 
+class KnotHash:
+    def __init__(self, input_str: str):
+        self.hash = self.get_hash(input_str)
+    
+    def get_hash(self, input_str: str) -> str:
+        lengths = []
+        for char in input_str:
+            lengths.append(ord(char))
+        lengths += [17, 31, 73, 47, 23]
+        nums = list(range(256))
+        cursor = 0
+        skip_size = 0
+        for round_id in range(64):
+            for length in lengths:
+                left = cursor
+                right = cursor + length - 1
+                while left < right:
+                    L = left % len(nums)
+                    R = right % len(nums)
+                    nums[L], nums[R] = nums[R], nums[L]
+                    left += 1
+                    right -= 1
+                cursor = (cursor + length + skip_size) % len(nums)
+                skip_size += 1
+        xors = [0] * 16
+        for i in range(16):
+            for j in range(16):
+                xors[i] ^= nums[16 * i + j]
+        chars = []
+        for i in range(16):
+            chars.append(hex(xors[i])[2:])
+        result = ''.join(chars)
+        return result
+
+
 class Template: # Template
     '''
     https://adventofcode.com/2017/day/?
@@ -37,6 +72,38 @@ class Template: # Template
     
     def solve(self, parsed_input):
         result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day14: # Disk Defragmentation
+    '''
+    https://adventofcode.com/2017/day/14
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = raw_input_lines[0]
+        return result
+    
+    def solve(self, parsed_input):
+        grid = []
+        for index in range(128):
+            input_str = parsed_input + '-' + str(index)
+            hash = KnotHash(input_str).hash
+            bin_hash = str(bin(int(hash, 16))[2:].zfill(128))
+            grid.append(bin_hash)
+        result = sum(1 for char in ''.join(grid) if char == '1')
         return result
     
     def solve2(self, parsed_input):
@@ -244,33 +311,7 @@ class Day10: # Knot Hash
         return result
     
     def solve2(self, chars):
-        lengths = []
-        for char in chars:
-            lengths.append(ord(char))
-        lengths += [17, 31, 73, 47, 23]
-        nums = list(range(256))
-        cursor = 0
-        skip_size = 0
-        for round_id in range(64):
-            for length in lengths:
-                left = cursor
-                right = cursor + length - 1
-                while left < right:
-                    L = left % len(nums)
-                    R = right % len(nums)
-                    nums[L], nums[R] = nums[R], nums[L]
-                    left += 1
-                    right -= 1
-                cursor = (cursor + length + skip_size) % len(nums)
-                skip_size += 1
-        xors = [0] * 16
-        for i in range(16):
-            for j in range(16):
-                xors[i] ^= nums[16 * i + j]
-        chars = []
-        for i in range(16):
-            chars.append(hex(xors[i])[2:])
-        result = ''.join(chars)
+        result = KnotHash(chars).hash
         return result
     
     def main(self):
@@ -871,7 +912,7 @@ if __name__ == '__main__':
        11: (Day11, 'Hex Ed'),
        12: (Day12, 'Digital Plumber'),
        13: (Day13, 'Packet Scanners'),
-    #    14: (Day14, 'XXX'),
+       14: (Day14, 'Disk Defragmentation'),
     #    15: (Day15, 'XXX'),
     #    16: (Day16, 'XXX'),
     #    17: (Day17, 'XXX'),
