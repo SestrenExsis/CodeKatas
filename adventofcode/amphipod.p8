@@ -152,8 +152,8 @@ function restart(depth)
 	_m={
 		move:new(5,7)
 	}
+	_n=1
 	_pth={}
-	_costs={0,0}
 	_brd=board:new(depth)
 	_amfs=getamphipods(depth)
 	cleanmap()
@@ -179,8 +179,8 @@ end
 
 function _update()
 	-- check for input
-	local ncol=_m[#_m].col
-	local nrow=_m[#_m].row
+	local ncol=_m[_n].col
+	local nrow=_m[_n].row
 	if btnp(⬅️) then
 		ncol-=1
 	elseif btnp(➡️) then
@@ -204,8 +204,8 @@ function _update()
 	end
 	if valid and
 	(
-		_m[#_m].col!=ncol or
-		_m[#_m].row!=nrow
+		_m[_n].col!=ncol or
+		_m[_n].row!=nrow
 	) then
 		-- check if backtracking
 		local backtrack=false
@@ -233,74 +233,61 @@ function _update()
 			-- add dot
 			add(_pth,
 				{
-					_m[#_m].col,
-					_m[#_m].row
+					_m[_n].col,
+					_m[_n].row
 				}
 			)
 		end
-		_m[#_m].col=ncol
-		_m[#_m].row=nrow
+		_m[_n].col=ncol
+		_m[_n].row=nrow
 	end
 	-- check for grabbed amphipod
 	if btnp(❎) then
-		if _m[#_m].amf==nil then
+		if _m[_n].amf==nil then
 			for amf in all(_amfs) do
 				if (
-					amf.col==_m[#_m].col and
-					amf.row==_m[#_m].row
+					amf.col==_m[_n].col and
+					amf.row==_m[_n].row
 				) then
-					_m[#_m].amf=amf
+					_m[_n].amf=amf
 					break
 				end
 			end
 		else
-			local row=_m[#_m].row
-			local col=_m[#_m].col
-			_m[#_m].row=_m[#_m].amf.row
-			_m[#_m].col=_m[#_m].amf.col
-			_m[#_m].amf.row=row
-			_m[#_m].amf.col=col
+			local row=_m[_n].row
+			local col=_m[_n].col
+			_m[_n].row=_m[_n].amf.row
+			_m[_n].col=_m[_n].amf.col
+			_m[_n].amf.row=row
+			_m[_n].amf.col=col
 			_pth={}
 			add(_m,move:new(row,col))
+			_n+=1
 		end
 	end
 	-- reset current move
 	if btnp(🅾️) then
 	-- todo: undo action history
-		if _m[#_m].amf==nil then
-			if #_m==1 then
-				_m[#_m].row=5
-				_m[#_m].col=7
+		if _m[_n].amf==nil then
+			if _n==1 then
+				_m[_n].row=5
+				_m[_n].col=7
 			else
-				deli(_m,#_m)
-				deli(_costs,#_costs)
-				local col=_m[#_m].col
-				local row=_m[#_m].row
-				_m[#_m].col=_m[#_m].amf.col
-				_m[#_m].row=_m[#_m].amf.row
-				_m[#_m].amf.col=col
-				_m[#_m].amf.row=row
+				deli(_m,_n)
+				_n-=1
+				local col=_m[_n].col
+				local row=_m[_n].row
+				_m[_n].col=_m[_n].amf.col
+				_m[_n].row=_m[_n].amf.row
+				_m[_n].amf.col=col
+				_m[_n].amf.row=row
 			end
 		else
-			_m[#_m].row=_m[#_m].amf.row
-			_m[#_m].col=_m[#_m].amf.col
-			_m[#_m].amf=nil
+			_m[_n].row=_m[_n].amf.row
+			_m[_n].col=_m[_n].amf.col
+			_m[_n].amf=nil
 			_pth={}
-			_costs[#_costs]=0
 		end
-	end
-	-- update costs
-	if _m[#_m].amf==nil then
-		if _costs[#_costs]>0 then
-			add(_costs,0)
-		end
-	else
-		local cost=_m[#_m].amf.cost
-		local dist=(
-			abs(_m[#_m].col-_m[#_m].amf.col)+
-			abs(_m[#_m].row-_m[#_m].amf.row)
-		)
-		_costs[#_costs]=cost*dist
 	end
 end
 
@@ -312,9 +299,9 @@ function _draw()
 		local lft=8*amf.col
 		local top=8*amf.row
 		local fm=8+amf.typ
-		if amf==_m[#_m].amf then
-			lft=8*_m[#_m].col
-			top=8*_m[#_m].row
+		if amf==_m[_n].amf then
+			lft=8*_m[_n].col
+			top=8*_m[_n].row
 			fm=24+amf.typ
 		end
 		spr(fm,lft,top)
@@ -324,20 +311,29 @@ function _draw()
 	if btn(❎) then
 		fm=8
 	end
-	spr(fm,8*_m[#_m].col,8*_m[#_m].row)
+	spr(fm,8*_m[_n].col,8*_m[_n].row)
 	-- draw movement dots
 	for dot in all(_pth) do
-		local fm=40+_m[#_m].amf.typ
+		local fm=40+_m[_n].amf.typ
 		spr(fm,8*dot[1],8*dot[2])
 	end
-	-- draw debug
-	local total=0
-	for cost in all(_costs) do
-		total+=cost>>16
+	-- calculate costs
+	local cost=0
+	for i=1,_n do
+		local move=_m[i]
+		if move.amf!=nil then
+			local amf=move.amf
+			local dist=(
+					abs(move.col-amf.col)
+				+abs(move.row-amf.row)
+				)
+			cost+=(dist*amf.cost)>>16
+		end
 	end
-	print(tostr(total,0x2),4,4,7)
-	print(_costs[#_costs],4,10,6)
-	print(_costs[#_costs-1],4,16,5)
+	-- draw debug
+	print(tostr(cost,0x2),4,4,7)
+	--print(_costs[#_costs],4,10,6)
+	--print(_costs[#_costs-1],4,16,5)
 end
 __gfx__
 00000000111111113333333399999999888888885555555555555555770000770000000000000000000000000000000000000000002222222222222222222200
