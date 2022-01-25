@@ -91,6 +91,35 @@ class Template: # Template
         result = solutions
         return result
 
+
+class Day15: # Dueling Generators
+    '''
+    https://adventofcode.com/2017/day/15
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day14: # Disk Defragmentation
     '''
     https://adventofcode.com/2017/day/14
@@ -937,7 +966,7 @@ if __name__ == '__main__':
        12: (Day12, 'Digital Plumber'),
        13: (Day13, 'Packet Scanners'),
        14: (Day14, 'Disk Defragmentation'),
-    #    15: (Day15, 'XXX'),
+       15: (Day15, 'Dueling Generators'),
     #    16: (Day16, 'XXX'),
     #    17: (Day17, 'XXX'),
     #    18: (Day18, 'XXX'),
