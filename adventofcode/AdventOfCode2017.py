@@ -37,7 +37,7 @@ class KnotHash:
         nums = list(range(256))
         cursor = 0
         skip_size = 0
-        for round_id in range(64):
+        for _ in range(64):
             for length in lengths:
                 left = cursor
                 right = cursor + length - 1
@@ -55,7 +55,10 @@ class KnotHash:
                 xors[i] ^= nums[16 * i + j]
         chars = []
         for i in range(16):
-            chars.append(hex(xors[i])[2:])
+            char = hex(xors[i])[2:]
+            if len(char) == 1:
+                char = '0' + char
+            chars.append(char)
         result = ''.join(chars)
         return result
 
@@ -92,30 +95,51 @@ class Day14: # Disk Defragmentation
     '''
     https://adventofcode.com/2017/day/14
     '''
-    def get_parsed_input(self, raw_input_lines: List[str]):
-        result = raw_input_lines[0]
-        return result
-    
-    def solve(self, parsed_input):
+    def get_grid(self, raw_input_lines: List[str]):
+        parsed_input = raw_input_lines[0]
         grid = []
         for index in range(128):
             input_str = parsed_input + '-' + str(index)
             hash = KnotHash(input_str).hash
             bin_hash = str(bin(int(hash, 16))[2:].zfill(128))
             grid.append(bin_hash)
+        result = grid
+        return result
+    
+    def solve(self, grid):
         result = sum(1 for char in ''.join(grid) if char == '1')
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, grid):
+        cells = set()
+        for row, row_data in enumerate(grid):
+            for col, cell in enumerate(row_data):
+                if cell == '1':
+                    cells.add((row, col))
+        region_count = 0
+        while len(cells) > 0:
+            work = [cells.pop()]
+            while len(work) > 0:
+                row, col = work.pop()
+                for (nrow, ncol) in (
+                    (row - 1, col),
+                    (row + 1, col),
+                    (row, col - 1),
+                    (row, col + 1),
+                ):
+                    if (nrow, ncol) in cells:
+                        cells.remove((nrow, ncol))
+                        work.append((nrow, ncol))
+            region_count += 1
+        result = region_count
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        grid = self.get_grid(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(grid),
+            self.solve2(grid),
             )
         result = solutions
         return result
