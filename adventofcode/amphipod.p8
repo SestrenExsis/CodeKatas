@@ -153,7 +153,6 @@ function restart(depth)
 		move:new(5,7)
 	}
 	_n=1
-	_pth={}
 	_brd=board:new(depth)
 	_amfs=getamphipods(depth)
 	cleanmap()
@@ -207,37 +206,6 @@ function _update()
 		_m[_n].col!=ncol or
 		_m[_n].row!=nrow
 	) then
-		-- check if backtracking
-		local backtrack=false
-		for dot in all(_pth) do
-			if (
-				dot[1]==ncol and
-				dot[2]==nrow
-			) then
-				backtrack=true
-			end
-		end
-		if backtrack then
-			-- delete prev dot
-			for i=1,#_pth do
-				local dot=_pth[i]
-				if (
-					dot[1]==ncol and
-					dot[2]==nrow
-				) then
-					deli(_pth,i)
-					break
-				end
-			end
-		elseif _m[#_m].amf!=nil then
-			-- add dot
-			add(_pth,
-				{
-					_m[_n].col,
-					_m[_n].row
-				}
-			)
-		end
 		_m[_n].col=ncol
 		_m[_n].row=nrow
 	end
@@ -260,7 +228,6 @@ function _update()
 			_m[_n].col=_m[_n].amf.col
 			_m[_n].amf.row=row
 			_m[_n].amf.col=col
-			_pth={}
 			add(_m,move:new(row,col))
 			_n+=1
 		end
@@ -286,7 +253,6 @@ function _update()
 			_m[_n].row=_m[_n].amf.row
 			_m[_n].col=_m[_n].amf.col
 			_m[_n].amf=nil
-			_pth={}
 		end
 	end
 end
@@ -294,6 +260,28 @@ end
 function _draw()
 	cls()
 	map(0,0,0,0,128,128)
+	-- draw movement dots
+	if _m[_n].amf!=nil then
+		local mov=_m[_n]
+		local amf=_m[_n].amf
+		local r1=min(mov.row,amf.row)
+		local c1=min(mov.col,amf.col)
+		local r2=max(mov.row,amf.row)
+		local c2=max(mov.col,amf.col)
+		print(r1.." "..r2,90,90)
+		print(c1.." "..c2,90,98)
+		local fm=40+amf.typ
+		while r1<=r2 or c1<=c2 do
+			local row=min(r1,r2)
+			local col=min(c1,c2)
+			spr(fm,8*col,8*row)
+			if c1<=c2 then
+				c1+=1
+			elseif r1<=r2 then
+				r1+=1
+			end
+		end
+	end
 	-- draw amphipods
 	for amf in all(_amfs) do
 		local lft=8*amf.col
@@ -312,11 +300,6 @@ function _draw()
 		fm=8
 	end
 	spr(fm,8*_m[_n].col,8*_m[_n].row)
-	-- draw movement dots
-	for dot in all(_pth) do
-		local fm=40+_m[_n].amf.typ
-		spr(fm,8*dot[1],8*dot[2])
-	end
 	-- calculate costs
 	local cost=0
 	for i=1,_n do
