@@ -264,22 +264,20 @@ function _draw()
 	if _m[_n].amf!=nil then
 		local mov=_m[_n]
 		local amf=_m[_n].amf
+		local fm=40+amf.typ
 		local r1=min(mov.row,amf.row)
 		local c1=min(mov.col,amf.col)
 		local r2=max(mov.row,amf.row)
 		local c2=max(mov.col,amf.col)
-		print(r1.." "..r2,90,90)
-		print(c1.." "..c2,90,98)
-		local fm=40+amf.typ
-		while r1<=r2 or c1<=c2 do
-			local row=min(r1,r2)
-			local col=min(c1,c2)
-			spr(fm,8*col,8*row)
-			if c1<=c2 then
-				c1+=1
-			elseif r1<=r2 then
-				r1+=1
+		for col=c1,c2 do
+			spr(fm,8*col,8*r1)
+		end
+		for row=r1,r2 do
+			local col=amf.col
+			if amf.row==r1 then
+				col=mov.col
 			end
+			spr(fm,8*col,8*row)
 		end
 	end
 	-- draw amphipods
