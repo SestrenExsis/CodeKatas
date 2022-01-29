@@ -96,49 +96,80 @@ class Day15: # Dueling Generators
     '''
     https://adventofcode.com/2017/day/15
     '''
-    MODULO = 2147483647
+    class Generator:
+        MODULO = 2147483647
+
+        def __init__(self, value: int, factor: int, multiple: int=0):
+            self.value = value
+            self.factor = factor
+            self.multiple = multiple
+        
+        def next(self) -> int:
+            while True:
+                self.value = (self.value * self.factor) % self.MODULO
+                if self.multiple == 0 or self.value % self.multiple == 0:
+                    break
+            result = self.value
+            return result
+    
     MASK = 2 ** 16 - 1
 
-    def get_generators(self, raw_input_lines: List[str]):
-        generators = {}
+    def get_starts(self, raw_input_lines: List[str]):
+        starts = {}
         for raw_input_line in raw_input_lines:
             parts = raw_input_line.split()
             key = parts[1]
             start = int(parts[-1])
-            generators[key] = {}
-            generators[key]['start'] = start
-            generators[key]['value'] = start
-        generators['A']['factor'] = 16807
-        generators['B']['factor'] = 48271
-        result = generators
+            starts[key] = start
+        result = starts
         return result
     
-    def solve_slowly(self, generators):
+    def solve_slowly(self, starts):
+        generators = {
+            self.Generator(starts['A'], 16807),
+            self.Generator(starts['B'], 48271),
+        }
         match_count = 0
         for i in range(40_000_000):
-            for gen in generators.values():
-                gen['value'] = (gen['value'] * gen['factor']) % self.MODULO
+            for gen in generators:
+                gen.next()
             bits = None
-            for gen in generators.values():
+            for gen in generators:
                 if bits is None:
-                    bits = gen['value'] & self.MASK
-                if bits != (gen['value'] & self.MASK):
+                    bits = gen.value & self.MASK
+                if bits != (gen.value & self.MASK):
                     break
             else:
                 match_count += 1
         result = match_count
         return result
     
-    def solve2(self, generators):
-        result = len(generators)
+    def solve2_slowly(self, starts):
+        generators = {
+            self.Generator(starts['A'], 16807, 4),
+            self.Generator(starts['B'], 48271, 8),
+        }
+        match_count = 0
+        for i in range(5_000_000):
+            for gen in generators:
+                gen.next()
+            bits = None
+            for gen in generators:
+                if bits is None:
+                    bits = gen.value & self.MASK
+                if bits != (gen.value & self.MASK):
+                    break
+            else:
+                match_count += 1
+        result = match_count
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        generators = self.get_generators(raw_input_lines)
+        starts = self.get_starts(raw_input_lines)
         solutions = (
-            self.solve_slowly(generators),
-            self.solve2(generators),
+            self.solve_slowly(starts),
+            self.solve2_slowly(starts),
             )
         result = solutions
         return result
