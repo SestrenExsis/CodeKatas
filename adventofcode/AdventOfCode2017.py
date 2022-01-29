@@ -96,26 +96,49 @@ class Day15: # Dueling Generators
     '''
     https://adventofcode.com/2017/day/15
     '''
-    def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
+    MODULO = 2147483647
+    MASK = 2 ** 16 - 1
+
+    def get_generators(self, raw_input_lines: List[str]):
+        generators = {}
         for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
+            parts = raw_input_line.split()
+            key = parts[1]
+            start = int(parts[-1])
+            generators[key] = {}
+            generators[key]['start'] = start
+            generators[key]['value'] = start
+        generators['A']['factor'] = 16807
+        generators['B']['factor'] = 48271
+        result = generators
         return result
     
-    def solve(self, parsed_input):
-        result = len(parsed_input)
+    def solve_slowly(self, generators):
+        match_count = 0
+        for i in range(40_000_000):
+            for gen in generators.values():
+                gen['value'] = (gen['value'] * gen['factor']) % self.MODULO
+            bits = None
+            for gen in generators.values():
+                if bits is None:
+                    bits = gen['value'] & self.MASK
+                if bits != (gen['value'] & self.MASK):
+                    break
+            else:
+                match_count += 1
+        result = match_count
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, generators):
+        result = len(generators)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        generators = self.get_generators(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve_slowly(generators),
+            self.solve2(generators),
             )
         result = solutions
         return result
