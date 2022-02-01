@@ -82,6 +82,8 @@ function move:new(r,c)
 	local obj={
 		row=r,
 		col=c,
+		r0=row,
+		c0=col,
 		amf=nil,
 	}
 	return setmetatable(
@@ -218,6 +220,8 @@ function _update()
 					amf.row==_m[_n].row
 				) then
 					_m[_n].amf=amf
+					_m[_n].r0=_m[_n].row
+					_m[_n].c0=_m[_n].col
 					break
 				end
 			end
@@ -265,10 +269,10 @@ function _draw()
 		local mov=_m[_n]
 		local amf=_m[_n].amf
 		local fm=40+amf.typ
-		local r1=min(mov.row,amf.row)
-		local c1=min(mov.col,amf.col)
-		local r2=max(mov.row,amf.row)
-		local c2=max(mov.col,amf.col)
+		local r1=min(mov.r0,mov.row)
+		local c1=min(mov.c0,mov.col)
+		local r2=max(mov.r0,mov.row)
+		local c2=max(mov.c0,mov.col)
 		for col=c1,c2 do
 			spr(fm,8*col,8*r1)
 		end
@@ -300,21 +304,25 @@ function _draw()
 	spr(fm,8*_m[_n].col,8*_m[_n].row)
 	-- calculate costs
 	local cost=0
-	for i=1,_n do
+	local y=4
+	for i=max(1,_n-3),_n do
 		local move=_m[i]
+		local amf=move.amf
+		local dist=0
+		local cost=0
 		if move.amf!=nil then
-			local amf=move.amf
-			local dist=(
+			dist=(
 					abs(move.col-amf.col)
 				+abs(move.row-amf.row)
 				)
 			cost+=(dist*amf.cost)>>16
 		end
+		m=tostr(cost,0x2).." "
+		m=m..tostr(dist).." "
+		m=m..tostr(amf)
+		print(m,4,y,8)
+		y+=8
 	end
-	-- draw debug
-	print(tostr(cost,0x2),4,4,7)
-	--print(_costs[#_costs],4,10,6)
-	--print(_costs[#_costs-1],4,16,5)
 end
 __gfx__
 00000000111111113333333399999999888888885555555555555555770000770000000000000000000000000000000000000000002222222222222222222200
