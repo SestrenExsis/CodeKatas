@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 34
+version 35
 __lua__
 -- amphipod
 -- by sestrenexsis
@@ -19,10 +19,10 @@ cartdata("sestrenexsis_amphipod_1")
 -- tile
 tile={}
 
-function tile:new(r,c,t)
+function tile:new(x,y,t)
 	local obj={
-		row=r,
-		col=c,
+		x=x,
+		y=y,
 		typ=t,
 	}
 	return setmetatable(
@@ -35,22 +35,22 @@ board={}
 
 function board:new(depth)
 	local tiles={}
-	add(tiles,tile:new(5,2,6))
-	add(tiles,tile:new(5,3,6))
-	add(tiles,tile:new(5,4,5))
+	add(tiles,tile:new(2,5,6))
+	add(tiles,tile:new(3,5,6))
+	add(tiles,tile:new(4,5,5))
 	add(tiles,tile:new(5,5,6))
-	add(tiles,tile:new(5,6,5))
-	add(tiles,tile:new(5,7,6))
-	add(tiles,tile:new(5,8,5))
-	add(tiles,tile:new(5,9,6))
-	add(tiles,tile:new(5,10,5))
-	add(tiles,tile:new(5,11,6))
-	add(tiles,tile:new(5,12,6))
-	for r=1,depth do
-		add(tiles,tile:new(5+r,4,1))
-		add(tiles,tile:new(5+r,6,2))
-		add(tiles,tile:new(5+r,8,3))
-		add(tiles,tile:new(5+r,10,4))
+	add(tiles,tile:new(6,5,5))
+	add(tiles,tile:new(7,5,6))
+	add(tiles,tile:new(8,5,5))
+	add(tiles,tile:new(9,5,6))
+	add(tiles,tile:new(10,5,5))
+	add(tiles,tile:new(11,5,6))
+	add(tiles,tile:new(12,5,6))
+	for y=1,depth do
+		add(tiles,tile:new(4,5+y,1))
+		add(tiles,tile:new(6,5+y,2))
+		add(tiles,tile:new(8,5+y,3))
+		add(tiles,tile:new(10,5+y,4))
 	end
 	local obj={
 		tiles=tiles,
@@ -63,10 +63,10 @@ end
 -- amphipods
 amphipod={}
 
-function amphipod:new(r,c,tp)
+function amphipod:new(x,y,tp)
 	local obj={
-		row=r,
-		col=c,
+		x=x,
+		y=y,
 		typ=tp,
 		cost=10^(tp-1),
 	}
@@ -78,12 +78,12 @@ end
 -- move
 move={}
 
-function move:new(r,c)
+function move:new(x,y)
 	local obj={
-		row=r,
-		col=c,
-		r0=row,
-		c0=col,
+		x=x,
+		y=y,
+		x0=x,
+		y0=y,
 		amf=nil,
 	}
 	return setmetatable(
@@ -104,8 +104,8 @@ function cleanmap()
 	for tile in all(_brd.tiles) do
 		for dx=-1,1 do
 			for dy=-1,1 do
-				local x=tile.col+dx
-				local y=tile.row+dy
+				local x=tile.x+dx
+				local y=tile.y+dy
 				if dx==0 and dy==0 then
 					mset(x,y,tile.typ)
 				elseif mget(x,y)==0 then
@@ -136,8 +136,8 @@ function getamphipods(depth)
 		for i=1,4 do
 			local idx=1+flr(rnd(#bag))
 			local amf=amphipod:new(
-				5+d,
 				2+2*i,
+				5+d,
 				bag[idx]
 			)
 			add(res,amf)
@@ -152,7 +152,7 @@ end
 
 function restart(depth)
 	_m={
-		move:new(5,7)
+		move:new(7,5)
 	}
 	_n=1
 	_brd=board:new(depth)
@@ -180,17 +180,17 @@ end
 
 function _update()
 	-- check for input
-	local ncol=_m[_n].col
-	local nrow=_m[_n].row
+	local nx=_m[_n].x
+	local ny=_m[_n].y
 	if btnp(⬅️) then
-		ncol-=1
+		nx-=1
 	elseif btnp(➡️) then
-		ncol+=1
+		nx+=1
 	end
 	if btnp(⬆️) then
-		nrow-=1
+		ny-=1
 	elseif btnp(⬇️) then
-		nrow+=1
+		ny+=1
 	end
 	-- check for valid tile
 	-- todo: restrict movement to
@@ -198,8 +198,8 @@ function _update()
 	local valid=false
 	for tile in all(_brd.tiles) do
 		if (
-			tile.col==ncol and
-			tile.row==nrow
+			tile.x==nx and
+			tile.y==ny
 		) then
 			valid=true
 			break
@@ -207,34 +207,34 @@ function _update()
 	end
 	if valid and
 	(
-		_m[_n].col!=ncol or
-		_m[_n].row!=nrow
+		_m[_n].x!=nx or
+		_m[_n].y!=ny
 	) then
-		_m[_n].col=ncol
-		_m[_n].row=nrow
+		_m[_n].x=nx
+		_m[_n].y=ny
 	end
 	-- check for grabbed amphipod
 	if btnp(❎) then
 		if _m[_n].amf==nil then
 			for amf in all(_amfs) do
 				if (
-					amf.col==_m[_n].col and
-					amf.row==_m[_n].row
+					amf.x==_m[_n].x and
+					amf.y==_m[_n].y
 				) then
 					_m[_n].amf=amf
-					_m[_n].r0=_m[_n].row
-					_m[_n].c0=_m[_n].col
+					_m[_n].x0=_m[_n].x
+					_m[_n].y0=_m[_n].y
 					break
 				end
 			end
 		else
-			local row=_m[_n].row
-			local col=_m[_n].col
-			_m[_n].row=_m[_n].amf.row
-			_m[_n].col=_m[_n].amf.col
-			_m[_n].amf.row=row
-			_m[_n].amf.col=col
-			add(_m,move:new(row,col))
+			local x=_m[_n].x
+			local y=_m[_n].y
+			_m[_n].x=_m[_n].amf.x
+			_m[_n].y=_m[_n].amf.y
+			_m[_n].amf.x=x
+			_m[_n].amf.y=y
+			add(_m,move:new(x,y))
 			_n+=1
 		end
 	end
@@ -243,21 +243,21 @@ function _update()
 	-- todo: undo action history
 		if _m[_n].amf==nil then
 			if _n==1 then
-				_m[_n].row=5
-				_m[_n].col=7
+				_m[_n].x=7
+				_m[_n].y=5
 			else
 				deli(_m,_n)
 				_n-=1
-				local col=_m[_n].col
-				local row=_m[_n].row
-				_m[_n].col=_m[_n].amf.col
-				_m[_n].row=_m[_n].amf.row
-				_m[_n].amf.col=col
-				_m[_n].amf.row=row
+				local x=_m[_n].x
+				local y=_m[_n].y
+				_m[_n].x=_m[_n].amf.x
+				_m[_n].y=_m[_n].amf.y
+				_m[_n].amf.x=x
+				_m[_n].amf.y=y
 			end
 		else
-			_m[_n].row=_m[_n].amf.row
-			_m[_n].col=_m[_n].amf.col
+			_m[_n].x=_m[_n].amf.x
+			_m[_n].y=_m[_n].amf.y
 			_m[_n].amf=nil
 		end
 	end
@@ -271,31 +271,31 @@ function _draw()
 		local mov=_m[_n]
 		local amf=_m[_n].amf
 		local fm=40+amf.typ
-		local r1=min(mov.r0,mov.row)
-		local c1=min(mov.c0,mov.col)
-		local r2=max(mov.r0,mov.row)
-		local c2=max(mov.c0,mov.col)
-		for col=c1,c2 do
-			spr(fm,8*col,8*r1)
+		local x1=min(mov.x0,mov.x)
+		local y1=min(mov.y0,mov.y)
+		local x2=max(mov.x0,mov.x)
+		local y2=max(mov.y0,mov.y)
+		for x=x1,x2 do
+			spr(fm,8*x,8*y1)
 		end
-		for row=r1,r2 do
-			local col=amf.col
-			if amf.row==r1 then
-				col=mov.col
+		for y=y1,y2 do
+			local x=amf.x
+			if amf.y==y1 then
+				x=mov.x
 			end
-			spr(fm,8*col,8*row)
+			spr(fm,8*x,8*y)
 		end
 	end
 	-- draw amphipods
 	palt(0,false)
 	palt(15,true)
 	for amf in all(_amfs) do
-		local lft=8*amf.col
-		local top=8*amf.row
+		local lft=8*amf.x
+		local top=8*amf.y
 		local fm=8+amf.typ
 		if amf==_m[_n].amf then
-			lft=8*_m[_n].col
-			top=8*_m[_n].row
+			lft=8*_m[_n].x
+			top=8*_m[_n].y
 			fm=24+amf.typ
 		end
 		spr(fm,lft,top)
@@ -306,7 +306,7 @@ function _draw()
 	if btn(❎) then
 		fm=8
 	end
-	spr(fm,8*_m[_n].col,8*_m[_n].row)
+	spr(fm,8*_m[_n].x,8*_m[_n].y)
 	-- calculate costs
 	local total=0
 	local y=4
@@ -317,8 +317,8 @@ function _draw()
 		local cost=0
 		if move.amf!=nil then
 			dist=(
-					abs(move.col-amf.col)
-				+abs(move.row-amf.row)
+					abs(move.x-amf.x)
+				+abs(move.y-amf.y)
 				)
 			cost+=(dist*amf.cost)>>16
 		end
