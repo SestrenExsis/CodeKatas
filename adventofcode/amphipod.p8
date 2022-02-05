@@ -194,7 +194,8 @@ function _update()
 	end
 	-- check for valid tile
 	-- todo: restrict movement to
-	-- leaving home or returning home
+	--       leaving home or 
+	--       returning home
 	local valid=false
 	for tile in all(_brd.tiles) do
 		if (
@@ -205,11 +206,7 @@ function _update()
 			break
 		end
 	end
-	if valid and
-	(
-		_m[_n].x!=nx or
-		_m[_n].y!=ny
-	) then
+	if valid then
 		_m[_n].x=nx
 		_m[_n].y=ny
 	end
@@ -230,11 +227,42 @@ function _update()
 		else
 			local x=_m[_n].x
 			local y=_m[_n].y
-			_m[_n].x=_m[_n].amf.x
-			_m[_n].y=_m[_n].amf.y
+			local ly=y
+			while true do
+				local valid=true
+				for amf in all(_amfs) do
+					if (
+						amf.x==x and
+						amf.y==y+1
+					) then
+						valid=false
+						break
+					end
+				end
+				if not valid then
+					break
+				end
+				y+=1
+				valid=false
+				for til in all(_brd.tiles) do
+					if (
+						til.x==x and
+						til.y==y
+					) then
+						valid=true
+						break
+					end
+				end
+				if not valid then
+					y-=1
+					break
+				end
+			end
+			_m[_n].x=x
+			_m[_n].y=y
 			_m[_n].amf.x=x
 			_m[_n].amf.y=y
-			add(_m,move:new(x,y))
+			add(_m,move:new(x,ly))
 			_n+=1
 		end
 	end
