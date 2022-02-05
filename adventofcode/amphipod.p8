@@ -206,6 +206,18 @@ function _update()
 			break
 		end
 	end
+	if _m[_n].amf!=nil then
+		for amf in all(_amfs) do
+			if (
+				amf.x==nx and
+				amf.y==ny and
+				amf!=_m[_n].amf
+			) then
+				valid=false
+				break
+			end
+		end
+	end
 	if valid then
 		_m[_n].x=nx
 		_m[_n].y=ny
