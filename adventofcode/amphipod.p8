@@ -233,7 +233,8 @@ function _update()
 				for amf in all(_amfs) do
 					if (
 						amf.x==x and
-						amf.y==y+1
+						amf.y==y+1 and
+						amf!=_m[_n].amf
 					) then
 						valid=false
 						break
