@@ -187,11 +187,6 @@ function _update()
 	elseif btnp(➡️) then
 		nx+=1
 	end
-	if btnp(⬆️) then
-		ny-=1
-	elseif btnp(⬇️) then
-		ny+=1
-	end
 	-- check for valid tile
 	-- todo: restrict movement to
 	--       leaving home or 
@@ -223,16 +218,20 @@ function _update()
 		_m[_n].y=ny
 	end
 	-- check for grabbed amphipod
-	if btnp(❎) then
+	if btnp(❎) or btnp(⬇️) then
 		if _m[_n].amf==nil then
+			local top=nil
 			for amf in all(_amfs) do
 				if (
 					amf.x==_m[_n].x and
-					amf.y==_m[_n].y
+					(
+						top==nil or
+						amf.y<top.y
+					)
 				) then
 					_m[_n].amf=amf
-					_m[_n].x0=_m[_n].x
-					_m[_n].y0=_m[_n].y
+					_m[_n].x0=amf.x
+					_m[_n].y0=amf.y
 					break
 				end
 			end
