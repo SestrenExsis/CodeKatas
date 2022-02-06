@@ -78,13 +78,10 @@ end
 -- move
 move={}
 
-function move:new(x,y)
+function move:new(x)
 	local obj={
-		x=x,
-		y=y,
 		x0=x,
-		y0=y,
-		amf=nil,
+		x=x,
 	}
 	return setmetatable(
 		obj,{__index=self}
@@ -152,11 +149,12 @@ end
 
 function restart(depth)
 	_m={
-		move:new(7,5)
+		move:new(7)
 	}
 	_n=1
 	_brd=board:new(depth)
 	_amfs=getamphipods(depth)
+	_amf=nil
 	cleanmap()
 end
 
@@ -181,7 +179,6 @@ end
 function _update()
 	-- check for input
 	local nx=_m[_n].x
-	local ny=_m[_n].y
 	if btnp(⬅️) then
 		nx-=1
 	elseif btnp(➡️) then
@@ -194,19 +191,18 @@ function _update()
 	local valid=false
 	for tile in all(_brd.tiles) do
 		if (
-			tile.x==nx and
-			tile.y==ny
+			tile.x==nx
 		) then
 			valid=true
 			break
 		end
 	end
-	if _m[_n].amf!=nil then
+	if _amf!=nil then
 		for amf in all(_amfs) do
 			if (
 				amf.x==nx and
-				amf.y==ny and
-				amf!=_m[_n].amf
+				amf.y==_amf.y and
+				amf!=_amf
 			) then
 				valid=false
 				break
@@ -215,37 +211,36 @@ function _update()
 	end
 	if valid then
 		_m[_n].x=nx
-		_m[_n].y=ny
+		if _amf!=nil then
+			_amf.x=nx
+		end
 	end
 	-- check for grabbed amphipod
 	if btnp(❎) or btnp(⬇️) then
-		if _m[_n].amf==nil then
-			local top=nil
+		if _amf==nil then
 			for amf in all(_amfs) do
 				if (
 					amf.x==_m[_n].x and
 					(
-						top==nil or
-						amf.y<top.y
+						_amf==nil or
+						amf.y<_amf.y
 					)
 				) then
-					_m[_n].amf=amf
+					_amf=amf
 					_m[_n].x0=amf.x
-					_m[_n].y0=amf.y
-					break
 				end
 			end
+			if _amf!=nil then
+					_amf.y=5
+			end
 		else
-			local x=_m[_n].x
-			local y=_m[_n].y
-			local ly=y
 			while true do
 				local valid=true
 				for amf in all(_amfs) do
 					if (
-						amf.x==x and
-						amf.y==y+1 and
-						amf!=_m[_n].amf
+						amf.x==_amf.x and
+						amf.y==_amf.y+1 and
+						amf!=_amf
 					) then
 						valid=false
 						break
@@ -254,33 +249,31 @@ function _update()
 				if not valid then
 					break
 				end
-				y+=1
+				_amf.y+=1
 				valid=false
 				for til in all(_brd.tiles) do
 					if (
-						til.x==x and
-						til.y==y
+						til.x==_amf.x and
+						til.y==_amf.y
 					) then
 						valid=true
 						break
 					end
 				end
 				if not valid then
-					y-=1
+					_amf.y-=1
 					break
 				end
 			end
-			_m[_n].x=x
-			_m[_n].y=y
-			_m[_n].amf.x=x
-			_m[_n].amf.y=y
-			add(_m,move:new(x,ly))
+			_m[_n].x=_amf.x
+			add(_m,move:new(_amf.x))
 			_n+=1
+			_amf=nil
 		end
 	end
 	-- reset current move
 	if btnp(🅾️) then
-	-- todo: undo action history
+	--[[ todo: undo action history
 		if _m[_n].amf==nil then
 			if _n==1 then
 				_m[_n].x=7
@@ -300,6 +293,7 @@ function _update()
 			_m[_n].y=_m[_n].amf.y
 			_m[_n].amf=nil
 		end
+		--]]
 	end
 end
 
@@ -307,10 +301,9 @@ function _draw()
 	cls()
 	map(0,0,0,0,128,128)
 	-- draw movement dots
-	if _m[_n].amf!=nil then
+	if _amf!=nil then
 		local mov=_m[_n]
-		local amf=_m[_n].amf
-		local fm=40+amf.typ
+		local fm=40+_amf.typ
 		local x1=min(mov.x0,mov.x)
 		local y1=min(mov.y0,mov.y)
 		local x2=max(mov.x0,mov.x)
@@ -319,8 +312,8 @@ function _draw()
 			spr(fm,8*x,8*y1)
 		end
 		for y=y1,y2 do
-			local x=amf.x
-			if amf.y==y1 then
+			local x=_amf.x
+			if _amf.y==y1 then
 				x=mov.x
 			end
 			spr(fm,8*x,8*y)
@@ -333,9 +326,7 @@ function _draw()
 		local lft=8*amf.x
 		local top=8*amf.y
 		local fm=8+amf.typ
-		if amf==_m[_n].amf then
-			lft=8*_m[_n].x
-			top=8*_m[_n].y
+		if amf==_amf then
 			fm=24+amf.typ
 		end
 		spr(fm,lft,top)
@@ -346,26 +337,26 @@ function _draw()
 	if btn(❎) then
 		fm=8
 	end
-	spr(fm,8*_m[_n].x,8*_m[_n].y)
+	local y0=5
+	spr(fm,8*_m[_n].x,8*y0)
 	-- calculate costs
 	local total=0
 	local y=4
 	for i=max(1,_n-3),_n do
 		local move=_m[i]
-		local amf=move.amf
 		local dist=0
 		local cost=0
-		if move.amf!=nil then
+		if _amf!=nil then
 			dist=(
-					abs(move.x-amf.x)
-				+abs(move.y-amf.y)
+					abs(move.x-_amf.x)
+				+abs(y0-_amf.y)
 				)
-			cost+=(dist*amf.cost)>>16
+			cost+=(dist*_amf.cost)>>16
 		end
 		total+=cost
 		m=tostr(cost,0x2).." "
 		m=m..tostr(dist).." "
-		m=m..tostr(amf)
+		m=m..tostr(_amf)
 		print(m,4,y,7)
 		y+=8
 	end
