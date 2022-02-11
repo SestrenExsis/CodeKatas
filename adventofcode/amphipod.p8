@@ -16,76 +16,57 @@ cartdata("sestrenexsis_amphipod_1")
 -->8
 -- classes
 
--- tile
-tile={}
-
-function tile:new(x,y,t)
-	local obj={
-		x=x,
-		y=y,
-		typ=t,
-	}
-	return setmetatable(
-		obj,{__index=self}
-	)
+function cost(tp)
+	local res=10^(tp-1)
+	return res
 end
 
--- board
-board={}
-
-function board:new(depth)
-	local tiles={}
-	add(tiles,tile:new(2,5,6))
-	add(tiles,tile:new(3,5,6))
-	add(tiles,tile:new(4,5,5))
-	add(tiles,tile:new(5,5,6))
-	add(tiles,tile:new(6,5,5))
-	add(tiles,tile:new(7,5,6))
-	add(tiles,tile:new(8,5,5))
-	add(tiles,tile:new(9,5,6))
-	add(tiles,tile:new(10,5,5))
-	add(tiles,tile:new(11,5,6))
-	add(tiles,tile:new(12,5,6))
-	for y=1,depth do
-		add(tiles,tile:new(4,5+y,1))
-		add(tiles,tile:new(6,5+y,2))
-		add(tiles,tile:new(8,5+y,3))
-		add(tiles,tile:new(10,5+y,4))
-	end
-	local obj={
-		tiles=tiles,
-	}
-	return setmetatable(
-		obj,{__index=self}
-	)
-end
-
--- amphipods
-amphipod={}
-
-function amphipod:new(x,y,tp)
-	local obj={
-		x=x,
-		y=y,
-		typ=tp,
-		cost=10^(tp-1),
-	}
-	return setmetatable(
-		obj,{__index=self}
-	)
-end
-
--- move
+--[[ move
+a move consists of 1-3 phases,
+which occur in a specific order:
+ - the initial column
+ - the column grabbing occurs
+ - the column dropping occurs
+--]]
 move={}
 
 function move:new(x)
 	local obj={
-		x0=x,
-		x=x,
+		init=x,
+		grab=nil,
+		drop=nil,
 	}
 	return setmetatable(
 		obj,{__index=self}
 	)
+end
+
+function move:act(x)
+	if grab==nil then
+		grab=x
+	elseif drop==nil then
+		drop=x
+	end
+end
+
+function move:x()
+	local res=self.init
+	if drop!=nil then
+		res=drop
+	elseif grab!=nil then
+		res=grab
+	end
+	return res
+end
+
+function move:state()
+	local res="free"
+	if drop!=nil then
+		res="drop"
+	elseif grab!=nil then
+		res="grab"
+	end
+	return res
 end
 -->8
 -- helper functions
@@ -97,79 +78,87 @@ function cleanmap()
 			mset(x,y,0)
 		end
 	end
-	-- process tiles
-	for tile in all(_brd.tiles) do
+	-- add walls
+	for x0=1,#_cels do
 		for dx=-1,1 do
 			for dy=-1,1 do
-				local x=tile.x+dx
-				local y=tile.y+dy
-				if dx==0 and dy==0 then
-					mset(x,y,tile.typ)
-				elseif mget(x,y)==0 then
-					local typ=56
-					if y<8 then typ=56
-					elseif x==4 then typ=57
-					elseif x==6 then typ=58
-					elseif x==8 then typ=59
-					elseif x==10 then typ=60
-					end
-					mset(x,y,typ)
-				end
+				mset(x0+dx+1,5+dy,56)
 			end
 		end
 	end
+	-- add main hallway
+	for x0=1,#_cels do
+		mset(x0+1,5,6)
+	end
+	-- 
+	for typ=1,4 do
+		local x=2*typ+2
+		mset(x,5,5)
+		for y=1,_size do
+			mset(x-1,5+y,56)
+			mset(x  ,5+y,typ)
+			mset(x+1,5+y,56)
+		end
+		mset(x-1,6+_size,56)
+		mset(x  ,6+_size,56+typ)
+		mset(x+1,6+_size,56)
+	end
+	--[[
+	if (
+		x==3 or
+		x==5 or
+		x==7 or
+		x==9
+	--]]
 	_dirty=false
-end
-
-function getamphipods(depth)
-	local bag={}
-	for d=1,depth do
-		for i=1,4 do
-			add(bag,i)
-		end
-	end
-	local res={}
-	for d=1,depth do
-		for i=1,4 do
-			local idx=1+flr(rnd(#bag))
-			local amf=amphipod:new(
-				2+2*i,
-				5+d,
-				bag[idx]
-			)
-			add(res,amf)
-			bag[idx]=bag[#bag]
-			deli(bag,#bag)
-		end
-	end
-	return res
 end
 -->8
 -- main
 
-function restart(depth)
-	_m={
-		move:new(7)
-	}
-	_n=1
-	_brd=board:new(depth)
-	_amfs=getamphipods(depth)
+function restart()
+	_lx=7
+	_x=7
 	_amf=nil
+	_cels={}
+	for col=1,11 do
+		add(_cels,{})
+	end
+	-- make a bag of amphipods
+	local bag={}
+	for d=1,_size do
+		for i=1,4 do
+			add(bag,i)
+		end
+	end
+	-- randomly assign amphipods
+	for col=3,9,2 do
+		for i=1,_size do
+			local idx=1+flr(rnd(#bag))
+			local amf=bag[idx]
+			add(_cels[col],amf)
+			bag[idx]=bag[#bag]
+			deli(bag,#bag)
+		end
+	end
 	cleanmap()
 end
 
 function restart2()
-	menuitem(1,"set depth to 4",
+	menuitem(1,
+		"set depth to 4",
 		restart4
 	)
-	restart(2)
+	_size=2
+	restart()
 end
 
 function restart4()
-	menuitem(1,"set depth to 2",
+	menuitem(1,
+		"set depth to 2",
 		restart2
 	)
-	restart(4)
+	_size=4
+	restart()
 end
 
 function _init()
@@ -178,158 +167,74 @@ end
 
 function _update()
 	-- check for input
-	local nx=_m[_n].x
+	local lx=_x
 	if btnp(⬅️) then
-		nx-=1
+		_x-=1
 	elseif btnp(➡️) then
-		nx+=1
+		_x+=1
 	end
-	-- check for valid tile
-	-- todo: restrict movement to
-	--       leaving home or 
-	--       returning home
-	local valid=false
-	for tile in all(_brd.tiles) do
-		if (
-			tile.x==nx
-		) then
-			valid=true
-			break
-		end
+	_x=mid(1,_x,#_cels)
+	local cap=0
+	if (
+		_x==3 or
+		_x==5 or
+		_x==7 or
+		_x==9
+	) then
+		cap=_size
 	end
-	if _amf!=nil then
-		for amf in all(_amfs) do
-			if (
-				amf.x==nx and
-				amf.y==_amf.y and
-				amf!=_amf
-			) then
-				valid=false
-				break
-			end
-		end
-	end
-	if valid then
-		_m[_n].x=nx
-		if _amf!=nil then
-			_amf.x=nx
-		end
+	-- check for amf collision
+	if (
+		_amf!=nil and
+		#_cels[_x]>cap
+	) then
+		_x=lx
 	end
 	-- check for grabbed amphipod
 	if btnp(❎) or btnp(⬇️) then
 		if _amf==nil then
-			for amf in all(_amfs) do
-				if (
-					amf.x==_m[_n].x and
-					(
-						_amf==nil or
-						amf.y<_amf.y
-					)
-				) then
-					_amf=amf
-					_m[_n].x0=amf.x
-				end
-			end
-			if _amf!=nil then
-					_amf.y=5
+			-- grab the top amf
+			if #_cels[_x]>0 then
+				_amf=_cels[_x][#_cels[_x]]
+				deli(_cels[_x],#_cels[_x])
 			end
 		else
-			while true do
-				local valid=true
-				for amf in all(_amfs) do
-					if (
-						amf.x==_amf.x and
-						amf.y==_amf.y+1 and
-						amf!=_amf
-					) then
-						valid=false
-						break
-					end
-				end
-				if not valid then
-					break
-				end
-				_amf.y+=1
-				valid=false
-				for til in all(_brd.tiles) do
-					if (
-						til.x==_amf.x and
-						til.y==_amf.y
-					) then
-						valid=true
-						break
-					end
-				end
-				if not valid then
-					_amf.y-=1
-					break
-				end
-			end
-			_m[_n].x=_amf.x
-			add(_m,move:new(_amf.x))
-			_n+=1
+			-- drop held amf
+			add(_cels[_x],_amf)
 			_amf=nil
 		end
 	end
-	-- reset current move
-	if btnp(🅾️) then
-	--[[ todo: undo action history
-		if _m[_n].amf==nil then
-			if _n==1 then
-				_m[_n].x=7
-				_m[_n].y=5
-			else
-				deli(_m,_n)
-				_n-=1
-				local x=_m[_n].x
-				local y=_m[_n].y
-				_m[_n].x=_m[_n].amf.x
-				_m[_n].y=_m[_n].amf.y
-				_m[_n].amf.x=x
-				_m[_n].amf.y=y
-			end
-		else
-			_m[_n].x=_m[_n].amf.x
-			_m[_n].y=_m[_n].amf.y
-			_m[_n].amf=nil
-		end
-		--]]
-	end
+	-- update movement
 end
 
 function _draw()
 	cls()
 	map(0,0,0,0,128,128)
 	-- draw movement dots
-	if _amf!=nil then
-		local mov=_m[_n]
-		local fm=40+_amf.typ
-		local x1=min(mov.x0,mov.x)
-		local y1=min(mov.y0,mov.y)
-		local x2=max(mov.x0,mov.x)
-		local y2=max(mov.y0,mov.y)
-		for x=x1,x2 do
-			spr(fm,8*x,8*y1)
-		end
-		for y=y1,y2 do
-			local x=_amf.x
-			if _amf.y==y1 then
-				x=mov.x
-			end
-			spr(fm,8*x,8*y)
-		end
-	end
+	-- todo: draw movement dots
 	-- draw amphipods
 	palt(0,false)
 	palt(15,true)
-	for amf in all(_amfs) do
-		local lft=8*amf.x
-		local top=8*amf.y
-		local fm=8+amf.typ
-		if amf==_amf then
-			fm=24+amf.typ
+	for x=1,#_cels do
+		local ht=0
+		if (
+			x==3 or
+			x==5 or
+			x==7 or
+			x==9
+		) then
+			ht=_size
 		end
-		spr(fm,lft,top)
+		local lft=8+8*x
+		for y=1,#_cels[x] do
+			local top=8*(6+ht-y)
+			local amf=_cels[x][y]
+			spr(8+amf,lft,top)
+		end
+	end
+	-- todo: draw grabbed amphipod
+	if _amf!=nil then
+		spr(24+_amf,8*(_x+1),8*5)
 	end
 	palt()
 	-- draw cursor
@@ -338,29 +243,7 @@ function _draw()
 		fm=8
 	end
 	local y0=5
-	spr(fm,8*_m[_n].x,8*y0)
-	-- calculate costs
-	local total=0
-	local y=4
-	for i=max(1,_n-3),_n do
-		local move=_m[i]
-		local dist=0
-		local cost=0
-		if _amf!=nil then
-			dist=(
-					abs(move.x-_amf.x)
-				+abs(y0-_amf.y)
-				)
-			cost+=(dist*_amf.cost)>>16
-		end
-		total+=cost
-		m=tostr(cost,0x2).." "
-		m=m..tostr(dist).." "
-		m=m..tostr(_amf)
-		print(m,4,y,7)
-		y+=8
-	end
-	print(tostr(total,0x2),4,80,8)
+	spr(fm,8*(1+_x),8*5)
 end
 __gfx__
 000000001111111133333333999999998888888855555555555555557700007700000000ffffffffffffffffffffffffffffffff002222222222222222222200
@@ -530,13 +413,13 @@ __map__
 1d00000010111213141516170000001f1d00101112131415161700141400001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 1d00000020212223242526270000001f1d30202122232425262700242400001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 1d00000000000000000000000000001f1d00000000000000000000000000001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-1d00000000000000000000000000001f1d01010101010101010101010101001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-1d00000000000000000000000000001f1d01020202020202020202020201001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-1d00000000000000000000000000001f1d01010105010401050103010101001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-1d00000000000000000000000000001f1d00000103010401050106010000001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-1d00000000000000000000000000001f1d00000103010501060104010000001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-1d00000000000000000000000000001f1d00000106010301040106010000001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-1d00000000000000000000000000001f1d0000011c011b011a0119010000001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+1d00000000000000000000000000001f1d38383838383838383838383838001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+1d00000000000000000000000000001f1d38060605060506050605060638001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+1d00000000000000000000000000001f1d38383801380238033804383838001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+1d00000000000000000000000000001f1d00003801380238033804380000001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+1d00000000000000000000000000001f1d00003801380238033804380000001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+1d00000000000000000000000000001f1d00003801380238033804380000001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+1d00000000000000000000000000001f1d00003839383a383b383c380000001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 1d00000000000000000000000000001f1d00000000000000000000000000001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 1d00000000000000000000000000001f1d00000000000000000000000000001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 1d00000000000000000000000000001f1d00000000000000000000000000001f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
