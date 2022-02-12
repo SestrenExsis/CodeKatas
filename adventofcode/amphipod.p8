@@ -70,6 +70,7 @@ function restart()
 	_lx=7
 	_x=7
 	_amf=nil
+	_cost=0
 	_cels={}
 	for col=1,11 do
 		add(_cels,{})
@@ -173,6 +174,32 @@ function _update()
 			_amf=nil
 		end
 	end
+	-- calculate current cost
+	_cost=0
+	if _amf!=nil then
+		-- add grab cost
+		if (
+			_lx==3 or
+			_lx==5 or
+			_lx==7 or
+			_lx==9
+		) then
+			_cost+=_size-#_cels[_lx]
+		end
+		-- add travel cost
+		local xmin=min(_x,_lx)
+		local xmax=max(_x,_lx)
+		_cost+=xmax-xmin
+		-- add drop cost
+		if _x!=_lx and (
+			_x==3 or
+			_x==5 or
+			_x==7 or
+			_x==9
+		) then
+			_cost+=_size-#_cels[_x]
+		end
+	end
 end
 
 function _draw()
@@ -249,6 +276,8 @@ function _draw()
 	end
 	local y0=5
 	spr(fm,8*(1+_x),8*5)
+	-- draw cost
+	print(_cost,4,4)
 end
 __gfx__
 000000001111111133333333999999998888888855555555555555557700007700000000ffffffffffffffffffffffffffffffff002222222222222222222200
