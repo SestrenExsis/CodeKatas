@@ -116,6 +116,7 @@ end
 -- main
 
 function restart()
+	_hist={}
 	_lx=7
 	_x=7
 	_amf=nil
@@ -190,21 +191,38 @@ function _update()
 	) then
 		_x=lx
 	end
-	-- check for grabbed amphipod
+	-- grab/drop amphipod
 	if btnp(❎) or btnp(⬇️) then
 		if _amf==nil then
-			-- grab the top amf
+			-- grab the top amphipod
 			if #_cels[_x]>0 then
 				_amf=_cels[_x][#_cels[_x]]
 				deli(_cels[_x],#_cels[_x])
+				_lx=_x
 			end
 		else
-			-- drop held amf
+			-- drop held amphipod
 			add(_cels[_x],_amf)
+			_amf=nil
+			add(_hist,{_lx,_x})
+		end
+	elseif btnp(🅾️) then
+		-- undo last move
+		if _amf==nil then
+			if #_hist>0 then
+				local mov=_hist[#_hist]
+				_x=mov[1]
+				_lx=_x
+				local id=mov[2]
+				_amf=_cels[id][#_cels[id]]
+				deli(_cels[id],#_cels[id])
+				deli(_hist,#_hist)
+			end
+		else
+			add(_cels[_lx],_amf)
 			_amf=nil
 		end
 	end
-	-- update movement
 end
 
 function _draw()
