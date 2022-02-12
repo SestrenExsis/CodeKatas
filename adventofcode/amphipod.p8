@@ -14,62 +14,12 @@ cartdata("sestrenexsis_amphipod_1")
  0: lowest score
 --]]
 -->8
--- classes
+-- helper functions
 
 function cost(tp)
 	local res=10^(tp-1)
 	return res
 end
-
---[[ move
-a move consists of 1-3 phases,
-which occur in a specific order:
- - the initial column
- - the column grabbing occurs
- - the column dropping occurs
---]]
-move={}
-
-function move:new(x)
-	local obj={
-		init=x,
-		grab=nil,
-		drop=nil,
-	}
-	return setmetatable(
-		obj,{__index=self}
-	)
-end
-
-function move:act(x)
-	if grab==nil then
-		grab=x
-	elseif drop==nil then
-		drop=x
-	end
-end
-
-function move:x()
-	local res=self.init
-	if drop!=nil then
-		res=drop
-	elseif grab!=nil then
-		res=grab
-	end
-	return res
-end
-
-function move:state()
-	local res="free"
-	if drop!=nil then
-		res="drop"
-	elseif grab!=nil then
-		res="grab"
-	end
-	return res
-end
--->8
--- helper functions
 
 function cleanmap()
 	-- clear map
