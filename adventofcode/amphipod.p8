@@ -16,11 +16,6 @@ cartdata("sestrenexsis_amphipod_1")
 -->8
 -- helper functions
 
-function cost(tp)
-	local res=10^(tp-1)
-	return res
-end
-
 function cleanmap()
 	-- clear map
 	for y=3,13 do
@@ -66,11 +61,11 @@ end
 -- main
 
 function restart()
-	_hist={}
+	_move={}
+	_costs={0}
 	_lx=7
 	_x=7
 	_amf=nil
-	_cost=0
 	_cels={}
 	for col=1,11 do
 		add(_cels,{})
@@ -155,27 +150,34 @@ function _update()
 			-- drop held amphipod
 			add(_cels[_x],_amf)
 			_amf=nil
-			add(_hist,{_lx,_x})
+			add(_move,{_lx,_x})
+			add(_costs,0)
 		end
 	elseif btnp(🅾️) then
 		-- undo last move
 		if _amf==nil then
-			if #_hist>0 then
-				local mov=_hist[#_hist]
+			if #_move>0 then
+				local mov=_move[#_move]
 				_x=mov[1]
 				_lx=_x
 				local id=mov[2]
 				_amf=_cels[id][#_cels[id]]
 				deli(_cels[id],#_cels[id])
-				deli(_hist,#_hist)
+				deli(_move,#_move)
+				deli(_costs,#_costs)
+			elseif #_costs>0 then
+				deli(_costs,#_costs)
+			else
+				_costs[#_costs]=0
 			end
 		else
 			add(_cels[_lx],_amf)
+			add(_costs,0)
 			_amf=nil
 		end
 	end
 	-- calculate current cost
-	_cost=0
+	local cost=0
 	if _amf!=nil then
 		-- add grab cost
 		if (
@@ -184,12 +186,12 @@ function _update()
 			_lx==7 or
 			_lx==9
 		) then
-			_cost+=_size-#_cels[_lx]
+			cost+=_size-#_cels[_lx]
 		end
 		-- add travel cost
 		local xmin=min(_x,_lx)
 		local xmax=max(_x,_lx)
-		_cost+=xmax-xmin
+		cost+=xmax-xmin
 		-- add drop cost
 		if _x!=_lx and (
 			_x==3 or
@@ -197,9 +199,13 @@ function _update()
 			_x==7 or
 			_x==9
 		) then
-			_cost+=_size-#_cels[_x]
+			cost+=_size-#_cels[_x]
 		end
 	end
+	if _amf!=nil then
+		cost*=10^(_amf-1)
+	end
+	_costs[#_costs]=cost
 end
 
 function _draw()
@@ -276,8 +282,10 @@ function _draw()
 	end
 	local y0=5
 	spr(fm,8*(1+_x),8*5)
-	-- draw cost
-	print(_cost,4,4)
+	-- draw costs
+	for i=1,#_costs do
+		print(_costs[i],4,4+6*(i-1),15)
+	end
 end
 __gfx__
 000000001111111133333333999999998888888855555555555555557700007700000000ffffffffffffffffffffffffffffffff002222222222222222222200
