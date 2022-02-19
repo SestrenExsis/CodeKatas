@@ -160,11 +160,10 @@ function _update()
 		if _amf==nil then
 			if #_move>0 then
 				local mov=_move[#_move]
-				_x=mov[1]
-				_lx=_x
-				local id=mov[2]
-				_amf=_cels[id][#_cels[id]]
-				deli(_cels[id],#_cels[id])
+				_lx=mov[1]
+				_x=mov[2]
+				_amf=_cels[_x][#_cels[_x]]
+				deli(_cels[_x],#_cels[_x])
 				deli(_move,#_move)
 				deli(_costs,#_costs)
 			elseif #_costs>0 then
@@ -173,8 +172,10 @@ function _update()
 				_costs[#_costs]=0
 			end
 		else
+			_x=_lx
 			add(_cels[_lx],_amf)
-			add(_costs,0)
+			--add(_costs,0)
+			_costs[#_costs]=0
 			_amf=nil
 		end
 	end
@@ -284,10 +285,12 @@ function _draw()
 	end
 	local y0=5
 	spr(fm,8*(1+_x),8*5)
+	local cost=0
 	-- draw costs
 	for i=1,#_costs do
-		print(_costs[i],4,4+6*(i-1),15)
+		cost+=_costs[i]
 	end
+	print(cost,4,4,15)
 end
 __gfx__
 000000001111111133333333999999998888888855555555555555557700007700000000ffffffffffffffffffffffffffffffff002222222222222222222200
