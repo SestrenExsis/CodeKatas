@@ -150,8 +150,10 @@ function _update()
 			-- drop held amphipod
 			add(_cels[_x],_amf)
 			_amf=nil
-			add(_move,{_lx,_x})
-			add(_costs,0)
+			if _lx!=_x then
+				add(_move,{_lx,_x})
+				add(_costs,0)
+			end
 		end
 	elseif btnp(🅾️) then
 		-- undo last move
