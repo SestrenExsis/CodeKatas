@@ -291,6 +291,7 @@ function _draw()
 		cost+=_costs[i]
 	end
 	print(cost,4,4,15)
+	print(#_costs,4,10,8)
 end
 __gfx__
 000000001111111133333333999999998888888855555555555555557700007700000000ffffffffffffffffffffffffffffffff002222222222222222222200
