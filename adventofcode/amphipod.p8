@@ -16,6 +16,36 @@ cartdata("sestrenexsis_amphipod_1")
 -->8
 -- helper functions
 
+function getcost()
+	local res=0
+	if _amf!=nil then
+		-- add grab cost
+		if (
+			_lx==3 or
+			_lx==5 or
+			_lx==7 or
+			_lx==9
+		) then
+			res+=_size-#_cels[_lx]
+		end
+		-- add travel cost
+		local xmin=min(_x,_lx)
+		local xmax=max(_x,_lx)
+		res+=xmax-xmin
+		-- add drop cost
+		if _x!=_lx and (
+			_x==3 or
+			_x==5 or
+			_x==7 or
+			_x==9
+		) then
+			res+=_size-#_cels[_x]
+		end
+		res*=10^(_amf-1)
+	end
+	return res
+end
+
 function cleanmap()
 	-- clear map
 	for y=3,13 do
@@ -62,7 +92,6 @@ end
 
 function restart()
 	_move={}
-	_costs={0}
 	_lx=7
 	_x=7
 	_amf=nil
@@ -148,11 +177,11 @@ function _update()
 			end
 		else
 			-- drop held amphipod
+			local cost=getcost()
 			add(_cels[_x],_amf)
 			_amf=nil
 			if _lx!=_x then
-				add(_move,{_lx,_x})
-				add(_costs,0)
+				add(_move,{_lx,_x,cost})
 			end
 		end
 	elseif btnp(🅾️) then
@@ -165,50 +194,13 @@ function _update()
 				_amf=_cels[_x][#_cels[_x]]
 				deli(_cels[_x],#_cels[_x])
 				deli(_move,#_move)
-				deli(_costs,#_costs)
-			elseif #_costs>0 then
-				deli(_costs,#_costs)
-			else
-				_costs[#_costs]=0
 			end
 		else
 			_x=_lx
 			add(_cels[_lx],_amf)
-			--add(_costs,0)
-			_costs[#_costs]=0
 			_amf=nil
 		end
 	end
-	-- calculate current cost
-	local cost=0
-	if _amf!=nil then
-		-- add grab cost
-		if (
-			_lx==3 or
-			_lx==5 or
-			_lx==7 or
-			_lx==9
-		) then
-			cost+=_size-#_cels[_lx]
-		end
-		-- add travel cost
-		local xmin=min(_x,_lx)
-		local xmax=max(_x,_lx)
-		cost+=xmax-xmin
-		-- add drop cost
-		if _x!=_lx and (
-			_x==3 or
-			_x==5 or
-			_x==7 or
-			_x==9
-		) then
-			cost+=_size-#_cels[_x]
-		end
-	end
-	if _amf!=nil then
-		cost*=10^(_amf-1)
-	end
-	_costs[#_costs]=cost
 end
 
 function _draw()
@@ -285,13 +277,13 @@ function _draw()
 	end
 	local y0=5
 	spr(fm,8*(1+_x),8*5)
-	local cost=0
+	local totalcost=getcost()
 	-- draw costs
-	for i=1,#_costs do
-		cost+=_costs[i]
+	for i=1,#_move do
+		totalcost+=_move[i][3]
 	end
-	print(cost,4,4,15)
-	print(#_costs,4,10,8)
+	print(totalcost,4,4,15)
+	print(#_move,4,10,8)
 end
 __gfx__
 000000001111111133333333999999998888888855555555555555557700007700000000ffffffffffffffffffffffffffffffff002222222222222222222200
