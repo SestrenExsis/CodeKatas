@@ -62,7 +62,6 @@ class KnotHash:
         result = ''.join(chars)
         return result
 
-
 class Template: # Template
     '''
     https://adventofcode.com/2017/day/?
@@ -87,6 +86,57 @@ class Template: # Template
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+
+class Day16: # Permutation Promenade
+    '''
+    https://adventofcode.com/2017/day/16
+    '''
+    def get_dance_moves(self, raw_input_lines: List[str]):
+        dance_moves = []
+        for line in raw_input_lines[0].split(','):
+            parameters = line[1:].split('/')
+            dance_move = [line[0]]
+            for parameter in parameters:
+                try:
+                    value = int(parameter)
+                    dance_move.append(value)
+                except ValueError:
+                    dance_move.append(parameter)
+            dance_moves.append(tuple(dance_move))
+        result = dance_moves
+        return result
+    
+    def solve(self, dance_moves):
+        programs = list('abcdefghijklmnop')
+        for dance_move in dance_moves:
+            if dance_move[0] == 's':
+                X = dance_move[1]
+                programs = programs[-X:] + programs[:-X]
+            elif dance_move[0] == 'x':
+                A = dance_move[1]
+                B = dance_move[2]
+                programs[A], programs[B] = programs[B], programs[A]
+            elif dance_move[0] == 'p':
+                A = programs.index(dance_move[1])
+                B = programs.index(dance_move[2])
+                programs[A], programs[B] = programs[B], programs[A]
+        result = ''.join(programs)
+        return result
+    
+    def solve2(self, dance_moves):
+        result = len(dance_moves)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        dance_moves = self.get_dance_moves(raw_input_lines)
+        solutions = (
+            self.solve(dance_moves),
+            self.solve2(dance_moves),
             )
         result = solutions
         return result
@@ -1021,7 +1071,7 @@ if __name__ == '__main__':
        13: (Day13, 'Packet Scanners'),
        14: (Day14, 'Disk Defragmentation'),
        15: (Day15, 'Dueling Generators'),
-    #    16: (Day16, 'XXX'),
+       16: (Day16, 'Permutation Promenade'),
     #    17: (Day17, 'XXX'),
     #    18: (Day18, 'XXX'),
     #    19: (Day19, 'XXX'),
