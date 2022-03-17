@@ -759,7 +759,6 @@ class MoonsAndUmbrellas: # 2021.Q.B
     2021.Q.B
     https://codingcompetitions.withgoogle.com/codejam/round/000000000043580a/00000000006d1145
     '''
-
     def solve(self, CJ: int, JC: int, S: str):
         C = float('inf')
         J = float('inf')
@@ -804,10 +803,6 @@ class MoonsAndUmbrellas: # 2021.Q.B
             output.append(output_row)
             print(output_row)
         return output
-
-if __name__ == '__main__':
-    solver = MoonsAndUmbrellas()
-    solver.main()
 
 class ReversortEngineering: # 2021.Q.C
     '''
