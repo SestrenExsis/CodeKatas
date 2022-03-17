@@ -759,34 +759,44 @@ class MoonsAndUmbrellas: # 2021.Q.B
     2021.Q.B
     https://codingcompetitions.withgoogle.com/codejam/round/000000000043580a/00000000006d1145
     '''
-    def solve(self, costs: dict, mural: str) -> int:
-        cost_c = 0
-        cost_j = 0
-        for i in range(len(mural)):
-            next_cost_c = min(cost_c, cost_j + costs['JC'])
-            next_cost_j = min(cost_j, cost_c + costs['CJ'])
-            char = mural[i]
-            if char in ('C', '?'):
-                cost_c = next_cost_c
-            else:
-                cost_c = float('inf')
-            if char in ('J', '?'):
-                cost_j = next_cost_j
-            else:
-                cost_j = float('inf')
-        result = min(cost_c, cost_j)
+
+    def solve(self, CJ: int, JC: int, S: str):
+        C = float('inf')
+        J = float('inf')
+        if S[0] in ('C', '?'):
+            C = 0
+        if S[0] in ('J', '?'):
+            J = 0
+        F = [(C, J)]
+        for i in range(1, len(S)):
+            C = float('inf')
+            J = float('inf')
+            if S[i] in ('C', '?'):
+                C = min(
+                    C,
+                    F[i - 1][0],
+                    F[i - 1][1] + JC,
+                )
+            if S[i] in ('J', '?'):
+                J = min(
+                    J,
+                    F[i - 1][0] + CJ,
+                    F[i - 1][1],
+                )
+            F.append((C, J))
+        result = min(F[len(S) - 1])
         return result
     
     def main(self):
-        test_count = int(input())
+        T = int(input())
         output = []
-        for test_id in range(1, test_count + 1):
-            cost1, cost2, mural = input().split(' ')
-            costs = {
-                'CJ': int(cost1),
-                'JC': int(cost2),
-            }
-            solution = self.solve(costs, mural)
+        for test_id in range(1, T + 1):
+            raw_input = input()
+            parts = raw_input.split(' ')
+            X = int(parts[0])
+            Y = int(parts[1])
+            S = parts[2]
+            solution = self.solve(X, Y, S)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
@@ -794,6 +804,10 @@ class MoonsAndUmbrellas: # 2021.Q.B
             output.append(output_row)
             print(output_row)
         return output
+
+if __name__ == '__main__':
+    solver = MoonsAndUmbrellas()
+    solver.main()
 
 class ReversortEngineering: # 2021.Q.C
     '''
