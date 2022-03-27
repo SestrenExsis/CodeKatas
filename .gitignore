@@ -3,7 +3,9 @@
 !*test*.in
 .vscode
 withgoogle/judges/*
-withgoogle/InteractiveRunner.py
+withgoogle/**/InteractiveRunner.py
+withgoogle/interactive/**/Judge.py
+withgoogle/interactive/**Judge.py
 spoilers/
 projecteuler/**
 kata/**

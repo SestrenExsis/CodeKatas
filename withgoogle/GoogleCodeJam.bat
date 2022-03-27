@@ -1,9 +1,9 @@
-python SolverSandbox.py^
- < inputs/SolverA.in^
+python Solver.py^
+ < inputs/MoonsAndUmbrellas/sample_ts1_input.in^
  > GoogleCodeJam.out
 
 type GoogleCodeJam.out
 
 python FileDiff.py^
  GoogleCodeJam.out^
- outputs/SolverA.out
+ outputs/MoonsAndUmbrellas/sample_ts1_output.out
