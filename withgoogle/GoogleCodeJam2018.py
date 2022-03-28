@@ -66,6 +66,50 @@ class SavingTheUniverseAgain: # 2018.Q.1
             print(output_row)
         return output
 
+class TroubleSort: # 2018.Q.2
+    '''
+    2018.Q.2
+    https://codingcompetitions.withgoogle.com/codejam/round/00000000000000cb/00000000000079cb
+    '''
+    def solve(self, nums):
+        result = 'OK'
+        while True:
+            sorted_ind = True
+            modification_ind = False
+            for i in range(2, len(nums)):
+                a, b, c = nums[i - 2], nums[i - 1], nums[i]
+                if not (a <= b <= c):
+                    sorted_ind = False
+                if a > c:
+                    nums[i - 2], nums[i] = nums[i], nums[i - 2]
+                    modification_ind = True
+            if sorted_ind:
+                break
+            if not sorted_ind and not modification_ind:
+                prev_num = nums[0]
+                for index, num in enumerate(nums[1:], start=1):
+                    if prev_num > num:
+                        result = index - 1
+                        break
+                    prev_num = num
+                break
+        return result
+    
+    def main(self):
+        test_count = int(input())
+        output = []
+        for test_id in range(1, test_count + 1):
+            N = int(input())
+            nums = list(map(int, input().split(' ')))
+            solution = self.solve(nums)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
 # Template for Submission page
 '''
 import collections
@@ -116,10 +160,11 @@ class Template:
 if __name__ == '__main__':
     '''
     Usage
-    python GoogleCodeJam2018.py 2018.Q.1 < inputs/SolverA.in
+    python GoogleCodeJam2018.py Q.2 < inputs/TroubleSort.in
     '''
     solvers = {
         'Q.1': (SavingTheUniverseAgain, 'Saving The Universe Again'),
+        'Q.2': (TroubleSort, 'Trouble Sort'),
         # 'Solver': (Solver, 'Solver'),
         }
     parser = argparse.ArgumentParser()
