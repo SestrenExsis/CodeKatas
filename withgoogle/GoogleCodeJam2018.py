@@ -15,9 +15,9 @@ import random
 import sys
 from typing import Dict, List, Set, Tuple
 
-class SavingTheUniverseAgain: # 2018.Q.1
+class SavingTheUniverseAgain: # Q.1
     '''
-    2018.Q.1
+    Q.1
     https://codingcompetitions.withgoogle.com/codejam/round/00000000000000cb/0000000000007966
     - You can never reduce damage by changing a 'SC' to a 'CS'
     - The greedy approach would be to always hack at the location where it will
@@ -66,34 +66,26 @@ class SavingTheUniverseAgain: # 2018.Q.1
             print(output_row)
         return output
 
-class TroubleSort: # 2018.Q.2
+class TroubleSort: # Q.2
     '''
-    2018.Q.2
+    Q.2
     https://codingcompetitions.withgoogle.com/codejam/round/00000000000000cb/00000000000079cb
     '''
     def solve(self, nums):
-        result = 'OK'
-        while True:
-            sorted_ind = True
-            modification_ind = False
-            for i in range(2, len(nums)):
-                a, b, c = nums[i - 2], nums[i - 1], nums[i]
-                if not (a <= b <= c):
-                    sorted_ind = False
-                if a > c:
-                    nums[i - 2], nums[i] = nums[i], nums[i - 2]
-                    modification_ind = True
-            if sorted_ind:
-                break
-            if not sorted_ind and not modification_ind:
-                prev_num = nums[0]
-                for index, num in enumerate(nums[1:], start=1):
-                    if prev_num > num:
-                        result = index - 1
-                        break
-                    prev_num = num
-                break
-        return result
+        evens = sorted(nums[i] for i in range(len(nums)) if i % 2 == 0)
+        odds = sorted(nums[i] for i in range(len(nums)) if i % 2 == 1)
+        prev_num = evens[0]
+        for i in range(1, len(nums)):
+            index = i // 2
+            if i % 2 == 0:
+                if evens[index] < prev_num:
+                    return i - 1
+                prev_num = evens[index]
+            else:
+                if odds[index] < prev_num:
+                    return i - 1
+                prev_num = odds[index]
+        return 'OK'
     
     def main(self):
         test_count = int(input())
