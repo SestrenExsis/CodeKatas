@@ -1,2 +1,2 @@
 
-python InteractiveRunner.py python judges/GoGopher.py 0 -- python solvers/GoGopher.py
+python InteractiveRunner.py python judges/TwistyLittlePassages.py 0 -- python solvers/TwistyLittlePassages.py

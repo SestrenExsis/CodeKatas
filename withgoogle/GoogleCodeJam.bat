@@ -1,9 +1,9 @@
-python Solver.py^
- < inputs/MoonsAndUmbrellas/sample_ts1_input.in^
+python GoogleCodeJam2022.py Q.D^
+ < inputs/SolverD.in^
  > GoogleCodeJam.out
 
 type GoogleCodeJam.out
 
 python FileDiff.py^
  GoogleCodeJam.out^
- outputs/MoonsAndUmbrellas/sample_ts1_output.out
+ outputs/SolverD.out
