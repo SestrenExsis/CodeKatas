@@ -31,11 +31,10 @@ for i in range(0, T):
     R, P = tuple(map(int, input().split(' ')))
     caves = {}
     caves[R] = P
-    passage_counts = collections.defaultdict(int)
-    passage_counts[P] += 1
     caves_to_visit = set(range(1, N + 1))
+    random_samples = {}
     ops_left = K
-    while ops_left > 0:
+    while ops_left > 1:
         # Teleport to one of the unvisited caves
         next_cave = caves_to_visit.pop()
         command = f'T {next_cave}'
@@ -43,12 +42,19 @@ for i in range(0, T):
         sys.stdout.flush()
         ops_left -= 1
         R, P = tuple(map(int, input().split(' ')))
-        passage_counts[P] += 1
         caves[R] = P
-    population_estimate = 0
-    for passages, count in passage_counts.items():
-        multiplier = N * (count / len(caves))
-        population_estimate += multiplier * passages
+        random_samples[R] = P
+        # Walk through a random passage
+        command = 'W'
+        print(command)
+        sys.stdout.flush()
+        ops_left -= 1
+        R, P = tuple(map(int, input().split(' ')))
+        caves[R] = P
+        caves_to_visit.discard(R)
+    population_estimate = sum(caves.values())
+    avg = sum(random_samples.values()) / len(random_samples)
+    population_estimate += avg * len(caves_to_visit)
     population_estimate /= 2
     lower_bound = math.floor((2 / 3) * population_estimate)
     upper_bound = math.ceil((4 / 3) * population_estimate)
