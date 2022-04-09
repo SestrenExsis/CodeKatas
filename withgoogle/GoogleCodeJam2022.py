@@ -203,39 +203,28 @@ class SolverA: # Solver 1A.1
     Solver 1A.1
     https://codingcompetitions.withgoogle.com/codejam/round/
     '''
-    def solve(self, raw_input):
-        result = raw_input
+    def solve(self, seed_word):
+        min_word = seed_word
+        words = [(seed_word, 0, 0)]
+        while len(words) > 0:
+            word, progress, index = heapq.heappop(words)
+            if word < min_word:
+                min_word = word
+            if progress < len(seed_word):
+                word2 = word[:index] + seed_word[progress] + word[index:]
+                if word <= min_word:
+                    heapq.heappush(words, (word, progress + 1, index + 1))
+                if word2 <= min_word:
+                    heapq.heappush(words, (word2, progress + 1, index + 2))
+        result = min_word
         return result
     
     def main(self):
         T = int(input())
         output = []
         for test_id in range(1, T + 1):
-            raw_input = input()
-            solution = self.solve(raw_input)
-            output_row = 'Case #{}: {}'.format(
-                test_id,
-                solution,
-                )
-            output.append(output_row)
-            print(output_row)
-        return output
-
-class SolverB: # Solver 1A.2
-    '''
-    Solver 1A.2
-    https://codingcompetitions.withgoogle.com/codejam/round/
-    '''
-    def solve(self, raw_input):
-        result = raw_input
-        return result
-    
-    def main(self):
-        T = int(input())
-        output = []
-        for test_id in range(1, T + 1):
-            raw_input = input()
-            solution = self.solve(raw_input)
+            word = input()
+            solution = self.solve(word)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
@@ -249,39 +238,54 @@ class SolverC: # Solver 1A.3
     Solver 1A.3
     https://codingcompetitions.withgoogle.com/codejam/round/
     '''
-    def solve(self, raw_input):
-        result = raw_input
-        return result
-    
-    def main(self):
-        T = int(input())
-        output = []
-        for test_id in range(1, T + 1):
-            raw_input = input()
-            solution = self.solve(raw_input)
-            output_row = 'Case #{}: {}'.format(
-                test_id,
-                solution,
+    def solve(self, exercises):
+        # assert 1 <= len(exercises[0]) <= 3
+        min_cost = float('inf')
+        seen = set()
+        work = [(0, 0, tuple())]
+        while len(work) > 0:
+            cost, progress, stack = heapq.heappop(work)
+            weights = list(exercises[progress])
+            for weight in stack:
+                weights[weight - 1] -= 1
+            progress_ind = True
+            for weight in weights:
+                if weight != 0:
+                    progress_ind = False
+                    break
+            if progress_ind:
+                progress += 1
+            if progress == len(exercises):
+                min_cost = cost
+                break
+            if (progress, stack) in seen:
+                continue
+            seen.add((progress, stack))
+            if len(stack) > 0:
+                next_stack = list(stack)
+                next_stack.pop()
+                heapq.heappush(work,
+                    (cost + 1, progress, tuple(next_stack))
                 )
-            output.append(output_row)
-            print(output_row)
-        return output
-
-class SolverD: # Solver 1A.4
-    '''
-    Solver 1A.4
-    https://codingcompetitions.withgoogle.com/codejam/round/
-    '''
-    def solve(self, raw_input):
-        result = raw_input
+            for weight in range(len(exercises[0])):
+                next_stack = list(stack)
+                next_stack.append(weight + 1)
+                heapq.heappush(work,
+                    (cost + 1, progress, tuple(next_stack))
+                )
+        result = min_cost + sum(exercises[-1])
         return result
     
     def main(self):
         T = int(input())
         output = []
         for test_id in range(1, T + 1):
-            raw_input = input()
-            solution = self.solve(raw_input)
+            E, W = tuple(map(int, input().split(' ')))
+            exercises = []
+            for _ in range(E):
+                exercise = tuple(map(int, input().split(' ')))
+                exercises.append(exercise)
+            solution = self.solve(exercises)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
@@ -301,9 +305,7 @@ if __name__ == '__main__':
         'Q.3': (Solverd1000000, 'd1000000'),
         'Q.4': (SolverChainReactions, 'Chain Reactions'),
         'A': (SolverA, 'Solver 1A.1'),
-        'B': (SolverB, 'Solver 1A.2'),
         'C': (SolverC, 'Solver 1A.3'),
-        'D': (SolverD, 'Solver 1A.4'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('problem', help='Solve for a given problem', type=str)
