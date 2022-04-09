@@ -14,7 +14,7 @@ import random
 import sys
 from typing import Dict, List, Set, Tuple
 
-class SolverA: # Punched Cards
+class SolverPunchedCards: # Punched Cards
     '''
     Punched Cards
     https://codingcompetitions.withgoogle.com/codejam/round/0000000000876ff1/0000000000a4621b    '''
@@ -47,7 +47,7 @@ class SolverA: # Punched Cards
                 print(row_data)
         return output
 
-class SolverB: # 3D Printing
+class Solver3DPrinting: # 3D Printing
     '''
     3D Printing
     https://codingcompetitions.withgoogle.com/codejam/round/0000000000876ff1/0000000000a4672b
@@ -96,7 +96,7 @@ class SolverB: # 3D Printing
             print(output_row)
         return output
 
-class SolverC: # d1000000
+class Solverd1000000: # d1000000
     '''
     d1000000
     https://codingcompetitions.withgoogle.com/codejam/round/0000000000876ff1/0000000000a46471
@@ -140,7 +140,7 @@ class SolverC: # d1000000
             print(output_row)
         return output
     
-class SolverD: # Chain Reactions
+class SolverChainReactions: # Chain Reactions
     '''
     Chain Reactions
     https://codingcompetitions.withgoogle.com/codejam/round/0000000000876ff1/0000000000a45ef7
@@ -198,16 +198,112 @@ class SolverD: # Chain Reactions
             print(output_row)
         return output
 
+class SolverA: # Solver 1A.1
+    '''
+    Solver 1A.1
+    https://codingcompetitions.withgoogle.com/codejam/round/
+    '''
+    def solve(self, raw_input):
+        result = raw_input
+        return result
+    
+    def main(self):
+        T = int(input())
+        output = []
+        for test_id in range(1, T + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverB: # Solver 1A.2
+    '''
+    Solver 1A.2
+    https://codingcompetitions.withgoogle.com/codejam/round/
+    '''
+    def solve(self, raw_input):
+        result = raw_input
+        return result
+    
+    def main(self):
+        T = int(input())
+        output = []
+        for test_id in range(1, T + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverC: # Solver 1A.3
+    '''
+    Solver 1A.3
+    https://codingcompetitions.withgoogle.com/codejam/round/
+    '''
+    def solve(self, raw_input):
+        result = raw_input
+        return result
+    
+    def main(self):
+        T = int(input())
+        output = []
+        for test_id in range(1, T + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverD: # Solver 1A.4
+    '''
+    Solver 1A.4
+    https://codingcompetitions.withgoogle.com/codejam/round/
+    '''
+    def solve(self, raw_input):
+        result = raw_input
+        return result
+    
+    def main(self):
+        T = int(input())
+        output = []
+        for test_id in range(1, T + 1):
+            raw_input = input()
+            solution = self.solve(raw_input)
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
 if __name__ == '__main__':
     '''
     Usage
-    python GoogleCodeJam2022.py Q.D < inputs/SolverD.in
+    python GoogleCodeJam2022.py A < inputs/SolverA.in
     '''
     solvers = {
-        'Q.A': (SolverA, 'SolverA'),
-        'Q.B': (SolverB, 'SolverB'),
-        'Q.C': (SolverC, 'SolverC'),
-        'Q.D': (SolverD, 'SolverD'),
+        'Q.1': (SolverPunchedCards, 'Punched Cards'),
+        'Q.2': (Solver3DPrinting, '3D Printing'),
+        'Q.3': (Solverd1000000, 'd1000000'),
+        'Q.4': (SolverChainReactions, 'Chain Reactions'),
+        'A': (SolverA, 'Solver 1A.1'),
+        'B': (SolverB, 'Solver 1A.2'),
+        'C': (SolverC, 'Solver 1A.3'),
+        'D': (SolverD, 'Solver 1A.4'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('problem', help='Solve for a given problem', type=str)
