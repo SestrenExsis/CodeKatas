@@ -7,11 +7,37 @@ __lua__
 
 -- for advent of code 2021
 -- https://adventofcode.com/2021/day/23
-_version=1
-cartdata("sestrenexsis_amphipod_1")
 
---[[ save data
- 0: lowest score
+function saveget()
+	_version=dget(0)
+	-- check if first save
+	if _version==0 then
+		_version=1
+		saveset()
+	end
+end
+
+function saveset()
+	-- set version
+	dset(0,_version)
+	-- set active score
+	-- dset(1,_score)
+	-- set active board
+	-- dset(2,0)
+	-- dset(3,0)
+end
+
+cartdata("sestrenexsis_amphipod")
+saveget()
+
+--[[
+memory costs
+amf: 4 states   -->  2 bits
+col: 11 states  -->  4 bits
+board2:  8 cols --> 32 bits
+board4: 16 cols --> 64 bits
+start2:  8 amfs --> 16 bits
+start4: 16 amfs --> 32 bits
 --]]
 -->8
 -- helper functions
