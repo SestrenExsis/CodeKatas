@@ -8,27 +8,19 @@ __lua__
 -- for advent of code 2021
 -- https://adventofcode.com/2021/day/23
 
-function saveget()
-	_version=dget(0)
-	-- check if first save
-	if _version==0 then
-		_version=1
-		saveset()
-	end
-end
-
-function saveset()
-	-- set version
-	dset(0,_version)
-	-- set active score
-	-- dset(1,_score)
-	-- set active board
-	-- dset(2,0)
-	-- dset(3,0)
-end
-
 cartdata("sestrenexsis_amphipod")
-saveget()
+_version=dget(0)
+if _version==0 then
+	-- use defaults if first save
+	_version=1
+	_data1=0
+else
+	-- use saved data
+	_data1=dget(1)
+end
+
+dset(0,_version)
+dset(1,_data1)
 
 --[[
 memory costs
@@ -42,7 +34,7 @@ start4: 16 amfs --> 32 bits
 -->8
 -- helper functions
 
-function getcost()
+function costget()
 	local res=0
 	if _amf!=nil then
 		-- add grab cost
@@ -104,13 +96,6 @@ function cleanmap()
 		mset(x  ,6+_size,56+typ)
 		mset(x+1,6+_size,56)
 	end
-	--[[
-	if (
-		x==3 or
-		x==5 or
-		x==7 or
-		x==9
-	--]]
 	_dirty=false
 end
 -->8
@@ -133,6 +118,7 @@ function restart()
 		end
 	end
 	-- randomly assign amphipods
+	local slot=1
 	for col=3,9,2 do
 		for i=1,_size do
 			local idx=1+flr(rnd(#bag))
@@ -140,6 +126,13 @@ function restart()
 			add(_cels[col],amf)
 			bag[idx]=bag[#bag]
 			deli(bag,#bag)
+			dset(slot,amf)
+			slot+=1
+		end
+		if _size==2 then
+			dset(slot+1,0)
+			dset(slot+2,0)
+			slot+=2
 		end
 	end
 	cleanmap()
@@ -203,7 +196,7 @@ function _update()
 			end
 		else
 			-- drop held amphipod
-			local cost=getcost()
+			local cost=costget()
 			add(_cels[_x],_amf)
 			_amf=nil
 			if _lx!=_x then
@@ -303,7 +296,7 @@ function _draw()
 	end
 	local y0=5
 	spr(fm,8*(1+_x),8*5)
-	local totalcost=getcost()
+	local totalcost=costget()
 	-- draw costs
 	for i=1,#_move do
 		totalcost+=_move[i][3]
