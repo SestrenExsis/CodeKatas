@@ -118,7 +118,7 @@ function restart()
 		end
 	end
 	-- randomly assign amphipods
-	local slot=1
+	local slot=2
 	for col=3,9,2 do
 		for i=1,_size do
 			local idx=1+flr(rnd(#bag))
@@ -296,12 +296,13 @@ function _draw()
 	end
 	local y0=5
 	spr(fm,8*(1+_x),8*5)
-	local totalcost=costget()
+	local sum=0
+	sum+=tonum(costget()>>16,0x2)
 	-- draw costs
 	for i=1,#_move do
-		totalcost+=_move[i][3]
+		sum+=tonum(_move[i][3]>>16,0x2)
 	end
-	print(totalcost,4,4,15)
+	print(tostr(sum,0x2),4,4,15)
 	print(#_move,4,10,8)
 end
 __gfx__
