@@ -1,9 +1,9 @@
-python GoogleCodeJam2022.py 1A.3^
- < inputs/SolverC.in^
+python GoogleCodeJam2022.py A^
+ < inputs/SolverA.in^
  > GoogleCodeJam.out
 
 type GoogleCodeJam.out
 
 python FileDiff.py^
  GoogleCodeJam.out^
- outputs/SolverC.out
+ outputs/SolverA.out

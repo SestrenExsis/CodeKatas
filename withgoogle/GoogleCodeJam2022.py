@@ -201,7 +201,7 @@ class SolverChainReactions: # Chain Reactions
 class SolverDoubleOrOneThing: # Double or One Thing
     '''
     Solver 1A.1
-    https://codingcompetitions.withgoogle.com/codejam/round/
+    https://codingcompetitions.withgoogle.com/codejam/round/0000000000877ba5/0000000000aa8e9c
     '''
     def solve(self, seed_word):
         min_word = seed_word
@@ -236,7 +236,7 @@ class SolverDoubleOrOneThing: # Double or One Thing
 class SolverWeightlifting: # Weightlifting
     '''
     Solver 1A.3
-    https://codingcompetitions.withgoogle.com/codejam/round/
+    https://codingcompetitions.withgoogle.com/codejam/round/0000000000877ba5/0000000000aa9280
     '''
     def solve_slowly(self, exercises):
         # assert 1 <= len(exercises[0]) <= 3
@@ -299,6 +299,94 @@ class SolverWeightlifting: # Weightlifting
             print(output_row)
         return output
 
+class SolverA: # SolverA
+    '''
+    Solver 1B.1
+    https://codingcompetitions.withgoogle.com/codejam/round/
+    '''
+    def solve(self):
+        result = 0
+        return result
+    
+    def main(self):
+        T = int(input())
+        output = []
+        for test_id in range(1, T + 1):
+            solution = self.solve()
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverB: # SolverB
+    '''
+    Solver 1B.2
+    https://codingcompetitions.withgoogle.com/codejam/round/
+    '''
+    def solve(self):
+        result = 0
+        return result
+    
+    def main(self):
+        T = int(input())
+        output = []
+        for test_id in range(1, T + 1):
+            solution = self.solve()
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverC: # SolverC
+    '''
+    Solver 1C.2
+    https://codingcompetitions.withgoogle.com/codejam/round/
+    '''
+    def solve(self):
+        result = 0
+        return result
+    
+    def main(self):
+        T = int(input())
+        output = []
+        for test_id in range(1, T + 1):
+            solution = self.solve()
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverD: # SolverD
+    '''
+    Solver 1D.2
+    https://codingcompetitions.withgoogle.com/codejam/round/
+    '''
+    def solve(self):
+        result = 0
+        return result
+    
+    def main(self):
+        T = int(input())
+        output = []
+        for test_id in range(1, T + 1):
+            solution = self.solve()
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
 if __name__ == '__main__':
     '''
     Usage
@@ -311,6 +399,10 @@ if __name__ == '__main__':
         'Q.4': (SolverChainReactions, 'Chain Reactions'),
         '1A.1': (SolverDoubleOrOneThing, 'Double or One Thing'),
         '1A.3': (SolverWeightlifting, 'Weightlifting'),
+        'A': (SolverA, 'SolverA'),
+        'B': (SolverB, 'SolverB'),
+        'C': (SolverC, 'SolverC'),
+        'D': (SolverD, 'SolverD'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('problem', help='Solve for a given problem', type=str)
