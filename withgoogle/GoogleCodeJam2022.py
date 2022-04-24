@@ -249,13 +249,15 @@ class SolverWeightlifting: # Weightlifting
             N = len(work)
             for _ in range(N):
                 cost, progress, stack = work.pop()
-                # print(N, cost, progress, stack)
-                exercise = exercises[progress]
-                needed = list(exercise)
-                for weight in stack:
-                    needed[weight] -= 1
-                if len(set(needed)) == 1 and sum(needed) == 0:
-                    progress += 1
+                while progress < len(exercises):
+                    exercise = exercises[progress]
+                    needed = list(exercise)
+                    for weight in stack:
+                        needed[weight] -= 1
+                    if len(set(needed)) == 1 and sum(needed) == 0:
+                        progress += 1
+                    else:
+                        break
                 if progress == len(exercises):
                     min_cost = cost + len(stack)
                     while len(work) > 0:
@@ -269,11 +271,8 @@ class SolverWeightlifting: # Weightlifting
                     next_stack.pop()
                     work.appendleft((cost + 1, progress, tuple(next_stack)))
                 exercise = exercises[progress]
-                needed = list(exercise)
-                for weight in stack:
-                    needed[weight] -= 1
                 for weight in range(W):
-                    if needed[weight] < 1:
+                    if stack.count(weight) > 2:
                         continue
                     next_stack = list(stack)
                     next_stack.append(weight)
