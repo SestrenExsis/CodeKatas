@@ -198,7 +198,7 @@ class SolverChainReactions: # Chain Reactions
             print(output_row)
         return output
 
-class SolverA: # Solver 1A.1
+class SolverDoubleOrOneThing: # Double or One Thing
     '''
     Solver 1A.1
     https://codingcompetitions.withgoogle.com/codejam/round/
@@ -233,47 +233,52 @@ class SolverA: # Solver 1A.1
             print(output_row)
         return output
 
-class SolverC: # Solver 1A.3
+class SolverWeightlifting: # Weightlifting
     '''
     Solver 1A.3
     https://codingcompetitions.withgoogle.com/codejam/round/
     '''
-    def solve(self, exercises):
+    def solve_slowly(self, exercises):
         # assert 1 <= len(exercises[0]) <= 3
         min_cost = float('inf')
+        W = len(exercises[0])
         seen = set()
-        work = [(0, 0, tuple())]
+        work = collections.deque() # (cost, progress, stack)
+        work.appendleft((0, 0, tuple()))
         while len(work) > 0:
-            cost, progress, stack = heapq.heappop(work)
-            weights = list(exercises[progress])
-            for weight in stack:
-                weights[weight - 1] -= 1
-            progress_ind = True
-            for weight in weights:
-                if weight != 0:
-                    progress_ind = False
+            N = len(work)
+            for _ in range(N):
+                cost, progress, stack = work.pop()
+                # print(N, cost, progress, stack)
+                exercise = exercises[progress]
+                needed = list(exercise)
+                for weight in stack:
+                    needed[weight] -= 1
+                if len(set(needed)) == 1 and sum(needed) == 0:
+                    progress += 1
+                if progress == len(exercises):
+                    min_cost = cost + len(stack)
+                    while len(work) > 0:
+                        work.pop()
                     break
-            if progress_ind:
-                progress += 1
-            if progress == len(exercises):
-                min_cost = cost
-                break
-            if (progress, stack) in seen:
-                continue
-            seen.add((progress, stack))
-            if len(stack) > 0:
-                next_stack = list(stack)
-                next_stack.pop()
-                heapq.heappush(work,
-                    (cost + 1, progress, tuple(next_stack))
-                )
-            for weight in range(len(exercises[0])):
-                next_stack = list(stack)
-                next_stack.append(weight + 1)
-                heapq.heappush(work,
-                    (cost + 1, progress, tuple(next_stack))
-                )
-        result = min_cost + sum(exercises[-1])
+                if (progress, stack) in seen:
+                    continue
+                seen.add((progress, stack))
+                if len(stack) > 0:
+                    next_stack = list(stack)
+                    next_stack.pop()
+                    work.appendleft((cost + 1, progress, tuple(next_stack)))
+                exercise = exercises[progress]
+                needed = list(exercise)
+                for weight in stack:
+                    needed[weight] -= 1
+                for weight in range(W):
+                    if needed[weight] < 1:
+                        continue
+                    next_stack = list(stack)
+                    next_stack.append(weight)
+                    work.appendleft((cost + 1, progress, tuple(next_stack)))
+        result = min_cost
         return result
     
     def main(self):
@@ -285,7 +290,7 @@ class SolverC: # Solver 1A.3
             for _ in range(E):
                 exercise = tuple(map(int, input().split(' ')))
                 exercises.append(exercise)
-            solution = self.solve(exercises)
+            solution = self.solve_slowly(exercises)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
@@ -304,8 +309,8 @@ if __name__ == '__main__':
         'Q.2': (Solver3DPrinting, '3D Printing'),
         'Q.3': (Solverd1000000, 'd1000000'),
         'Q.4': (SolverChainReactions, 'Chain Reactions'),
-        'A': (SolverA, 'Solver 1A.1'),
-        'C': (SolverC, 'Solver 1A.3'),
+        '1A.1': (SolverDoubleOrOneThing, 'Double or One Thing'),
+        '1A.3': (SolverWeightlifting, 'Weightlifting'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('problem', help='Solve for a given problem', type=str)
