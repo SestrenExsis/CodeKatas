@@ -303,15 +303,58 @@ class SolverA: # SolverA
     Solver 1B.1
     https://codingcompetitions.withgoogle.com/codejam/round/
     '''
-    def solve(self):
-        result = 0
+    def greedy(self, D: tuple):
+        payments = 0
+        left = 0
+        right = len(D) - 1
+        max_served = 0
+        while left <= right:
+            if D[left] < D[right]:
+                # Serve from the left
+                if D[left] >= max_served:
+                    payments += 1
+                max_served = max(max_served, D[left])
+                left += 1
+            else:
+                # Serve from the right
+                if D[right] >= max_served:
+                    payments += 1
+                max_served = max(max_served, D[right])
+                right -= 1
+        result = payments
+        return result
+
+    def bruteforce(self, D: tuple):
+        max_payments = 0
+        for pattern in range(2 ** len(D)):
+            payments = 0
+            max_served = 0
+            left = 0
+            right = len(D) - 1
+            for i in range(len(D)):
+                if ((2 ** i) & pattern) == 0:
+                    # Serve from the left
+                    if D[left] >= max_served:
+                        payments += 1
+                    max_served = max(max_served, D[left])
+                    left += 1
+                else:
+                    # Serve from the right
+                    if D[right] >= max_served:
+                        payments += 1
+                    max_served = max(max_served, D[right])
+                    right -= 1
+            max_payments = max(max_payments, payments)
+        result = max_payments
         return result
     
     def main(self):
         T = int(input())
         output = []
         for test_id in range(1, T + 1):
-            solution = self.solve()
+            N = int(input())
+            D = tuple(map(int, input().split(' ')))
+            solution = self.greedy(D)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
@@ -325,15 +368,67 @@ class SolverB: # SolverB
     Solver 1B.2
     https://codingcompetitions.withgoogle.com/codejam/round/
     '''
-    def solve(self):
-        result = 0
+    def bruteforce(self, customers):
+        min_cost = float('inf')
+        for pattern in range(2 ** len(customers)):
+            level = 0
+            cost = 0
+            for i in range(len(customers)):
+                products = None
+                if ((2 ** i) & pattern) == 0:
+                    # Go low to high
+                    products = sorted(customers[i])
+                else:
+                    # Go high to low
+                    products = reversed(sorted(customers[i]))
+                for product in products:
+                    cost += abs(product - level)
+                    level = product
+            min_cost = min(min_cost, cost)
+        result = min_cost
+        return result
+    
+    def greedy(self, customers):
+        # [running_cost, current_level]
+        L = [0, 0]
+        H = [0, 0]
+        for i in range(len(customers)):
+            # Go low to high, starting from L
+            L1 = L[:]
+            for product in sorted(customers[i]):
+                L1[0] += abs(product - L1[1])
+                L1[1] = product
+            # Go low to high, starting from H
+            L2 = H[:]
+            for product in sorted(customers[i]):
+                L2[0] += abs(product - L2[1])
+                L2[1] = product
+            # Go high to low, starting from L
+            H1 = L[:]
+            for product in reversed(sorted(customers[i])):
+                H1[0] += abs(product - H1[1])
+                H1[1] = product
+            # Go high to low, starting from H
+            H2 = H[:]
+            for product in reversed(sorted(customers[i])):
+                H2[0] += abs(product - H2[1])
+                H2[1] = product
+            # Choose the best way to end at low and at high
+            L = min(L1, L2)
+            H = min(H1, H2)
+        result = min(L, H)[0]
         return result
     
     def main(self):
         T = int(input())
         output = []
         for test_id in range(1, T + 1):
-            solution = self.solve()
+            N, P = tuple(map(int, input().split(' ')))
+            customers = []
+            for _ in range(N):
+                customer = tuple(map(int, input().split(' ')))
+                customers.append(customer)
+            solution = self.greedy(customers)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,

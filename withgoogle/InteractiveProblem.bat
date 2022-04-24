@@ -1,2 +1,2 @@
 
-python InteractiveRunner.py python judges/EqualSum.py 0 -- python solvers/EqualSum.py
+python InteractiveRunner.py python judges/ASeDatAb.py 0 -- python solvers/InteractiveSolver.py
