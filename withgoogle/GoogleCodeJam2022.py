@@ -442,15 +442,95 @@ class SolverA: # SolverA
     Solver 1C.1
     https://codingcompetitions.withgoogle.com/codejam/round/
     '''
-    def solve(self):
-        result = 0
+    def valid(self, tower):
+        result = True
+        chars = set()
+        chars.add(tower[0])
+        for i in range(1, len(tower)):
+            if tower[i] != tower[i - 1] and tower[i] in chars:
+                result = False
+                break
+            chars.add(tower[i])
+        return result
+
+    def bruteforce(self, towers):
+        result = 'IMPOSSIBLE'
+        if all(self.valid(tower) for tower in towers):
+            for ordering in itertools.permutations(towers):
+                mega_tower = ''.join(ordering)
+                if self.valid(mega_tower):
+                    result = mega_tower
+                    break
+        return result
+    
+    def solve(self, towers):
+        blocks = collections.defaultdict(list)
+        for tower in towers:
+            blocks[(tower[0], tower[-1])].append(tower)
+        result = 'IMPOSSIBLE'
+        if all(self.valid(tower) for tower in towers):
+            chain = collections.deque()
+            block_id = min(blocks)
+            for block in blocks[block_id]:
+                chain.append(block)
+            del blocks[block_id]
+            while len(blocks) > 0:
+                bottom = chain[0][0]
+                top = chain[-1][-1]
+                # First, try chaining off the top if possible
+                block_id = (top, top)
+                if block_id in blocks:
+                    chosen = block_id
+                    tower = blocks[block_id].pop()
+                    chain.append(tower)
+                    if len(blocks[block_id]) < 1:
+                        del blocks[block_id]
+                    continue
+                chosen = None
+                for block_id in blocks:
+                    if block_id[0] == top:
+                        chosen = block_id
+                        tower = blocks[block_id].pop()
+                        chain.append(tower)
+                if chosen is not None:
+                    if len(blocks[chosen]) < 1:
+                        del blocks[chosen]
+                    continue
+                # Then, try chaining off the bottom if possible
+                block_id = (bottom, bottom)
+                if block_id in blocks:
+                    tower = blocks[block_id].pop()
+                    chain.appendleft(tower)
+                    if len(blocks[block_id]) < 1:
+                        del blocks[block_id]
+                    continue
+                chosen = None
+                for block_id in blocks:
+                    if block_id[1] == bottom:
+                        chosen = block_id
+                        tower = blocks[block_id].pop()
+                        chain.appendleft(tower)
+                if chosen is not None:
+                    if len(blocks[chosen]) < 1:
+                        del blocks[chosen]
+                    continue
+                # Chain off something else
+                block_id = min(blocks)
+                for block in blocks[block_id]:
+                    chain.append(block)
+                del blocks[block_id]
+            mega_tower = ''.join(chain)
+            if self.valid(mega_tower):
+                result = mega_tower
         return result
     
     def main(self):
         T = int(input())
         output = []
         for test_id in range(1, T + 1):
-            solution = self.solve()
+            N = int(input())
+            S = tuple(input().split(' '))
+            solution = self.solve(S)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
@@ -464,15 +544,61 @@ class SolverB: # SolverB
     Solver 1C.2
     https://codingcompetitions.withgoogle.com/codejam/round/
     '''
-    def solve(self):
-        result = 0
+    def is_squary(self, elements):
+        result = True
+        squared_sum = sum(elements) ** 2
+        sum_of_squares = 0
+        for num in elements:
+            sum_of_squares += num ** 2
+        result = squared_sum == sum_of_squares
+        return result
+    
+    def bruteforce(self, nums, K):
+        elements = list(nums)
+        result = 'IMPOSSIBLE'
+        MIN_NUM = -(10 ** 5)
+        MAX_NUM = 10 ** 5
+        assert K == 1
+        for num_to_add in range(MIN_NUM, MAX_NUM + 1):
+            if self.is_squary(elements + [num_to_add]):
+                result = str(num_to_add)
+                break
+        return result
+
+    def solve(self, nums, K):
+        MIN_NUM = -(10 ** 18)
+        MAX_NUM = 10 ** 18
+        elements = list(nums)
+        adds = []
+        if len(nums) == 1:
+            adds.append(0)
+        else:
+            for _ in range(K):
+                numerator = 0
+                for a, b in itertools.combinations(elements, 2):
+                    numerator += -(a * b)
+                denominator = sum(elements)
+                if denominator == 0:
+                    break
+                next_add = int(numerator / denominator)
+                if not (MIN_NUM <= next_add <= MAX_NUM):
+                    break
+                elements.append(next_add)
+                adds.append(next_add)
+                if K > 1:
+                    break
+        result = 'IMPOSSIBLE'
+        if 1 <= len(adds) <= K and self.is_squary(elements):
+            result = ' '.join(map(str, adds))
         return result
     
     def main(self):
         T = int(input())
         output = []
         for test_id in range(1, T + 1):
-            solution = self.solve()
+            N, K = tuple(map(int, input().split(' ')))
+            E = tuple(map(int, input().split(' ')))
+            solution = self.bruteforce(E, K)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
@@ -486,7 +612,7 @@ class SolverC: # SolverC
     Solver 1C.3
     https://codingcompetitions.withgoogle.com/codejam/round/
     '''
-    def solve(self):
+    def solve(self, M, K):
         result = 0
         return result
     
@@ -494,29 +620,8 @@ class SolverC: # SolverC
         T = int(input())
         output = []
         for test_id in range(1, T + 1):
-            solution = self.solve()
-            output_row = 'Case #{}: {}'.format(
-                test_id,
-                solution,
-                )
-            output.append(output_row)
-            print(output_row)
-        return output
-
-class SolverD: # SolverD
-    '''
-    Solver 1C.4
-    https://codingcompetitions.withgoogle.com/codejam/round/
-    '''
-    def solve(self):
-        result = 0
-        return result
-    
-    def main(self):
-        T = int(input())
-        output = []
-        for test_id in range(1, T + 1):
-            solution = self.solve()
+            M, K = tuple(map(int, input().split(' ')))
+            solution = self.solve(M, K)
             output_row = 'Case #{}: {}'.format(
                 test_id,
                 solution,
@@ -542,7 +647,6 @@ if __name__ == '__main__':
         'A': (SolverA, 'SolverA'),
         'B': (SolverB, 'SolverB'),
         'C': (SolverC, 'SolverC'),
-        'D': (SolverD, 'SolverD'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('problem', help='Solve for a given problem', type=str)
