@@ -298,10 +298,10 @@ class SolverWeightlifting: # Weightlifting
             print(output_row)
         return output
 
-class SolverA: # SolverA
+class SolverPancakeDeque: # Pancake Deque
     '''
     Solver 1B.1
-    https://codingcompetitions.withgoogle.com/codejam/round/
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000087711b/0000000000acd59d
     '''
     def greedy(self, D: tuple):
         payments = 0
@@ -363,10 +363,10 @@ class SolverA: # SolverA
             print(output_row)
         return output
 
-class SolverB: # SolverB
+class SolverControlledInflation: # Controlled Inflation
     '''
     Solver 1B.2
-    https://codingcompetitions.withgoogle.com/codejam/round/
+    https://codingcompetitions.withgoogle.com/codejam/round/000000000087711b/0000000000accfdb
     '''
     def bruteforce(self, customers):
         min_cost = float('inf')
@@ -437,7 +437,29 @@ class SolverB: # SolverB
             print(output_row)
         return output
 
-class SolverC: # SolverC
+class SolverA: # SolverA
+    '''
+    Solver 1C.1
+    https://codingcompetitions.withgoogle.com/codejam/round/
+    '''
+    def solve(self):
+        result = 0
+        return result
+    
+    def main(self):
+        T = int(input())
+        output = []
+        for test_id in range(1, T + 1):
+            solution = self.solve()
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
+class SolverB: # SolverB
     '''
     Solver 1C.2
     https://codingcompetitions.withgoogle.com/codejam/round/
@@ -459,9 +481,31 @@ class SolverC: # SolverC
             print(output_row)
         return output
 
+class SolverC: # SolverC
+    '''
+    Solver 1C.3
+    https://codingcompetitions.withgoogle.com/codejam/round/
+    '''
+    def solve(self):
+        result = 0
+        return result
+    
+    def main(self):
+        T = int(input())
+        output = []
+        for test_id in range(1, T + 1):
+            solution = self.solve()
+            output_row = 'Case #{}: {}'.format(
+                test_id,
+                solution,
+                )
+            output.append(output_row)
+            print(output_row)
+        return output
+
 class SolverD: # SolverD
     '''
-    Solver 1D.2
+    Solver 1C.4
     https://codingcompetitions.withgoogle.com/codejam/round/
     '''
     def solve(self):
@@ -493,6 +537,8 @@ if __name__ == '__main__':
         'Q.4': (SolverChainReactions, 'Chain Reactions'),
         '1A.1': (SolverDoubleOrOneThing, 'Double or One Thing'),
         '1A.3': (SolverWeightlifting, 'Weightlifting'),
+        '1B.1': (SolverPancakeDeque, 'Pancake Deque'),
+        '1B.2': (SolverControlledInflation, 'Controlled Inflation'),
         'A': (SolverA, 'SolverA'),
         'B': (SolverB, 'SolverB'),
         'C': (SolverC, 'SolverC'),
