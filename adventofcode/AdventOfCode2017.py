@@ -109,8 +109,8 @@ class Day16: # Permutation Promenade
         result = dance_moves
         return result
     
-    def solve(self, dance_moves):
-        programs = list('abcdefghijklmnop')
+    def solve(self, state, dance_moves):
+        programs = list(state)
         for dance_move in dance_moves:
             if dance_move[0] == 's':
                 X = dance_move[1]
@@ -126,16 +126,27 @@ class Day16: # Permutation Promenade
         result = ''.join(programs)
         return result
     
-    def solve2(self, dance_moves):
-        result = len(dance_moves)
+    def memoized(self, dance_moves, iteration_count):
+        @functools.lru_cache(maxsize=1024)
+        def perform_dance(current_state: str) -> str:
+            next_state = self.solve(current_state, dance_moves)
+            return next_state
+        state = 'abcdefghijklmnop'
+        for i in range(iteration_count):
+            if i % 10_000_000 == 0:
+                progress = int(100 * i / iteration_count)
+                print(f'{progress}% done')
+            next_state = perform_dance(state)
+            state = next_state
+        result = state
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         dance_moves = self.get_dance_moves(raw_input_lines)
         solutions = (
-            self.solve(dance_moves),
-            self.solve2(dance_moves),
+            self.solve('abcdefghijklmnop', dance_moves),
+            self.memoized(dance_moves, 1_000_000_000),
             )
         result = solutions
         return result
