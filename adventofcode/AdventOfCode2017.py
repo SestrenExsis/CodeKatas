@@ -90,9 +90,62 @@ class Template: # Template
         result = solutions
         return result
 
+class Day17: # Spinlock
+    '''
+    https://adventofcode.com/2017/day/17
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = int(raw_input_lines[0])
+        return result
+    
+    def solve(self, step_count, iteration_count, target):
+        buffer = [0]
+        cursor = 0
+        for num in range(1, iteration_count + 1):
+            cursor = (cursor + step_count) % len(buffer)
+            buffer = buffer[:cursor + 1] + [num] + buffer[cursor + 1:]
+            cursor += 1
+        result = buffer[0]
+        index = buffer.index(target)
+        if index < len(buffer) - 1:
+            result = buffer[index + 1]
+        return result
+    
+    def solve2(self, step_count, iteration_count):
+        '''
+        [0]             0: 0 -> (0 + 3) % 1 = 0 + 1 = 1
+        [0 1]           1: 1 -> (1 + 3) % 2 = 0 + 1 = 1
+        [0 2 1]         2: 1 -> (1 + 3) % 3 = 1 + 1 = 2
+        [0 2 3 1]       3: 2 -> (2 + 3) % 4 = 1 + 1 = 2
+        [0 2 4 3 1]     4: 2 -> (2 + 3) % 5 = 0 + 1 = 1
+        [0 5 2 4 3 1]   5: 1 -> (1 + 3) % 6 = 4 + 1 = 5
+        [0 5 2 4 3 6 1] 6: 5 -> (5 + 3) % 7 = 1 + 1 = 2
+        '''
+        value_after_zero = 1
+        spinlock_size = 2
+        cursor = 1
+        for num in range(2, iteration_count):
+            cursor = (cursor + step_count) % spinlock_size + 1
+            if cursor == 1:
+                value_after_zero = num
+            spinlock_size += 1
+        result = value_after_zero
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input, 2017, 2017),
+            self.solve2(parsed_input, 50_000_000),
+            )
+        result = solutions
+        return result
+
 class Day16: # Permutation Promenade
     '''
     https://adventofcode.com/2017/day/16
+    TODO: Consider if cycle detection will make this any faster
     '''
     def get_dance_moves(self, raw_input_lines: List[str]):
         dance_moves = []
@@ -1082,7 +1135,7 @@ if __name__ == '__main__':
        14: (Day14, 'Disk Defragmentation'),
        15: (Day15, 'Dueling Generators'),
        16: (Day16, 'Permutation Promenade'),
-    #    17: (Day17, 'XXX'),
+       17: (Day17, 'Spinlock'),
     #    18: (Day18, 'XXX'),
     #    19: (Day19, 'XXX'),
     #    20: (Day20, 'XXX'),
