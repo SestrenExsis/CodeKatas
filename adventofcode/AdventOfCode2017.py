@@ -90,6 +90,93 @@ class Template: # Template
         result = solutions
         return result
 
+class Day18: # Template
+    '''
+    https://adventofcode.com/2017/day/18
+    '''
+    def get_instructions(self, raw_input_lines: List[str]):
+        instructions = []
+        for raw_input_line in raw_input_lines:
+            parts = raw_input_line.split(' ')
+            operation = parts[0]
+            operands = parts[1:]
+            for i in range(len(operands)):
+                try:
+                    operands[i] = int(operands[i])
+                except ValueError:
+                    pass
+            instruction = (operation, operands)
+            instructions.append(instruction)
+        result = instructions
+        return result
+    
+    def solve(self, instructions):
+        most_recent_sound = None
+        registers = {}
+        for char in 'abcdefghijklmnopqrstuvwxyz':
+            registers[char] = 0
+        def get_value(operand) -> int:
+            nonlocal registers
+            value = operand
+            if type(operand) == str:
+                value = registers[operand]
+            return value
+        pc = 0
+        while pc < len(instructions):
+            operation, operands = instructions[pc]
+            if operation == 'snd':
+                x = operands[0]
+                most_recent_sound = get_value(x)
+                pc += 1
+            elif operation == 'set':
+                x = operands[0]
+                y = operands[1]
+                registers[x] = get_value(y)
+                pc += 1
+            elif operation == 'add':
+                x = operands[0]
+                y = operands[1]
+                registers[x] += get_value(y)
+                pc += 1
+            elif operation == 'mul':
+                x = operands[0]
+                y = operands[1]
+                registers[x] *= get_value(y)
+                pc += 1
+            elif operation == 'mod':
+                x = operands[0]
+                y = operands[1]
+                registers[x] %= get_value(y)
+                pc += 1
+            elif operation == 'rcv':
+                x = operands[0]
+                if get_value(x) > 0:
+                    break
+                pc += 1
+            elif operation == 'jgz':
+                x = operands[0]
+                y = operands[1]
+                if get_value(x) > 0:
+                    pc += get_value(y)
+                else:
+                    pc += 1
+        result = most_recent_sound
+        return result
+    
+    def solve2(self, instructions):
+        result = len(instructions)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        instructions = self.get_instructions(raw_input_lines)
+        solutions = (
+            self.solve(instructions),
+            self.solve2(instructions),
+            )
+        result = solutions
+        return result
+
 class Day17: # Spinlock
     '''
     https://adventofcode.com/2017/day/17
@@ -1136,7 +1223,7 @@ if __name__ == '__main__':
        15: (Day15, 'Dueling Generators'),
        16: (Day16, 'Permutation Promenade'),
        17: (Day17, 'Spinlock'),
-    #    18: (Day18, 'XXX'),
+       18: (Day18, 'Duet'),
     #    19: (Day19, 'XXX'),
     #    20: (Day20, 'XXX'),
     #    21: (Day21, 'XXX'),
