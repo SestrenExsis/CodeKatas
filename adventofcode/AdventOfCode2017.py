@@ -62,6 +62,69 @@ class KnotHash:
         result = ''.join(chars)
         return result
 
+class DuetVM:
+    def __init__(self, instructions):
+        self.registers = {}
+        for char in 'abcdefghijklmnopqrstuvwxyz':
+            self.registers[char] = 0
+        self.instructions = instructions
+        self.pc = 0
+        self.most_recent_sound = None
+    
+    def get_value(self, operand) -> int:
+        value = operand
+        if type(operand) == str:
+            value = self.registers[operand]
+        return value
+    
+    def run(self):
+        while self.pc < len(self.instructions):
+            interrupt_ind = self.step()
+            if interrupt_ind:
+                break
+    
+    def step(self) -> bool:
+        interrupt_ind = False
+        operation, operands = self.instructions[self.pc]
+        if operation == 'snd':
+            x = operands[0]
+            self.most_recent_sound = self.get_value(x)
+            self.pc += 1
+        elif operation == 'set':
+            x = operands[0]
+            y = operands[1]
+            self.registers[x] = self.get_value(y)
+            self.pc += 1
+        elif operation == 'add':
+            x = operands[0]
+            y = operands[1]
+            self.registers[x] += self.get_value(y)
+            self.pc += 1
+        elif operation == 'mul':
+            x = operands[0]
+            y = operands[1]
+            self.registers[x] *= self.get_value(y)
+            self.pc += 1
+        elif operation == 'mod':
+            x = operands[0]
+            y = operands[1]
+            self.registers[x] %= self.get_value(y)
+            self.pc += 1
+        elif operation == 'rcv':
+            x = operands[0]
+            if self.get_value(x) > 0:
+                interrupt_ind = True
+            self.pc += 1
+        elif operation == 'jgz':
+            x = operands[0]
+            y = operands[1]
+            if self.get_value(x) > 0:
+                self.pc += self.get_value(y)
+            else:
+                self.pc += 1
+        result = interrupt_ind
+        return result
+
 class Template: # Template
     '''
     https://adventofcode.com/2017/day/?
@@ -111,56 +174,9 @@ class Day18: # Template
         return result
     
     def solve(self, instructions):
-        most_recent_sound = None
-        registers = {}
-        for char in 'abcdefghijklmnopqrstuvwxyz':
-            registers[char] = 0
-        def get_value(operand) -> int:
-            nonlocal registers
-            value = operand
-            if type(operand) == str:
-                value = registers[operand]
-            return value
-        pc = 0
-        while pc < len(instructions):
-            operation, operands = instructions[pc]
-            if operation == 'snd':
-                x = operands[0]
-                most_recent_sound = get_value(x)
-                pc += 1
-            elif operation == 'set':
-                x = operands[0]
-                y = operands[1]
-                registers[x] = get_value(y)
-                pc += 1
-            elif operation == 'add':
-                x = operands[0]
-                y = operands[1]
-                registers[x] += get_value(y)
-                pc += 1
-            elif operation == 'mul':
-                x = operands[0]
-                y = operands[1]
-                registers[x] *= get_value(y)
-                pc += 1
-            elif operation == 'mod':
-                x = operands[0]
-                y = operands[1]
-                registers[x] %= get_value(y)
-                pc += 1
-            elif operation == 'rcv':
-                x = operands[0]
-                if get_value(x) > 0:
-                    break
-                pc += 1
-            elif operation == 'jgz':
-                x = operands[0]
-                y = operands[1]
-                if get_value(x) > 0:
-                    pc += get_value(y)
-                else:
-                    pc += 1
-        result = most_recent_sound
+        vm = DuetVM(instructions)
+        vm.run()
+        result = vm.most_recent_sound
         return result
     
     def solve2(self, instructions):
