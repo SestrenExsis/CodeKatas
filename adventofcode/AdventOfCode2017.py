@@ -156,7 +156,70 @@ class Template: # Template
         result = solutions
         return result
 
-class Day18: # Template
+class Day19: # A Series of Tubes
+    '''
+    https://adventofcode.com/2017/day/19
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        rows = len(parsed_input)
+        cols = len(parsed_input[0])
+        col = 0
+        for i in range(cols):
+            if parsed_input[0][i] == '|':
+                col = i
+                break
+        row = 0
+        direction = 'SOUTH'
+        path = []
+        while True:
+            cell = parsed_input[row][col]
+            if cell == ' ':
+                break
+            elif cell in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+                path.append(cell)
+            elif cell == '+':
+                if direction in ('NORTH', 'SOUTH'):
+                    if col < 1 or parsed_input[row][col + 1] != ' ':
+                        direction = 'EAST'
+                    else:
+                        direction = 'WEST'
+                elif direction in ('EAST', 'WEST'):
+                    if row < 1 or parsed_input[row + 1][col] != ' ':
+                        direction = 'SOUTH'
+                    else:
+                        direction = 'NORTH'
+            if direction == 'NORTH':
+                row -= 1
+            elif direction == 'EAST':
+                col += 1
+            elif direction == 'SOUTH':
+                row += 1
+            elif direction == 'WEST':
+                col -= 1
+        result = ''.join(path)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day18: # Duet
     '''
     https://adventofcode.com/2017/day/18
     '''
@@ -1265,7 +1328,7 @@ if __name__ == '__main__':
        16: (Day16, 'Permutation Promenade'),
        17: (Day17, 'Spinlock'),
        18: (Day18, 'Duet'),
-    #    19: (Day19, 'XXX'),
+       19: (Day19, 'A Series of Tubes'),
     #    20: (Day20, 'XXX'),
     #    21: (Day21, 'XXX'),
     #    22: (Day22, 'XXX'),
