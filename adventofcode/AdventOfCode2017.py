@@ -69,7 +69,8 @@ class DuetVM:
             self.registers[char] = 0
         self.instructions = instructions
         self.pc = 0
-        self.most_recent_sound = None
+        self.sends = collections.deque()
+        self.receiving_register = None
     
     def get_value(self, operand) -> int:
         value = operand
@@ -78,17 +79,22 @@ class DuetVM:
         return value
     
     def run(self):
-        while self.pc < len(self.instructions):
-            interrupt_ind = self.step()
-            if interrupt_ind:
-                break
+        while (
+            self.pc < len(self.instructions) and
+            self.receiving_register is None
+        ):
+            self.step()
     
-    def step(self) -> bool:
-        interrupt_ind = False
+    def receive(self, value):
+        self.registers[self.receiving_register] = value
+        self.receiving_register = None
+    
+    def step(self):
         operation, operands = self.instructions[self.pc]
         if operation == 'snd':
             x = operands[0]
-            self.most_recent_sound = self.get_value(x)
+            send = self.get_value(x)
+            self.sends.append(send)
             self.pc += 1
         elif operation == 'set':
             x = operands[0]
@@ -112,8 +118,7 @@ class DuetVM:
             self.pc += 1
         elif operation == 'rcv':
             x = operands[0]
-            if self.get_value(x) > 0:
-                interrupt_ind = True
+            self.receiving_register = x
             self.pc += 1
         elif operation == 'jgz':
             x = operands[0]
@@ -122,8 +127,6 @@ class DuetVM:
                 self.pc += self.get_value(y)
             else:
                 self.pc += 1
-        result = interrupt_ind
-        return result
 
 class Template: # Template
     '''
@@ -176,11 +179,33 @@ class Day18: # Template
     def solve(self, instructions):
         vm = DuetVM(instructions)
         vm.run()
-        result = vm.most_recent_sound
+        result = vm.sends[-1]
         return result
     
     def solve2(self, instructions):
-        result = len(instructions)
+        vm0 = DuetVM(instructions)
+        vm0.registers['p'] = 0
+        vm1 = DuetVM(instructions)
+        vm1.registers['p'] = 1
+        vm1_send_step_count = 0
+        while (
+            vm0.receiving_register is None or
+            vm1.receiving_register is None
+        ):
+            vm0.run()
+            vm1.run()
+            if (
+                vm0.receiving_register is not None and
+                len(vm1.sends) > 0
+            ):
+                vm0.receive(vm1.sends.popleft())
+                vm1_send_step_count += 1
+            if (
+                vm1.receiving_register is not None and
+                len(vm0.sends) > 0
+            ):
+                vm1.receive(vm0.sends.popleft())
+        result = vm1_send_step_count + len(vm1.sends)
         return result
     
     def main(self):
