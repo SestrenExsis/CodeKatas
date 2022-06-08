@@ -156,6 +156,44 @@ class Template: # Template
         result = solutions
         return result
 
+class Day20: # Particle Swarm
+    '''
+    https://adventofcode.com/2017/day/20
+    '''
+    def get_particles(self, raw_input_lines: List[str]):
+        particles = []
+        for raw_input_line in raw_input_lines:
+            particle = {}
+            parts = raw_input_line.split(', ')
+            for part in parts:
+                key = part[0]
+                raw_x, raw_y, raw_z = part[3:-1].split(',')
+                x = int(raw_x)
+                y = int(raw_y)
+                z = int(raw_z)
+                particle[key] = [x, y, z]
+            particles.append(particle)
+        result = particles
+        return result
+    
+    def solve(self, particles):
+        result = len(particles)
+        return result
+    
+    def solve2(self, particles):
+        result = len(particles)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        particles = self.get_particles(raw_input_lines)
+        solutions = (
+            self.solve(particles),
+            self.solve2(particles),
+            )
+        result = solutions
+        return result
+
 class Day19: # A Series of Tubes
     '''
     https://adventofcode.com/2017/day/19
@@ -1336,7 +1374,7 @@ if __name__ == '__main__':
        17: (Day17, 'Spinlock'),
        18: (Day18, 'Duet'),
        19: (Day19, 'A Series of Tubes'),
-    #    20: (Day20, 'XXX'),
+       20: (Day20, 'Particle Swarm'),
     #    21: (Day21, 'XXX'),
     #    22: (Day22, 'XXX'),
     #    23: (Day23, 'XXX'),
