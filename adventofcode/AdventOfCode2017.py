@@ -166,7 +166,9 @@ class Day19: # A Series of Tubes
             result.append(raw_input_line)
         return result
     
-    def solve(self, parsed_input):
+    def traverse(self, parsed_input):
+        path = []
+        step_count = 0
         rows = len(parsed_input)
         cols = len(parsed_input[0])
         col = 0
@@ -202,11 +204,16 @@ class Day19: # A Series of Tubes
                 row += 1
             elif direction == 'WEST':
                 col -= 1
-        result = ''.join(path)
+            step_count += 1
+        result = (step_count, ''.join(path))
+        return result
+    
+    def solve(self, parsed_input):
+        _, result = self.traverse(parsed_input)
         return result
     
     def solve2(self, parsed_input):
-        result = len(parsed_input)
+        result, _ = self.traverse(parsed_input)
         return result
     
     def main(self):
