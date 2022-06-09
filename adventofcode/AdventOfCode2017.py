@@ -171,25 +171,77 @@ class Day20: # Particle Swarm
                 x = int(raw_x)
                 y = int(raw_y)
                 z = int(raw_z)
-                particle[key] = [x, y, z]
+                particle[key + 'x'] = x
+                particle[key + 'y'] = y
+                particle[key + 'z'] = z
             particles.append(particle)
         result = particles
         return result
     
     def solve(self, particles):
-        result = len(particles)
+        for _ in range(1_000):
+            for particle in particles:
+                particle['vx'] += particle['ax']
+                particle['vy'] += particle['ay']
+                particle['vz'] += particle['az']
+                particle['px'] += particle['vx']
+                particle['py'] += particle['vy']
+                particle['pz'] += particle['vz']
+        closest_particle_id = None
+        min_distance = float('inf')
+        for particle_id, particle in enumerate(particles):
+            distance = sum((
+                abs(particle['px']),
+                abs(particle['py']),
+                abs(particle['pz']),
+            ))
+            if distance < min_distance:
+                min_distance = distance
+                closest_particle_id = particle_id
+        result = closest_particle_id
         return result
     
     def solve2(self, particles):
-        result = len(particles)
+        positions = {}
+        for particle_id, particle in enumerate(particles):
+            px = particle['px']
+            py = particle['py']
+            pz = particle['pz']
+            if (px, py, pz) not in positions:
+                positions[(px, py, pz)] = set()
+            positions[(px, py, pz)].add(particle_id)
+        for i in range(1_000):
+            next_positions = {}
+            collisions = set()
+            for particle_ids in positions.values():
+                particle_id = particle_ids.pop()
+                particles[particle_id]['vx'] += particles[particle_id]['ax']
+                particles[particle_id]['vy'] += particles[particle_id]['ay']
+                particles[particle_id]['vz'] += particles[particle_id]['az']
+                particles[particle_id]['px'] += particles[particle_id]['vx']
+                particles[particle_id]['py'] += particles[particle_id]['vy']
+                particles[particle_id]['pz'] += particles[particle_id]['vz']
+                px = particles[particle_id]['px']
+                py = particles[particle_id]['py']
+                pz = particles[particle_id]['pz']
+                if (px, py, pz) not in next_positions:
+                    next_positions[(px, py, pz)] = set()
+                next_positions[(px, py, pz)].add(particle_id)
+            for next_position, particle_ids in next_positions.items():
+                if len(particle_ids) > 1:
+                    collisions.add(next_position)
+            for collision in collisions:
+                del next_positions[collision]
+            positions = next_positions
+        result = len(positions)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         particles = self.get_particles(raw_input_lines)
         solutions = (
-            self.solve(particles),
-            self.solve2(particles),
+            self.solve(copy.deepcopy(particles)),
+            self.solve2(copy.deepcopy(particles)),
             )
         result = solutions
         return result
