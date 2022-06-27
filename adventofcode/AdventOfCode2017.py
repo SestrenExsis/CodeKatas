@@ -156,6 +156,156 @@ class Template: # Template
         result = solutions
         return result
 
+class Day21: # Fractal Art
+    '''
+    https://adventofcode.com/2017/day/21
+    '''
+    def get_enhancement_rules(self, raw_input_lines: List[str]):
+        # Use canonicalized inputs for the input keys
+        enhancement_rules = {}
+        for raw_input_line in raw_input_lines:
+            raw_input, raw_output = raw_input_line.split(' => ')
+            raw_input = raw_input.split('/')
+            pattern_input = self.canonicalize(raw_input)
+            pattern_output = raw_output.split('/')
+            enhancement_rules[pattern_input] = pattern_output
+        result = enhancement_rules
+        return result
+    
+    def canonicalize(self, grid):
+        '''
+        AB -> CA -> DC -> BD
+        CD    DB    BA    AC
+        ,
+        BA -> DB -> CD -> AC
+        DC    CA    AB    BD
+
+        ABC -> GDA -> IHG -> CFI
+        DEF    HEB    FED    BEH
+        GHI    IFC    CBA    ADG
+        ,
+        CBA -> ADG -> GHI -> IFC
+        FED    BEH    DEF    HEB
+        IHG    CFI    ABC    GDA
+        '''
+        rotations = []
+        if len(grid) == 2:
+            a = grid[0][0]
+            b = grid[0][1]
+            c = grid[1][0]
+            d = grid[1][1]
+            rotations.append((  a + b,  c + d  ))
+            rotations.append((  b + a,  d + c  ))
+            rotations.append((  c + a,  d + b  ))
+            rotations.append((  a + c,  b + d  ))
+            rotations.append((  d + c,  b + a  ))
+            rotations.append((  c + d,  a + b  ))
+            rotations.append((  b + d,  a + c  ))
+            rotations.append((  d + b,  c + a  ))
+        elif len(grid) == 3:
+            a = grid[0][0]
+            b = grid[0][1]
+            c = grid[0][2]
+            d = grid[1][0]
+            e = grid[1][1]
+            f = grid[1][2]
+            g = grid[2][0]
+            h = grid[2][1]
+            i = grid[2][2]
+            rotations.append((  a + b + c,  d + e + f,  g + h + i  ))
+            rotations.append((  c + b + a,  f + e + d,  i + h + g  ))
+            rotations.append((  g + d + a,  h + e + b,  i + f + c  ))
+            rotations.append((  a + d + g,  b + e + h,  c + f + i  ))
+            rotations.append((  i + h + g,  f + e + d,  c + b + a  ))
+            rotations.append((  g + h + i,  d + e + f,  a + b + c  ))
+            rotations.append((  c + f + i,  b + e + h,  a + d + g  ))
+            rotations.append((  i + f + c,  h + e + b,  g + d + a  ))
+        result = min(rotations)
+        return result
+    
+    def solve(self, enhancement_rules, iteration_count):
+        size = 3
+        pattern = {
+            (0, 0): '.',
+            (0, 1): '#',
+            (0, 2): '.',
+            (1, 0): '.',
+            (1, 1): '.',
+            (1, 2): '#',
+            (2, 0): '#',
+            (2, 1): '#',
+            (2, 2): '#',
+        }
+        for _ in range(iteration_count):
+            if size % 2 == 0:
+                next_pattern = {}
+                for row in range(0, size // 2):
+                    for col in range(0, size // 2):
+                        a = pattern[(2 * row    , 2 * col    )]
+                        b = pattern[(2 * row    , 2 * col + 1)]
+                        c = pattern[(2 * row + 1, 2 * col    )]
+                        d = pattern[(2 * row + 1, 2 * col + 1)]
+                        key = self.canonicalize((a + b, c + d))
+                        out = enhancement_rules[key]
+                        next_pattern[(3 * row    , 3 * col    )] = out[0][0]
+                        next_pattern[(3 * row    , 3 * col + 1)] = out[0][1]
+                        next_pattern[(3 * row    , 3 * col + 2)] = out[0][2]
+                        next_pattern[(3 * row + 1, 3 * col    )] = out[1][0]
+                        next_pattern[(3 * row + 1, 3 * col + 1)] = out[1][1]
+                        next_pattern[(3 * row + 1, 3 * col + 2)] = out[1][2]
+                        next_pattern[(3 * row + 2, 3 * col    )] = out[2][0]
+                        next_pattern[(3 * row + 2, 3 * col + 1)] = out[2][1]
+                        next_pattern[(3 * row + 2, 3 * col + 2)] = out[2][2]
+                pattern = next_pattern
+                size = 3 * (size // 2)
+            elif size % 3 == 0:
+                next_pattern = {}
+                for row in range(0, size // 3):
+                    for col in range(0, size // 3):
+                        a = pattern[(3 * row    , 3 * col    )]
+                        b = pattern[(3 * row    , 3 * col + 1)]
+                        c = pattern[(3 * row    , 3 * col + 2)]
+                        d = pattern[(3 * row + 1, 3 * col    )]
+                        e = pattern[(3 * row + 1, 3 * col + 1)]
+                        f = pattern[(3 * row + 1, 3 * col + 2)]
+                        g = pattern[(3 * row + 2, 3 * col    )]
+                        h = pattern[(3 * row + 2, 3 * col + 1)]
+                        i = pattern[(3 * row + 2, 3 * col + 2)]
+                        key = self.canonicalize((a + b + c, d + e + f, g + h + i))
+                        out = enhancement_rules[key]
+                        next_pattern[(4 * row    , 4 * col    )] = out[0][0]
+                        next_pattern[(4 * row    , 4 * col + 1)] = out[0][1]
+                        next_pattern[(4 * row    , 4 * col + 2)] = out[0][2]
+                        next_pattern[(4 * row    , 4 * col + 3)] = out[0][3]
+                        next_pattern[(4 * row + 1, 4 * col    )] = out[1][0]
+                        next_pattern[(4 * row + 1, 4 * col + 1)] = out[1][1]
+                        next_pattern[(4 * row + 1, 4 * col + 2)] = out[1][2]
+                        next_pattern[(4 * row + 1, 4 * col + 3)] = out[1][3]
+                        next_pattern[(4 * row + 2, 4 * col    )] = out[2][0]
+                        next_pattern[(4 * row + 2, 4 * col + 1)] = out[2][1]
+                        next_pattern[(4 * row + 2, 4 * col + 2)] = out[2][2]
+                        next_pattern[(4 * row + 2, 4 * col + 3)] = out[2][3]
+                        next_pattern[(4 * row + 3, 4 * col    )] = out[3][0]
+                        next_pattern[(4 * row + 3, 4 * col + 1)] = out[3][1]
+                        next_pattern[(4 * row + 3, 4 * col + 2)] = out[3][2]
+                        next_pattern[(4 * row + 3, 4 * col + 3)] = out[3][3]
+                pattern = next_pattern
+                size = 4 * (size // 3)
+            else:
+                raise Exception('Invalid grid size!')
+        result = sum(1 for cell in pattern.values() if cell == '#')
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        enhancement_rules = self.get_enhancement_rules(raw_input_lines)
+        solutions = (
+            self.solve(enhancement_rules, 5),
+            self.solve(enhancement_rules, 18),
+            )
+        result = solutions
+        return result
+
 class Day20: # Particle Swarm
     '''
     https://adventofcode.com/2017/day/20
@@ -1427,7 +1577,7 @@ if __name__ == '__main__':
        18: (Day18, 'Duet'),
        19: (Day19, 'A Series of Tubes'),
        20: (Day20, 'Particle Swarm'),
-    #    21: (Day21, 'XXX'),
+       21: (Day21, 'Fractal Art'),
     #    22: (Day22, 'XXX'),
     #    23: (Day23, 'XXX'),
     #    24: (Day24, 'XXX'),
