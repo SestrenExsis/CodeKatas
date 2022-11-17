@@ -156,6 +156,66 @@ class Template: # Template
         result = solutions
         return result
 
+class Day22: # Sporifica Virus
+    '''
+    https://adventofcode.com/2017/day/22
+    '''
+    NORTH = 0
+    EAST = 1
+    SOUTH = 2
+    WEST = 3
+
+    facings = {
+        NORTH: (-1,  0),
+        EAST:  ( 0,  1),
+        SOUTH: ( 1,  0),
+        WEST:  ( 0, -1),
+    }
+
+    def get_infected_nodes(self, raw_input_lines: List[str]):
+        infected_nodes = set()
+        for row, raw_input_line in enumerate(raw_input_lines):
+            for col, cell in enumerate(raw_input_line):
+                if cell == '#':
+                    infected_nodes.add((row, col))
+        start_row = len(raw_input_lines) // 2
+        start_col = len(raw_input_lines[0]) // 2
+        result = infected_nodes, (start_row, start_col)
+        return result
+    
+    def solve(self, infected_nodes, start_row, start_col):
+        nodes = copy.deepcopy(infected_nodes)
+        row = start_row
+        col = start_col
+        infections = 0
+        facing = self.NORTH
+        for _ in range(10_000):
+            if (row, col) in nodes:
+                facing = (facing + 1) % len(self.facings)
+                nodes.remove((row, col))
+            else:
+                facing = (facing - 1) % len(self.facings)
+                nodes.add((row, col))
+                infections += 1
+            row += self.facings[facing][0]
+            col += self.facings[facing][1]
+        result = infections
+        return result
+    
+    def solve2(self, infected_nodes, start_row, start_col):
+        result = len(infected_nodes)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        infected_nodes, (start_row, start_col) = self.get_infected_nodes(raw_input_lines)
+        solutions = (
+            self.solve(infected_nodes, start_row, start_col),
+            self.solve2(infected_nodes, start_row, start_col),
+            )
+        result = solutions
+        return result
+
 class Day21: # Fractal Art
     '''
     https://adventofcode.com/2017/day/21
@@ -1578,7 +1638,7 @@ if __name__ == '__main__':
        19: (Day19, 'A Series of Tubes'),
        20: (Day20, 'Particle Swarm'),
        21: (Day21, 'Fractal Art'),
-    #    22: (Day22, 'XXX'),
+       22: (Day22, 'Sporifica Virus'),
     #    23: (Day23, 'XXX'),
     #    24: (Day24, 'XXX'),
     #    25: (Day25, 'XXX'),
