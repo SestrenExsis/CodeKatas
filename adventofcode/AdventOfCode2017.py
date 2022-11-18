@@ -91,34 +91,10 @@ class DuetVM:
     
     def step(self):
         operation, operands = self.instructions[self.pc]
-        if operation == 'snd':
-            x = operands[0]
-            send = self.get_value(x)
-            self.sends.append(send)
-            self.pc += 1
-        elif operation == 'set':
-            x = operands[0]
-            y = operands[1]
-            self.registers[x] = self.get_value(y)
-            self.pc += 1
-        elif operation == 'add':
+        if operation == 'add':
             x = operands[0]
             y = operands[1]
             self.registers[x] += self.get_value(y)
-            self.pc += 1
-        elif operation == 'mul':
-            x = operands[0]
-            y = operands[1]
-            self.registers[x] *= self.get_value(y)
-            self.pc += 1
-        elif operation == 'mod':
-            x = operands[0]
-            y = operands[1]
-            self.registers[x] %= self.get_value(y)
-            self.pc += 1
-        elif operation == 'rcv':
-            x = operands[0]
-            self.receiving_register = x
             self.pc += 1
         elif operation == 'jgz':
             x = operands[0]
@@ -127,6 +103,43 @@ class DuetVM:
                 self.pc += self.get_value(y)
             else:
                 self.pc += 1
+        elif operation == 'jnz':
+            # TODO: make
+            x = operands[0]
+            y = operands[1]
+            if self.get_value(x) != 0:
+                self.pc += self.get_value(y)
+            else:
+                self.pc += 1
+        elif operation == 'mod':
+            x = operands[0]
+            y = operands[1]
+            self.registers[x] %= self.get_value(y)
+            self.pc += 1
+        elif operation == 'mul':
+            x = operands[0]
+            y = operands[1]
+            self.registers[x] *= self.get_value(y)
+            self.pc += 1
+        elif operation == 'rcv':
+            x = operands[0]
+            self.receiving_register = x
+            self.pc += 1
+        elif operation == 'set':
+            x = operands[0]
+            y = operands[1]
+            self.registers[x] = self.get_value(y)
+            self.pc += 1
+        elif operation == 'snd':
+            x = operands[0]
+            send = self.get_value(x)
+            self.sends.append(send)
+            self.pc += 1
+        elif operation == 'sub':
+            x = operands[0]
+            y = operands[1]
+            self.registers[x] -= self.get_value(y)
+            self.pc += 1
 
 class Template: # Template
     '''
@@ -152,6 +165,51 @@ class Template: # Template
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day23: # Coprocessor Conflagration
+    '''
+    https://adventofcode.com/2017/day/23
+    '''
+    def get_instructions(self, raw_input_lines: List[str]):
+        instructions = []
+        for raw_input_line in raw_input_lines:
+            parts = raw_input_line.split(' ')
+            operation = parts[0]
+            operands = parts[1:]
+            for i in range(len(operands)):
+                try:
+                    operands[i] = int(operands[i])
+                except ValueError:
+                    pass
+            instruction = (operation, operands)
+            instructions.append(instruction)
+        result = instructions
+        return result
+    
+    def solve(self, instructions):
+        vm = DuetVM(instructions)
+        mul_step_count = 0
+        while vm.pc < len(vm.instructions):
+            operation, _ = vm.instructions[vm.pc]
+            if operation == 'mul':
+                mul_step_count += 1
+            vm.step()
+        result = mul_step_count
+        return result
+    
+    def solve2(self, instructions):
+        result = len(instructions)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        instructions = self.get_instructions(raw_input_lines)
+        solutions = (
+            self.solve(instructions),
+            self.solve2(instructions),
             )
         result = solutions
         return result
@@ -1666,7 +1724,7 @@ if __name__ == '__main__':
        20: (Day20, 'Particle Swarm'),
        21: (Day21, 'Fractal Art'),
        22: (Day22, 'Sporifica Virus'),
-    #    23: (Day23, 'XXX'),
+       23: (Day23, 'Coprocessor Conflagration'),
     #    24: (Day24, 'XXX'),
     #    25: (Day25, 'XXX'),
         }
