@@ -172,6 +172,11 @@ class Day22: # Sporifica Virus
         WEST:  ( 0, -1),
     }
 
+    CLEAN = 0
+    WEAKENED = 1
+    INFECTED = 2
+    FLAGGED = 3
+
     def get_infected_nodes(self, raw_input_lines: List[str]):
         infected_nodes = set()
         for row, raw_input_line in enumerate(raw_input_lines):
@@ -203,7 +208,29 @@ class Day22: # Sporifica Virus
         return result
     
     def solve2(self, infected_nodes, start_row, start_col):
-        result = len(infected_nodes)
+        nodes = {}
+        for (row, col) in infected_nodes:
+            nodes[(row, col)] = self.INFECTED
+        row = start_row
+        col = start_col
+        infections = 0
+        facing = self.NORTH
+        for _ in range(10_000_000):
+            if (row, col) not in nodes:
+                facing = (facing - 1) % len(self.facings)
+                nodes[(row, col)] = self.WEAKENED
+            elif nodes[(row, col)] == self.WEAKENED:
+                nodes[(row, col)] = self.INFECTED
+                infections += 1
+            elif nodes[(row, col)] == self.INFECTED:
+                facing = (facing + 1) % len(self.facings)
+                nodes[(row, col)] = self.FLAGGED
+            elif nodes[(row, col)] == self.FLAGGED:
+                facing = (facing + 2) % len(self.facings)
+                del nodes[(row, col)]
+            row += self.facings[facing][0]
+            col += self.facings[facing][1]
+        result = infections
         return result
     
     def main(self):
