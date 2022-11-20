@@ -200,8 +200,25 @@ class Day23: # Coprocessor Conflagration
         result = mul_step_count
         return result
     
-    def solve2(self, instructions):
-        result = len(instructions)
+    def solve2(self, start: int, step_size: int, step_count: int):
+        prime_count = 0
+        for step_id in range(step_count):
+            candidate = start + step_size * step_id
+            step_count += 1
+            prime_ind = 0
+            # Check if prime
+            for factor1 in range(2, candidate + 1):
+                if candidate % factor1 != 0:
+                    continue
+                for factor2 in range(2, candidate // factor1 + 1):
+                    if factor1 * factor2 == candidate:
+                        prime_ind = 1
+                        break
+                if prime_ind == 1:
+                    break
+            if prime_ind == 1:
+                prime_count += 1
+        result = prime_count
         return result
     
     def main(self):
@@ -209,7 +226,7 @@ class Day23: # Coprocessor Conflagration
         instructions = self.get_instructions(raw_input_lines)
         solutions = (
             self.solve(instructions),
-            self.solve2(instructions),
+            self.solve2(106_500, 17, 1_001),
             )
         result = solutions
         return result
