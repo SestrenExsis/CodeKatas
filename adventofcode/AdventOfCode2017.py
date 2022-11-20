@@ -211,7 +211,39 @@ class Day24: # Electromagnetic Moat
         return result
     
     def solve2(self, components):
-        result = len(components)
+        # visited is expressed using a 64-bit mask
+        max_bridge_length = 0
+        max_bridge_strength = 0
+        seen = set()
+        work = [] # (bridge_strength, end_port, length, visited)
+        for index, (a, b) in enumerate(components):
+            if a == 0:
+                work.append((a + b, b, 1, 2 ** index))
+            if b == 0:
+                work.append((a + b, a, 1, 2 ** index))
+        while len(work) > 0:
+            (bridge_strength, end_port, bridge_length, visited) = work.pop()
+            if (bridge_length, visited, end_port) in seen:
+                continue
+            seen.add((bridge_length, visited, end_port))
+            if bridge_length > max_bridge_length:
+                max_bridge_length = bridge_length
+                max_bridge_strength = bridge_strength
+            elif (
+                bridge_length == max_bridge_length and
+                bridge_strength > max_bridge_strength
+            ):
+                max_bridge_strength = bridge_strength
+            for index, (a, b) in enumerate(components):
+                if 2 ** index & visited > 0:
+                    continue
+                next_bridge_strength = bridge_strength + a + b
+                next_visited = visited | 2 ** index
+                if a == end_port:
+                    work.append((next_bridge_strength, b, bridge_length + 1, next_visited))
+                if b == end_port:
+                    work.append((next_bridge_strength, a, bridge_length + 1, next_visited))
+        result = max_bridge_strength
         return result
     
     def main(self):
