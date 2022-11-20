@@ -169,6 +169,61 @@ class Template: # Template
         result = solutions
         return result
 
+class Day24: # Electromagnetic Moat
+    '''
+    https://adventofcode.com/2017/day/24
+    '''
+    def get_components(self, raw_input_lines: List[str]):
+        components = []
+        for raw_input_line in raw_input_lines:
+            (a, b) = tuple(map(int, raw_input_line.split('/')))
+            components.append((a, b))
+        result = components
+        return result
+    
+    def solve(self, components):
+        # visited is expressed using a 64-bit mask
+        max_bridge_strength = 0
+        seen = set()
+        work = [] # (bridge_strength, end_port, visited)
+        for index, (a, b) in enumerate(components):
+            if a == 0:
+                work.append((a + b, b, 2 ** index))
+            if b == 0:
+                work.append((a + b, a, 2 ** index))
+        while len(work) > 0:
+            (bridge_strength, end_port, visited) = work.pop()
+            if (visited, end_port) in seen:
+                continue
+            seen.add((visited, end_port))
+            if bridge_strength > max_bridge_strength:
+                max_bridge_strength = bridge_strength
+            for index, (a, b) in enumerate(components):
+                if 2 ** index & visited > 0:
+                    continue
+                next_bridge_strength = bridge_strength + a + b
+                next_visited = visited | 2 ** index
+                if a == end_port:
+                    work.append((next_bridge_strength, b, next_visited))
+                if b == end_port:
+                    work.append((next_bridge_strength, a, next_visited))
+        result = max_bridge_strength
+        return result
+    
+    def solve2(self, components):
+        result = len(components)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        components = self.get_components(raw_input_lines)
+        solutions = (
+            self.solve(components),
+            self.solve2(components),
+            )
+        result = solutions
+        return result
+
 class Day23: # Coprocessor Conflagration
     '''
     https://adventofcode.com/2017/day/23
@@ -1742,7 +1797,7 @@ if __name__ == '__main__':
        21: (Day21, 'Fractal Art'),
        22: (Day22, 'Sporifica Virus'),
        23: (Day23, 'Coprocessor Conflagration'),
-    #    24: (Day24, 'XXX'),
+       24: (Day24, 'Electromagnetic Moat'),
     #    25: (Day25, 'XXX'),
         }
     parser = argparse.ArgumentParser()
