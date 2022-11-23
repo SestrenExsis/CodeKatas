@@ -169,6 +169,61 @@ class Template: # Template
         result = solutions
         return result
 
+class Day25: # The Halting Problem
+    '''
+    https://adventofcode.com/2017/day/25
+    '''
+    def get_turing_machine(self, raw_input_lines: List[str]):
+        initial_state = raw_input_lines[0].split()[-1][0]
+        step_count = int(raw_input_lines[1].split()[-2])
+        states = {
+            ('A', 0): (1, +1, 'B'),
+            ('A', 1): (0, -1, 'D'),
+            ('B', 0): (1, +1, 'C'),
+            ('B', 1): (0, +1, 'F'),
+        }
+        states = {}
+        index = 3
+        while index < len(raw_input_lines):
+            current_state = raw_input_lines[index].split()[-1][0]
+            current_value = int(raw_input_lines[index + 1].split()[-1][0])
+            next_value = int(raw_input_lines[index + 2].split()[-1][0])
+            next_move = 1 if raw_input_lines[index + 3].split()[-1][0] == 'r' else -1
+            next_state = raw_input_lines[index + 4].split()[-1][0]
+            states[(current_state, current_value)] = (next_value, next_move, next_state)
+            index += 4
+            current_value = int(raw_input_lines[index + 1].split()[-1][0])
+            next_value = int(raw_input_lines[index + 2].split()[-1][0])
+            next_move = 1 if raw_input_lines[index + 3].split()[-1][0] == 'r' else -1
+            next_state = raw_input_lines[index + 4].split()[-1][0]
+            states[(current_state, current_value)] = (next_value, next_move, next_state)
+            index += 6
+        result = (initial_state, step_count, states)
+        return result
+    
+    def solve(self, initial_state, step_count, states):
+        state = initial_state
+        tape = collections.defaultdict(int)
+        cursor = 0
+        for _ in range(step_count):
+            (next_value, next_move, next_state) = states[(state, tape[cursor])]
+            tape[cursor] = next_value
+            state = next_state
+            cursor += next_move
+        result = sum(tape.values())
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        turing_machine = self.get_turing_machine(raw_input_lines)
+        (initial_state, step_count, states) = turing_machine
+        solutions = (
+            self.solve(initial_state, step_count, states),
+            'Merry Christmas!',
+            )
+        result = solutions
+        return result
+
 class Day24: # Electromagnetic Moat
     '''
     https://adventofcode.com/2017/day/24
@@ -1830,7 +1885,7 @@ if __name__ == '__main__':
        22: (Day22, 'Sporifica Virus'),
        23: (Day23, 'Coprocessor Conflagration'),
        24: (Day24, 'Electromagnetic Moat'),
-    #    25: (Day25, 'XXX'),
+       25: (Day25, 'The Halting Problem'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('day', help='Solve for a given day', type=int)
