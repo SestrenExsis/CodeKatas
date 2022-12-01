@@ -51,30 +51,41 @@ class Template: # Template
         result = solutions
         return result
 
-class Day01: # Day01
+class Day01: # Calorie Counting
     '''
     https://adventofcode.com/2022/day/1
     '''
-    def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
+    def get_elves(self, raw_input_lines: List[str]):
+        elves = [[]]
         for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
+            if len(raw_input_line) < 1:
+                elves.append([])
+            else:
+                elves[-1].append(int(raw_input_line))
+        result = elves
         return result
     
-    def solve(self, parsed_input):
-        result = len(parsed_input)
+    def solve(self, elves):
+        result = max(sum(calories) for calories in elves)
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, elves):
+        heap = []
+        for calories in elves:
+            heapq.heappush(heap, -1 * sum(calories))
+        top_calories = []
+        top_calories.append(-1 * heapq.heappop(heap))
+        top_calories.append(-1 * heapq.heappop(heap))
+        top_calories.append(-1 * heapq.heappop(heap))
+        result = sum(top_calories)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        elves = self.get_elves(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(elves),
+            self.solve2(elves),
             )
         result = solutions
         return result
@@ -85,7 +96,7 @@ if __name__ == '__main__':
     python AdventOfCode2022.py 1 < inputs/2022day01.in
     '''
     solvers = {
-        1: (Template, 'Day01'),
+        1: (Day01, 'Calorie Counting'),
     #     2: (Day02, 'Day02'),
     #     3: (Day03, 'Day03'),
     #     4: (Day04, 'Day04'),
