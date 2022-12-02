@@ -60,29 +60,47 @@ class Day02: # Rock Paper Scissors
         'Paper': 2,
         'Scissors': 3,
         'Loss': 0,
-        'Tie': 3,
+        'Draw': 3,
         'Win': 6,
     }
 
-    legend = {
+    messages = {
         'A': 'Rock',
         'B': 'Paper',
         'C': 'Scissors',
+    }
+
+    responses = {
         'X': 'Rock',
         'Y': 'Paper',
         'Z': 'Scissors',
+        ('Rock', 'Loss'): 'Scissors',
+        ('Paper', 'Loss'): 'Rock',
+        ('Scissors', 'Loss'): 'Paper',
+        ('Rock', 'Draw'): 'Rock',
+        ('Paper', 'Draw'): 'Paper',
+        ('Scissors', 'Draw'): 'Scissors',
+        ('Rock', 'Win'): 'Paper',
+        ('Paper', 'Win'): 'Scissors',
+        ('Scissors', 'Win'): 'Rock',
+    }
+
+    desired_outcomes = {
+        'X': 'Loss',
+        'Y': 'Draw',
+        'Z': 'Win',
     }
 
     outcomes = {
-        ('Rock', 'Rock'): 'Tie',
+        ('Rock', 'Rock'): 'Draw',
         ('Rock', 'Paper'): 'Win',
         ('Rock', 'Scissors'): 'Loss',
         ('Paper', 'Rock'): 'Loss',
-        ('Paper', 'Paper'): 'Tie',
+        ('Paper', 'Paper'): 'Draw',
         ('Paper', 'Scissors'): 'Win',
         ('Scissors', 'Rock'): 'Win',
         ('Scissors', 'Paper'): 'Loss',
-        ('Scissors', 'Scissors'): 'Tie',
+        ('Scissors', 'Scissors'): 'Draw',
     }
 
     def get_strategy_guide(self, raw_input_lines: List[str]):
@@ -90,9 +108,25 @@ class Day02: # Rock Paper Scissors
         for raw_input_line in raw_input_lines:
             message, response = raw_input_line.split(' ')
             strategy_guide.append(
-                (self.legend[message], self.legend[response])
+                (
+                    self.messages[message],
+                    self.responses[response],
+                )
             )
         result = strategy_guide
+        return result
+
+    def get_strategy_guide_v2(self, raw_input_lines: List[str]):
+        strategy_guide_v2 = []
+        for raw_input_line in raw_input_lines:
+            message, desired_outcome = raw_input_line.split(' ')
+            strategy_guide_v2.append(
+                (
+                    self.messages[message],
+                    self.desired_outcomes[desired_outcome],
+                )
+            )
+        result = strategy_guide_v2
         return result
     
     def solve(self, strategy_guide):
@@ -104,16 +138,23 @@ class Day02: # Rock Paper Scissors
         result = total_score
         return result
     
-    def solve2(self, strategy_guide):
-        result = len(strategy_guide)
+    def solve2(self, strategy_guide_v2):
+        total_score = 0
+        for (message, desired_outcome) in strategy_guide_v2:
+            outcome = desired_outcome
+            response = self.responses[(message, outcome)]
+            total_score += self.scoring_values[response]
+            total_score += self.scoring_values[outcome]
+        result = total_score
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         strategy_guide = self.get_strategy_guide(raw_input_lines)
+        strategy_guide_v2 = self.get_strategy_guide_v2(raw_input_lines)
         solutions = (
             self.solve(strategy_guide),
-            self.solve2(strategy_guide),
+            self.solve2(strategy_guide_v2),
             )
         result = solutions
         return result
