@@ -51,6 +51,73 @@ class Template: # Template
         result = solutions
         return result
 
+class Day02: # Rock Paper Scissors
+    '''
+    https://adventofcode.com/2022/day/2
+    '''
+    scoring_values = {
+        'Rock': 1,
+        'Paper': 2,
+        'Scissors': 3,
+        'Loss': 0,
+        'Tie': 3,
+        'Win': 6,
+    }
+
+    legend = {
+        'A': 'Rock',
+        'B': 'Paper',
+        'C': 'Scissors',
+        'X': 'Rock',
+        'Y': 'Paper',
+        'Z': 'Scissors',
+    }
+
+    outcomes = {
+        ('Rock', 'Rock'): 'Tie',
+        ('Rock', 'Paper'): 'Win',
+        ('Rock', 'Scissors'): 'Loss',
+        ('Paper', 'Rock'): 'Loss',
+        ('Paper', 'Paper'): 'Tie',
+        ('Paper', 'Scissors'): 'Win',
+        ('Scissors', 'Rock'): 'Win',
+        ('Scissors', 'Paper'): 'Loss',
+        ('Scissors', 'Scissors'): 'Tie',
+    }
+
+    def get_strategy_guide(self, raw_input_lines: List[str]):
+        strategy_guide = []
+        for raw_input_line in raw_input_lines:
+            message, response = raw_input_line.split(' ')
+            strategy_guide.append(
+                (self.legend[message], self.legend[response])
+            )
+        result = strategy_guide
+        return result
+    
+    def solve(self, strategy_guide):
+        total_score = 0
+        for (message, response) in strategy_guide:
+            total_score += self.scoring_values[response]
+            outcome = self.outcomes[(message, response)]
+            total_score += self.scoring_values[outcome]
+        result = total_score
+        return result
+    
+    def solve2(self, strategy_guide):
+        result = len(strategy_guide)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        strategy_guide = self.get_strategy_guide(raw_input_lines)
+        solutions = (
+            self.solve(strategy_guide),
+            self.solve2(strategy_guide),
+            )
+        result = solutions
+        return result
+
 class Day01: # Calorie Counting
     '''
     https://adventofcode.com/2022/day/1
@@ -97,7 +164,7 @@ if __name__ == '__main__':
     '''
     solvers = {
         1: (Day01, 'Calorie Counting'),
-    #     2: (Day02, 'Day02'),
+        2: (Day02, 'Rock Paper Scissors'),
     #     3: (Day03, 'Day03'),
     #     4: (Day04, 'Day04'),
     #     5: (Day05, 'Day05'),
