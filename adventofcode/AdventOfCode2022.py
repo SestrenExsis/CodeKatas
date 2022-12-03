@@ -66,7 +66,7 @@ class Day03: # Rucksack Reorganization
         return result
     
     def solve(self, rucksacks):
-        total_priority = 0
+        priorities = []
         for (compartment_a, compartment_b) in rucksacks:
             common_items = set(compartment_a) & set(compartment_b)
             for item in common_items:
@@ -75,12 +75,25 @@ class Day03: # Rucksack Reorganization
                     priority = 1 + ord(item) - ord('a')
                 elif item in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
                     priority = 27 + ord(item) - ord('A')
-                total_priority += priority
-        result = total_priority
+                priorities.append(priority)
+        result = sum(priorities)
         return result
     
     def solve2(self, rucksacks):
-        result = len(rucksacks)
+        priorities = []
+        for index in range(0, len(rucksacks), 3):
+            rucksack_a = rucksacks[index][0] + rucksacks[index][1]
+            rucksack_b = rucksacks[index + 1][0] + rucksacks[index + 1][1]
+            rucksack_c = rucksacks[index + 2][0] + rucksacks[index + 2][1]
+            common_items = set(rucksack_a) & set(rucksack_b) & set(rucksack_c)
+            for item in common_items:
+                priority = 0
+                if item in 'abcdefghijklmnopqrstuvwxyz':
+                    priority = 1 + ord(item) - ord('a')
+                elif item in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+                    priority = 27 + ord(item) - ord('A')
+                priorities.append(priority)
+        result = sum(priorities)
         return result
     
     def main(self):
