@@ -51,6 +51,48 @@ class Template: # Template
         result = solutions
         return result
 
+class Day03: # Rucksack Reorganization
+    '''
+    https://adventofcode.com/2022/day/3
+    '''
+    def get_rucksacks(self, raw_input_lines: List[str]):
+        rucksacks = []
+        for raw_input_line in raw_input_lines:
+            compartment_size = len(raw_input_line) // 2
+            compartment_a = raw_input_line[:compartment_size]
+            compartment_b = raw_input_line[compartment_size:]
+            rucksacks.append((compartment_a, compartment_b))
+        result = rucksacks
+        return result
+    
+    def solve(self, rucksacks):
+        total_priority = 0
+        for (compartment_a, compartment_b) in rucksacks:
+            common_items = set(compartment_a) & set(compartment_b)
+            for item in common_items:
+                priority = 0
+                if item in 'abcdefghijklmnopqrstuvwxyz':
+                    priority = 1 + ord(item) - ord('a')
+                elif item in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+                    priority = 27 + ord(item) - ord('A')
+                total_priority += priority
+        result = total_priority
+        return result
+    
+    def solve2(self, rucksacks):
+        result = len(rucksacks)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        rucksacks = self.get_rucksacks(raw_input_lines)
+        solutions = (
+            self.solve(rucksacks),
+            self.solve2(rucksacks),
+            )
+        result = solutions
+        return result
+
 class Day02: # Rock Paper Scissors
     '''
     https://adventofcode.com/2022/day/2
@@ -201,12 +243,12 @@ class Day01: # Calorie Counting
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2022.py 1 < inputs/2022day01.in
+    python AdventOfCode2022.py 3 < inputs/2022day03.in
     '''
     solvers = {
         1: (Day01, 'Calorie Counting'),
         2: (Day02, 'Rock Paper Scissors'),
-    #     3: (Day03, 'Day03'),
+        3: (Day03, 'Rucksack Reorganization'),
     #     4: (Day04, 'Day04'),
     #     5: (Day05, 'Day05'),
     #     6: (Day06, 'Day06'),
