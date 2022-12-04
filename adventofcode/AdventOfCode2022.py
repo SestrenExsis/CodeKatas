@@ -77,7 +77,11 @@ class Day04: # Camp Cleanup
         return result
     
     def solve2(self, assignments):
-        result = len(assignments)
+        overlap_count = 0
+        for (a1, a2), (b1, b2) in assignments:
+            if len(set(range(a1, a2 + 1)) & set(range(b1, b2 + 1))) > 0:
+                overlap_count += 1
+        result = overlap_count
         return result
     
     def main(self):
