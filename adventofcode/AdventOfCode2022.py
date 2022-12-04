@@ -51,6 +51,45 @@ class Template: # Template
         result = solutions
         return result
 
+class Day04: # Camp Cleanup
+    '''
+    https://adventofcode.com/2022/day/4
+    '''
+    def get_assignments(self, raw_input_lines: List[str]):
+        assignments = []
+        for raw_input_line in raw_input_lines:
+            a, b = raw_input_line.split(',')
+            a1, a2 = tuple(map(int, a.split('-')))
+            b1, b2 = tuple(map(int, b.split('-')))
+            assignments.append(((a1, a2), (b1, b2)))
+        result = assignments
+        return result
+    
+    def solve(self, assignments):
+        containment_count = 0
+        for (a1, a2), (b1, b2) in assignments:
+            if (
+                (a1 <= b1 and a2 >= b2) or
+                (b1 <= a1 and b2 >= a2)
+            ):
+                containment_count += 1
+        result = containment_count
+        return result
+    
+    def solve2(self, assignments):
+        result = len(assignments)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        assignments = self.get_assignments(raw_input_lines)
+        solutions = (
+            self.solve(assignments),
+            self.solve2(assignments),
+            )
+        result = solutions
+        return result
+
 class Day03: # Rucksack Reorganization
     '''
     https://adventofcode.com/2022/day/3
@@ -256,13 +295,13 @@ class Day01: # Calorie Counting
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2022.py 3 < inputs/2022day03.in
+    python AdventOfCode2022.py 4 < inputs/2022day04.in
     '''
     solvers = {
         1: (Day01, 'Calorie Counting'),
         2: (Day02, 'Rock Paper Scissors'),
         3: (Day03, 'Rucksack Reorganization'),
-    #     4: (Day04, 'Day04'),
+        4: (Day04, 'Camp Cleanup'),
     #     5: (Day05, 'Day05'),
     #     6: (Day06, 'Day06'),
     #     7: (Day07, 'Day07'),
