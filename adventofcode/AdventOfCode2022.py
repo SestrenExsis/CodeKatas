@@ -51,6 +51,65 @@ class Template: # Template
         result = solutions
         return result
 
+class Day05: # Supply Stacks
+    '''
+    https://adventofcode.com/2022/day/5
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        stack_height = 0
+        while '[' in raw_input_lines[stack_height]:
+            stack_height += 1
+        stack_count = max(map(int, raw_input_lines[stack_height].split()))
+        stacks = []
+        for stack_id in range(stack_count):
+            col = 1 + 4 * stack_id
+            stacks.append('')
+            for row in reversed(range(stack_height)):
+                cell = raw_input_lines[row][col]
+                if cell != ' ':
+                    stacks[-1] += raw_input_lines[row][col]
+        instructions = []
+        for raw_input_line in raw_input_lines[stack_height + 2:]:
+            parts = raw_input_line.split(' ')
+            crate_count = int(parts[1])
+            source_column = int(parts[3]) - 1
+            target_column = int(parts[5]) - 1
+            instruction = (crate_count, source_column, target_column)
+            instructions.append(instruction)
+        result = (stacks, instructions)
+        return result
+    
+    def solve(self, stacks, instructions):
+        for (crate_count, source_column, target_column) in instructions:
+            for _ in range(crate_count):
+                crate = stacks[source_column][-1]
+                stacks[source_column] = stacks[source_column][:-1]
+                stacks[target_column] += crate
+        result = ''
+        for stack in stacks:
+            result += stack[-1]
+        return result
+    
+    def solve2(self, stacks, instructions):
+        for (crate_count, source_column, target_column) in instructions:
+            crates = stacks[source_column][-crate_count:]
+            stacks[source_column] = stacks[source_column][:-crate_count]
+            stacks[target_column] += crates
+        result = ''
+        for stack in stacks:
+            result += stack[-1]
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        stacks, instructions = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(stacks[:], instructions),
+            self.solve2(stacks[:], instructions),
+            )
+        result = solutions
+        return result
+
 class Day04: # Camp Cleanup
     '''
     https://adventofcode.com/2022/day/4
@@ -299,14 +358,14 @@ class Day01: # Calorie Counting
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2022.py 4 < inputs/2022day04.in
+    python AdventOfCode2022.py 5 < inputs/2022day05.in
     '''
     solvers = {
         1: (Day01, 'Calorie Counting'),
         2: (Day02, 'Rock Paper Scissors'),
         3: (Day03, 'Rucksack Reorganization'),
         4: (Day04, 'Camp Cleanup'),
-    #     5: (Day05, 'Day05'),
+        5: (Day05, 'Supply Stacks'),
     #     6: (Day06, 'Day06'),
     #     7: (Day07, 'Day07'),
     #     8: (Day08, 'Day08'),
