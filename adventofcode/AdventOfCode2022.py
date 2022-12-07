@@ -51,6 +51,42 @@ class Template: # Template
         result = solutions
         return result
 
+class Day06: # Tuning Trouble
+    '''
+    https://adventofcode.com/2022/day/6
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = raw_input_lines[0]
+        return result
+    
+    def solve(self, signal):
+        stream = iter(signal)
+        result = ''
+        chars = collections.deque()
+        while len(chars) < 4:
+            chars.append(next(stream))
+        start = 4
+        while len(set(chars)) < 4:
+            chars.popleft()
+            chars.append(next(stream))
+            start += 1
+        result = start
+        return result
+    
+    def solve2(self, signal):
+        result = len(signal)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        signal = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(signal),
+            self.solve2(signal),
+            )
+        result = solutions
+        return result
+
 class Day05: # Supply Stacks
     '''
     https://adventofcode.com/2022/day/5
@@ -366,7 +402,7 @@ if __name__ == '__main__':
         3: (Day03, 'Rucksack Reorganization'),
         4: (Day04, 'Camp Cleanup'),
         5: (Day05, 'Supply Stacks'),
-    #     6: (Day06, 'Day06'),
+        6: (Day06, 'Tuning Trouble'),
     #     7: (Day07, 'Day07'),
     #     8: (Day08, 'Day08'),
     #     9: (Day09, 'Day09'),
