@@ -74,7 +74,17 @@ class Day06: # Tuning Trouble
         return result
     
     def solve2(self, signal):
-        result = len(signal)
+        stream = iter(signal)
+        result = ''
+        chars = collections.deque()
+        while len(chars) < 14:
+            chars.append(next(stream))
+        start = 14
+        while len(set(chars)) < 14:
+            chars.popleft()
+            chars.append(next(stream))
+            start += 1
+        result = start
         return result
     
     def main(self):
