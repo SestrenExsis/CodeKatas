@@ -103,7 +103,6 @@ class Day08: # Treetop Tree House
         rows = len(trees)
         cols = len(trees[0])
         scenic_scores = {}
-        visible_trees = set()
         for row in range(rows):
             for col in range(cols):
                 viewing_height = int(trees[row][col])
