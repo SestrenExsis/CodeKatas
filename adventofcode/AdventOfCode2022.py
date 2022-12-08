@@ -52,6 +52,104 @@ class Template: # Template
         result = solutions
         return result
 
+class Day08: # Treetop Tree House
+    '''
+    https://adventofcode.com/2022/day/8
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, trees):
+        rows = len(trees)
+        cols = len(trees[0])
+        visible_trees = set()
+        for row in range(rows):
+            # Look from the left
+            tallest_tree_from_left = -1
+            for col in range(cols):
+                tree = int(trees[row][col])
+                if tree > tallest_tree_from_left:
+                    visible_trees.add((row, col))
+                    tallest_tree_from_left = tree
+            # Look from the right
+            tallest_tree_from_right = -1
+            for col in reversed(range(cols)):
+                tree = int(trees[row][col])
+                if tree > tallest_tree_from_right:
+                    visible_trees.add((row, col))
+                    tallest_tree_from_right = tree
+        for col in range(cols):
+            # Look from the top
+            tallest_tree_from_top = -1
+            for row in range(rows):
+                tree = int(trees[row][col])
+                if tree > tallest_tree_from_top:
+                    visible_trees.add((row, col))
+                    tallest_tree_from_top = tree
+            # Look from the bottom
+            tallest_tree_from_bottom = -1
+            for row in reversed(range(rows)):
+                tree = int(trees[row][col])
+                if tree > tallest_tree_from_bottom:
+                    visible_trees.add((row, col))
+                    tallest_tree_from_bottom = tree
+        result = len(visible_trees)
+        return result
+    
+    def solve2(self, trees):
+        rows = len(trees)
+        cols = len(trees[0])
+        scenic_scores = {}
+        visible_trees = set()
+        for row in range(rows):
+            for col in range(cols):
+                viewing_height = int(trees[row][col])
+                # Look left
+                left_tree_count = 0
+                for c in reversed(range(col)):
+                    left_tree_count += 1
+                    tree = int(trees[row][c])
+                    if tree >= viewing_height:
+                        break
+                # Look right
+                right_tree_count = 0
+                for c in range(col + 1, cols):
+                    right_tree_count += 1
+                    tree = int(trees[row][c])
+                    if tree >= viewing_height:
+                        break
+                # Look up
+                up_tree_count = 0
+                for r in reversed(range(row)):
+                    up_tree_count += 1
+                    tree = int(trees[r][col])
+                    if tree >= viewing_height:
+                        break
+                # Look down
+                down_tree_count = 0
+                for r in range(row + 1, rows):
+                    down_tree_count += 1
+                    tree = int(trees[r][col])
+                    if tree >= viewing_height:
+                        break
+                scenic_score = left_tree_count * right_tree_count * up_tree_count * down_tree_count
+                scenic_scores[(row, col)] = scenic_score
+        result = max(scenic_scores.values())
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day07: # No Space Left On Device
     '''
     https://adventofcode.com/2022/day/7
@@ -489,7 +587,7 @@ class Day01: # Calorie Counting
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2022.py 5 < inputs/2022day05.in
+    python AdventOfCode2022.py 8 < inputs/2022day08.in
     '''
     solvers = {
         1: (Day01, 'Calorie Counting'),
@@ -499,7 +597,7 @@ if __name__ == '__main__':
         5: (Day05, 'Supply Stacks'),
         6: (Day06, 'Tuning Trouble'),
         7: (Day07, 'No Space Left On Device'),
-    #     8: (Day08, 'Day08'),
+        8: (Day08, 'Treetop Tree House'),
     #     9: (Day09, 'Day09'),
     #    10: (Day10, 'Day10'),
     #    11: (Day11, 'Day11'),
