@@ -116,7 +116,14 @@ class Day07: # No Space Left On Device
         return result
     
     def solve2(self, sizes):
-        result = len(sizes)
+        total_disk_space = 70_000_000
+        available_disk_space = total_disk_space - sizes['/']
+        disk_space_needed = max(0, 30_000_000 - available_disk_space)
+        result = min(
+            size for
+            _, size in sizes.items() if
+            size >= disk_space_needed
+        )
         return result
     
     def main(self):
