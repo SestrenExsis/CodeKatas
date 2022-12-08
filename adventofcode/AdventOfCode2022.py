@@ -6,6 +6,7 @@ Created on 2022-11-30
 import argparse
 import collections
 import copy
+import functools
 import heapq
 from typing import Dict, List, Set, Tuple
     
@@ -35,6 +36,83 @@ class Template: # Template
     
     def solve(self, parsed_input):
         result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day07: # No Space Left On Device
+    '''
+    https://adventofcode.com/2022/day/7
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        working_dir = '/'
+        lists = {}
+        memo = {}
+        cursor = 0
+        while cursor < len(parsed_input):
+            if parsed_input[cursor][0] != '$':
+                raise Exception('Invalid row. Row must start with $')
+            command = tuple(parsed_input[cursor][2:].split(' '))
+            if command[0] == 'cd':
+                if command[1] == '/':
+                    working_dir = '/'
+                elif command[1] == '..':
+                    if working_dir != '/':
+                        working_dir = '/'.join(working_dir.split('/')[:-2]) + '/'
+                else:
+                    working_dir += command[1] + '/'
+                cursor += 1
+            elif command[0] == 'ls':
+                cursor += 1
+                dirs = []
+                files = {}
+                while (
+                    cursor < len(parsed_input) and
+                    parsed_input[cursor][0] != '$'
+                ):
+                    parts = parsed_input[cursor].split(' ')
+                    if parts[0] == 'dir':
+                        dirs.append(parts[1])
+                    else:
+                        file = parts[1]
+                        filesize = int(parts[0])
+                        files[file] = int(parts[0])
+                        memo[working_dir + file] = filesize
+                    cursor += 1
+                lists[working_dir] = (dirs, files)
+        def sizeof(path: str):
+            if path not in memo:
+                total_size = 0
+                (dirs, files) = lists[path]
+                for file in files:
+                    total_size += memo[path + file]
+                for dir in dirs:
+                    total_size += sizeof(path + dir + '/')
+                memo[path] = total_size
+            return memo[path]
+        result = sum(
+            sizeof(path) for
+            path in lists if
+            sizeof(path) <= 100_000
+        )
         return result
     
     def solve2(self, parsed_input):
@@ -413,7 +491,7 @@ if __name__ == '__main__':
         4: (Day04, 'Camp Cleanup'),
         5: (Day05, 'Supply Stacks'),
         6: (Day06, 'Tuning Trouble'),
-    #     7: (Day07, 'Day07'),
+        7: (Day07, 'No Space Left On Device'),
     #     8: (Day08, 'Day08'),
     #     9: (Day09, 'Day09'),
     #    10: (Day10, 'Day10'),
