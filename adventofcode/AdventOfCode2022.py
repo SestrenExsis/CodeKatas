@@ -56,21 +56,15 @@ class Day07: # No Space Left On Device
     '''
     https://adventofcode.com/2022/day/7
     '''
-    def get_parsed_input(self, raw_input_lines: List[str]):
-        result = []
-        for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
-        return result
-    
-    def solve(self, parsed_input):
+    def get_sizes(self, raw_input_lines: List[str]):
         working_dir = '/'
         lists = {}
-        memo = {}
+        sizes = {}
         cursor = 0
-        while cursor < len(parsed_input):
-            if parsed_input[cursor][0] != '$':
+        while cursor < len(raw_input_lines):
+            if raw_input_lines[cursor][0] != '$':
                 raise Exception('Invalid row. Row must start with $')
-            command = tuple(parsed_input[cursor][2:].split(' '))
+            command = tuple(raw_input_lines[cursor][2:].split(' '))
             if command[0] == 'cd':
                 if command[1] == '/':
                     working_dir = '/'
@@ -85,46 +79,52 @@ class Day07: # No Space Left On Device
                 dirs = []
                 files = {}
                 while (
-                    cursor < len(parsed_input) and
-                    parsed_input[cursor][0] != '$'
+                    cursor < len(raw_input_lines) and
+                    raw_input_lines[cursor][0] != '$'
                 ):
-                    parts = parsed_input[cursor].split(' ')
+                    parts = raw_input_lines[cursor].split(' ')
                     if parts[0] == 'dir':
                         dirs.append(parts[1])
                     else:
                         file = parts[1]
                         filesize = int(parts[0])
                         files[file] = int(parts[0])
-                        memo[working_dir + file] = filesize
+                        sizes[working_dir + file] = filesize
                     cursor += 1
                 lists[working_dir] = (dirs, files)
         def sizeof(path: str):
-            if path not in memo:
+            if path not in sizes:
                 total_size = 0
                 (dirs, files) = lists[path]
                 for file in files:
-                    total_size += memo[path + file]
+                    total_size += sizes[path + file]
                 for dir in dirs:
                     total_size += sizeof(path + dir + '/')
-                memo[path] = total_size
-            return memo[path]
+                sizes[path] = total_size
+            return sizes[path]
+        for path in lists:
+            sizes[path] = sizeof(path)
+        result = sizes
+        return result
+    
+    def solve(self, sizes):
         result = sum(
-            sizeof(path) for
-            path in lists if
-            sizeof(path) <= 100_000
+            size for
+            path, size in sizes.items() if
+            path[-1] == '/' and size <= 100_000
         )
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, sizes):
+        result = len(sizes)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        sizes = self.get_sizes(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(sizes),
+            self.solve2(sizes),
             )
         result = solutions
         return result
