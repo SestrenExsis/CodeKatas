@@ -52,6 +52,63 @@ class Template: # Template
         result = solutions
         return result
 
+class Day09: # Rope Bridge
+    '''
+    https://adventofcode.com/2022/day/9
+    '''
+    dirs = {
+        'U': (-1,  0),
+        'D': ( 1,  0),
+        'L': ( 0, -1),
+        'R': ( 0,  1),
+    }
+
+    def get_steps(self, raw_input_lines: List[str]):
+        steps = []
+        for raw_input_line in raw_input_lines:
+            dir, count = raw_input_line.split(' ')
+            steps.append((dir, int(count)))
+        result = steps
+        return result
+    
+    def solve(self, steps):
+        tail_visits = set()
+        tail = (0, 0)
+        head = (0, 0)
+        tail_visits.add(tail)
+        for (dir, count) in steps:
+            (drow, dcol) = self.dirs[dir]
+            for _ in range(count):
+                head = (head[0] + drow, head[1] + dcol)
+                rowdiff = abs(head[0] - tail[0])
+                coldiff = abs(head[1] - tail[1])
+                if rowdiff > 1 or coldiff > 1 or sum((rowdiff, coldiff)) > 2:
+                    if head[0] < tail[0]:
+                        tail = (tail[0] - 1, tail[1])
+                    elif head[0] > tail[0]:
+                        tail = (tail[0] + 1, tail[1])
+                    if head[1] < tail[1]:
+                        tail = (tail[0], tail[1] - 1)
+                    elif head[1] > tail[1]:
+                        tail = (tail[0], tail[1] + 1)
+                tail_visits.add(tail)
+        result = len(tail_visits)
+        return result
+    
+    def solve2(self, steps):
+        result = len(steps)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        steps = self.get_steps(raw_input_lines)
+        solutions = (
+            self.solve(steps),
+            self.solve2(steps),
+            )
+        result = solutions
+        return result
+
 class Day08: # Treetop Tree House
     '''
     https://adventofcode.com/2022/day/8
@@ -586,7 +643,7 @@ class Day01: # Calorie Counting
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2022.py 8 < inputs/2022day08.in
+    python AdventOfCode2022.py 9 < inputs/2022day09.in
     '''
     solvers = {
         1: (Day01, 'Calorie Counting'),
@@ -597,7 +654,7 @@ if __name__ == '__main__':
         6: (Day06, 'Tuning Trouble'),
         7: (Day07, 'No Space Left On Device'),
         8: (Day08, 'Treetop Tree House'),
-    #     9: (Day09, 'Day09'),
+        9: (Day09, 'Rope Bridge'),
     #    10: (Day10, 'Day10'),
     #    11: (Day11, 'Day11'),
     #    12: (Day12, 'Day12'),
