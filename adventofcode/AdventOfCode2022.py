@@ -95,9 +95,49 @@ class Day09: # Rope Bridge
         result = len(tail_visits)
         return result
     
-    def solve2(self, steps):
-        result = len(steps)
+    def solve2(self, steps, knot_count: int=10):
+        knots = []
+        for _ in range(knot_count):
+            knots.append((0, 0))
+        head_visits = set()
+        tail_visits = set()
+        tail_visits.add(knots[-1])
+        head_visits.add(knots[0])
+        for (dir, count) in steps:
+            (drow, dcol) = self.dirs[dir]
+            for _ in range(count):
+                knots[0] = (knots[0][0] + drow, knots[0][1] + dcol)
+                head_visits.add(knots[0])
+                for knot_id in range(1, knot_count):
+                    rowdiff = abs(knots[knot_id - 1][0] - knots[knot_id][0])
+                    coldiff = abs(knots[knot_id - 1][1] - knots[knot_id][1])
+                    if rowdiff > 1 or coldiff > 1 or sum((rowdiff, coldiff)) > 2:
+                        if knots[knot_id - 1][0] < knots[knot_id][0]:
+                            knots[knot_id] = (knots[knot_id][0] - 1, knots[knot_id][1])
+                        elif knots[knot_id - 1][0] > knots[knot_id][0]:
+                            knots[knot_id] = (knots[knot_id][0] + 1, knots[knot_id][1])
+                        if knots[knot_id - 1][1] < knots[knot_id][1]:
+                            knots[knot_id] = (knots[knot_id][0], knots[knot_id][1] - 1)
+                        elif knots[knot_id - 1][1] > knots[knot_id][1]:
+                            knots[knot_id] = (knots[knot_id][0], knots[knot_id][1] + 1)
+                tail_visits.add(knots[-1])
+        result = len(tail_visits)
+        # self.visualize(tail_visits)
         return result
+    
+    def visualize(self, visits: set):
+        min_row = min(visit[0] for visit in visits)
+        min_col = min(visit[1] for visit in visits)
+        max_row = max(visit[0] for visit in visits)
+        max_col = max(visit[1] for visit in visits)
+        for row in range(min_row, max_row + 1):
+            row_data = ''
+            for col in range(min_col, max_col + 1):
+                cell = '.'
+                if (row, col) in visits:
+                    cell = '#'
+                row_data += cell
+            print(row_data)
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
