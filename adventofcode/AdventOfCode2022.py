@@ -52,6 +52,56 @@ class Template: # Template
         result = solutions
         return result
 
+class Day10: # Cathode-Ray Tube
+    '''
+    https://adventofcode.com/2022/day/10
+    '''
+    def get_instructions(self, raw_input_lines: List[str]):
+        instructions = []
+        for raw_input_line in raw_input_lines:
+            parts = raw_input_line.split()
+            instruction = tuple(parts)
+            if parts[0] == 'addx':
+                instruction = (parts[0], int(parts[1]))
+            instructions.append(instruction)
+        result = instructions
+        return result
+    
+    def solve(self, instructions):
+        cycles = {}
+        x = 1
+        cycle_count = 1
+        for instruction in instructions:
+            if instruction[0] == 'noop':
+                cycles[cycle_count] = (x, instruction, cycle_count * x)
+                cycle_count += 1
+            if instruction[0] == 'addx':
+                cycles[cycle_count] = (x, instruction, cycle_count * x)
+                cycle_count += 1
+                cycles[cycle_count] = (x, instruction, cycle_count * x)
+                cycle_count += 1
+                x += instruction[1]
+        result = sum(
+            signal_strength for
+            (cycle, (x, instruction, signal_strength)) in cycles.items() if
+            cycle in (20, 60, 100, 140, 180, 220)
+        )
+        return result
+    
+    def solve2(self, instructions):
+        result = len(instructions)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        instructions = self.get_instructions(raw_input_lines)
+        solutions = (
+            self.solve(instructions),
+            self.solve2(instructions),
+            )
+        result = solutions
+        return result
+
 class Day09: # Rope Bridge
     '''
     https://adventofcode.com/2022/day/9
@@ -683,7 +733,7 @@ class Day01: # Calorie Counting
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2022.py 9 < inputs/2022day09.in
+    python AdventOfCode2022.py 10 < inputs/2022day10.in
     '''
     solvers = {
         1: (Day01, 'Calorie Counting'),
@@ -695,7 +745,7 @@ if __name__ == '__main__':
         7: (Day07, 'No Space Left On Device'),
         8: (Day08, 'Treetop Tree House'),
         9: (Day09, 'Rope Bridge'),
-    #    10: (Day10, 'Day10'),
+       10: (Day10, 'Cathode-Ray Tube'),
     #    11: (Day11, 'Day11'),
     #    12: (Day12, 'Day12'),
     #    13: (Day13, 'Day13'),
