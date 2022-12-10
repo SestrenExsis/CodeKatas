@@ -24,6 +24,28 @@ def get_raw_input_lines() -> list:
             break
     return raw_input_lines
 
+class DeviceCPU:
+    def __init__(self, instructions):
+        self.x = 1
+        self.instructions = instructions
+        self.pc = 0
+        self.cycles_remaining = 0
+    
+    def step(self):
+        instruction = self.instructions[self.pc]
+        if instruction[0] == 'noop':
+            # NOOP takes 1 clock cycle to compute
+            self.pc += 1
+        elif instruction[0] == 'addx':
+            # ADDX takes 2 clock cycles to compute
+            if self.cycles_remaining == 0:
+                self.cycles_remaining = 1
+            else:
+                self.cycles_remaining -= 1
+                if self.cycles_remaining < 1:
+                    self.x += instruction[1]
+                    self.pc += 1
+
 class Template: # Template
     '''
     https://adventofcode.com/2022/day/?
@@ -68,22 +90,17 @@ class Day10: # Cathode-Ray Tube
         return result
     
     def solve(self, instructions):
+        cpu = DeviceCPU(instructions)
         cycles = {}
-        x = 1
-        cycle_count = 1
-        for instruction in instructions:
-            if instruction[0] == 'noop':
-                cycles[cycle_count] = (x, instruction, cycle_count * x)
-                cycle_count += 1
-            if instruction[0] == 'addx':
-                cycles[cycle_count] = (x, instruction, cycle_count * x)
-                cycle_count += 1
-                cycles[cycle_count] = (x, instruction, cycle_count * x)
-                cycle_count += 1
-                x += instruction[1]
+        cycle_id = 1
+        while cpu.pc < len(cpu.instructions):
+            signal_strength = cpu.x * cycle_id
+            cycles[cycle_id] = signal_strength
+            cpu.step()
+            cycle_id += 1
         result = sum(
             signal_strength for
-            (cycle, (x, instruction, signal_strength)) in cycles.items() if
+            (cycle, signal_strength) in cycles.items() if
             cycle in (20, 60, 100, 140, 180, 220)
         )
         return result
