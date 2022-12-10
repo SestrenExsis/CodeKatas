@@ -46,6 +46,35 @@ class DeviceCPU:
                     self.x += instruction[1]
                     self.pc += 1
 
+class DeviceCRT:
+    def __init__(self):
+        self.rows = 6
+        self.cols = 40
+        self.display = [['.'] * self.cols for _ in range(self.rows)]
+        self.pos = (0, 0)
+    
+    def step(self, x):
+        row, col = self.pos
+        col += 1
+        if col >= self.cols:
+            col = 0
+            row += 1
+            if row >= self.rows:
+                row = 0
+        cell = '.'
+        if col in (x - 1, x, x + 1):
+            cell = '#'
+        self.display[row][col] = cell
+        self.pos = (row, col)
+    
+    def get_display(self):
+        display = []
+        for row in range(self.rows):
+            row_data = ''.join(self.display[row])
+            display.append(row_data)
+        result = display
+        return result
+
 class Template: # Template
     '''
     https://adventofcode.com/2022/day/?
@@ -106,7 +135,12 @@ class Day10: # Cathode-Ray Tube
         return result
     
     def solve2(self, instructions):
-        result = len(instructions)
+        cpu = DeviceCPU(instructions)
+        crt = DeviceCRT()
+        while cpu.pc < len(cpu.instructions):
+            cpu.step()
+            crt.step(cpu.x)
+        result = '\n' + '\n'.join(crt.get_display())
         return result
     
     def main(self):
