@@ -103,6 +103,69 @@ class Template: # Template
         result = solutions
         return result
 
+class Day11: # Monkey in the Middle
+    '''
+    https://adventofcode.com/2022/day/11
+    '''
+    def get_monkeys(self, raw_input_lines: List[str]):
+        monkeys = {}
+        index = 0
+        while index < len(raw_input_lines):
+            monkey_id = raw_input_lines[index][-2]
+            items = list(reversed(list(map(int,
+                raw_input_lines[index + 1].split(': ')[1].split(', ')
+            ))))
+            operation = raw_input_lines[index + 2].split(' = ')[1]
+            factor = int(raw_input_lines[index + 3].split(' ')[-1])
+            true_monkey = raw_input_lines[index + 4].split(' ')[-1]
+            false_monkey = raw_input_lines[index + 5].split(' ')[-1]
+            monkey = {
+                'items': collections.deque(items),
+                'operation': operation,
+                'factor': factor,
+                'if_true': true_monkey,
+                'if_false': false_monkey,
+                'inspections': 0,
+            }
+            monkeys[monkey_id] = monkey
+            index += 7
+        result = monkeys
+        return result
+    
+    def solve(self, monkeys):
+        for round_id in range(20):
+            for monkey_id, monkey in monkeys.items():
+                while len(monkey['items']) > 0:
+                    old = monkey['items'].pop()
+                    expression = monkey['operation'].replace('old', str(old))
+                    new = eval(expression) // 3
+                    monkey['inspections'] += 1
+                    target = monkey['if_false']
+                    if new % monkey['factor'] == 0:
+                        target = monkey['if_true']
+                    monkeys[target]['items'].appendleft(new)
+        monkey_business = []
+        for monkey in monkeys.values():
+            heapq.heappush(monkey_business, -1 * monkey['inspections'])
+        print(monkey_business)
+        result = -1 * heapq.heappop(monkey_business)
+        result *= -1 * heapq.heappop(monkey_business)
+        return result
+    
+    def solve2(self, monkeys):
+        result = len(monkeys)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        monkeys = self.get_monkeys(raw_input_lines)
+        solutions = (
+            self.solve(copy.deepcopy(monkeys)),
+            self.solve2(copy.deepcopy(monkeys)),
+            )
+        result = solutions
+        return result
+
 class Day10: # Cathode-Ray Tube
     '''
     https://adventofcode.com/2022/day/10
@@ -784,7 +847,7 @@ class Day01: # Calorie Counting
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2022.py 10 < inputs/2022day10.in
+    python AdventOfCode2022.py 11 < inputs/2022day11.in
     '''
     solvers = {
         1: (Day01, 'Calorie Counting'),
@@ -797,7 +860,7 @@ if __name__ == '__main__':
         8: (Day08, 'Treetop Tree House'),
         9: (Day09, 'Rope Bridge'),
        10: (Day10, 'Cathode-Ray Tube'),
-    #    11: (Day11, 'Day11'),
+       11: (Day11, 'Monkey in the Middle'),
     #    12: (Day12, 'Day12'),
     #    13: (Day13, 'Day13'),
     #    14: (Day14, 'Day14'),
