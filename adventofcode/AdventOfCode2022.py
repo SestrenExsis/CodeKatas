@@ -147,13 +147,30 @@ class Day11: # Monkey in the Middle
         monkey_business = []
         for monkey in monkeys.values():
             heapq.heappush(monkey_business, -1 * monkey['inspections'])
-        print(monkey_business)
         result = -1 * heapq.heappop(monkey_business)
         result *= -1 * heapq.heappop(monkey_business)
         return result
     
     def solve2(self, monkeys):
-        result = len(monkeys)
+        modulo = 1
+        for monkey in monkeys.values():
+            modulo *= monkey['factor']
+        for round_id in range(10_000):
+            for monkey_id, monkey in monkeys.items():
+                while len(monkey['items']) > 0:
+                    old = monkey['items'].pop()
+                    expression = monkey['operation'].replace('old', str(old))
+                    new = eval(expression) % modulo
+                    monkey['inspections'] += 1
+                    target = monkey['if_false']
+                    if new % monkey['factor'] == 0:
+                        target = monkey['if_true']
+                    monkeys[target]['items'].appendleft(new)
+        monkey_business = []
+        for monkey in monkeys.values():
+            heapq.heappush(monkey_business, -1 * monkey['inspections'])
+        result = -1 * heapq.heappop(monkey_business)
+        result *= -1 * heapq.heappop(monkey_business)
         return result
     
     def main(self):
