@@ -55,16 +55,16 @@ class DeviceCRT:
     
     def step(self, x):
         row, col = self.pos
+        cell = '.'
+        if col in (x - 1, x, x + 1):
+            cell = '#'
+        self.display[row][col] = cell
         col += 1
         if col >= self.cols:
             col = 0
             row += 1
             if row >= self.rows:
                 row = 0
-        cell = '.'
-        if col in (x - 1, x, x + 1):
-            cell = '#'
-        self.display[row][col] = cell
         self.pos = (row, col)
     
     def get_display(self):
@@ -218,8 +218,8 @@ class Day10: # Cathode-Ray Tube
         cpu = DeviceCPU(instructions)
         crt = DeviceCRT()
         while cpu.pc < len(cpu.instructions):
-            cpu.step()
             crt.step(cpu.x)
+            cpu.step()
         result = '\n' + '\n'.join(crt.get_display())
         return result
     
