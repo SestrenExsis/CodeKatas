@@ -103,6 +103,74 @@ class Template: # Template
         result = solutions
         return result
 
+class Day12: # Hill Climbing Algorithm
+    '''
+    https://adventofcode.com/2022/day/12
+    '''
+    def get_map_data(self, raw_input_lines: List[str]):
+        heights = {}
+        start = (0, 0)
+        end = (0, 0)
+        for row, raw_input_line in enumerate(raw_input_lines):
+            for col in range(len(raw_input_line)):
+                if raw_input_line[col] == 'S':
+                    start = (row, col)
+                    height = ord('a') - ord('a')
+                elif raw_input_line[col] == 'E':
+                    end = (row, col)
+                    height = ord('z') - ord('a')
+                else:
+                    height = ord(raw_input_line[col]) - ord('a')
+                heights[(row, col)] = height
+        result = (heights, start, end)
+        return result
+    
+    def solve(self, heights, start, end):
+        min_distance = float('inf')
+        visited = set()
+        work = collections.deque()
+        work.append((start[0], start[1], 0))
+        while len(work) > 0:
+            N = len(work)
+            print(N)
+            for _ in range(N):
+                (row, col, distance) = work.pop()
+                if (row, col) == end:
+                    min_distance = distance
+                    break
+                if (row, col) in visited:
+                    continue
+                visited.add((row, col))
+                for (next_row, next_col) in (
+                    (row + 1, col    ),
+                    (row - 1, col    ),
+                    (row    , col + 1),
+                    (row    , col - 1),
+                ):
+                    if (next_row, next_col) in heights:
+                        height = heights[(row, col)]
+                        next_height = heights[(next_row, next_col)]
+                        if next_height <= height + 1:
+                            work.appendleft((next_row, next_col, distance + 1))
+            if min_distance < float('inf'):
+                break
+        result = min_distance
+        return result
+    
+    def solve2(self, heights, start, end):
+        result = len(heights)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        (heights, start, end) = self.get_map_data(raw_input_lines)
+        solutions = (
+            self.solve(heights, start, end),
+            self.solve2(heights, start, end),
+            )
+        result = solutions
+        return result
+
 class Day11: # Monkey in the Middle
     '''
     https://adventofcode.com/2022/day/11
@@ -878,7 +946,7 @@ if __name__ == '__main__':
         9: (Day09, 'Rope Bridge'),
        10: (Day10, 'Cathode-Ray Tube'),
        11: (Day11, 'Monkey in the Middle'),
-    #    12: (Day12, 'Day12'),
+       12: (Day12, 'Day12'),
     #    13: (Day13, 'Day13'),
     #    14: (Day14, 'Day14'),
     #    15: (Day15, 'Day15'),
