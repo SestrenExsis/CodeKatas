@@ -132,7 +132,6 @@ class Day12: # Hill Climbing Algorithm
         work.append((start[0], start[1], 0))
         while len(work) > 0:
             N = len(work)
-            print(N)
             for _ in range(N):
                 (row, col, distance) = work.pop()
                 if (row, col) == end:
@@ -158,7 +157,34 @@ class Day12: # Hill Climbing Algorithm
         return result
     
     def solve2(self, heights, start, end):
-        result = len(heights)
+        min_distance = float('inf')
+        visited = set()
+        work = collections.deque()
+        work.append((end[0], end[1], 0))
+        while len(work) > 0:
+            N = len(work)
+            for _ in range(N):
+                (row, col, distance) = work.pop()
+                if heights[(row, col)] == 0:
+                    min_distance = distance
+                    break
+                if (row, col) in visited:
+                    continue
+                visited.add((row, col))
+                for (next_row, next_col) in (
+                    (row + 1, col    ),
+                    (row - 1, col    ),
+                    (row    , col + 1),
+                    (row    , col - 1),
+                ):
+                    if (next_row, next_col) in heights:
+                        height = heights[(row, col)]
+                        next_height = heights[(next_row, next_col)]
+                        if next_height >= height - 1:
+                            work.appendleft((next_row, next_col, distance + 1))
+            if min_distance < float('inf'):
+                break
+        result = min_distance
         return result
     
     def main(self):
