@@ -159,9 +159,7 @@ class Day13: # Distress Signal
         return result
     
     def solve2(self, packets):
-        def comparator(left, right):
-            return self.compare(left, right)
-        packets.sort(key=functools.cmp_to_key(comparator))
+        packets.sort(key=functools.cmp_to_key(self.compare))
         divider_ids = []
         for packet_id, packet in enumerate(packets, start=1):
             if packet in ([[2]], [[6]]):
