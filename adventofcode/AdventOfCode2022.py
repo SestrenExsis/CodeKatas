@@ -103,6 +103,88 @@ class Template: # Template
         result = solutions
         return result
 
+class Day13: # Distress Signal
+    '''
+    https://adventofcode.com/2022/day/13
+    '''
+    def get_packet_pairs(self, raw_input_lines: List[str]):
+        packet_pairs = {}
+        index = 0
+        while index < len(raw_input_lines):
+            left = eval(raw_input_lines[index])
+            right = eval(raw_input_lines[index + 1])
+            packet_pair = (left, right)
+            packet_pairs[len(packet_pairs) + 1] = packet_pair
+            index += 3
+        result = packet_pairs
+        return result
+    
+    def compare(self, left, right):
+        result = 0
+        if type(left) == int and type(right) == int:
+            if left < right:
+                result = -1
+            elif left > right:
+                result = 1
+        elif type(left) == list and type(right) == list:
+            N = min(len(left), len(right))
+            comparison = 0
+            for i in range(N):
+                comparison = self.compare(left[i], right[i])
+                if comparison < 0:
+                    result = -1
+                    break
+                elif comparison > 0:
+                    result = 1
+                    break
+            if comparison == 0:
+                if len(left) < len(right):
+                    result = -1
+                elif len(left) > len(right):
+                    result = 1
+        else: # Assume one is a list and the other is an int
+            if type(left) == int:
+                result = self.compare([left], right)
+            elif type(right) == int:
+                result = self.compare(left, [right])
+        return result
+    
+    def solve(self, packet_pairs):
+        ordered_packets = set()
+        for (pair_id, (left, right)) in packet_pairs.items():
+            comparison = self.compare(left, right)
+            if comparison < 0:
+                ordered_packets.add(pair_id)
+        result = sum(ordered_packets)
+        return result
+    
+    def solve2(self, packets):
+        def comparator(left, right):
+            return self.compare(left, right)
+        packets.sort(key=functools.cmp_to_key(comparator))
+        divider_ids = []
+        for packet_id, packet in enumerate(packets, start=1):
+            if packet in ([[2]], [[6]]):
+                divider_ids.append(packet_id)
+        result = divider_ids[0] * divider_ids[1]
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        packet_pairs = self.get_packet_pairs(raw_input_lines)
+        packets = []
+        for (left, right) in packet_pairs.values():
+            packets.append(left)
+            packets.append(right)
+        packets.append([[2]])
+        packets.append([[6]])
+        solutions = (
+            self.solve(copy.deepcopy(packet_pairs)),
+            self.solve2(packets),
+            )
+        result = solutions
+        return result
+
 class Day12: # Hill Climbing Algorithm
     '''
     https://adventofcode.com/2022/day/12
@@ -958,7 +1040,7 @@ class Day01: # Calorie Counting
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2022.py 11 < inputs/2022day11.in
+    python AdventOfCode2022.py 13 < inputs/2022day13.in
     '''
     solvers = {
         1: (Day01, 'Calorie Counting'),
@@ -972,8 +1054,8 @@ if __name__ == '__main__':
         9: (Day09, 'Rope Bridge'),
        10: (Day10, 'Cathode-Ray Tube'),
        11: (Day11, 'Monkey in the Middle'),
-       12: (Day12, 'Day12'),
-    #    13: (Day13, 'Day13'),
+       12: (Day12, 'Hill Climbing Algorithm'),
+       13: (Day13, 'Distress Signal'),
     #    14: (Day14, 'Day14'),
     #    15: (Day15, 'Day15'),
     #    16: (Day16, 'Day16'),
