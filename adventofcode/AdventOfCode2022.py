@@ -103,6 +103,86 @@ class Template: # Template
         result = solutions
         return result
 
+class Day14: # Regolith Reservoir
+    '''
+    https://adventofcode.com/2022/day/14
+    '''
+    def get_material(self, raw_input_lines: List[str]):
+        material = {}
+        for raw_input_line in raw_input_lines:
+            raw_paths = raw_input_line.split(' -> ')
+            prev_path = tuple(map(int, raw_paths[0].split(',')))
+            for raw_path in raw_paths[1:]:
+                curr_path = tuple(map(int, raw_path.split(',')))
+                diff = curr_path[0] - prev_path[0]
+                if diff == 0:
+                    x = curr_path[0]
+                    yy = (prev_path[1], curr_path[1])
+                    for y in range(min(yy), max(yy) + 1):
+                        material[(x, y)] = '#'
+                else:
+                    y = curr_path[1]
+                    xx = (prev_path[0], curr_path[0])
+                    for x in range(min(xx), max(xx) + 1):
+                        material[(x, y)] = '#'
+                prev_path = curr_path
+        result = material
+        return result
+    
+    def solve(self, material):
+        max_y = max(y for (_, y) in material.keys())
+        while True:
+            (x, y) = (500, 0)
+            while True:
+                if (x, y + 1) not in material.keys():
+                    y += 1
+                elif (x - 1, y + 1) not in material.keys():
+                    x -= 1
+                    y += 1
+                elif (x + 1, y + 1) not in material.keys():
+                    x += 1
+                    y += 1
+                else:
+                    material[(x, y)] = 'o'
+                    break
+                if y > max_y:
+                    break
+            if y > max_y:
+                break
+        result = sum(1 for v in material.values() if v == 'o')
+        return result
+    
+    def solve2(self, material):
+        floor = 2 + max(y for (_, y) in material.keys())
+        while True:
+            (x, y) = (500, 0)
+            while True:
+                if (x, y + 1) not in material.keys() and y + 1 < floor:
+                    y += 1
+                elif (x - 1, y + 1) not in material.keys() and y + 1 < floor:
+                    x -= 1
+                    y += 1
+                elif (x + 1, y + 1) not in material.keys() and y + 1 < floor:
+                    x += 1
+                    y += 1
+                else:
+                    material[(x, y)] = 'o'
+                    break
+            if (x, y) == (500, 0):
+                break
+        result = sum(1 for v in material.values() if v == 'o')
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        material = self.get_material(raw_input_lines)
+        solutions = (
+            self.solve(copy.deepcopy(material)),
+            self.solve2(copy.deepcopy(material)),
+            )
+        result = solutions
+        return result
+
 class Day13: # Distress Signal
     '''
     https://adventofcode.com/2022/day/13
@@ -1054,7 +1134,7 @@ if __name__ == '__main__':
        11: (Day11, 'Monkey in the Middle'),
        12: (Day12, 'Hill Climbing Algorithm'),
        13: (Day13, 'Distress Signal'),
-    #    14: (Day14, 'Day14'),
+       14: (Day14, 'Regolith Reservoir'),
     #    15: (Day15, 'Day15'),
     #    16: (Day16, 'Day16'),
     #    17: (Day17, 'Day17'),
