@@ -103,6 +103,50 @@ class Template: # Template
         result = solutions
         return result
 
+class Day15: # Beacon Exclusion Zone
+    '''
+    https://adventofcode.com/2022/day/15
+    '''
+    def get_sensors(self, raw_input_lines: List[str]):
+        sensors = {}
+        for raw_input_line in raw_input_lines:
+            parts = raw_input_line.split(': ')
+            part0 = parts[0].split(' ')
+            sensor_x = int(part0[2][2:-1])
+            sensor_y = int(part0[3][2:])
+            part1 = parts[1].split(' ')
+            beacon_x = int(part1[4][2:-1])
+            beacon_y = int(part1[5][2:])
+            sensors[(sensor_x, sensor_y)] = (beacon_x, beacon_y)
+        result = sensors
+        return result
+    
+    def solve(self, sensors, target_y: int=2_000_000):
+        positions = set()
+        for (sx, sy), (bx, by) in sensors.items():
+            distance = abs(bx - sx) + abs(by - sy)
+            span = distance - abs(sy - target_y)
+            for offset in range(span + 1):
+                positions.add((sx + offset, target_y))
+                positions.add((sx - offset, target_y))
+            positions.discard((bx, by))
+        result = len(positions)
+        return result
+    
+    def solve2(self, sensors):
+        result = len(sensors)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        sensors = self.get_sensors(raw_input_lines)
+        solutions = (
+            self.solve(sensors),
+            self.solve2(sensors),
+            )
+        result = solutions
+        return result
+
 class Day14: # Regolith Reservoir
     '''
     https://adventofcode.com/2022/day/14
@@ -1118,7 +1162,7 @@ class Day01: # Calorie Counting
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2022.py 13 < inputs/2022day13.in
+    python AdventOfCode2022.py 15 < inputs/2022day15.in
     '''
     solvers = {
         1: (Day01, 'Calorie Counting'),
@@ -1135,7 +1179,7 @@ if __name__ == '__main__':
        12: (Day12, 'Hill Climbing Algorithm'),
        13: (Day13, 'Distress Signal'),
        14: (Day14, 'Regolith Reservoir'),
-    #    15: (Day15, 'Day15'),
+       15: (Day15, 'Beacon Exclusion Zone'),
     #    16: (Day16, 'Day16'),
     #    17: (Day17, 'Day17'),
     #    18: (Day18, 'Day18'),
