@@ -133,8 +133,63 @@ class Day15: # Beacon Exclusion Zone
         result = len(positions)
         return result
     
-    def solve2(self, sensors):
-        result = len(sensors)
+    def solve2_slowly(self, sensors, max_coord: int=4_000_000):
+        candidates = set()
+        for x in range(max_coord + 1):
+            print('x:', x)
+            for y in range(max_coord + 1):
+                candidate = True
+                for (sx, sy), (bx, by) in sensors.items():
+                    nearest_beacon_distance = abs(bx - sx) + abs(by - sy)
+                    distance = abs(sx - x) + abs(sy - y)
+                    if distance <= nearest_beacon_distance:
+                        candidate = False
+                        break
+                if candidate:
+                    candidates.add((x, y))
+                    break
+            if len(candidates) > 0:
+                break
+        coord = candidates.pop()
+        tuning_frequency = 4_000_000 * coord[0] + coord[1]
+        result = tuning_frequency
+        return result
+    
+    def solve2(self, sensors, max_coord: int=4_000_000):
+        coord = None
+        # Each sensor forms a perimeter of candidate coordinates
+        sensors_list = []
+        for (sx1, sy1), (bx1, by1) in sensors.items():
+            distance = 1 + abs(bx1 - sx1) + abs(by1 - sy1)
+            sensors_list.append((sx1, sy1, distance))
+        for i in range(len(sensors_list)):
+            candidates = set()
+            (sx1, sy1, distance1) = sensors_list[i]
+            for j in range(i + 1, len(sensors_list)):
+                (sx2, sy2, distance2) = sensors_list[j]
+                for y in range(max_coord + 1):
+                    span = distance1 - abs(sy1 - y)
+                    if span < 0:
+                        continue
+                    for x in (sx1 - span, sx1 + span):
+                        d = abs(x - sx2) + abs(y - sy2)
+                        if 0 <= x <= max_coord and d == distance2:
+                            candidates.add((x, y))
+            for (x, y) in candidates:
+                candidate_ind = True
+                for (sx, sy), (bx, by) in sensors.items():
+                    nearest_beacon_distance = abs(bx - sx) + abs(by - sy)
+                    distance = abs(sx - x) + abs(sy - y)
+                    if distance <= nearest_beacon_distance:
+                        candidate_ind = False
+                        break
+                if candidate_ind:
+                    coord = (x, y)
+                    break
+            if coord is not None:
+                break
+        tuning_frequency = 4_000_000 * coord[0] + coord[1]
+        result = tuning_frequency
         return result
     
     def main(self):
