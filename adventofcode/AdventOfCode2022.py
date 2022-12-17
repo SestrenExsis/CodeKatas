@@ -103,6 +103,93 @@ class Template: # Template
         result = solutions
         return result
 
+class Day16: # Proboscidea Volcanium
+    '''
+    https://adventofcode.com/2022/day/16
+    '''
+    def get_valves(self, raw_input_lines: List[str]):
+        valves = {}
+        for raw_input_line in raw_input_lines:
+            a, b = raw_input_line.split('; ')
+            c, d = a.split('=')
+            parts = c.split(' ')
+            valve_id = parts[1]
+            flow_rate = int(d)
+            if b[:7] == 'tunnels':
+                b = b[23:]
+            else:
+                b = b[22:]
+            tunnels = set(b.split(', '))
+            bit_mask = 2 ** len(valves)
+            valve = {
+                'flow_rate': flow_rate,
+                'tunnels': tunnels,
+                'bit_mask': bit_mask,
+            }
+            valves[valve_id] = valve
+        result = valves
+        return result
+    
+    def solve(self, valves, max_time: int=30):
+        # Many of the valves have flow rate of 0, so maybe ignore them
+        # Simplify the cave structure first
+        # time is defined as minutes elapsed
+        # score is total pressure released by the final time
+        # valve_id is the current valve
+        # valves_open is a 64-bit mask
+        max_score = 0
+        work = [(0, 0, 'AA', 0)]
+        # (time, score, valve_id, valves_open)
+        seen = {}
+        # (valve_id, valves_open): (score, time_left)
+        while len(work) > 0:
+            (time, score, valve_id, valves_open) = work.pop()
+            if score > max_score:
+                max_score = score
+            if time >= max_time:
+                continue
+            valve = valves[valve_id]
+            flow_rate = valve['flow_rate']
+            tunnels = valve['tunnels']
+            bit_mask = valve['bit_mask']
+            for new_valve_id in tunnels:
+                key = (new_valve_id, valves_open)
+                if (
+                    key not in seen or
+                    seen[key] < (score, max_time - (time + 1))
+                ):
+                    seen[key] = (score, max_time - (time + 1))
+                    work.append((time + 1, score, new_valve_id, valves_open))
+            if (
+                valves_open & bit_mask == 0 and
+                flow_rate > 0
+            ):
+                new_score = score + flow_rate * (max_time - (time + 1))
+                new_valves_open = valves_open | bit_mask
+                key = (valve_id, new_valves_open)
+                if (
+                    key not in seen or
+                    seen[key] < (new_score, max_time - (time + 1))
+                ):
+                    seen[key] = (new_score, max_time - (time + 1))
+                    work.append((time + 1, new_score, valve_id, new_valves_open))
+        result = max_score
+        return result
+    
+    def solve2(self, valves):
+        result = len(valves)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        valves = self.get_valves(raw_input_lines)
+        solutions = (
+            self.solve(valves),
+            self.solve2(valves),
+            )
+        result = solutions
+        return result
+
 class Day15: # Beacon Exclusion Zone
     '''
     https://adventofcode.com/2022/day/15
@@ -1235,7 +1322,7 @@ if __name__ == '__main__':
        13: (Day13, 'Distress Signal'),
        14: (Day14, 'Regolith Reservoir'),
        15: (Day15, 'Beacon Exclusion Zone'),
-    #    16: (Day16, 'Day16'),
+       16: (Day16, 'Proboscidea Volcanium'),
     #    17: (Day17, 'Day17'),
     #    18: (Day18, 'Day18'),
     #    19: (Day19, 'Day19'),
