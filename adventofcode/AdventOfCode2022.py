@@ -8,6 +8,7 @@ import collections
 import copy
 import functools
 import heapq
+import random
 from typing import Dict, List, Set, Tuple
     
 def get_raw_input_lines() -> list:
@@ -120,7 +121,12 @@ class Day16: # Proboscidea Volcanium
             else:
                 b = b[22:]
             tunnels = set(b.split(', '))
-            bit_mask = 2 ** len(valves)
+            bit_mask = 0
+            if flow_rate > 0:
+                bit_mask = 2 ** sum(
+                    1 for v in valves.values() if
+                    v['flow_rate'] > 0
+                )
             valve = {
                 'flow_rate': flow_rate,
                 'tunnels': tunnels,
@@ -131,53 +137,89 @@ class Day16: # Proboscidea Volcanium
         return result
     
     def solve(self, valves, max_time: int=30):
-        # Many of the valves have flow rate of 0, so maybe ignore them
-        # Simplify the cave structure first
+        # Many of the valves have flow rate of 0, so ignore them
         # time is defined as minutes elapsed
         # score is total pressure released by the final time
         # valve_id is the current valve
         # valves_open is a 64-bit mask
         max_score = 0
         work = [(0, 0, 'AA', 0)]
-        # (time, score, valve_id, valves_open)
+        # (time, score, pos_a, valves_open)
         seen = {}
-        # (valve_id, valves_open): (score, time_left)
+        # (pos_a, valves_open): (score, time_left)
         while len(work) > 0:
-            (time, score, valve_id, valves_open) = work.pop()
+            (time, score, pos_a, valves_open) = work.pop()
             if score > max_score:
                 max_score = score
             if time >= max_time:
                 continue
-            valve = valves[valve_id]
-            flow_rate = valve['flow_rate']
-            tunnels = valve['tunnels']
-            bit_mask = valve['bit_mask']
-            for new_valve_id in tunnels:
-                key = (new_valve_id, valves_open)
-                if (
-                    key not in seen or
-                    seen[key] < (score, max_time - (time + 1))
-                ):
-                    seen[key] = (score, max_time - (time + 1))
-                    work.append((time + 1, score, new_valve_id, valves_open))
-            if (
-                valves_open & bit_mask == 0 and
-                flow_rate > 0
-            ):
-                new_score = score + flow_rate * (max_time - (time + 1))
-                new_valves_open = valves_open | bit_mask
-                key = (valve_id, new_valves_open)
+            valve_a = valves[pos_a]
+            choices_a = {pos_a} | valve_a['tunnels']
+            for new_pos_a in choices_a:
+                if (new_pos_a == pos_a and ((valve_a['flow_rate'] == 0) or ((valves_open & valve_a['bit_mask']) > 0))):
+                    continue
+                new_valves_open = valves_open
+                new_score = score
+                if new_pos_a == pos_a:
+                    new_valves_open |= valve_a['bit_mask']
+                    new_score += valve_a['flow_rate'] * (max_time - (time + 1))
+                key = (new_pos_a, new_valves_open)
                 if (
                     key not in seen or
                     seen[key] < (new_score, max_time - (time + 1))
                 ):
                     seen[key] = (new_score, max_time - (time + 1))
-                    work.append((time + 1, new_score, valve_id, new_valves_open))
+                    work.append((time + 1, new_score, new_pos_a, new_valves_open))
         result = max_score
         return result
     
-    def solve2(self, valves):
-        result = len(valves)
+    def solve2(self, valves, max_time: int=26):
+        # Many of the valves have flow rate of 0, so ignore them
+        # time is defined as minutes elapsed
+        # score is total pressure released by the final time
+        # valve_id is the current valve
+        # valves_open is a 64-bit mask
+        max_score = 0
+        work = [(0, 0, 'AA', 'AA', 0)]
+        # (time, score, pos_a, pos_b, valves_open)
+        seen = {}
+        # (pos_a, pos_b, valves_open): (score, time_left)
+        while len(work) > 0:
+            (time, score, pos_a, pos_b, valves_open) = work.pop()
+            if random.random() < 0.00001:
+                print(max_score, len(work), len(seen), (time, score, pos_a, pos_b, valves_open))
+            if score > max_score:
+                max_score = score
+            if time >= max_time:
+                continue
+            valve_a = valves[pos_a]
+            valve_b = valves[pos_b]
+            choices_a = {pos_a} | valve_a['tunnels']
+            choices_b = {pos_b} | valve_b['tunnels']
+            for new_pos_a in choices_a:
+                for new_pos_b in choices_b:
+                    if (new_pos_a == pos_a and ((valve_a['flow_rate'] == 0) or ((valves_open & valve_a['bit_mask']) > 0))):
+                        continue
+                    if (new_pos_b == pos_b and ((valve_b['flow_rate'] == 0) or ((valves_open & valve_b['bit_mask']) > 0))):
+                        continue
+                    new_valves_open = valves_open
+                    new_score = score
+                    if new_pos_a == pos_a:
+                        assert valves_open & valve_a['bit_mask'] == 0
+                        new_valves_open |= valve_a['bit_mask']
+                        new_score += valve_a['flow_rate'] * (max_time - (time + 1))
+                    if new_pos_b == pos_b:
+                        assert valves_open & valve_b['bit_mask'] == 0
+                        new_valves_open |= valve_b['bit_mask']
+                        new_score += valve_b['flow_rate'] * (max_time - (time + 1))
+                    key = (new_pos_a, new_pos_b, new_valves_open)
+                    if (
+                        key not in seen or
+                        seen[key] < (new_score, max_time - (time + 1))
+                    ):
+                        seen[key] = (new_score, max_time - (time + 1))
+                        work.append((time + 1, new_score, new_pos_a, new_pos_b, new_valves_open))
+        result = max_score
         return result
     
     def main(self):
@@ -1304,7 +1346,7 @@ class Day01: # Calorie Counting
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2022.py 15 < inputs/2022day15.in
+    python AdventOfCode2022.py 16 < inputs/2022day16.in
     '''
     solvers = {
         1: (Day01, 'Calorie Counting'),
