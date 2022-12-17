@@ -77,6 +77,97 @@ class DeviceCRT:
         result = display
         return result
 
+class FallingRockSim:
+    rocks = [
+        ['####'],
+        ['.#.','###','.#.'],
+        ['..#','..#','###'],
+        ['#','#','#','#'],
+        ['##','##'],
+    ]
+
+    def __init__(self, jets: str):
+        self.moves = itertools.cycle(jets)
+        self.rows = 0
+        self.cols = 7
+        self.chamber = set()
+        self.rock_count = 0
+    
+    def get_rock(self, rock_id, left, bottom):
+        rock = set()
+        height = len(self.rocks[rock_id])
+        width = len(self.rocks[rock_id][0])
+        for row in range(height):
+            for col in range(width):
+                if self.rocks[rock_id][row][col] == '#':
+                    rock.add((bottom + height - row - 1, left + col))
+        result = rock
+        return result
+    
+    def collided(self, rock):
+        result = False
+        if len(rock & self.chamber) > 0:
+            # Collides with a settled rock
+            result = True
+        elif min(row for row, _ in rock) < 0:
+            # Collides with the floor
+            result = True
+        elif min(col for _, col in rock) < 0:
+            # Collides with the left wall
+            result = True
+        elif max(col for _, col in rock) >= self.cols:
+            # Collides with the right wall
+            result = True
+        return result
+    
+    def settle_next_rock(self):
+        rock_id = self.rock_count % len(self.rocks)
+        left = 2
+        bottom = self.rows + 3
+        rock = self.get_rock(rock_id, left, bottom)
+        self.rock_count += 1
+        # Move the rock until it settles
+        while True:
+            move = -1 if next(self.moves) == '<' else 1
+            moved_rock = self.get_rock(rock_id, left + move, bottom)
+            if not self.collided(moved_rock):
+                rock = moved_rock
+                left += move
+            falling_rock = self.get_rock(rock_id, left, bottom - 1)
+            if not self.collided(falling_rock):
+                rock = falling_rock
+                bottom -= 1
+            else:
+                self.chamber |= rock
+                break
+        self.rows = 1 + max(row for row, _ in self.chamber)
+    
+    def get_state(self, window_size: int=10_000) -> tuple:
+        state = []
+        top = max(row for (row, _) in self.chamber)
+        bottom = max(0, top - window_size)
+        for row in range(top, bottom, -1):
+            row_state = 0
+            for col in range(self.cols):
+                if (row, col) in self.chamber:
+                    row_state += 2 ** col
+            state.append(row_state)
+        result = tuple(state)
+        return result
+    
+    def show_chamber(self):
+        top = max(row for (row, col) in self.chamber)
+        bottom = min(row for (row, col) in self.chamber)
+        for row in range(top, bottom - 1, -1):
+            row_data = []
+            for col in range(7):
+                cell = '.'
+                if (row, col) in self.chamber:
+                    cell = '#'
+                row_data.append(cell)
+            print('|' + ''.join(row_data) + '|')
+        print('+-------+')
+
 class Template: # Template
     '''
     https://adventofcode.com/2022/day/?
@@ -109,82 +200,48 @@ class Day17: # Pyroclastic Flow
     '''
     https://adventofcode.com/2022/day/17
     '''
-    rocks = [
-        ['####'],
-        ['.#.','###','.#.'],
-        ['..#','..#','###'],
-        ['#','#','#','#'],
-        ['##','##'],
-    ]
 
-    def get_pushes(self, raw_input_lines: List[str]):
-        pushes = raw_input_lines[0]
-        result = pushes
+    def get_jets(self, raw_input_lines: List[str]):
+        jets = raw_input_lines[0]
+        result = jets
         return result
     
-    def get_rock(self, rock_id, left, bottom):
-        rock = set()
-        rows = len(self.rocks[rock_id])
-        cols = len(self.rocks[rock_id][0])
-        for row in range(rows):
-            for col in range(cols):
-                if self.rocks[rock_id][row][col] == '#':
-                    rock.add((bottom + rows - row - 1, left + col))
-        result = rock
+    def solve_slowly(self, jets, max_rock_count: int=2022):
+        sim = FallingRockSim(jets)
+        for _ in range(max_rock_count):
+            sim.settle_next_rock()
+        result = sim.rows
         return result
     
-    def collided(self, rock, chamber, cols):
-        result = False
-        if len(rock & chamber) > 0: # Collides with a settled rock
-            result = True
-        elif min(row for row, _ in rock) < 0: # Collides with the floor
-            result = True
-        elif min(col for _, col in rock) < 0: # Collides with the left wall
-            result = True
-        elif max(col for _, col in rock) >= cols: # Collides with the right wall
-            result = True
-        return result
-    
-    def solve(self, pushes, max_rock_count: int=2022):
-        rock_count = 0
-        rows = 0
-        cols = 7
-        chamber = set()
-        moves = itertools.cycle(pushes)
-        while rock_count < max_rock_count:
-            left = 2
-            bottom = rows + 3
-            rock_id = rock_count % len(self.rocks)
-            rock = self.get_rock(rock_count % len(self.rocks), left, bottom)
-            rock_count += 1
-            # Move the rock until it settles
-            while True:
-                move = -1 if next(moves) == '<' else 1
-                moved_rock = self.get_rock(rock_id, left + move, bottom)
-                if not self.collided(moved_rock, chamber, cols):
-                    rock = moved_rock
-                    left += move
-                falling_rock = self.get_rock(rock_id, left, bottom - 1)
-                if not self.collided(falling_rock, chamber, cols):
-                    rock = falling_rock
-                    bottom -= 1
-                else:
-                    chamber |= rock
-                    break
-            rows = 1 + max(row for row, _ in chamber)
-        result = rows
-        return result
-    
-    def solve_quickly(self, pushes, max_rock_count: int=1_000_000_000_000):
-        result = len(pushes)
+    def solve_quickly(self, jets, max_rock_count: int=1_000_000_000_000, window_size: int=10_000):
+        sim = FallingRockSim(jets)
+        heights = []
+        for _ in range(window_size):
+            sim.settle_next_rock()
+            heights.append(sim.rows)
+        states_seen = set()
+        while True:
+            sim.settle_next_rock()
+            state = sim.get_state(window_size)
+            if state in states_seen:
+                break
+            states_seen.add(state)
+        cycle_size = len(states_seen)
+        assert cycle_size % len(sim.rocks) == 0
+        height_gain_per_cycle = heights[-1] - heights[-cycle_size - 1]
+        cycles_skipped = (max_rock_count - sim.rock_count) // cycle_size
+        rocks_left = max_rock_count - sim.rock_count - cycle_size * cycles_skipped
+        for _ in range(rocks_left):
+            sim.settle_next_rock()
+        result = sim.rows + height_gain_per_cycle * cycles_skipped
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        pushes = self.get_pushes(raw_input_lines)
+        jets = self.get_jets(raw_input_lines)
         solutions = (
-            self.solve(pushes, 2022),
-            self.solve_quickly(pushes, 1_000_000_000_000),
+            self.solve_slowly(jets, 2022),
+            self.solve_quickly(jets, 1_000_000_000_000),
             )
         result = solutions
         return result
