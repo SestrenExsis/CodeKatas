@@ -8,6 +8,7 @@ import collections
 import copy
 import functools
 import heapq
+import itertools
 import random
 from typing import Dict, List, Set, Tuple
     
@@ -100,6 +101,90 @@ class Template: # Template
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day17: # Pyroclastic Flow
+    '''
+    https://adventofcode.com/2022/day/17
+    '''
+    rocks = [
+        ['####'],
+        ['.#.','###','.#.'],
+        ['..#','..#','###'],
+        ['#','#','#','#'],
+        ['##','##'],
+    ]
+
+    def get_pushes(self, raw_input_lines: List[str]):
+        pushes = raw_input_lines[0]
+        result = pushes
+        return result
+    
+    def get_rock(self, rock_id, left, bottom):
+        rock = set()
+        rows = len(self.rocks[rock_id])
+        cols = len(self.rocks[rock_id][0])
+        for row in range(rows):
+            for col in range(cols):
+                if self.rocks[rock_id][row][col] == '#':
+                    rock.add((bottom + rows - row - 1, left + col))
+        result = rock
+        return result
+    
+    def collided(self, rock, chamber, cols):
+        result = False
+        if len(rock & chamber) > 0: # Collides with a settled rock
+            result = True
+        elif min(row for row, _ in rock) < 0: # Collides with the floor
+            result = True
+        elif min(col for _, col in rock) < 0: # Collides with the left wall
+            result = True
+        elif max(col for _, col in rock) >= cols: # Collides with the right wall
+            result = True
+        return result
+    
+    def solve(self, pushes, max_rock_count: int=2022):
+        rock_count = 0
+        rows = 0
+        cols = 7
+        chamber = set()
+        moves = itertools.cycle(pushes)
+        while rock_count < max_rock_count:
+            left = 2
+            bottom = rows + 3
+            rock_id = rock_count % len(self.rocks)
+            rock = self.get_rock(rock_count % len(self.rocks), left, bottom)
+            rock_count += 1
+            # Move the rock until it settles
+            while True:
+                move = -1 if next(moves) == '<' else 1
+                moved_rock = self.get_rock(rock_id, left + move, bottom)
+                if not self.collided(moved_rock, chamber, cols):
+                    rock = moved_rock
+                    left += move
+                falling_rock = self.get_rock(rock_id, left, bottom - 1)
+                if not self.collided(falling_rock, chamber, cols):
+                    rock = falling_rock
+                    bottom -= 1
+                else:
+                    chamber |= rock
+                    break
+            rows = 1 + max(row for row, _ in chamber)
+        result = rows
+        return result
+    
+    def solve_quickly(self, pushes, max_rock_count: int=1_000_000_000_000):
+        result = len(pushes)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        pushes = self.get_pushes(raw_input_lines)
+        solutions = (
+            self.solve(pushes, 2022),
+            self.solve_quickly(pushes, 1_000_000_000_000),
             )
         result = solutions
         return result
@@ -1365,7 +1450,7 @@ if __name__ == '__main__':
        14: (Day14, 'Regolith Reservoir'),
        15: (Day15, 'Beacon Exclusion Zone'),
        16: (Day16, 'Proboscidea Volcanium'),
-    #    17: (Day17, 'Day17'),
+       17: (Day17, 'Pyroclastic Flow'),
     #    18: (Day18, 'Day18'),
     #    19: (Day19, 'Day19'),
     #    20: (Day20, 'Day20'),
