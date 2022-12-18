@@ -155,7 +155,7 @@ class FallingRockSim:
         result = tuple(state)
         return result
     
-    def show_chamber(self):
+    def visualize(self):
         top = max(row for (row, col) in self.chamber)
         bottom = min(row for (row, col) in self.chamber)
         for row in range(top, bottom - 1, -1):
@@ -227,7 +227,51 @@ class Day18: # Boiling Boulders
         return result
     
     def solve2(self, cubes):
-        result = len(cubes)
+        min_x = min(x for (x, y, z) in cubes) - 1
+        max_x = max(x for (x, y, z) in cubes) + 1
+        min_y = min(y for (x, y, z) in cubes) - 1
+        max_y = max(y for (x, y, z) in cubes) + 1
+        min_z = min(z for (x, y, z) in cubes) - 1
+        max_z = max(z for (x, y, z) in cubes) + 1
+        exposed_air = set()
+        work = []
+        for x in range(min_x, max_x + 1):
+            for y in range(min_y, max_y + 1):
+                work.append((x, y, min_z))
+                work.append((x, y, max_z))
+        for x in range(min_x, max_x + 1):
+            for z in range(min_z, max_z + 1):
+                work.append((x, min_y, z))
+                work.append((x, max_y, z))
+        for y in range(min_y, max_y + 1):
+            for z in range(min_z, max_z + 1):
+                work.append((min_x, y, z))
+                work.append((max_x, y, z))
+        exposed_surfaces = set()
+        while len(work) > 0:
+            (x1, y1, z1) = work.pop()
+            if (x1, y1, z1) in cubes:
+                continue
+            exposed_air.add((x1, y1, z1))
+            for (x2, y2, z2) in (
+                (x1 - 1, y1    , z1    ),
+                (x1 + 1, y1    , z1    ),
+                (x1    , y1 - 1, z1    ),
+                (x1    , y1 + 1, z1    ),
+                (x1    , y1    , z1 - 1),
+                (x1    , y1    , z1 + 1),
+            ):
+                if (x2, y2, z2) in cubes:
+                    exposed_surfaces.add(((x2, y2, z2), (x1, y1, z1)))
+                elif (
+                    min_x <= x2 <= max_x and
+                    min_y <= y2 <= max_y and
+                    min_z <= z2 <= max_z and
+                    (x2, y2, z2) not in exposed_air
+                ):
+                    work.append((x2, y2, z2))
+        result = len(exposed_surfaces)
+        # 1980 is too low
         return result
     
     def main(self):
@@ -451,7 +495,6 @@ class Day15: # Beacon Exclusion Zone
     def solve2_slowly(self, sensors, max_coord: int=4_000_000):
         candidates = set()
         for x in range(max_coord + 1):
-            print('x:', x)
             for y in range(max_coord + 1):
                 candidate = True
                 for (sx, sy), (bx, by) in sensors.items():
