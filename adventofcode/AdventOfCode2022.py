@@ -196,6 +196,50 @@ class Template: # Template
         result = solutions
         return result
 
+class Day18: # Boiling Boulders
+    '''
+    https://adventofcode.com/2022/day/18
+    '''
+    def get_cubes(self, raw_input_lines: List[str]):
+        cubes = set()
+        for raw_input_line in raw_input_lines:
+            cube = tuple(map(int, raw_input_line.split(',')))
+            cubes.add(cube)
+        result = cubes
+        return result
+    
+    def solve(self, cubes):
+        exposed_surface_area = 0
+        for (x1, y1, z1) in cubes:
+            surface_area = 6
+            for (x2, y2, z2) in (
+                (x1 - 1, y1    , z1    ),
+                (x1 + 1, y1    , z1    ),
+                (x1    , y1 - 1, z1    ),
+                (x1    , y1 + 1, z1    ),
+                (x1    , y1    , z1 - 1),
+                (x1    , y1    , z1 + 1),
+            ):
+                if (x2, y2, z2) in cubes:
+                    surface_area -= 1
+            exposed_surface_area += surface_area
+        result = exposed_surface_area
+        return result
+    
+    def solve2(self, cubes):
+        result = len(cubes)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        cubes = self.get_cubes(raw_input_lines)
+        solutions = (
+            self.solve(cubes),
+            self.solve2(cubes),
+            )
+        result = solutions
+        return result
+
 class Day17: # Pyroclastic Flow
     '''
     https://adventofcode.com/2022/day/17
@@ -1488,7 +1532,7 @@ class Day01: # Calorie Counting
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2022.py 16 < inputs/2022day16.in
+    python AdventOfCode2022.py 18 < inputs/2022day18.in
     '''
     solvers = {
         1: (Day01, 'Calorie Counting'),
@@ -1508,7 +1552,7 @@ if __name__ == '__main__':
        15: (Day15, 'Beacon Exclusion Zone'),
        16: (Day16, 'Proboscidea Volcanium'),
        17: (Day17, 'Pyroclastic Flow'),
-    #    18: (Day18, 'Day18'),
+       18: (Day18, 'Boiling Boulders'),
     #    19: (Day19, 'Day19'),
     #    20: (Day20, 'Day20'),
     #    21: (Day21, 'Day21'),
