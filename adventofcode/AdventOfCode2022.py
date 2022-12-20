@@ -207,6 +207,15 @@ class Day19: # Not Enough Minerals
     OBSIDIAN = 2
     GEODE = 3
 
+    resource_types = {
+        'ore': ORE,
+        'clay': CLAY,
+        'obsidian': OBSIDIAN,
+        'geode': GEODE,
+    }
+
+    resources = ['ore', 'clay', 'obsidian', 'geode']
+
     def get_blueprints(self, raw_input_lines: List[str]):
         blueprints = {}
         for raw_input_line in raw_input_lines:
@@ -232,9 +241,12 @@ class Day19: # Not Enough Minerals
         result = blueprints
         return result
     
-    def state_to_priority(self, state: tuple) -> tuple:
+    def state_to_priority(self, state: tuple, max_turns) -> tuple:
         (turns, robots, resources) = state
+        turns_left = max_turns - turns
+        final_geode_count = resources[self.GEODE] + turns_left * robots[self.GEODE]
         priority = (
+            -1 * final_geode_count,
             -1 * resources[self.GEODE],
             -1 * robots[self.GEODE],
             -1 * resources[self.OBSIDIAN],
@@ -249,18 +261,18 @@ class Day19: # Not Enough Minerals
         return result
     
     def priority_to_state(self, priority: tuple) -> tuple:
-        turns = priority[8]
+        turns = priority[9]
         robots = (
+            -1 * priority[8], # ORE
+            -1 * priority[6], # CLAY
+            -1 * priority[4], # OBSIDIAN
+            -1 * priority[2], # GEODE
+        )
+        resources = (
             -1 * priority[7], # ORE
             -1 * priority[5], # CLAY
             -1 * priority[3], # OBSIDIAN
             -1 * priority[1], # GEODE
-        )
-        resources = (
-            -1 * priority[6], # ORE
-            -1 * priority[4], # CLAY
-            -1 * priority[2], # OBSIDIAN
-            -1 * priority[0], # GEODE
         )
         result = (turns, robots, resources)
         return result
@@ -271,13 +283,7 @@ class Day19: # Not Enough Minerals
         result = key
         return result
     
-    def get_quality_level(self, blueprint, max_turns: int=24):
-        resource_types = {
-            'ore': self.ORE,
-            'clay': self.CLAY,
-            'obsidian': self.OBSIDIAN,
-            'geode': self.GEODE,
-        }
+    def get_geode_count(self, blueprint, max_turns: int):
         '''
         work = [state_1, state_2, ...]
         state: tuple(turns, robots, resources)
@@ -289,12 +295,12 @@ class Day19: # Not Enough Minerals
         keys = {}
         work = []
         state = (0, (1, 0, 0, 0), (0, 0, 0, 0))
-        heapq.heappush(work, self.state_to_priority(state))
+        heapq.heappush(work, self.state_to_priority(state, max_turns))
         while len(work) > 0:
-            if random.random() < 0.0001:
-                print(max_geode_count, len(work), len(keys))
             priority = heapq.heappop(work)
             state = self.priority_to_state(priority)
+            if random.random() < 0.00001:
+                print(max_geode_count, len(work), len(keys), state)
             (turns, robots, resources) = state
             if turns >= max_turns:
                 geode_count = resources[self.GEODE]
@@ -304,98 +310,60 @@ class Day19: # Not Enough Minerals
             if key in keys and keys[key] <= turns:
                 continue
             keys[key] = turns
-            # Build nothing
-            next_turns = turns + 1
+            # Build nothing else
+            next_turns = max_turns
             next_resources = list(resources)
             next_robots = robots
-            if min(next_resources) >= 0:
-                for i in range(4):
-                    next_resources[i] += robots[i]
-                next_state = (next_turns, tuple(next_robots), tuple(next_resources))
-                next_key = self.state_to_key(next_state)
-                if next_key not in keys or keys[next_key] >= next_turns:
-                    next_priority = self.state_to_priority(next_state)
-                    heapq.heappush(work, next_priority)
-            # Build an ore robot, if possible
-            next_turns = turns + 1
-            next_resources = list(resources)
-            next_robots = list(robots)
-            next_robots[self.ORE] += 1
-            for resource_type, resource_cost in blueprint['robots']['ore'].items():
-                id = resource_types[resource_type]
-                next_resources[id] -= resource_cost
-            if min(next_resources) >= 0:
-                for i in range(4):
-                    next_resources[i] += robots[i]
-                next_state = (next_turns, tuple(next_robots), tuple(next_resources))
-                next_key = self.state_to_key(next_state)
-                if next_key not in keys or keys[next_key] >= next_turns:
-                    next_priority = self.state_to_priority(next_state)
-                    heapq.heappush(work, next_priority)
-            # Build a clay robot, if possible
-            next_turns = turns + 1
-            next_resources = list(resources)
-            next_robots = list(robots)
-            next_robots[self.CLAY] += 1
-            for resource_type, resource_cost in blueprint['robots']['clay'].items():
-                id = resource_types[resource_type]
-                next_resources[id] -= resource_cost
-            if min(next_resources) >= 0:
-                for i in range(4):
-                    next_resources[i] += robots[i]
-                next_state = (next_turns, tuple(next_robots), tuple(next_resources))
-                next_key = self.state_to_key(next_state)
-                if next_key not in keys or keys[next_key] >= next_turns:
-                    next_priority = self.state_to_priority(next_state)
-                    heapq.heappush(work, next_priority)
-            # Build a obsidian robot, if possible
-            next_turns = turns + 1
-            next_resources = list(resources)
-            next_robots = list(robots)
-            next_robots[self.OBSIDIAN] += 1
-            for resource_type, resource_cost in blueprint['robots']['obsidian'].items():
-                id = resource_types[resource_type]
-                next_resources[id] -= resource_cost
-            if min(next_resources) >= 0:
-                for i in range(4):
-                    next_resources[i] += robots[i]
-                next_state = (next_turns, tuple(next_robots), tuple(next_resources))
-                next_key = self.state_to_key(next_state)
-                if next_key not in keys or keys[next_key] >= next_turns:
-                    next_priority = self.state_to_priority(next_state)
-                    heapq.heappush(work, next_priority)
-            # Build a geode robot, if possible
-            next_turns = turns + 1
-            next_resources = list(resources)
-            next_robots = list(robots)
-            next_robots[self.GEODE] += 1
-            for resource_type, resource_cost in blueprint['robots']['geode'].items():
-                id = resource_types[resource_type]
-                next_resources[id] -= resource_cost
-            if min(next_resources) >= 0:
-                for i in range(4):
-                    next_resources[i] += robots[i]
-                next_state = (next_turns, tuple(next_robots), tuple(next_resources))
-                next_key = self.state_to_key(next_state)
-                if next_key not in keys or keys[next_key] >= next_turns:
-                    next_priority = self.state_to_priority(next_state)
-                    heapq.heappush(work, next_priority)
+            for i in range(4):
+                next_resources[i] = resources[i] + (next_turns - turns) * robots[i]
+            next_state = (next_turns, tuple(next_robots), tuple(next_resources))
+            next_key = self.state_to_key(next_state)
+            if next_key not in keys or keys[next_key] >= next_turns:
+                next_priority = self.state_to_priority(next_state, max_turns)
+                heapq.heappush(work, next_priority)
+            # Build each robot next, if possible
+            for i in range(4):
+                next_turns = turns
+                next_resources = list(resources)
+                next_robots = list(robots)
+                next_robots[i] += 1
+                resource = self.resources[i]
+                for resource_type, resource_cost in blueprint['robots'][resource].items():
+                    id = self.resource_types[resource_type]
+                    next_resources[id] -= resource_cost
+                build_possible = False
+                while next_turns < max_turns:
+                    if min(next_resources) >= 0:
+                        build_possible = True
+                    next_turns += 1
+                    for j in range(4):
+                        next_resources[j] += robots[j]
+                    if build_possible:
+                        next_state = (next_turns, tuple(next_robots), tuple(next_resources))
+                        next_key = self.state_to_key(next_state)
+                        if next_key not in keys or keys[next_key] >= next_turns:
+                            next_priority = self.state_to_priority(next_state, max_turns)
+                            heapq.heappush(work, next_priority)
+                        break
         result = max_geode_count
         return result
     
     def solve(self, blueprints, max_turns: int=24):
-        quality_levels = {
-            blueprint_id: self.get_quality_level(blueprint, max_turns) for
+        geode_counts = {
+            blueprint_id: self.get_geode_count(blueprint, max_turns) for
             blueprint_id, blueprint in blueprints.items()
         }
         result = sum(
-            blueprint_id * quality_levels[blueprint_id] for
+            blueprint_id * geode_counts[blueprint_id] for
             blueprint_id in blueprints
         )
         return result
     
-    def solve2(self, blueprints):
-        result = len(blueprints)
+    def solve2(self, blueprints, max_turns: int=32):
+        result = 1
+        for i in (1, 2, 3):
+            if i in blueprints:
+                result *= self.get_geode_count(blueprints[i], max_turns)
         return result
     
     def main(self):
