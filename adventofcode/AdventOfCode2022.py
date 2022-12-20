@@ -196,6 +196,75 @@ class Template: # Template
         result = solutions
         return result
 
+class Day20: # Grove Positioning System
+    '''
+    https://adventofcode.com/2022/day/20
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(int(raw_input_line))
+        return result
+    
+    def solve(self, encrypted_file):
+        N = len(encrypted_file)
+        F = list(
+            (i, num) for i, num in enumerate(encrypted_file)
+        )
+        F = collections.deque(F)
+        for i in range(N):
+            start = 0
+            while F[start][0] != i:
+                start += 1
+            offset = F[start][1]
+            F.rotate(-start - 1)
+            subject = F.pop()
+            F.rotate(-offset)
+            F.append(subject)
+        decrypted_file = list(num for _, num in F)
+        start = decrypted_file.index(0)
+        result = sum((
+            decrypted_file[(start + 1000) % N],
+            decrypted_file[(start + 2000) % N],
+            decrypted_file[(start + 3000) % N],
+        ))
+        return result
+    
+    def solve2(self, encrypted_file, decryption_key: int=811_589_153):
+        N = len(encrypted_file)
+        F = list(
+            (i, decryption_key * num) for i, num in enumerate(encrypted_file)
+        )
+        F = collections.deque(F)
+        for _ in range(10):
+            for i in range(N):
+                start = 0
+                while F[start][0] != i:
+                    start += 1
+                offset = F[start][1]
+                F.rotate(-start - 1)
+                subject = F.pop()
+                F.rotate(-offset)
+                F.append(subject)
+        decrypted_file = list(num for _, num in F)
+        start = decrypted_file.index(0)
+        result = sum((
+            decrypted_file[(start + 1000) % N],
+            decrypted_file[(start + 2000) % N],
+            decrypted_file[(start + 3000) % N],
+        ))
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        encrypted_file = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(encrypted_file),
+            self.solve2(encrypted_file),
+            )
+        result = solutions
+        return result
+
 class Day19: # Not Enough Minerals
     '''
     https://adventofcode.com/2022/day/19
@@ -1777,7 +1846,7 @@ if __name__ == '__main__':
        17: (Day17, 'Pyroclastic Flow'),
        18: (Day18, 'Boiling Boulders'),
        19: (Day19, 'Not Enough Minerals'),
-    #    20: (Day20, 'Day20'),
+       20: (Day20, 'Grove Positioning System'),
     #    21: (Day21, 'Day21'),
     #    22: (Day22, 'Day22'),
     #    23: (Day23, 'Day23'),
