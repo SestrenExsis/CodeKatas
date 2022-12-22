@@ -196,6 +196,144 @@ class Template: # Template
         result = solutions
         return result
 
+class Day21: # Monkey Math
+    '''
+    https://adventofcode.com/2022/day/21
+    '''
+    def get_monkeys(self, raw_input_lines: List[str]):
+        monkeys = {}
+        for raw_input_line in raw_input_lines:
+            monkey_id, raw_job = raw_input_line.split(': ')
+            try:
+                monkeys[monkey_id] = (int(raw_job), )
+            except ValueError:
+                monkey_a, operand, monkey_b = raw_job.split(' ')
+                monkeys[monkey_id] = (operand, monkey_a, monkey_b)
+        result = monkeys
+        return result
+    
+    def solve(self, monkeys):
+        root = None
+        values = {}
+        monkeys_left = set(monkeys.keys())
+        while 'root' not in values:
+            shouts = set()
+            for monkey_id in monkeys_left:
+                monkey = monkeys[monkey_id]
+                if isinstance(monkey[0], int):
+                    values[monkey_id] = monkey[0]
+                    shouts.add(monkey_id)
+                else:
+                    (operand, monkey_a, monkey_b) = monkey
+                    try:
+                        value = 0
+                        if operand == '+':
+                            value = values[monkey_a] + values[monkey_b]
+                        elif operand == '-':
+                            value = values[monkey_a] - values[monkey_b]
+                        elif operand == '*':
+                            value = values[monkey_a] * values[monkey_b]
+                        elif operand == '/':
+                            value = values[monkey_a] // values[monkey_b]
+                        else:
+                            raise Exception('Unknown operand ' + operand)
+                        values[monkey_id] = value
+                        shouts.add(monkey_id)
+                    except KeyError:
+                        pass
+            monkeys_left -= shouts
+        result = values['root']
+        return result
+    
+    def solve2(self, monkeys):
+        root = monkeys['root']
+        del monkeys['root']
+        del monkeys['humn']
+        values = {}
+        monkeys_left = set(monkeys.keys())
+        while True:
+            shouts = set()
+            for monkey_id in monkeys_left:
+                monkey = monkeys[monkey_id]
+                if isinstance(monkey[0], int):
+                    values[monkey_id] = monkey[0]
+                    shouts.add(monkey_id)
+                else:
+                    (operand, monkey_a, monkey_b) = monkey
+                    try:
+                        value = 0
+                        if operand == '+':
+                            value = values[monkey_a] + values[monkey_b]
+                        elif operand == '-':
+                            value = values[monkey_a] - values[monkey_b]
+                        elif operand == '*':
+                            value = values[monkey_a] * values[monkey_b]
+                        elif operand == '/':
+                            value = values[monkey_a] // values[monkey_b]
+                        else:
+                            raise Exception('Unknown operand ' + operand)
+                        values[monkey_id] = value
+                        shouts.add(monkey_id)
+                    except KeyError:
+                        pass
+            monkeys_left -= shouts
+            if len(shouts) < 1:
+                break
+        def resolve(monkey_id: str, target: int) -> str:
+            if monkey_id == 'humn':
+                return target
+            (op, a, b) = monkeys[monkey_id]
+            if a not in values and b not in values:
+                raise Exception('Unresolvable situation')
+            answer = None
+            if op == '+':
+                # TARGET = A + B
+                if a in values:
+                    # B = TARGET - A
+                    answer = resolve(b, target - values[a])
+                elif b in values:
+                    # A = TARGET - B
+                    answer = resolve(a, target - values[b])
+            elif op == '-':
+                # TARGET = A - B
+                if a in values:
+                    # B = A - TARGET
+                    answer = resolve(b, values[a] - target)
+                elif b in values:
+                    # A = TARGET + B
+                    answer = resolve(a, target + values[b])
+            elif op == '*':
+                # TARGET = A * B
+                if a in values:
+                    # B = TARGET / A
+                    answer = resolve(b, target // values[a])
+                elif b in values:
+                    # A = TARGET / B
+                    answer = resolve(a, target // values[b])
+            elif op == '/':
+                # TARGET = A / B
+                if a in values:
+                    # B = A / TARGET
+                    answer = resolve(b, values[a] // target)
+                elif b in values:
+                    # A = B * TARGET
+                    answer = resolve(a, values[b] * target)
+            return answer
+        target = values[root[2]]
+        monkey_id = root[1]
+        result = resolve(monkey_id, target)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        monkeys = self.get_monkeys(raw_input_lines)
+        solutions = (
+            self.solve(copy.deepcopy(monkeys)),
+            self.solve2(copy.deepcopy(monkeys)),
+            )
+        result = solutions
+        return result
+
 class Day20: # Grove Positioning System
     '''
     https://adventofcode.com/2022/day/20
@@ -1847,7 +1985,7 @@ if __name__ == '__main__':
        18: (Day18, 'Boiling Boulders'),
        19: (Day19, 'Not Enough Minerals'),
        20: (Day20, 'Grove Positioning System'),
-    #    21: (Day21, 'Day21'),
+       21: (Day21, 'Monkey Math'),
     #    22: (Day22, 'Day22'),
     #    23: (Day23, 'Day23'),
     #    24: (Day24, 'Day24'),
