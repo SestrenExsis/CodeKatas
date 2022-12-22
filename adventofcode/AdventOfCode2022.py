@@ -196,6 +196,109 @@ class Template: # Template
         result = solutions
         return result
 
+class Day22: # Monkey Map
+    '''
+    https://adventofcode.com/2022/day/22
+    '''
+    facings = [
+        ( 0,  1), # east
+        ( 1,  0), # south
+        ( 0, -1), # west
+        (-1,  0), # north
+    ]
+
+    def get_setup(self, raw_input_lines: List[str]):
+        board = {}
+        start_row = -1
+        start_col = -1
+        for row, raw_input_line in enumerate(raw_input_lines[:-2], start=1):
+            for col, cell in enumerate(raw_input_line, start=1):
+                if cell == ' ':
+                    continue
+                if start_row == -1:
+                    start_row = row
+                    start_col = col
+                neighbors = []
+                for (r, c) in self.facings:
+                    neighbors.append((row + r, col + c))
+                board[(row, col)] = {
+                    'blocking': cell == '#',
+                    'neighbors': neighbors,
+                }
+        for (row, col) in board:
+            for i in range(len(self.facings)):
+                neighbor = board[(row, col)]['neighbors'][i]
+                if neighbor not in board:
+                    new_row = row
+                    new_col = col
+                    if i == 0: # Went off going east
+                        new_col = min(
+                            c for (r, c) in board if
+                            r == row
+                        )
+                    elif i == 1: # Went off going south
+                        new_row = min(
+                            r for (r, c) in board if
+                            c == col
+                        )
+                    elif i == 2: # Went off going west
+                        new_col = max(
+                            c for (r, c) in board if
+                            r == row
+                        )
+                    elif i == 3: # Went off going north
+                        new_row = max(
+                            r for (r, c) in board if
+                            c == col
+                        )
+                    board[(row, col)]['neighbors'][i] = (new_row, new_col)
+        path = []
+        num = 0
+        chars = raw_input_lines[-1] + 'RL'
+        for char in chars:
+            try:
+                digit = int(char)
+                num = 10 * num + digit
+            except ValueError:
+                if num > 0:
+                    path.append(num)
+                    num = 0
+                path.append(char)
+        pos = (start_row, start_col, 0)
+        result = (board, path, pos)
+        return result
+    
+    def solve(self, board, path, pos):
+        for step in path:
+            (row, col, facing) = pos
+            if step == 'L':
+                facing = (facing - 1) % len(self.facings)
+            elif step == 'R':
+                facing = (facing + 1) % len(self.facings)
+            else:
+                for _ in range(step):
+                    (next_row, next_col) = board[(row, col)]['neighbors'][facing]
+                    if not board[(next_row, next_col)]['blocking']:
+                        (row, col) = (next_row, next_col)
+            pos = (row, col, facing)
+        (row, col, facing) = pos
+        result = 1000 * row + 4 * col + facing
+        return result
+    
+    def solve2(self, board, path, pos):
+        result = len(board)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        (board, path, pos) = self.get_setup(raw_input_lines)
+        solutions = (
+            self.solve(board, path, pos),
+            self.solve2(board, path, pos),
+            )
+        result = solutions
+        return result
+
 class Day21: # Monkey Math
     '''
     https://adventofcode.com/2022/day/21
@@ -1962,7 +2065,7 @@ class Day01: # Calorie Counting
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2022.py 19 < inputs/2022day19.in
+    python AdventOfCode2022.py 22 < inputs/2022day22.in
     '''
     solvers = {
         1: (Day01, 'Calorie Counting'),
@@ -1986,7 +2089,7 @@ if __name__ == '__main__':
        19: (Day19, 'Not Enough Minerals'),
        20: (Day20, 'Grove Positioning System'),
        21: (Day21, 'Monkey Math'),
-    #    22: (Day22, 'Day22'),
+       22: (Day22, 'Monkey Map'),
     #    23: (Day23, 'Day23'),
     #    24: (Day24, 'Day24'),
     #    25: (Day25, 'Day25'),
