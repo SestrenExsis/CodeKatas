@@ -196,6 +196,117 @@ class Template: # Template
         result = solutions
         return result
 
+class Day23: # Unstable Diffusion
+    '''
+    https://adventofcode.com/2022/day/23
+    '''
+    def get_elves(self, raw_input_lines: List[str]):
+        elves = set()
+        for row, raw_input_line in enumerate(raw_input_lines):
+            for col, cell in enumerate(raw_input_line):
+                if cell == '#':
+                    elves.add((row, col))
+        result = elves
+        return result
+
+    def visualize(self, elves):
+        min_row = min(row for row, col in elves)
+        max_row = max(row for row, col in elves)
+        min_col = min(col for row, col in elves)
+        max_col = max(col for row, col in elves)
+        for row in range(min_row, max_row + 1):
+            row_data = []
+            for col in range(min_col, max_col + 1):
+                cell = '.'
+                if (row, col) in elves:
+                    cell = '#'
+                row_data.append(cell)
+            print(''.join(row_data))
+    
+    def solve(self, elves):
+        considerations = {
+            'N': {(-1, -1), (-1,  0), (-1,  1)},
+            'S': {( 1, -1), ( 1,  0), ( 1,  1)},
+            'W': {(-1, -1), ( 0, -1), ( 1, -1)},
+            'E': {(-1,  1), ( 0,  1), ( 1,  1)},
+        }
+        directions = collections.deque(['N', 'S', 'W', 'E'])
+        # self.visualize(elves)
+        for _ in range(10):
+            proposals = {}
+            for (row, col) in elves:
+                # If this Elf has no neighbors, then it does nothing this round
+                neighbors = set()
+                for neighbor in (
+                    (row - 1, col - 1),
+                    (row    , col - 1),
+                    (row + 1, col - 1),
+                    (row - 1, col),
+                    (row + 1, col),
+                    (row - 1, col + 1),
+                    (row    , col + 1),
+                    (row + 1, col + 1),
+                ):
+                    if neighbor in elves:
+                        neighbors.add(neighbor)
+                if len(neighbors) < 1:
+                    continue
+                # If the Elf has at least one neighbor, then it proposes a direction
+                valid_proposals = []
+                for direction in directions:
+                    valid_ind = True
+                    for (row_offset, col_offset) in considerations[direction]:
+                        if (row + row_offset, col + col_offset) in elves:
+                            valid_ind = False
+                    if valid_ind:
+                        valid_proposals.append(direction)
+                if len(valid_proposals) > 0:
+                    direction = valid_proposals[0]
+                    destination = (row, col)
+                    if direction == 'N':
+                        destination = (row - 1, col   )
+                    elif direction == 'S':
+                        destination = (row + 1, col   )
+                    elif direction == 'W':
+                        destination = (row    , col - 1)
+                    elif direction == 'E':
+                        destination = (row    , col + 1)
+                    if destination not in proposals:
+                        proposals[destination] = set()
+                    proposals[destination].add((direction, row, col))
+            next_elves = set(elves)
+            for destination, proposing_elves in proposals.items():
+                # As long as no collisions will happen, the Elf moves
+                if len(proposing_elves) == 1:
+                    (direction, row, col) = proposing_elves.pop()
+                    next_elves.remove((row, col))
+                    next_elves.add(destination)
+            elves = next_elves
+            directions.rotate(-1)
+            # self.visualize(elves)
+        min_row = min(row for row, col in elves)
+        max_row = max(row for row, col in elves)
+        min_col = min(col for row, col in elves)
+        max_col = max(col for row, col in elves)
+        rows = 1 + max_row - min_row
+        cols = 1 + max_col - min_col
+        result = (rows * cols) - len(elves)
+        return result
+    
+    def solve2(self, elves):
+        result = len(elves)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        elves = self.get_elves(raw_input_lines)
+        solutions = (
+            self.solve(copy.deepcopy(elves)),
+            self.solve2(elves),
+            )
+        result = solutions
+        return result
+
 class Day22: # Monkey Map
     '''
     https://adventofcode.com/2022/day/22
@@ -316,7 +427,6 @@ class Day21: # Monkey Math
         return result
     
     def solve(self, monkeys):
-        root = None
         values = {}
         monkeys_left = set(monkeys.keys())
         while 'root' not in values:
@@ -2090,7 +2200,7 @@ if __name__ == '__main__':
        20: (Day20, 'Grove Positioning System'),
        21: (Day21, 'Monkey Math'),
        22: (Day22, 'Monkey Map'),
-    #    23: (Day23, 'Day23'),
+       23: (Day23, 'Unstable Diffusion'),
     #    24: (Day24, 'Day24'),
     #    25: (Day25, 'Day25'),
         }
