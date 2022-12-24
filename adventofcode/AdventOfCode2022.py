@@ -254,7 +254,7 @@ class Day24: # Blizzard Basin
         ))
         return result
     
-    def solve(self, map_size, blizzards):
+    def get_goal_time(self, map_size, blizzards, start, end, step):
         '''
         - NORTH and SOUTH blizzards will arrive back at their original
           positions every ROWS minutes
@@ -265,17 +265,16 @@ class Day24: # Blizzard Basin
         - STEP starts at 0, increases by 1 every minute, and resets back to 0
           when it reaches MODULO
         '''
-        min_minutes = float('inf')
+        goal_time = float('inf')
         (rows, cols) = map_size
         modulo = self.get_lcm((rows, cols))
-        exit = (rows - 1, cols - 1) # One move away from the true exit
         seen = set() # (row, col, step)
         work = collections.deque()
-        work.append((0, -1, 0, 0)) # (minutes, row, col, step)
+        work.append((0, start[0], start[1], step)) # (minutes, row, col, step)
         while len(work) > 0:
             (minutes, row, col, step) = work.pop()
-            if (row, col) == exit:
-                min_minutes = minutes
+            if (row, col) == end:
+                goal_time = minutes
                 break
             if (row, col, step) in seen:
                 continue
@@ -294,7 +293,7 @@ class Day24: # Blizzard Basin
                         next_row, next_col, next_step,
                     ) and
                     (
-                        (next_row, next_col) == (-1, 0) or
+                        (next_row, next_col) == start or
                         (
                             0 <= next_row < rows and
                             0 <= next_col < cols
@@ -304,7 +303,14 @@ class Day24: # Blizzard Basin
                     work.appendleft(
                         (minutes + 1, next_row, next_col, next_step)
                     )
-        result = 1 + min_minutes # Add 1 minute to reach the true exit
+        result = goal_time
+        return result
+
+    def solve(self, map_size, blizzards):
+        (rows, cols) = map_size
+        end = (rows - 1, cols - 1) # One move away from the true exit
+        goal_time = self.get_goal_time(map_size, blizzards, (-1, 0), end, 0)
+        result = 1 + goal_time # Add 1 minute to reach the true exit
         return result
     
     def solve2(self, map_size, blizzards):
