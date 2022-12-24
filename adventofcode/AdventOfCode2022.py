@@ -288,15 +288,13 @@ class Day24: # Blizzard Basin
                 (row    , col + 1), # move east
             ):
                 if (
-                    self.valid(
-                        blizzards, rows, cols,
-                        next_row, next_col, next_step,
-                    ) and
+                    (next_row, next_col) in (start, end) or
                     (
-                        (next_row, next_col) == start or
-                        (
-                            0 <= next_row < rows and
-                            0 <= next_col < cols
+                        0 <= next_row < rows and
+                        0 <= next_col < cols and
+                        self.valid(
+                            blizzards, rows, cols,
+                            next_row, next_col, next_step,
                         )
                     )
                 ):
@@ -308,15 +306,25 @@ class Day24: # Blizzard Basin
 
     def solve(self, map_size, blizzards):
         (rows, cols) = map_size
-        end = (rows - 1, cols - 1) # One move away from the true exit
-        goal_time = self.get_goal_time(map_size, blizzards, (-1, 0), end, 0)
-        result = 1 + goal_time # Add 1 minute to reach the true exit
+        start = (-1, 0)
+        end = (rows, cols - 1)
+        goal_time = self.get_goal_time(map_size, blizzards, start, end, 0)
+        result = goal_time
         return result
     
     def solve2(self, map_size, blizzards):
         (rows, cols) = map_size
-        (north, east, south, west) = blizzards
-        result = (rows, cols)
+        modulo = self.get_lcm((rows, cols))
+        start = (-1, 0)
+        end = (rows, cols - 1)
+        steps = 0
+        # Go from start to end, back to start again, then back to end again
+        goal_time = self.get_goal_time(map_size, blizzards, start, end, 0)
+        steps = (goal_time % modulo)
+        goal_time += self.get_goal_time(map_size, blizzards, end, start, steps)
+        steps = (goal_time % modulo)
+        goal_time += self.get_goal_time(map_size, blizzards, start, end, steps)
+        result = goal_time
         return result
     
     def main(self):
