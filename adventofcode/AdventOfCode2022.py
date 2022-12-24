@@ -196,6 +196,133 @@ class Template: # Template
         result = solutions
         return result
 
+class Day24: # Blizzard Basin
+    '''
+    https://adventofcode.com/2022/day/24
+    '''
+    def get_map_info(self, raw_input_lines: List[str]):
+        north = set()
+        east = set()
+        south = set()
+        west = set()
+        for row, raw_input_line in enumerate(raw_input_lines[1:-1]):
+            for col, cell in enumerate(raw_input_line[1:-1]):
+                if cell == '^':
+                    north.add((row, col))
+                elif cell == '>':
+                    east.add((row, col))
+                elif cell == 'v':
+                    south.add((row, col))
+                elif cell == '<':
+                    west.add((row, col))
+        rows = len(raw_input_lines[1:-1])
+        cols = len(raw_input_line[1:-1])
+        result = (rows, cols), (north, east, south, west)
+        return result
+    
+    def get_lcm(self, nums: set) -> int:
+    # Compute the least common multiple, using a slow method to do so
+        lcm = max(nums)
+        while True:
+            valid_lcm = True
+            for num in nums:
+                if lcm % num != 0:
+                    valid_lcm = False
+                    break
+            if valid_lcm:
+                break
+            lcm += 1
+        result = lcm
+        return result
+    
+    def valid(self, blizzards, rows, cols, row, col, step) -> bool:
+        if row == -1:
+            if col == 0:
+                return True
+            else:
+                return False
+        (north, east, south, west) = blizzards
+        north_row = (row + step) % rows
+        south_row = (row - step) % rows
+        west_col = (col + step) % cols
+        east_col = (col - step) % cols
+        result = not any((
+            (north_row, col     ) in north,
+            (south_row, col     ) in south,
+            (row      , west_col) in west,
+            (row      , east_col) in east,
+        ))
+        return result
+    
+    def solve(self, map_size, blizzards):
+        '''
+        - NORTH and SOUTH blizzards will arrive back at their original
+          positions every ROWS minutes
+        - EAST and WEST blizzards will arrive back at their original
+          positions every COLS minutes
+        - The state of the blizzards loops every LCM((ROWS, COLS)) minutes
+        - STEP and MODULO are used to track the state of the blizzards
+        - STEP starts at 0, increases by 1 every minute, and resets back to 0
+          when it reaches MODULO
+        '''
+        min_minutes = float('inf')
+        (rows, cols) = map_size
+        modulo = self.get_lcm((rows, cols))
+        exit = (rows - 1, cols - 1) # One move away from the true exit
+        seen = set() # (row, col, step)
+        work = collections.deque()
+        work.append((0, -1, 0, 0)) # (minutes, row, col, step)
+        while len(work) > 0:
+            (minutes, row, col, step) = work.pop()
+            if (row, col) == exit:
+                min_minutes = minutes
+                break
+            if (row, col, step) in seen:
+                continue
+            seen.add((row, col, step))
+            next_step = (step + 1) % modulo
+            for (next_row, next_col) in (
+                (row    , col    ), # idle
+                (row - 1, col    ), # move north
+                (row + 1, col    ), # move south
+                (row    , col - 1), # move west
+                (row    , col + 1), # move east
+            ):
+                if (
+                    self.valid(
+                        blizzards, rows, cols,
+                        next_row, next_col, next_step,
+                    ) and
+                    (
+                        (next_row, next_col) == (-1, 0) or
+                        (
+                            0 <= next_row < rows and
+                            0 <= next_col < cols
+                        )
+                    )
+                ):
+                    work.appendleft(
+                        (minutes + 1, next_row, next_col, next_step)
+                    )
+        result = 1 + min_minutes # Add 1 minute to reach the true exit
+        return result
+    
+    def solve2(self, map_size, blizzards):
+        (rows, cols) = map_size
+        (north, east, south, west) = blizzards
+        result = (rows, cols)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        map_size, blizzards = self.get_map_info(raw_input_lines)
+        solutions = (
+            self.solve(map_size, blizzards),
+            self.solve2(map_size, blizzards),
+            )
+        result = solutions
+        return result
+
 class Day23: # Unstable Diffusion
     '''
     https://adventofcode.com/2022/day/23
@@ -316,7 +443,7 @@ class Day23: # Unstable Diffusion
         elves = self.get_elves(raw_input_lines)
         solutions = (
             self.solve(copy.deepcopy(elves)),
-            self.solve2(elves),
+            self.solve2(copy.deepcopy(elves)),
             )
         result = solutions
         return result
@@ -2215,7 +2342,7 @@ if __name__ == '__main__':
        21: (Day21, 'Monkey Math'),
        22: (Day22, 'Monkey Map'),
        23: (Day23, 'Unstable Diffusion'),
-    #    24: (Day24, 'Day24'),
+       24: (Day24, 'Blizzard Basin'),
     #    25: (Day25, 'Day25'),
         }
     parser = argparse.ArgumentParser()
