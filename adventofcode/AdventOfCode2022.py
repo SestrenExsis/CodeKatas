@@ -196,6 +196,70 @@ class Template: # Template
         result = solutions
         return result
 
+class Day25: # Full of Hot Air
+    '''
+    https://adventofcode.com/2022/day/25
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+
+    def snafu2dec(self, snafu: str) -> int:
+        num = 0
+        for (i, char) in enumerate(snafu[::-1]):
+            value = 0
+            try:
+                value = int(char)
+            except ValueError:
+                if char == '-':
+                    value = -1
+                elif char == '=':
+                    value = -2
+            power = 5 ** i
+            num += value * power
+        result = num
+        return result
+
+    def dec2snafu(self, num: int) -> str:
+        digits = collections.deque()
+        while num > 0:
+            digit = num % 5
+            if digit == 4:
+                digits.appendleft('-')
+                num += 1
+            elif digit == 3:
+                digits.appendleft('=')
+                num += 2
+            else:
+                digits.appendleft(str(digit))
+                num -= digit
+            num //= 5
+        result = ''.join(digits)
+        return result
+    
+    def solve(self, parsed_input):
+        snafus = []
+        for snafu in parsed_input:
+            snafus.append(self.snafu2dec(snafu))
+        result = self.dec2snafu(sum(snafus))
+        return result
+    
+    def solve2(self, parsed_input):
+        result = 'MERRY CHRISTMAS!'
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day24: # Blizzard Basin
     '''
     https://adventofcode.com/2022/day/24
@@ -2330,7 +2394,7 @@ class Day01: # Calorie Counting
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2022.py 22 < inputs/2022day22.in
+    python AdventOfCode2022.py 25 < inputs/2022day25.in
     '''
     solvers = {
         1: (Day01, 'Calorie Counting'),
@@ -2357,7 +2421,7 @@ if __name__ == '__main__':
        22: (Day22, 'Monkey Map'),
        23: (Day23, 'Unstable Diffusion'),
        24: (Day24, 'Blizzard Basin'),
-    #    25: (Day25, 'Day25'),
+       25: (Day25, 'Full of Hot Air'),
         }
     parser = argparse.ArgumentParser()
     parser.add_argument('day', help='Solve for a given day', type=int)
