@@ -10,6 +10,7 @@ import functools
 import heapq
 import itertools
 import random
+import time
 from typing import Dict, List, Set, Tuple
     
 def get_raw_input_lines() -> list:
@@ -1198,8 +1199,7 @@ class Day16: # Proboscidea Volcanium
         # (pos_a, valves_open): (score, time_left)
         while len(work) > 0:
             (time, score, pos_a, valves_open) = work.pop()
-            if score > max_score:
-                max_score = score
+            max_score = max(max_score, score)
             if time >= max_time:
                 continue
             valve_a = valves[pos_a]
@@ -1223,8 +1223,9 @@ class Day16: # Proboscidea Volcanium
         return result
     
     def get_paths(self, valves):
-        # Calculate the shortest distance between two valves
+        # Calculate the shortest distance between all pairs of valves
         def get_distance(start: str, destination: str) -> int:
+            # Calculate the shortest distance between two valves
             min_distance = float('inf')
             work = collections.deque()
             work.appendleft((0, start))
@@ -1235,7 +1236,7 @@ class Day16: # Proboscidea Volcanium
                     break
                 for next_valve in valves[valve]['tunnels']:
                     work.appendleft((distance + 1, next_valve))
-            return min_distance
+            return 1 + min_distance
         paths = {}
         for valve in valves:
             if valves[valve]['flow_rate'] < 1:
@@ -1256,8 +1257,75 @@ class Day16: # Proboscidea Volcanium
         return result
 
     def solve2(self, valves, max_time: int=26):
+        # 2136 is too low
+        max_score = 0
         paths = self.get_paths(valves)
-        result = paths
+        work = [(max_time, 0, 'AA', 0, 'AA', 0, 0)]
+        # (time, score, dest_a, wait_a, dest_b, wait_b, valves_chosen)
+        seen = {}
+        while len(work) > 0:
+            (time_left, score, dest_a, wait_a, dest_b, wait_b, valves_chosen) = work.pop()
+            if time_left < 0:
+                continue
+            max_score = max(max_score, score)
+            key = (
+                min(dest_a, dest_b),
+                max(dest_a, dest_b),
+                valves_chosen,
+            )
+            if key in seen and seen[key] >= score:
+                continue
+            seen[key] = score
+            # Find all unopened valves
+            options = set()
+            for (valve_id, valve) in valves.items():
+                if (valves_chosen & valve['bit_mask']) > 0:
+                    continue
+                if valve['flow_rate'] < 1:
+                    continue
+                options.add(valve_id)
+            # Determine how many choices will be made
+            choice_count = 0
+            if wait_a == 0:
+                choice_count += 1
+            if wait_b == 0:
+                choice_count += 1
+            # Explore all available choices
+            choices = itertools.permutations(options, choice_count)
+            for choice in choices:
+                next_valves = list(choice)
+                next_time_left = time_left
+                next_score = score
+                next_valves_chosen = valves_chosen
+                (next_dest_a, next_wait_a) = (dest_a, wait_a)
+                if next_wait_a < 1:
+                    next_dest_a = next_valves.pop()
+                    if next_dest_a != dest_a:
+                        next_wait_a = paths[(dest_a, next_dest_a)]
+                        next_valves_chosen |= valves[next_dest_a]['bit_mask']
+                        t = time_left - next_wait_a
+                        next_score += t * valves[next_dest_a]['flow_rate']
+                (next_dest_b, next_wait_b) = (dest_b, wait_b)
+                if next_wait_b < 1:
+                    next_dest_b = next_valves.pop()
+                    if next_dest_b != dest_b:
+                        next_wait_b = paths[(dest_b, next_dest_b)]
+                        next_valves_chosen |= valves[next_dest_b]['bit_mask']
+                        t = time_left - next_wait_b
+                        next_score += t * valves[next_dest_b]['flow_rate']
+                # Skip idle time
+                idle = min(next_time_left, next_wait_a, next_wait_b)
+                next_wait_a -= idle
+                next_wait_b -= idle
+                next_time_left -= idle
+                work.append((
+                    next_time_left,
+                    next_score,
+                    next_dest_a, next_wait_a,
+                    next_dest_b, next_wait_b,
+                    next_valves_chosen,
+                ))
+        result = max_score
         return result
     
     def main(self):
