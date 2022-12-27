@@ -1065,7 +1065,7 @@ class Day19: # Not Enough Minerals
         result = key
         return result
     
-    def get_geode_count(self, blueprint, max_turns: int):
+    def get_geode_count_slowly(self, blueprint, max_turns: int):
         '''
         work = [state_1, state_2, ...]
         state: tuple(turns, robots, resources)
@@ -1073,6 +1073,12 @@ class Day19: # Not Enough Minerals
         robots: tuple(ore, clay, obsidian, geode)
         resources: tuple(ore, clay, obsidian, geode)
         '''
+        max_resources = collections.defaultdict(int)
+        for i in range(4):
+            resource = self.resources[i]
+            for resource_type, resource_cost in blueprint['robots'][resource].items():
+                id = self.resource_types[resource_type]
+                max_resources[id] = max(max_resources[id], resource_cost)
         max_geode_count = 0
         keys = {}
         work = []
@@ -1105,6 +1111,10 @@ class Day19: # Not Enough Minerals
                 heapq.heappush(work, next_priority)
             # Build each robot next, if possible
             for i in range(4):
+                # No need to build another non-geode robot, 
+                # as we have the ability to build any robot we want every turn
+                if i <= 2 and robots[i] >= max_resources[i]:
+                    continue
                 next_turns = turns
                 next_resources = list(resources)
                 next_robots = list(robots)
@@ -1129,7 +1139,7 @@ class Day19: # Not Enough Minerals
                         break
         result = max_geode_count
         return result
-    
+
     def solve(self, blueprints, max_turns: int=24):
         geode_counts = {
             blueprint_id: self.get_geode_count(blueprint, max_turns) for
