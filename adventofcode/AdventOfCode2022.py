@@ -531,6 +531,11 @@ class Day22: # Monkey Map
     '''
     https://adventofcode.com/2022/day/22
     '''
+    EAST = 0
+    SOUTH = 1
+    WEST = 2
+    NORTH = 3
+
     facings = [
         ( 0,  1), # east
         ( 1,  0), # south
@@ -599,6 +604,129 @@ class Day22: # Monkey Map
         result = (board, path, pos)
         return result
     
+    def visualize(self, board, pos):
+        print(pos)
+        (row, col, facing) = pos
+        size = 10
+        for r in range(-size, size + 1):
+            row_data = []
+            for c in range(-size, size + 1):
+                cell = ' '
+                if (row + r, col + c) in board:
+                    cell = '.'
+                    if board[(row + r, col + c)]['blocking']:
+                        cell = '#'
+                if r == 0 and c == 0:
+                    cell = '@'
+                    if facing == self.NORTH:
+                        cell = '^'
+                    elif facing == self.EAST:
+                        cell = '>'
+                    elif facing == self.SOUTH:
+                        cell = 'v'
+                    elif facing == self.WEST:
+                        cell = '<'
+                row_data.append(cell)
+            print(''.join(row_data))
+    
+    def board_to_cube(self, board) -> dict:
+        # I forgot to change the facing!
+        '''
+        .....1..2..
+        ....AAABBB.
+        ...3AAABBB4
+        ....AAABBB.
+        ....CCC.6..
+        ...5CCC6...
+        ..5.CCC....
+        .DDDEEE....
+        3DDDEEE4...
+        .DDDEEE....
+        .FFF.7.....
+        1FFF7......
+        .FFF.......
+        ..2........
+        '''
+        changes = set()
+        cube = copy.deepcopy(board)
+        # Add facing to all neighbors
+        for (row, col) in cube:
+            for facing in range(len(self.facings)):
+                next_row, next_col = cube[(row, col)]['neighbors'][facing]
+                cube[(row, col)]['neighbors'][facing] = (next_row, next_col, facing)
+        # Path 1 connects A north to F west
+        for index in range(1, 51):
+            # A north goes from (1, 51) to (1, 100)
+            row = 0 + 1
+            col = 50 + index
+            # F west goes from (1, 151) to (1, 200)
+            next_row = 150 + index
+            next_col = 0 + 1
+            cube[(row, col)]['neighbors'][self.NORTH] = (next_row, next_col, self.EAST)
+            cube[(next_row, next_col)]['neighbors'][self.WEST] = (row, col, self.SOUTH)
+        # Path 2 connects B north to F south
+        for index in range(1, 51):
+            # B north goes from (1, 101) to (1, 150)
+            row = 0 + 1
+            col = 100 + index
+            # F south goes from (200, 1) to (200, 50)
+            next_row = 200
+            next_col = index
+            cube[(row, col)]['neighbors'][self.NORTH] = (next_row, next_col, self.NORTH)
+            cube[(next_row, next_col)]['neighbors'][self.SOUTH] = (row, col, self.SOUTH)
+        # Path 3 connects A west to D west
+        for index in range(1, 51):
+            # A west goes from (51, 1) to (51, 50)
+            row = index
+            col = 50 + 1
+            # D west goes from (101, 1) to (150, 1)
+            next_row = 150 + 1 - index
+            next_col = 0 + 1
+            cube[(row, col)]['neighbors'][self.WEST] = (next_row, next_col, self.EAST)
+            cube[(next_row, next_col)]['neighbors'][self.WEST] = (row, col, self.EAST)
+        # Path 4 connects B east to E east
+        for index in range(1, 51):
+            # B east goes from (1, 150), (50, 150)
+            row = index
+            col = 150
+            # E east goes from (101, 100), (150, 100)
+            next_row = 150 + 1 - index
+            next_col = 100
+            cube[(row, col)]['neighbors'][self.EAST] = (next_row, next_col, self.WEST)
+            cube[(next_row, next_col)]['neighbors'][self.EAST] = (row, col, self.WEST)
+        # Path 5 connects C west to D north
+        for index in range(1, 51):
+            # C west goes from (51, 51), (100, 51)
+            row = 50 + index
+            col = 50 + 1
+            # D north goes from (101, 1), (101, 50)
+            next_row = 100 + 1
+            next_col = index
+            cube[(row, col)]['neighbors'][self.WEST] = (next_row, next_col, self.SOUTH)
+            cube[(next_row, next_col)]['neighbors'][self.NORTH] = (row, col, self.EAST)
+        # Path 6 connects B south to C east
+        for index in range(1, 51):
+            # B south goes from (50, 101), (50, 150)
+            row = 50
+            col = 100 + index
+            # C east goes from (51, 100), (100, 100)
+            next_row = 50 + index
+            next_col = 100
+            cube[(row, col)]['neighbors'][self.SOUTH] = (next_row, next_col, self.WEST)
+            cube[(next_row, next_col)]['neighbors'][self.EAST] = (row, col, self.NORTH)
+        # Path 7 connects E south to F east
+        for index in range(1, 51):
+            # E south goes from (150, 51), (150, 100)
+            row = 150
+            col = 50 + index
+            # F east goes from (151, 50), (200, 50)
+            next_row = 150 + index
+            next_col = 50
+            cube[(row, col)]['neighbors'][self.SOUTH] = (next_row, next_col, self.WEST)
+            cube[(next_row, next_col)]['neighbors'][self.EAST] = (row, col, self.NORTH)
+        result = cube
+        return result
+    
     def solve(self, board, path, pos):
         for step in path:
             (row, col, facing) = pos
@@ -617,7 +745,21 @@ class Day22: # Monkey Map
         return result
     
     def solve2(self, board, path, pos):
-        result = len(board)
+        cube = self.board_to_cube(board)
+        for step in path:
+            (row, col, facing) = pos
+            if step == 'L':
+                facing = (facing - 1) % len(self.facings)
+            elif step == 'R':
+                facing = (facing + 1) % len(self.facings)
+            else:
+                for _ in range(step):
+                    (next_row, next_col, next_facing) = cube[(row, col)]['neighbors'][facing]
+                    if not cube[(next_row, next_col)]['blocking']:
+                        (row, col, facing) = (next_row, next_col, next_facing)
+            pos = (row, col, facing)
+        (row, col, facing) = pos
+        result = 1000 * row + 4 * col + facing
         return result
     
     def main(self):
@@ -1002,6 +1144,7 @@ class Day19: # Not Enough Minerals
     def solve2(self, blueprints, max_turns: int=32):
         result = 1
         for i in (1, 2, 3):
+            print('solve2', i)
             if i in blueprints:
                 result *= self.get_geode_count(blueprints[i], max_turns)
         return result
