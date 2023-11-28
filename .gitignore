@@ -2,6 +2,8 @@
 *.out
 !*test*.in
 .vscode
+ignored/*
+withgoogle/foobar/*
 withgoogle/judges/*
 withgoogle/**/InteractiveRunner.py
 withgoogle/interactive/**/Judge.py
