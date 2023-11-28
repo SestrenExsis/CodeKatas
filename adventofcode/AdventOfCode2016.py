@@ -207,6 +207,7 @@ class Template: # Template
         result = solutions
         return result
 
+# TODO(sestren): Finish 2016 Day 25
 class Day25Incomplete: # Clock Signal
     '''
     Clock Signal
@@ -433,6 +434,7 @@ class Day23: # Safe Cracking
         result = solutions
         return result
 
+# TODO(sestren): Finish 2016 Day 22
 class Day22Incomplete: # Grid Computing
     '''
     Grid Computing
