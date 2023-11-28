@@ -49,6 +49,8 @@ class Template: # Template
         result = solutions
         return result
 
+# TODO(sestren): Restore 2019 Days 7 through 25
+
 class Day06: # Universal Orbit Map
     '''
     Universal Orbit Map
@@ -107,6 +109,8 @@ class Day06: # Universal Orbit Map
             )
         result = solutions
         return result
+
+# TODO(sestren): Restore 2019 Day 5
 
 class Day04:
     '''
@@ -288,6 +292,8 @@ class Day03:
             )
         result = solutions
         return result
+
+# TODO(sestren): Restore 2019 Day 2
 
 class Day01:
     '''
