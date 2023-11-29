@@ -3,6 +3,8 @@ Created on Nov 28, 2023
 
 @author: Sestren
 '''
+
+import copy
 from typing import Dict
 
 class IntcodeVM:
@@ -10,7 +12,7 @@ class IntcodeVM:
     A simple 3-dimensional scalar
     '''
     def __init__(self, program: Dict[int, int]):
-        self.program = program
+        self.program = copy.deepcopy(program)
         self.pc = 0
 
     def step(self):

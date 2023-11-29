@@ -1305,8 +1305,17 @@ class Day02:
         result = vm.program[0]
         return result
     
-    def solve2(self, parsed_input: List[str]) -> str:
-        result = 0
+    def solve2(self, parsed_input: Dict[int, int]) -> int:
+        result = None
+        for noun in range(100):
+            for verb in range(100):
+                vm = intcode.IntcodeVM(parsed_input)
+                vm.program[1] = noun
+                vm.program[2] = verb
+                vm.run()
+                if vm.program[0] == 19_690_720:
+                    result = 100 * noun + verb
+                    break
         return result
     
     def main(self):
