@@ -7,7 +7,9 @@ import argparse
 import collections
 import heapq
 import math
-from typing import List
+from typing import Dict, List
+
+import intcode
     
 def get_raw_input_lines() -> list:
     raw_input_lines = []
@@ -51,7 +53,7 @@ class Template: # Template
         result = solutions
         return result
 
-# TODO(sestren): Restore 2019 Days 7 through 25
+# TODO(sestren): Solve intcode problems
 
 class Vector3D():
     '''
@@ -1283,7 +1285,39 @@ class Day03:
         result = solutions
         return result
 
-# TODO(sestren): Restore 2019 Day 2
+class Day02:
+    '''
+    1202 Program Alarm
+    https://adventofcode.com/2019/day/2
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]) -> List[str]:
+        nums = map(int, raw_input_lines[0].split(','))
+        result = collections.defaultdict(int)
+        for index, num in enumerate(nums):
+            result[index] = num
+        return result
+    
+    def solve(self, parsed_input: Dict[int, int]) -> int:
+        vm = intcode.IntcodeVM(parsed_input)
+        vm.program[1] = 12
+        vm.program[2] = 2
+        vm.run()
+        result = vm.program[0]
+        return result
+    
+    def solve2(self, parsed_input: List[str]) -> str:
+        result = 0
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
 
 class Day01:
     '''
@@ -1333,7 +1367,7 @@ if __name__ == '__main__':
     '''
     solvers = {
         1: (Day01, 'The Tyranny of the Rocket Equation'),
-    #     2: (Day02, '1202 Program Alarm'),
+        2: (Day02, '1202 Program Alarm'),
         3: (Day03, 'Crossed Wires'),
         4: (Day04, 'Secure Container'),
     #     5: (Day05, 'Sunny with a Chance of Asteroids'),
