@@ -4,6 +4,7 @@ Created on Nov 14, 2020
 @author: Sestren
 '''
 import argparse
+import asyncio
 import collections
 import heapq
 import math
@@ -1102,7 +1103,44 @@ class Day06: # Universal Orbit Map
         result = solutions
         return result
 
-# TODO(sestren): Restore 2019 Day 5
+class Day05:
+    '''
+    Sunny with a Chance of Asteroids
+    https://adventofcode.com/2019/day/5
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]) -> List[str]:
+        nums = map(int, raw_input_lines[0].split(','))
+        result = collections.defaultdict(int)
+        for index, str_num in enumerate(nums):
+            result[index] = int(str_num)
+        return result
+    
+    def solve(self, parsed_input: Dict[int, int]) -> int:
+        vm = intcode.IntcodeVM(parsed_input)
+        vm.debug = False
+        vm.send_input(1)
+        result = None
+        while True:
+            vm.run()
+            output = vm.get_next_output()
+            if output is None:
+                break
+            result = output
+        return result
+    
+    def solve2(self, parsed_input: Dict[int, int]) -> int:
+        result = None
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+        )
+        result = solutions
+        return result
 
 class Day04:
     '''
@@ -1379,7 +1417,7 @@ if __name__ == '__main__':
         2: (Day02, '1202 Program Alarm'),
         3: (Day03, 'Crossed Wires'),
         4: (Day04, 'Secure Container'),
-    #     5: (Day05, 'Sunny with a Chance of Asteroids'),
+        5: (Day05, 'Sunny with a Chance of Asteroids'),
         6: (Day06, 'Universal Orbit Map'),
     #     7: (Day07, 'Amplification Circuit'),
         8: (Day08, 'Space Image Format'),
