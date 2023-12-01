@@ -55,7 +55,7 @@ class Template: # Template
         result = solutions
         return result
 
-class Day01: # Unknown
+class Day01: # Trebuchet?!
     '''
     https://adventofcode.com/2023/day/1
     '''
@@ -66,11 +66,70 @@ class Day01: # Unknown
         return result
     
     def solve(self, parsed_input):
-        result = len(parsed_input)
+        calibration_values = []
+        for row_data in parsed_input:
+            calibration_value = 0
+            for char in row_data:
+                try:
+                    value = int(char)
+                    calibration_value = 10 * value
+                    break
+                except ValueError:
+                    pass
+            for char in reversed(row_data):
+                try:
+                    value = int(char)
+                    calibration_value += value
+                    break
+                except ValueError:
+                    pass
+            calibration_values.append(calibration_value)
+        result = sum(calibration_values)
         return result
     
     def solve2(self, parsed_input):
-        result = len(parsed_input)
+        numbers = {
+            'one': 1,
+            'two': 2,
+            'three': 3,
+            'four': 4,
+            'five': 5,
+            'six': 6,
+            'seven': 7,
+            'eight': 8,
+            'nine': 9,
+        }
+        calibration_values = []
+        for row_data in parsed_input:
+            parts = []
+            for i in range(len(row_data)):
+                try:
+                    value = int(row_data[i])
+                    parts.append(value)
+                    break
+                except ValueError:
+                    for number in sorted(numbers, key=len):
+                        if row_data[i:].startswith(number):
+                            value = numbers[number]
+                            parts.append(value)
+                            break
+                    if len(parts) > 0:
+                        break
+            for i in reversed(range(len(row_data))):
+                try:
+                    value = int(row_data[i])
+                    parts.append(value)
+                    break
+                except ValueError:
+                    for number in sorted(numbers, key=len):
+                        if row_data[i:].startswith(number):
+                            value = numbers[number]
+                            parts.append(value)
+                            break
+                    if len(parts) > 1:
+                        break
+            calibration_values.append(10 * parts[0] + parts[1])
+        result = sum(calibration_values)
         return result
     
     def main(self):
@@ -89,7 +148,7 @@ if __name__ == '__main__':
     python AdventOfCode2023.py 1 < inputs/2023day01.in
     '''
     solvers = {
-        1: (Day01, 'Unknown'),
+        1: (Day01, 'Trebuchet?!'),
     #     2: (Day02, 'Unknown'),
     #     3: (Day03, 'Unknown'),
     #     4: (Day04, 'Unknown'),
