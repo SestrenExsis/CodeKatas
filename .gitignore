@@ -11,3 +11,5 @@ withgoogle/interactive/**Judge.py
 spoilers/
 projecteuler/**
 kata/**
+__pycache__/
+*.py[cod]
