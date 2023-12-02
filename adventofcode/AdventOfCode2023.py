@@ -78,7 +78,7 @@ class Day02: # Cube Conundrum
     
     def solve(self, games):
         valid_game_ids = set()
-        max_colors = {
+        max_cubes = {
             'red': 12,
             'green': 13,
             'blue': 14,
@@ -87,7 +87,7 @@ class Day02: # Cube Conundrum
             valid_game = True
             for trial in game:
                 for color, amount in trial.items():
-                    if amount > max_colors[color]:
+                    if amount > max_cubes[color]:
                         valid_game = False
                         break
             if valid_game:
@@ -96,7 +96,20 @@ class Day02: # Cube Conundrum
         return result
     
     def solve2(self, games):
-        result = len(games)
+        min_cubes = {}
+        for game_id, game in games.items():
+            min_cube = collections.defaultdict(int)
+            for trial in game:
+                for color, amount in trial.items():
+                    min_cube[color] = max(min_cube[color], amount)
+            min_cubes[game_id] = min_cube
+        powers = {}
+        for cube_id, min_cube in min_cubes.items():
+            power = 1
+            for amount in min_cube.values():
+                power *= amount
+            powers[cube_id] = power
+        result = sum(powers.values())
         return result
     
     def main(self):
