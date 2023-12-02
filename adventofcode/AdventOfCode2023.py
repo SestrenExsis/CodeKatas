@@ -29,7 +29,7 @@ def get_raw_input_lines() -> list:
 
 class Template: # Template
     '''
-    https://adventofcode.com/2022/day/?
+    https://adventofcode.com/2023/day/?
     '''
     def get_parsed_input(self, raw_input_lines: List[str]):
         result = []
@@ -51,6 +51,60 @@ class Template: # Template
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day02: # Cube Conundrum
+    '''
+    https://adventofcode.com/2023/day/2
+    '''
+    def get_games(self, raw_input_lines: List[str]):
+        games = {}
+        for raw_input_line in raw_input_lines:
+            raw_game_id, raw_game_info = raw_input_line.split(': ')
+            game_id = int(raw_game_id.split(' ')[1])
+            game = []
+            for raw_trial_info in raw_game_info.split('; '):
+                trial = {}
+                for raw_color_info in raw_trial_info.split(', '):
+                    raw_amount, color = raw_color_info.split(' ')
+                    amount = int(raw_amount)
+                    trial[color] = amount
+                game.append(trial)
+            games[game_id] = game
+        result = games
+        return result
+    
+    def solve(self, games):
+        valid_game_ids = set()
+        max_colors = {
+            'red': 12,
+            'green': 13,
+            'blue': 14,
+        }
+        for game_id, game in games.items():
+            valid_game = True
+            for trial in game:
+                for color, amount in trial.items():
+                    if amount > max_colors[color]:
+                        valid_game = False
+                        break
+            if valid_game:
+                valid_game_ids.add(game_id)
+        result = sum(valid_game_ids)
+        return result
+    
+    def solve2(self, games):
+        result = len(games)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        games = self.get_games(raw_input_lines)
+        solutions = (
+            self.solve(games),
+            self.solve2(games),
             )
         result = solutions
         return result
@@ -145,11 +199,11 @@ class Day01: # Trebuchet?!
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2023.py 1 < inputs/2023day01.in
+    python AdventOfCode2023.py 2 < inputs/2023day02.in
     '''
     solvers = {
         1: (Day01, 'Trebuchet?!'),
-    #     2: (Day02, 'Unknown'),
+        2: (Day02, 'Cube Conundrum'),
     #     3: (Day03, 'Unknown'),
     #     4: (Day04, 'Unknown'),
     #     5: (Day05, 'Unknown'),
