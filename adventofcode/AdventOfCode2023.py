@@ -55,6 +55,80 @@ class Template: # Template
         result = solutions
         return result
 
+class Day03: # Gear Ratios
+    '''
+    https://adventofcode.com/2023/day/3
+    '''
+    def get_schematic(self, raw_input_lines: List[str]):
+        schematic = {}
+        for row, raw_input_line in enumerate(raw_input_lines):
+            for col, char in enumerate(raw_input_line):
+                if char != '.':
+                    schematic[(row, col)] = char
+        result = schematic
+        return result
+    
+    def solve(self, schematic):
+        work = set()
+        for (row, col), char in schematic.items():
+            if char not in '0123456789':
+                for (r, c) in (
+                    (-1, -1),
+                    (-1,  0),
+                    (-1,  1),
+                    ( 0, -1),
+                    ( 0,  1),
+                    ( 1, -1),
+                    ( 1,  0),
+                    ( 1,  1),
+                ):
+                    if (
+                        (row + r, col + c) in schematic and
+                        schematic[(row + r, col + c)] in '0123456789'
+                    ):
+                        work.add((row + r, col + c))
+        valid_part_numbers = []
+        while len(work) > 0:
+            (row, col) = work.pop()
+            # Expand left to find the start
+            start_col = col
+            while (
+                (row, start_col - 1) in schematic and 
+                schematic[(row, start_col - 1)] in '0123456789'
+            ):
+                start_col -= 1
+                work.discard((row, start_col))
+            # Expand right to find the end
+            end_col = col
+            while (
+                (row, end_col + 1) in schematic and 
+                schematic[(row, end_col + 1)] in '0123456789'
+            ):
+                end_col += 1
+                work.discard((row, end_col))
+            # Calculate the whole part number
+            valid_part_number = 0
+            for col in range(start_col, end_col + 1):
+                number = int(schematic[(row, col)])
+                valid_part_number = 10 * valid_part_number + number
+            valid_part_numbers.append(valid_part_number)
+        result = sum(valid_part_numbers)
+        return result
+    
+    def solve2(self, schematic):
+        result = len(schematic)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        schematic = self.get_schematic(raw_input_lines)
+        solutions = (
+            self.solve(schematic),
+            self.solve2(schematic),
+            )
+        result = solutions
+        return result
+
 class Day02: # Cube Conundrum
     '''
     https://adventofcode.com/2023/day/2
@@ -217,7 +291,7 @@ if __name__ == '__main__':
     solvers = {
         1: (Day01, 'Trebuchet?!'),
         2: (Day02, 'Cube Conundrum'),
-    #     3: (Day03, 'Unknown'),
+        3: (Day03, 'Gear Ratios'),
     #     4: (Day04, 'Unknown'),
     #     5: (Day05, 'Unknown'),
     #     6: (Day06, 'Unknown'),
