@@ -116,7 +116,77 @@ class Day03: # Gear Ratios
         return result
     
     def solve2(self, schematic):
-        result = len(schematic)
+        work = set()
+        for (row, col), char in schematic.items():
+            if char == '*':
+                for (r, c) in (
+                    (-1, -1),
+                    (-1,  0),
+                    (-1,  1),
+                    ( 0, -1),
+                    ( 0,  1),
+                    ( 1, -1),
+                    ( 1,  0),
+                    ( 1,  1),
+                ):
+                    if (
+                        (row + r, col + c) in schematic and
+                        schematic[(row + r, col + c)] in '0123456789'
+                    ):
+                        work.add((row + r, col + c))
+        # Locate part numbers
+        part_number_map = {} # (row, col) -> part_number_id
+        part_numbers = {} # part_number_id -> part_number
+        while len(work) > 0:
+            part_number_id = len(part_numbers)
+            (row, col) = work.pop()
+            part_number_map[(row, col)] = part_number_id
+            # Expand left to find the start
+            start_col = col
+            while (
+                (row, start_col - 1) in schematic and 
+                schematic[(row, start_col - 1)] in '0123456789'
+            ):
+                start_col -= 1
+                work.discard((row, start_col))
+                part_number_map[(row, start_col)] = part_number_id
+            # Expand right to find the end
+            end_col = col
+            while (
+                (row, end_col + 1) in schematic and 
+                schematic[(row, end_col + 1)] in '0123456789'
+            ):
+                end_col += 1
+                work.discard((row, end_col))
+                part_number_map[(row, start_col)] = part_number_id
+            # Calculate the whole part number
+            part_number = 0
+            for col in range(start_col, end_col + 1):
+                number = int(schematic[(row, col)])
+                part_number = 10 * part_number + number
+            part_numbers[part_number_id] = part_number
+        gear_ratios = []
+        for (row, col), char in schematic.items():
+            if char == '*':
+                neighbors = set()
+                for (r, c) in (
+                    (-1, -1),
+                    (-1,  0),
+                    (-1,  1),
+                    ( 0, -1),
+                    ( 0,  1),
+                    ( 1, -1),
+                    ( 1,  0),
+                    ( 1,  1),
+                ):
+                    if (row + r, col + c) in part_number_map:
+                        neighbor = part_number_map[(row + r, col + c)]
+                        neighbors.add(neighbor)
+                if len(neighbors) == 2:
+                    gear_ratio = part_numbers[neighbors.pop()]
+                    gear_ratio *= part_numbers[neighbors.pop()]
+                    gear_ratios.append(gear_ratio)
+        result = sum(gear_ratios)
         return result
     
     def main(self):
