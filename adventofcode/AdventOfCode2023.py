@@ -55,6 +55,54 @@ class Template: # Template
         result = solutions
         return result
 
+class Day04: # Scratchcards
+    '''
+    https://adventofcode.com/2023/day/4
+    '''
+    def get_cards(self, raw_input_lines: List[str]):
+        cards = {}
+        for raw_input_line in raw_input_lines:
+            a, b = raw_input_line.split(': ')
+            card_id = int(a.split()[1])
+            c, d = b.split(' | ')
+            winners = set(map(int, c.split()))
+            numbers = set(map(int, d.split()))
+            card = {
+                'winners': winners,
+                'numbers': numbers,
+            }
+            cards[card_id] = card
+        result = cards
+        return result
+    
+    def solve(self, cards):
+        winnings = []
+        for card in cards.values():
+            winning_numbers = card['winners'] & card['numbers']
+            points = 0
+            for _ in winning_numbers:
+                if points < 1:
+                    points = 1
+                else:
+                    points *= 2
+            winnings.append(points)
+        result = sum(winnings)
+        return result
+    
+    def solve2(self, cards):
+        result = len(cards)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        cards = self.get_cards(raw_input_lines)
+        solutions = (
+            self.solve(cards),
+            self.solve2(cards),
+            )
+        result = solutions
+        return result
+
 class Day03: # Gear Ratios
     '''
     https://adventofcode.com/2023/day/3
@@ -362,7 +410,7 @@ if __name__ == '__main__':
         1: (Day01, 'Trebuchet?!'),
         2: (Day02, 'Cube Conundrum'),
         3: (Day03, 'Gear Ratios'),
-    #     4: (Day04, 'Unknown'),
+        4: (Day04, 'Scratchcards'),
     #     5: (Day05, 'Unknown'),
     #     6: (Day06, 'Unknown'),
     #     7: (Day07, 'Unknown'),
