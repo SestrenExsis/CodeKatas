@@ -90,7 +90,15 @@ class Day04: # Scratchcards
         return result
     
     def solve2(self, cards):
-        result = len(cards)
+        copies = {}
+        # Calculate copies in reverse order by card ID
+        for card_id in reversed(sorted(cards.keys())):
+            card = cards[card_id]
+            matches = len(card['winners'] & card['numbers'])
+            copies[card_id] = 1
+            for offset in range(1, matches + 1):
+                copies[card_id] += copies[card_id + offset]
+        result = sum(copies.values())
         return result
     
     def main(self):
