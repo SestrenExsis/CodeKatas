@@ -55,6 +55,119 @@ class Template: # Template
         result = solutions
         return result
 
+class Day05: # If You Give A Seed A Fertilizer
+    '''
+    https://adventofcode.com/2023/day/5
+    '''
+    def get_almanac(self, raw_input_lines: List[str]):
+        seeds = list(map(int, raw_input_lines[0].split(': ')[1].split(' ')))
+        almanac = {
+            'seeds': seeds,
+            'seed-to-soil': {},
+            'soil-to-fertilizer': {},
+            'fertilizer-to-water': {},
+            'water-to-light': {},
+            'light-to-temperature': {},
+            'temperature-to-humidity': {},
+            'humidity-to-location': {},
+        }
+        section = None
+        for raw_input_line in raw_input_lines[1:]:
+            if len(raw_input_line) < 1:
+                pass
+            elif raw_input_line[-1] == ':':
+                section = raw_input_line.split(' ')[0]
+            else:
+                mapping = tuple(map(int, raw_input_line.split(' ')))
+                map_key = (mapping[1], mapping[1] + mapping[2] - 1)
+                map_value = mapping[0] - mapping[1]
+                almanac[section][map_key] = map_value
+        result = almanac
+        return result
+    
+    def solve(self, almanac):
+        locations = []
+        seeds = almanac['seeds']
+        # Convert seed to soil
+        soils = []
+        for seed in seeds:
+            for (range_start, range_end), offset in almanac['seed-to-soil'].items():
+                if range_start <= seed <= range_end:
+                    soils.append(seed + offset)
+                    break
+            else:
+                soils.append(seed)
+        # Convert soil to fertilizer
+        fertilizers = []
+        for soil in soils:
+            for (range_start, range_end), offset in almanac['soil-to-fertilizer'].items():
+                if range_start <= soil <= range_end:
+                    fertilizers.append(soil + offset)
+                    break
+            else:
+                fertilizers.append(soil)
+        # Convert fertilizer to water
+        waters = []
+        for fertilizer in fertilizers:
+            for (range_start, range_end), offset in almanac['fertilizer-to-water'].items():
+                if range_start <= fertilizer <= range_end:
+                    waters.append(fertilizer + offset)
+                    break
+            else:
+                waters.append(fertilizer)
+        # Convert water to light
+        lights = []
+        for water in waters:
+            for (range_start, range_end), offset in almanac['water-to-light'].items():
+                if range_start <= water <= range_end:
+                    lights.append(water + offset)
+                    break
+            else:
+                lights.append(water)
+        # Convert light to temperature
+        temperatures = []
+        for light in lights:
+            for (range_start, range_end), offset in almanac['light-to-temperature'].items():
+                if range_start <= light <= range_end:
+                    temperatures.append(light + offset)
+                    break
+            else:
+                temperatures.append(light)
+        # Convert temperature to humidity
+        humiditys = []
+        for temperature in temperatures:
+            for (range_start, range_end), offset in almanac['temperature-to-humidity'].items():
+                if range_start <= temperature <= range_end:
+                    humiditys.append(temperature + offset)
+                    break
+            else:
+                humiditys.append(temperature)
+        # Convert humidity to location
+        locations = []
+        for humidity in humiditys:
+            for (range_start, range_end), offset in almanac['humidity-to-location'].items():
+                if range_start <= humidity <= range_end:
+                    locations.append(humidity + offset)
+                    break
+            else:
+                locations.append(humidity)
+        result = min(locations)
+        return result
+    
+    def solve2(self, almanac):
+        result = len(almanac)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        almanac = self.get_almanac(raw_input_lines)
+        solutions = (
+            self.solve(almanac),
+            self.solve2(almanac),
+            )
+        result = solutions
+        return result
+
 class Day04: # Scratchcards
     '''
     https://adventofcode.com/2023/day/4
@@ -419,7 +532,7 @@ if __name__ == '__main__':
         2: (Day02, 'Cube Conundrum'),
         3: (Day03, 'Gear Ratios'),
         4: (Day04, 'Scratchcards'),
-    #     5: (Day05, 'Unknown'),
+        5: (Day05, 'If You Give A Seed A Fertilizer'),
     #     6: (Day06, 'Unknown'),
     #     7: (Day07, 'Unknown'),
     #     8: (Day08, 'Unknown'),
