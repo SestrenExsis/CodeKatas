@@ -154,8 +154,168 @@ class Day05: # If You Give A Seed A Fertilizer
         result = min(locations)
         return result
     
+    def solve2_slowly(self, almanac):
+        almanac2 = copy.deepcopy(almanac)
+        seeds = []
+        for index in range(0, len(almanac['seeds']), 2):
+            seed_start = almanac['seeds'][index]
+            seed_count = almanac['seeds'][index + 1]
+            for seed in range(seed_start, seed_start + seed_count):
+                seeds.append(seed)
+        almanac2['seeds'] = seeds
+        result = self.solve(almanac2)
+        return result
+
+    def split_range(self, source_range, mapping):
+        (source_start, source_end) = source_range
+        target_ranges = []
+        for (start, end), offset in mapping.items():
+            if start <= source_start:
+                if end >= source_start:
+                    target_range = (
+                        offset + max(start, source_start),
+                        offset + min(end, source_end),
+                    )
+                    target_ranges.append(target_range)
+                else:
+                    pass # no overlap
+            elif end <= source_end:
+                if end >= source_start:
+                    target_range = (
+                        offset + max(start, source_start),
+                        offset + min(end, source_end),
+                    )
+                    target_ranges.append(target_range)
+                pass
+            else:
+                pass # no overlap
+        result = target_ranges
+        return result
+    
+    def solve2_with_ranges(self, almanac):
+        seed_ranges = []
+        for index in range(0, len(almanac['seeds']), 2):
+            seed_start = almanac['seeds'][index]
+            seed_count = almanac['seeds'][index + 1]
+            seed_ranges.append((seed_start, seed_start + seed_count - 1))
+        # Convert seed to soil
+        soil_ranges = []
+        for source_range in seed_ranges:
+            target_ranges = self.split_range(source_range, almanac['seed-to-soil'])
+            soil_ranges.extend(target_ranges)
+        print('soil_ranges:', soil_ranges)
+        # Convert soil to fertilizer
+        fertilizer_ranges = []
+        for source_range in soil_ranges:
+            target_ranges = self.split_range(source_range, almanac['soil-to-fertilizer'])
+            fertilizer_ranges.extend(target_ranges)
+        print('fertilizer_ranges:', fertilizer_ranges)
+        # Convert fertilizer to water
+        water_ranges = []
+        for source_range in fertilizer_ranges:
+            target_ranges = self.split_range(source_range, almanac['fertilizer-to-water'])
+            water_ranges.extend(target_ranges)
+        # Convert water to light
+        light_ranges = []
+        for source_range in water_ranges:
+            target_ranges = self.split_range(source_range, almanac['water-to-light'])
+            light_ranges.extend(target_ranges)
+        # Convert light to temperature
+        temperature_ranges = []
+        for source_range in light_ranges:
+            target_ranges = self.split_range(source_range, almanac['light-to-temperature'])
+            temperature_ranges.extend(target_ranges)
+        # Convert temperature to humidity
+        humidity_ranges = []
+        for source_range in temperature_ranges:
+            target_ranges = self.split_range(source_range, almanac['temperature-to-humidity'])
+            humidity_ranges.extend(target_ranges)
+        # Convert humidity to location
+        location_ranges = []
+        for source_range in humidity_ranges:
+            target_ranges = self.split_range(source_range, almanac['humidity-to-location'])
+            location_ranges.extend(target_ranges)
+        # Calculate minimum location
+        result = float('inf')
+        for start, end in location_ranges:
+            result = min(result, start)
+        return result
+
     def solve2(self, almanac):
-        result = len(almanac)
+        # Work backwards to figure out seeds of interest
+        # Get initial points of interest from humidity
+        humiditys_of_interest = set()
+        for (start, end), offset in almanac['humidity-to-location'].items():
+            humiditys_of_interest.add(start)
+            humiditys_of_interest.add(end)
+        # Convert humidity to temperature
+        temperatures_of_interest = set()
+        for humidity in humiditys_of_interest:
+            for (start, end), offset in almanac['temperature-to-humidity'].items():
+                if (start + offset <= humidity <= end + offset):
+                    temperatures_of_interest.add(start)
+                    temperatures_of_interest.add(end)
+                    temperatures_of_interest.add(humidity - offset)
+            temperatures_of_interest.add(humidity)
+        # Convert temperature to light
+        lights_of_interest = set()
+        for temperature in temperatures_of_interest:
+            for (start, end), offset in almanac['light-to-temperature'].items():
+                if (start + offset <= temperature <= end + offset):
+                    lights_of_interest.add(start)
+                    lights_of_interest.add(end)
+                    lights_of_interest.add(temperature - offset)
+            lights_of_interest.add(humidity)
+        # Convert light to water
+        waters_of_interest = set()
+        for light in lights_of_interest:
+            for (start, end), offset in almanac['water-to-light'].items():
+                if (start + offset <= light <= end + offset):
+                    waters_of_interest.add(start)
+                    waters_of_interest.add(end)
+                    waters_of_interest.add(light - offset)
+            waters_of_interest.add(light)
+        # Convert water to fertilizer
+        fertilizers_of_interest = set()
+        for water in waters_of_interest:
+            for (start, end), offset in almanac['fertilizer-to-water'].items():
+                if (start + offset <= water <= end + offset):
+                    fertilizers_of_interest.add(start)
+                    fertilizers_of_interest.add(end)
+                    fertilizers_of_interest.add(water - offset)
+            fertilizers_of_interest.add(water)
+        # Convert fertilizer to soil
+        soils_of_interest = set()
+        for fertilizer in fertilizers_of_interest:
+            for (start, end), offset in almanac['soil-to-fertilizer'].items():
+                if (start + offset <= fertilizer <= end + offset):
+                    soils_of_interest.add(start)
+                    soils_of_interest.add(end)
+                    soils_of_interest.add(fertilizer - offset)
+            soils_of_interest.add(fertilizer)
+        # Convert soil to seed
+        seeds_of_interest = set()
+        for soil in soils_of_interest:
+            for (start, end), offset in almanac['seed-to-soil'].items():
+                if (start + offset <= soil <= end + offset):
+                    seeds_of_interest.add(start)
+                    seeds_of_interest.add(end)
+                    seeds_of_interest.add(soil - offset)
+            seeds_of_interest.add(soil)
+        valid_seeds = set()
+        # Find seeds of interest in original seeds
+        for seed in seeds_of_interest:
+            for index in range(0, len(almanac['seeds']), 2):
+                seed_start = almanac['seeds'][index]
+                seed_count = almanac['seeds'][index + 1]
+                seed_end = seed_start + seed_count - 1
+                if seed_start <= seed <= seed_end:
+                    valid_seeds.add(seed)
+                    break
+        revised_almanac = copy.deepcopy(almanac)
+        revised_almanac['seeds'] = list(valid_seeds)
+        min_location = self.solve(revised_almanac)
+        result = min_location
         return result
     
     def main(self):
