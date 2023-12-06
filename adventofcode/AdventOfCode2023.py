@@ -55,6 +55,56 @@ class Template: # Template
         result = solutions
         return result
 
+class Day06: # Wait For It
+    '''
+    https://adventofcode.com/2023/day/6
+    '''
+    def get_races(self, raw_input_lines: List[str]):
+        races = []
+        raw_time = raw_input_lines[0].split()
+        raw_distance = raw_input_lines[1].split()
+        for i in range(1, len(raw_time)):
+            races.append((int(raw_time[i]), int(raw_distance[i])))
+        result = races
+        return result
+    
+    def solve(self, races):
+        ways_to_win = []
+        for (time, record) in races:
+            wins = {}
+            for speed in range(time + 1):
+                time_left = time - speed
+                distance = speed * time_left
+                if distance > record:
+                    wins[speed] = distance
+            ways_to_win.append(wins)
+        margin_of_error = 1
+        for wins in ways_to_win:
+            margin_of_error *= len(wins)
+        result = margin_of_error
+        return result
+    
+    def solve2(self, races):
+        combined_time = ''
+        combined_distance = ''
+        for (time, record) in races:
+            combined_time += str(time)
+            combined_distance += str(record)
+        new_races = []
+        new_races.append((int(combined_time), int(combined_distance)))
+        result = self.solve(new_races)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        races = self.get_races(raw_input_lines)
+        solutions = (
+            self.solve(races),
+            self.solve2(races),
+            )
+        result = solutions
+        return result
+
 class Day05: # If You Give A Seed A Fertilizer
     '''
     https://adventofcode.com/2023/day/5
@@ -606,7 +656,7 @@ if __name__ == '__main__':
         3: (Day03, 'Gear Ratios'),
         4: (Day04, 'Scratchcards'),
         5: (Day05, 'If You Give A Seed A Fertilizer'),
-    #     6: (Day06, 'Unknown'),
+        6: (Day06, 'Wait For It'),
     #     7: (Day07, 'Unknown'),
     #     8: (Day08, 'Unknown'),
     #     9: (Day09, 'Unknown'),
