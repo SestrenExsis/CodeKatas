@@ -85,7 +85,14 @@ class Day06: # Wait For It
         return result
     
     def solve2(self, races):
-        result = len(races)
+        combined_time = ''
+        combined_distance = ''
+        for (time, record) in races:
+            combined_time += str(time)
+            combined_distance += str(record)
+        new_races = []
+        new_races.append((int(combined_time), int(combined_distance)))
+        result = self.solve(new_races)
         return result
     
     def main(self):
