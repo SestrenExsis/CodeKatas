@@ -59,6 +59,7 @@ class Day07: # Camel Cards
     '''
     https://adventofcode.com/2023/day/7
     '''
+    joker_rule = False
     rank_values = {
         'A': 14,
         'K': 13,
@@ -121,9 +122,21 @@ class Day07: # Camel Cards
     def get_bidding_hand_sort(self, bidding_hand):
         HAND, BID = 0, 1
         hand = bidding_hand[HAND]
-        hand_type = self.get_hand_type(hand)
+        best_hand_type_value = -1
+        if self.joker_rule and 'J' in hand:
+            for rank in '23456789TJQKA':
+                new_hand = hand.replace('J', rank)
+                best_hand_type_value = max(
+                    best_hand_type_value,
+                    self.hand_type_values[self.get_hand_type(new_hand)],
+                )
+        else:
+            best_hand_type_value = self.hand_type_values[self.get_hand_type(hand)]
+        # Temporarily change the value of J
+        if self.joker_rule and 'J' in hand:
+            self.rank_values['J'] = 1
         bidding_hand_value = (
-            self.hand_type_values[hand_type],
+            best_hand_type_value,
             self.rank_values[hand[0]],
             self.rank_values[hand[1]],
             self.rank_values[hand[2]],
@@ -131,9 +144,12 @@ class Day07: # Camel Cards
             self.rank_values[hand[4]],
         )
         result = bidding_hand_value
+        # Change the value of J back
+        self.rank_values['J'] = 11
         return result
     
     def solve(self, bidding_hands):
+        self.joker_rule = False
         bidding_hands.sort(key=self.get_bidding_hand_sort)
         winnings = []
         for multiplier, (hand, bid) in enumerate(bidding_hands, start=1):
@@ -142,7 +158,12 @@ class Day07: # Camel Cards
         return result
     
     def solve2(self, bidding_hands):
-        result = len(bidding_hands)
+        self.joker_rule = True
+        bidding_hands.sort(key=self.get_bidding_hand_sort)
+        winnings = []
+        for multiplier, (hand, bid) in enumerate(bidding_hands, start=1):
+            winnings.append(multiplier * bid)
+        result = sum(winnings)
         return result
     
     def main(self):
