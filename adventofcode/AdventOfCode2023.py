@@ -55,6 +55,106 @@ class Template: # Template
         result = solutions
         return result
 
+class Day07: # Camel Cards
+    '''
+    https://adventofcode.com/2023/day/7
+    '''
+    rank_values = {
+        'A': 14,
+        'K': 13,
+        'Q': 12,
+        'J': 11,
+        'T': 10,
+        '9': 9,
+        '8': 8,
+        '7': 7,
+        '6': 6,
+        '5': 5,
+        '4': 4,
+        '3': 3,
+        '2': 2,
+    }
+    hand_type_values = {
+        'Five of a kind': 6,
+        'Four of a kind': 5,
+        'Full house': 4,
+        'Three of a kind': 3,
+        'Two pair': 2,
+        'One pair': 1,
+        'High card': 0,
+    }
+    def get_bidding_hands(self, raw_input_lines: List[str]):
+        bidding_hands = []
+        for raw_input_line in raw_input_lines:
+            (hand, raw_bid) = raw_input_line.split()
+            bid = int(raw_bid)
+            bidding_hands.append((hand, bid))
+        result = bidding_hands
+        return result
+
+    def get_hand_type(self, hand):
+        counts = collections.Counter(hand)
+        RANK, COUNT = 0, 1
+        ranks = []
+        for rank, count in counts.most_common():
+            ranks.append((rank, count))
+        hand_type = 'UNKNOWN'
+        if ranks[0][COUNT] == 5:
+            hand_type = 'Five of a kind'
+        elif ranks[0][COUNT] == 4:
+            hand_type = 'Four of a kind'
+        elif ranks[0][COUNT] == 3:
+            if len(ranks) > 1 and ranks[1][COUNT] == 2:
+                hand_type = 'Full house'
+            else:
+                hand_type = 'Three of a kind'
+        elif ranks[0][COUNT] == 2:
+            if len(ranks) > 1 and ranks[1][COUNT] == 2:
+                hand_type = 'Two pair'
+            else:
+                hand_type = 'One pair'
+        else:
+            hand_type = 'High card'
+        result = hand_type
+        return result
+    
+    def get_bidding_hand_sort(self, bidding_hand):
+        HAND, BID = 0, 1
+        hand = bidding_hand[HAND]
+        hand_type = self.get_hand_type(hand)
+        bidding_hand_value = (
+            self.hand_type_values[hand_type],
+            self.rank_values[hand[0]],
+            self.rank_values[hand[1]],
+            self.rank_values[hand[2]],
+            self.rank_values[hand[3]],
+            self.rank_values[hand[4]],
+        )
+        result = bidding_hand_value
+        return result
+    
+    def solve(self, bidding_hands):
+        bidding_hands.sort(key=self.get_bidding_hand_sort)
+        winnings = []
+        for multiplier, (hand, bid) in enumerate(bidding_hands, start=1):
+            winnings.append(multiplier * bid)
+        result = sum(winnings)
+        return result
+    
+    def solve2(self, bidding_hands):
+        result = len(bidding_hands)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        bidding_hands = self.get_bidding_hands(raw_input_lines)
+        solutions = (
+            self.solve(bidding_hands),
+            self.solve2(bidding_hands),
+            )
+        result = solutions
+        return result
+
 class Day06: # Wait For It
     '''
     https://adventofcode.com/2023/day/6
@@ -657,7 +757,7 @@ if __name__ == '__main__':
         4: (Day04, 'Scratchcards'),
         5: (Day05, 'If You Give A Seed A Fertilizer'),
         6: (Day06, 'Wait For It'),
-    #     7: (Day07, 'Unknown'),
+        7: (Day07, 'Camel Cards'),
     #     8: (Day08, 'Unknown'),
     #     9: (Day09, 'Unknown'),
     #    10: (Day10, 'Unknown'),
