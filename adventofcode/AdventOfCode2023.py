@@ -69,11 +69,11 @@ class Day08: # Haunted Wasteland
         result = (instructions, network)
         return result
     
-    def solve(self, instructions, network):
+    def solve(self, instructions, network, starting_node='AAA', ending_pattern='ZZZ'):
         LEFT, RIGHT = 0, 1
         step_count = 0
-        node = 'AAA'
-        while node != 'ZZZ':
+        node = starting_node
+        while True:
             instruction = instructions[step_count % len(instructions)]
             next_node = node
             if instruction == 'L':
@@ -82,11 +82,33 @@ class Day08: # Haunted Wasteland
                 next_node = network[node][RIGHT]
             step_count += 1
             node = next_node
+            ending_pattern_matched = True
+            for i in range(len(node)):
+                if ending_pattern[i] == '*' or ending_pattern[i] == node[i]:
+                    pass
+                else:
+                    ending_pattern_matched = False
+                    break
+            if ending_pattern_matched:
+                break
         result = step_count
         return result
     
     def solve2(self, instructions, network):
-        result = len(network)
+        LEFT, RIGHT = 0, 1
+        step_counts = []
+        for node in network.keys():
+            if node[-1] == 'A':
+                step_counts.append(
+                    self.solve(instructions, network, node, '**Z')
+                )
+        total_step_count = 1
+        for step_count in sorted(step_counts):
+            multiplier = 1
+            while ((multiplier * total_step_count) % step_count) != 0:
+                multiplier += 1
+            total_step_count *= multiplier
+        result = total_step_count
         return result
     
     def main(self):
