@@ -55,6 +55,72 @@ class Template: # Template
         result = solutions
         return result
 
+class Day08: # Haunted Wasteland
+    '''
+    https://adventofcode.com/2023/day/8
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        instructions = raw_input_lines[0]
+        network = {}
+        for raw_input_line in raw_input_lines[2:]:
+            (node, raw_elements) = raw_input_line.split(' = ')
+            (left_node, right_node) = raw_elements[1:-1].split(', ')
+            network[node] = (left_node, right_node)
+        result = (instructions, network)
+        return result
+    
+    def solve(self, instructions, network, starting_node='AAA', ending_pattern='ZZZ'):
+        LEFT, RIGHT = 0, 1
+        step_count = 0
+        node = starting_node
+        while True:
+            instruction = instructions[step_count % len(instructions)]
+            next_node = node
+            if instruction == 'L':
+                next_node = network[node][LEFT]
+            else:
+                next_node = network[node][RIGHT]
+            step_count += 1
+            node = next_node
+            ending_pattern_matched = True
+            for i in range(len(node)):
+                if ending_pattern[i] == '*' or ending_pattern[i] == node[i]:
+                    pass
+                else:
+                    ending_pattern_matched = False
+                    break
+            if ending_pattern_matched:
+                break
+        result = step_count
+        return result
+    
+    def solve2(self, instructions, network):
+        LEFT, RIGHT = 0, 1
+        step_counts = []
+        for node in network.keys():
+            if node[-1] == 'A':
+                step_counts.append(
+                    self.solve(instructions, network, node, '**Z')
+                )
+        total_step_count = 1
+        for step_count in sorted(step_counts):
+            multiplier = 1
+            while ((multiplier * total_step_count) % step_count) != 0:
+                multiplier += 1
+            total_step_count *= multiplier
+        result = total_step_count
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        (instructions, network) = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(instructions, network),
+            self.solve2(instructions, network),
+            )
+        result = solutions
+        return result
+
 class Day07: # Camel Cards
     '''
     https://adventofcode.com/2023/day/7
@@ -779,7 +845,7 @@ if __name__ == '__main__':
         5: (Day05, 'If You Give A Seed A Fertilizer'),
         6: (Day06, 'Wait For It'),
         7: (Day07, 'Camel Cards'),
-    #     8: (Day08, 'Unknown'),
+        8: (Day08, 'Haunted Wasteland'),
     #     9: (Day09, 'Unknown'),
     #    10: (Day10, 'Unknown'),
     #    11: (Day11, 'Unknown'),
