@@ -55,6 +55,54 @@ class Template: # Template
         result = solutions
         return result
 
+class Day09: # Mirage Maintenance
+    '''
+    https://adventofcode.com/2023/day/9
+    '''
+    def get_histories(self, raw_input_lines: List[str]):
+        histories = []
+        for raw_input_line in raw_input_lines:
+            history = tuple(map(int, raw_input_line.split()))
+            histories.append(history)
+        result = histories
+        return result
+
+    def get_prediction(self, history):
+        differences = [list(history)]
+        while len(set(differences[-1])) > 1 or differences[-1][0] != 0:
+            next_difference = []
+            for i in range(len(differences[-1]) - 1):
+                a = differences[-1][i]
+                b = differences[-1][i + 1]
+                next_difference.append(b - a)
+            differences.append(next_difference)
+        prediction = 0
+        for i in range(len(differences)):
+            prediction += differences[i][-1]
+        result = prediction
+        return result
+    
+    def solve(self, histories):
+        predictions = list()
+        for history in histories:
+            predictions.append(self.get_prediction(history))
+        result = sum(predictions)
+        return result
+    
+    def solve2(self, histories):
+        result = len(histories)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        histories = self.get_histories(raw_input_lines)
+        solutions = (
+            self.solve(histories),
+            self.solve2(histories),
+            )
+        result = solutions
+        return result
+
 class Day08: # Haunted Wasteland
     '''
     https://adventofcode.com/2023/day/8
@@ -846,7 +894,7 @@ if __name__ == '__main__':
         6: (Day06, 'Wait For It'),
         7: (Day07, 'Camel Cards'),
         8: (Day08, 'Haunted Wasteland'),
-    #     9: (Day09, 'Unknown'),
+        9: (Day09, 'Mirage Maintenance'),
     #    10: (Day10, 'Unknown'),
     #    11: (Day11, 'Unknown'),
     #    12: (Day12, 'Unknown'),
