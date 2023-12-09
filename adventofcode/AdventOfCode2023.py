@@ -67,7 +67,7 @@ class Day09: # Mirage Maintenance
         result = histories
         return result
 
-    def get_prediction(self, history):
+    def get_differences(self, history):
         differences = [list(history)]
         while len(set(differences[-1])) > 1 or differences[-1][0] != 0:
             next_difference = []
@@ -76,21 +76,38 @@ class Day09: # Mirage Maintenance
                 b = differences[-1][i + 1]
                 next_difference.append(b - a)
             differences.append(next_difference)
-        prediction = 0
+        result = differences
+        return result
+
+    def get_extrapolation(self, history):
+        differences = self.get_differences(history)
+        extrapolation = 0
         for i in range(len(differences)):
-            prediction += differences[i][-1]
-        result = prediction
+            extrapolation += differences[i][-1]
+        result = extrapolation
+        return result
+
+    def get_reverse_extrapolation(self, history):
+        differences = self.get_differences(history)
+        extrapolation = 0
+        for i in reversed(range(len(differences) - 1)):
+            next_extrapolation = differences[i][0] - extrapolation
+            extrapolation = next_extrapolation
+        result = extrapolation
         return result
     
     def solve(self, histories):
-        predictions = list()
+        extrapolations = list()
         for history in histories:
-            predictions.append(self.get_prediction(history))
-        result = sum(predictions)
+            extrapolations.append(self.get_extrapolation(history))
+        result = sum(extrapolations)
         return result
     
     def solve2(self, histories):
-        result = len(histories)
+        extrapolations = list()
+        for history in histories:
+            extrapolations.append(self.get_reverse_extrapolation(history))
+        result = sum(extrapolations)
         return result
     
     def main(self):
