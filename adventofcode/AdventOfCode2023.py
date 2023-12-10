@@ -74,6 +74,7 @@ class Day10: # Pipe Maze
         '7': {'S', 'W'},
         'F': {'S', 'E'},
     }
+
     def get_parsed_input(self, raw_input_lines: List[str]):
         start = None
         pipes = {}
@@ -81,8 +82,30 @@ class Day10: # Pipe Maze
             for (col, char) in enumerate(raw_input_line):
                 if char == 'S':
                     start = (row, col)
-                    # TODO(sestren): Actually compute this instead of forcing it
-                    pipes[(row, col)] = 'F'
+                    directions = set()
+                    # Figure out what type of pipe S is based on its neighbors
+                    if row > 0:
+                        north = raw_input_lines[row - 1][col]
+                        if 'S' in self.CONNECTIONS[north]:
+                            directions.add('N')
+                    if row < len(raw_input_lines) - 1:
+                        south = raw_input_lines[row + 1][col]
+                        if 'N' in self.CONNECTIONS[south]:
+                            directions.add('S')
+                    if col > 0:
+                        west = raw_input_lines[row][col - 1]
+                        if 'E' in self.CONNECTIONS[west]:
+                            directions.add('W')
+                    if col < len(raw_input_line) - 1:
+                        east = raw_input_lines[row][col + 1]
+                        if 'W' in self.CONNECTIONS[east]:
+                            directions.add('E')
+                    for new_char, new_directions in self.CONNECTIONS.items():
+                        if len(new_directions & directions) == 2:
+                            pipes[(row, col)] = new_char
+                            break
+                    else:
+                        raise Exception('No replacement for pipe found')
                 else:
                     pipes[(row, col)] = char
         result = (start, pipes)
