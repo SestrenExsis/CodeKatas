@@ -55,6 +55,70 @@ class Template: # Template
         result = solutions
         return result
 
+class Day10: # Pipe Maze
+    '''
+    https://adventofcode.com/2023/day/10
+    '''
+    ROW, COL = 0, 1
+    DIRECTIONS = {
+        'N': (-1,  0),
+        'E': ( 0,  1),
+        'S': ( 1,  0),
+        'W': ( 0, -1),
+    }
+    CONNECTIONS = {
+        '|': {'N', 'S'},
+        '-': {'E', 'W'},
+        'L': {'N', 'E'},
+        'J': {'N', 'W'},
+        '7': {'S', 'W'},
+        'F': {'S', 'E'},
+        '.': set(),
+    }
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        start = None
+        pipes = {}
+        for (row, raw_input_line) in enumerate(raw_input_lines):
+            for (col, char) in enumerate(raw_input_line):
+                if char == 'S':
+                    start = (row, col)
+                    # TODO(sestren): Actually compute this instead of forcing it
+                    pipes[(row, col)] = 'F'
+                else:
+                    pipes[(row, col)] = char
+        result = (start, pipes)
+        return result
+    
+    def solve(self, start, pipes):
+        (row, col) = start
+        nodes = set()
+        work = [(row, col)]
+        while len(work) > 0:
+            (row, col) = work.pop()
+            nodes.add((row, col))
+            connection = pipes[(row, col)]
+            for direction in self.CONNECTIONS[connection]:
+                next_row = row + self.DIRECTIONS[direction][self.ROW]
+                next_col = col + self.DIRECTIONS[direction][self.COL]
+                if (next_row, next_col) not in nodes:
+                    work.append((next_row, next_col))
+        result = len(nodes) // 2
+        return result
+    
+    def solve2(self, start, pipes):
+        result = len(pipes)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        start, pipes = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(start, pipes),
+            self.solve2(start, pipes),
+            )
+        result = solutions
+        return result
+
 class Day09: # Mirage Maintenance
     '''
     https://adventofcode.com/2023/day/9
@@ -912,7 +976,7 @@ if __name__ == '__main__':
         7: (Day07, 'Camel Cards'),
         8: (Day08, 'Haunted Wasteland'),
         9: (Day09, 'Mirage Maintenance'),
-    #    10: (Day10, 'Unknown'),
+       10: (Day10, 'Pipe Maze'),
     #    11: (Day11, 'Unknown'),
     #    12: (Day12, 'Unknown'),
     #    13: (Day13, 'Unknown'),
