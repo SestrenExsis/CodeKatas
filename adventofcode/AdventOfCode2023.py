@@ -142,18 +142,6 @@ class Day10: # Pipe Maze
         result = expanded_pipes
         return result
     
-    def display_pipes(self, pipes, center_row, center_col, span):
-        print('#' * (2 * span + 1))
-        for row in range(center_row - span, center_row + span + 1):
-            row_data = []
-            for col in range(center_col - span, center_col + span + 1):
-                char = ' '
-                if (row, col) in pipes:
-                    char = pipes[(row, col)]
-                row_data.append(char)
-            print(''.join(row_data))
-        print('#' * (2 * span + 1))
-    
     def solve(self, start, pipes):
         (row, col) = start
         main_loop = self.get_main_loop(start, pipes)
@@ -166,11 +154,8 @@ class Day10: # Pipe Maze
         expanded_pipes = self.expand_pipes(simplified_pipes)
         (min_row, max_row, min_col, max_col) = self.get_boundaries(expanded_pipes)
         enclosed_tiles = set()
-        points_of_egress = set()
         for ((row, col), char) in expanded_pipes.items():
             if char != '.':
-                continue
-            if (row, col) in points_of_egress:
                 continue
             seen = set()
             visited = set()
@@ -180,9 +165,6 @@ class Day10: # Pipe Maze
             seen.add((row, col))
             while len(work) > 0:
                 (curr_row, curr_col) = work.pop()
-                if (curr_row, curr_col) in enclosed_tiles:
-                    enclosed_tiles |= visited
-                    break
                 if (
                     curr_row < min_row or
                     curr_row > max_row or
@@ -200,8 +182,6 @@ class Day10: # Pipe Maze
                 ):
                     if (next_row, next_col) in seen:
                         continue
-                    if (next_row, next_col) in visited:
-                        continue
                     if (
                         (next_row, next_col) in expanded_pipes and
                         expanded_pipes[(next_row, next_col)] != '.'
@@ -211,15 +191,14 @@ class Day10: # Pipe Maze
                     seen.add((next_row, next_col))
             if enclosed_ind:
                 enclosed_tiles |= visited
-            else:
-                points_of_egress |= visited
-        result = 0
-        for (row, col) in enclosed_tiles:
-            if (
-                (row, col) in expanded_pipes and
+                break
+        result = len(
+            enclosed_tiles &
+            set((row, col) for
+                (row, col) in expanded_pipes if
                 expanded_pipes[(row, col)] == '.'
-            ):
-                result += 1
+            )
+        )
         return result
     
     def main(self):
