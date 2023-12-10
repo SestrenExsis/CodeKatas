@@ -73,7 +73,6 @@ class Day10: # Pipe Maze
         'J': {'N', 'W'},
         '7': {'S', 'W'},
         'F': {'S', 'E'},
-        '.': set(),
     }
     def get_parsed_input(self, raw_input_lines: List[str]):
         start = None
@@ -89,24 +88,138 @@ class Day10: # Pipe Maze
         result = (start, pipes)
         return result
     
-    def solve(self, start, pipes):
+    def get_main_loop(self, start, pipes):
         (row, col) = start
-        nodes = set()
+        main_loop = set()
         work = [(row, col)]
         while len(work) > 0:
             (row, col) = work.pop()
-            nodes.add((row, col))
+            main_loop.add((row, col))
             connection = pipes[(row, col)]
             for direction in self.CONNECTIONS[connection]:
                 next_row = row + self.DIRECTIONS[direction][self.ROW]
                 next_col = col + self.DIRECTIONS[direction][self.COL]
-                if (next_row, next_col) not in nodes:
+                if (next_row, next_col) not in main_loop:
                     work.append((next_row, next_col))
-        result = len(nodes) // 2
+        result = main_loop
+        return result
+
+    def get_boundaries(self, pipes):
+        min_row = min(row for (row, col) in pipes)
+        max_row = max(row for (row, col) in pipes)
+        min_col = min(col for (row, col) in pipes)
+        max_col = max(col for (row, col) in pipes)
+        result = (min_row, max_row, min_col, max_col)
+        return result
+
+    def simplify_pipes(self, pipes, main_loop):
+        (min_row, max_row, min_col, max_col) = self.get_boundaries(main_loop)
+        simplified_pipes = {}
+        for (row, col), char in pipes.items():
+            if (
+                row < min_row or
+                row > max_row or
+                col < min_col or
+                col > max_col
+            ):
+                continue
+            if (row, col) not in main_loop:
+                char = '.'
+            simplified_pipes[(row, col)] = char
+        result = simplified_pipes
+        return result
+
+    def expand_pipes(self, pipes):
+        expanded_pipes = {}
+        for (row, col), char in pipes.items():
+            expanded_pipes[(2 * row, 2 * col)] = char
+            if char not in self.CONNECTIONS:
+                continue
+            for direction in self.CONNECTIONS[char]:
+                next_row = 2 * row + self.DIRECTIONS[direction][self.ROW]
+                next_col = 2 * col + self.DIRECTIONS[direction][self.COL]
+                expanded_pipes[(next_row, next_col)] = '+'
+        result = expanded_pipes
+        return result
+    
+    def display_pipes(self, pipes, center_row, center_col, span):
+        print('#' * (2 * span + 1))
+        for row in range(center_row - span, center_row + span + 1):
+            row_data = []
+            for col in range(center_col - span, center_col + span + 1):
+                char = ' '
+                if (row, col) in pipes:
+                    char = pipes[(row, col)]
+                row_data.append(char)
+            print(''.join(row_data))
+        print('#' * (2 * span + 1))
+    
+    def solve(self, start, pipes):
+        (row, col) = start
+        main_loop = self.get_main_loop(start, pipes)
+        result = len(main_loop) // 2
         return result
     
     def solve2(self, start, pipes):
-        result = len(pipes)
+        main_loop = self.get_main_loop(start, pipes)
+        simplified_pipes = self.simplify_pipes(pipes, main_loop)
+        expanded_pipes = self.expand_pipes(simplified_pipes)
+        (min_row, max_row, min_col, max_col) = self.get_boundaries(expanded_pipes)
+        enclosed_tiles = set()
+        points_of_egress = set()
+        for ((row, col), char) in expanded_pipes.items():
+            if char != '.':
+                continue
+            if (row, col) in points_of_egress:
+                continue
+            seen = set()
+            visited = set()
+            enclosed_ind = True
+            work = collections.deque()
+            work.append((row, col))
+            seen.add((row, col))
+            while len(work) > 0:
+                (curr_row, curr_col) = work.pop()
+                if (curr_row, curr_col) in enclosed_tiles:
+                    enclosed_tiles |= visited
+                    break
+                if (
+                    curr_row < min_row or
+                    curr_row > max_row or
+                    curr_col < min_col or
+                    curr_col > max_col
+                ):
+                    enclosed_ind = False
+                    break
+                visited.add((curr_row, curr_col))
+                for (next_row, next_col) in (
+                    (curr_row - 1, curr_col   ),
+                    (curr_row + 1, curr_col   ),
+                    (curr_row    , curr_col - 1),
+                    (curr_row    , curr_col + 1),
+                ):
+                    if (next_row, next_col) in seen:
+                        continue
+                    if (next_row, next_col) in visited:
+                        continue
+                    if (
+                        (next_row, next_col) in expanded_pipes and
+                        expanded_pipes[(next_row, next_col)] != '.'
+                    ):
+                        continue
+                    work.appendleft((next_row, next_col))
+                    seen.add((next_row, next_col))
+            if enclosed_ind:
+                enclosed_tiles |= visited
+            else:
+                points_of_egress |= visited
+        result = 0
+        for (row, col) in enclosed_tiles:
+            if (
+                (row, col) in expanded_pipes and
+                expanded_pipes[(row, col)] == '.'
+            ):
+                result += 1
         return result
     
     def main(self):
