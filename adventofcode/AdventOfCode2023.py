@@ -55,6 +55,185 @@ class Template: # Template
         result = solutions
         return result
 
+class Day10: # Pipe Maze
+    '''
+    https://adventofcode.com/2023/day/10
+    '''
+    ROW, COL = 0, 1
+    DIRECTIONS = {
+        'N': (-1,  0),
+        'E': ( 0,  1),
+        'S': ( 1,  0),
+        'W': ( 0, -1),
+    }
+    CONNECTIONS = {
+        '|': {'N', 'S'},
+        '-': {'E', 'W'},
+        'L': {'N', 'E'},
+        'J': {'N', 'W'},
+        '7': {'S', 'W'},
+        'F': {'S', 'E'},
+    }
+
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        start = None
+        pipes = {}
+        for (row, raw_input_line) in enumerate(raw_input_lines):
+            for (col, char) in enumerate(raw_input_line):
+                if char == 'S':
+                    start = (row, col)
+                    directions = set()
+                    # Figure out what type of pipe S is based on its neighbors
+                    if row > 0:
+                        north = raw_input_lines[row - 1][col]
+                        if 'S' in self.CONNECTIONS[north]:
+                            directions.add('N')
+                    if row < len(raw_input_lines) - 1:
+                        south = raw_input_lines[row + 1][col]
+                        if 'N' in self.CONNECTIONS[south]:
+                            directions.add('S')
+                    if col > 0:
+                        west = raw_input_lines[row][col - 1]
+                        if 'E' in self.CONNECTIONS[west]:
+                            directions.add('W')
+                    if col < len(raw_input_line) - 1:
+                        east = raw_input_lines[row][col + 1]
+                        if 'W' in self.CONNECTIONS[east]:
+                            directions.add('E')
+                    for new_char, new_directions in self.CONNECTIONS.items():
+                        if len(new_directions & directions) == 2:
+                            pipes[(row, col)] = new_char
+                            break
+                    else:
+                        raise Exception('No replacement for pipe found')
+                else:
+                    pipes[(row, col)] = char
+        result = (start, pipes)
+        return result
+    
+    def get_main_loop(self, start, pipes):
+        (row, col) = start
+        main_loop = set()
+        work = [(row, col)]
+        while len(work) > 0:
+            (row, col) = work.pop()
+            main_loop.add((row, col))
+            connection = pipes[(row, col)]
+            for direction in self.CONNECTIONS[connection]:
+                next_row = row + self.DIRECTIONS[direction][self.ROW]
+                next_col = col + self.DIRECTIONS[direction][self.COL]
+                if (next_row, next_col) not in main_loop:
+                    work.append((next_row, next_col))
+        result = main_loop
+        return result
+
+    def get_boundaries(self, pipes):
+        min_row = min(row for (row, col) in pipes)
+        max_row = max(row for (row, col) in pipes)
+        min_col = min(col for (row, col) in pipes)
+        max_col = max(col for (row, col) in pipes)
+        result = (min_row, max_row, min_col, max_col)
+        return result
+
+    def simplify_pipes(self, pipes, main_loop):
+        (min_row, max_row, min_col, max_col) = self.get_boundaries(main_loop)
+        simplified_pipes = {}
+        for (row, col), char in pipes.items():
+            if (
+                row < min_row or
+                row > max_row or
+                col < min_col or
+                col > max_col
+            ):
+                continue
+            if (row, col) not in main_loop:
+                char = '.'
+            simplified_pipes[(row, col)] = char
+        result = simplified_pipes
+        return result
+
+    def expand_pipes(self, pipes):
+        expanded_pipes = {}
+        for (row, col), char in pipes.items():
+            expanded_pipes[(2 * row, 2 * col)] = char
+            if char not in self.CONNECTIONS:
+                continue
+            for direction in self.CONNECTIONS[char]:
+                next_row = 2 * row + self.DIRECTIONS[direction][self.ROW]
+                next_col = 2 * col + self.DIRECTIONS[direction][self.COL]
+                expanded_pipes[(next_row, next_col)] = '+'
+        result = expanded_pipes
+        return result
+    
+    def solve(self, start, pipes):
+        (row, col) = start
+        main_loop = self.get_main_loop(start, pipes)
+        result = len(main_loop) // 2
+        return result
+    
+    def solve2(self, start, pipes):
+        main_loop = self.get_main_loop(start, pipes)
+        simplified_pipes = self.simplify_pipes(pipes, main_loop)
+        expanded_pipes = self.expand_pipes(simplified_pipes)
+        (min_row, max_row, min_col, max_col) = self.get_boundaries(expanded_pipes)
+        enclosed_tiles = set()
+        for ((row, col), char) in expanded_pipes.items():
+            if char != '.':
+                continue
+            seen = set()
+            visited = set()
+            enclosed_ind = True
+            work = collections.deque()
+            work.append((row, col))
+            seen.add((row, col))
+            while len(work) > 0:
+                (curr_row, curr_col) = work.pop()
+                if (
+                    curr_row < min_row or
+                    curr_row > max_row or
+                    curr_col < min_col or
+                    curr_col > max_col
+                ):
+                    enclosed_ind = False
+                    break
+                visited.add((curr_row, curr_col))
+                for (next_row, next_col) in (
+                    (curr_row - 1, curr_col   ),
+                    (curr_row + 1, curr_col   ),
+                    (curr_row    , curr_col - 1),
+                    (curr_row    , curr_col + 1),
+                ):
+                    if (next_row, next_col) in seen:
+                        continue
+                    if (
+                        (next_row, next_col) in expanded_pipes and
+                        expanded_pipes[(next_row, next_col)] != '.'
+                    ):
+                        continue
+                    work.appendleft((next_row, next_col))
+                    seen.add((next_row, next_col))
+            if enclosed_ind:
+                enclosed_tiles |= visited
+                break
+        result = len(
+            enclosed_tiles &
+            set((row, col) for
+                (row, col) in expanded_pipes if
+                expanded_pipes[(row, col)] == '.'
+            )
+        )
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        start, pipes = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(start, pipes),
+            self.solve2(start, pipes),
+            )
+        result = solutions
+        return result
+
 class Day09: # Mirage Maintenance
     '''
     https://adventofcode.com/2023/day/9
@@ -912,7 +1091,7 @@ if __name__ == '__main__':
         7: (Day07, 'Camel Cards'),
         8: (Day08, 'Haunted Wasteland'),
         9: (Day09, 'Mirage Maintenance'),
-    #    10: (Day10, 'Unknown'),
+       10: (Day10, 'Pipe Maze'),
     #    11: (Day11, 'Unknown'),
     #    12: (Day12, 'Unknown'),
     #    13: (Day13, 'Unknown'),
