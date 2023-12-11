@@ -68,7 +68,7 @@ class Day11: # Cosmic Expansion
         result = galaxies
         return result
     
-    def solve(self, galaxies):
+    def solve(self, galaxies, expansions=2):
         filled_rows = set()
         filled_cols = set()
         for (row, col) in galaxies:
@@ -83,13 +83,13 @@ class Day11: # Cosmic Expansion
         expanded_galaxies = set()
         for (row, col) in galaxies:
             expanded_row = row + sum(
-                1 for _ in (
+                expansions - 1 for _ in (
                     empty_row for empty_row in
                     empty_rows if empty_row < row
                 )
             )
             expanded_col = col + sum(
-                1 for _ in (
+                expansions - 1 for _ in (
                     empty_col for empty_col in
                     empty_cols if empty_col < col
                 )
@@ -110,7 +110,7 @@ class Day11: # Cosmic Expansion
         return result
     
     def solve2(self, galaxies):
-        result = len(galaxies)
+        result = self.solve(galaxies, 1_000_000)
         return result
     
     def main(self):
