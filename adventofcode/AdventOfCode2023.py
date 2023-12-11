@@ -55,6 +55,74 @@ class Template: # Template
         result = solutions
         return result
 
+class Day11: # Cosmic Expansion
+    '''
+    https://adventofcode.com/2023/day/11
+    '''
+    def get_galaxies(self, raw_input_lines: List[str]):
+        galaxies = set()
+        for row, raw_input_line in enumerate(raw_input_lines):
+            for col, char in enumerate(raw_input_line):
+                if char == '#':
+                    galaxies.add((row, col))
+        result = galaxies
+        return result
+    
+    def solve(self, galaxies):
+        filled_rows = set()
+        filled_cols = set()
+        for (row, col) in galaxies:
+            filled_rows.add(row)
+            filled_cols.add(col)
+        min_row = min(filled_rows)
+        max_row = max(filled_rows)
+        empty_rows = set(range(min_row, max_row + 1)) - filled_rows
+        min_col = min(filled_cols)
+        max_col = max(filled_cols)
+        empty_cols = set(range(min_col, max_col + 1)) - filled_cols
+        expanded_galaxies = set()
+        for (row, col) in galaxies:
+            expanded_row = row + sum(
+                1 for _ in (
+                    empty_row for empty_row in
+                    empty_rows if empty_row < row
+                )
+            )
+            expanded_col = col + sum(
+                1 for _ in (
+                    empty_col for empty_col in
+                    empty_cols if empty_col < col
+                )
+            )
+            expanded_galaxies.add((expanded_row, expanded_col))
+        distances = {}
+        for (row1, col1) in expanded_galaxies:
+            for (row2, col2) in expanded_galaxies:
+                if (row2 == row1 and col2 == col1):
+                    continue
+                pairing_key = (
+                    min((row1, col1), (row2, col2)),
+                    max((row1, col1), (row2, col2)),
+                )
+                distance = abs(row2 - row1) + abs(col2 - col1)
+                distances[pairing_key] = distance
+        result = sum(distances.values())
+        return result
+    
+    def solve2(self, galaxies):
+        result = len(galaxies)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        galaxies = self.get_galaxies(raw_input_lines)
+        solutions = (
+            self.solve(galaxies),
+            self.solve2(galaxies),
+            )
+        result = solutions
+        return result
+
 class Day10: # Pipe Maze
     '''
     https://adventofcode.com/2023/day/10
@@ -1092,7 +1160,7 @@ if __name__ == '__main__':
         8: (Day08, 'Haunted Wasteland'),
         9: (Day09, 'Mirage Maintenance'),
        10: (Day10, 'Pipe Maze'),
-    #    11: (Day11, 'Unknown'),
+       11: (Day11, 'Cosmic Expansion'),
     #    12: (Day12, 'Unknown'),
     #    13: (Day13, 'Unknown'),
     #    14: (Day14, 'Unknown'),
