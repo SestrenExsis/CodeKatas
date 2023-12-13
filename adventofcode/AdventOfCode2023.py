@@ -55,6 +55,89 @@ class Template: # Template
         result = solutions
         return result
 
+class Day13: # Point of Incidence
+    '''
+    https://adventofcode.com/2023/day/13
+    '''
+    def get_patterns(self, raw_input_lines: List[str]):
+        patterns = []
+        pattern = set()
+        row = 0
+        cols = len(raw_input_lines[0])
+        for raw_input_line in raw_input_lines:
+            if len(raw_input_line) < 1:
+                patterns.append((pattern, row, cols))
+                pattern = set()
+                row = 0
+            else:
+                for col, char in enumerate(raw_input_line):
+                    if char == '#':
+                        pattern.add((row, col))
+                cols = len(raw_input_line)
+                row += 1
+        patterns.append((pattern, row, cols))
+        result = patterns
+        return result
+    
+    def solve(self, patterns):
+        reflected_rows = []
+        reflected_cols = []
+        for (pattern, rows, cols) in patterns:
+            # Find reflected rows
+            for line in range(1, rows):
+                height = min(line, rows - line)
+                for i in range(height):
+                    top = line - i - 1
+                    bottom = line + i
+                    top_rocks = set(
+                        col for (row, col) in
+                        pattern if row == top
+                    )
+                    bottom_rocks = set(
+                        col for (row, col) in
+                        pattern if row == bottom
+                    )
+                    if top_rocks != bottom_rocks:
+                        break
+                else:
+                    reflected_rows.append(line)
+                    break
+            # Find reflected columns
+            for line in range(1, cols):
+                width = min(line, cols - line)
+                for i in range(width):
+                    left = line - i - 1
+                    right = line + i
+                    left_rocks = set(
+                        row for (row, col) in
+                        pattern if col == left
+                    )
+                    right_rocks = set(
+                        row for (row, col) in
+                        pattern if col == right
+                    )
+                    if left_rocks != right_rocks:
+                        break
+                else:
+                    reflected_cols.append(line)
+                    break
+        result = 100 * sum(reflected_rows) + sum(reflected_cols)
+        return result
+    
+    def solve2(self, patterns):
+        result = len(patterns)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        patterns = self.get_patterns(raw_input_lines)
+        solutions = (
+            self.solve(patterns),
+            self.solve2(patterns),
+            )
+        result = solutions
+        return result
+
 class Day12: # Hot Springs
     '''
     https://adventofcode.com/2023/day/12
@@ -1239,7 +1322,7 @@ if __name__ == '__main__':
        10: (Day10, 'Pipe Maze'),
        11: (Day11, 'Cosmic Expansion'),
        12: (Day12, 'Hot Springs'),
-    #    13: (Day13, 'Unknown'),
+       13: (Day13, 'Point of Incidence'),
     #    14: (Day14, 'Unknown'),
     #    15: (Day15, 'Unknown'),
     #    16: (Day16, 'Unknown'),
