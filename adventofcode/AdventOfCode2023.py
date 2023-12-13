@@ -55,6 +55,83 @@ class Template: # Template
         result = solutions
         return result
 
+class Day12: # Hot Springs
+    '''
+    https://adventofcode.com/2023/day/12
+    '''
+    def get_records(self, raw_input_lines: List[str]):
+        records = []
+        for raw_input_line in raw_input_lines:
+            condition, b = raw_input_line.split(' ')
+            summary = tuple(map(int, b.split(',')))
+            records.append((condition, summary))
+        result = records
+        return result
+    
+    def possible_arrangements(self, condition):
+        wildcards = []
+        for index, char in enumerate(condition):
+            if char == '?':
+                wildcards.append(index)
+        if len(wildcards) < 1:
+            return [condition]
+        arrangements = []
+        arrangement_count = 2 ** len(wildcards)
+        for code_id in range(arrangement_count):
+            arrangement = list(condition)
+            code = bin(code_id)[2:][::-1]
+            for i in range(len(wildcards)):
+                char = '.'
+                if i < len(code) and code[i] == '1':
+                    char = '#'
+                arrangement[wildcards[i]] = char
+            arrangements.append(''.join(arrangement))
+        result = arrangements
+        return result
+
+    def summarize(self, arrangement):
+        start = 0
+        while start < len(arrangement) and arrangement[start] == '.':
+            start += 1
+        summary = [0]
+        for i in range(start, len(arrangement)):
+            if arrangement[i] == '.':
+                if summary[-1] > 0:
+                    summary.append(0)
+            else:
+                summary[-1] += 1
+        if len(summary) > 1 and summary[-1] == 0:
+            summary.pop()
+        result = tuple(summary)
+        return result
+    
+    def solve(self, records):
+        valid_arrangement_counts = []
+        for (condition, summary) in records:
+            valid_arrangement_count = 0
+            for arrangement in self.possible_arrangements(condition):
+                new_summary = self.summarize(arrangement)
+                if new_summary == summary:
+                    valid_arrangement_count += 1
+            valid_arrangement_counts.append(valid_arrangement_count)
+            print(valid_arrangement_count, condition, summary)
+        result = sum(valid_arrangement_counts)
+        return result
+    
+    def solve2(self, records):
+        result = len(records)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        records = self.get_records(raw_input_lines)
+        solutions = (
+            self.solve(records),
+            self.solve2(records),
+            )
+        result = solutions
+        return result
+
 class Day11: # Cosmic Expansion
     '''
     https://adventofcode.com/2023/day/11
@@ -1161,7 +1238,7 @@ if __name__ == '__main__':
         9: (Day09, 'Mirage Maintenance'),
        10: (Day10, 'Pipe Maze'),
        11: (Day11, 'Cosmic Expansion'),
-    #    12: (Day12, 'Unknown'),
+       12: (Day12, 'Hot Springs'),
     #    13: (Day13, 'Unknown'),
     #    14: (Day14, 'Unknown'),
     #    15: (Day15, 'Unknown'),
