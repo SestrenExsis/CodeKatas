@@ -55,6 +55,55 @@ class Template: # Template
         result = solutions
         return result
 
+class Day14: # Parabolic Reflector Dish
+    '''
+    https://adventofcode.com/2023/day/14
+    '''
+    def get_rocks(self, raw_input_lines: List[str]):
+        rows = len(raw_input_lines)
+        cols = len(raw_input_lines[0])
+        rocks = {}
+        for row, raw_input_line in enumerate(raw_input_lines):
+            for col, char in enumerate(raw_input_line):
+                if char in 'O#':
+                    rocks[(row, col)] = char
+        result = (rocks, rows, cols)
+        return result
+    
+    def solve(self, rocks, rows, cols):
+        # Tilt north
+        while True:
+            moves = set(
+                (row, col) for (row, col), rock in rocks.items() if
+                rock == 'O' and row > 0 and (row - 1, col) not in rocks
+            )
+            for (row, col) in moves:
+                del rocks[(row, col)]
+                rocks[(row - 1, col)] = 'O'
+            if len(moves) == 0:
+                break
+        # Calculate total load
+        total_load = sum(
+            rows - row for (row, col), rock in rocks.items() if
+            rock == 'O'
+        )
+        result = total_load
+        return result
+    
+    def solve2(self, rocks, rows, cols):
+        result = len(rocks)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        (rocks, rows, cols) = self.get_rocks(raw_input_lines)
+        solutions = (
+            self.solve(copy.deepcopy(rocks), rows, cols),
+            self.solve2(copy.deepcopy(rocks), rows, cols),
+            )
+        result = solutions
+        return result
+
 class Day13: # Point of Incidence
     '''
     https://adventofcode.com/2023/day/13
@@ -1361,7 +1410,7 @@ if __name__ == '__main__':
        11: (Day11, 'Cosmic Expansion'),
        12: (Day12, 'Hot Springs'),
        13: (Day13, 'Point of Incidence'),
-    #    14: (Day14, 'Unknown'),
+       14: (Day14, 'Parabolic Reflector Dish'),
     #    15: (Day15, 'Unknown'),
     #    16: (Day16, 'Unknown'),
     #    17: (Day17, 'Unknown'),
