@@ -79,53 +79,91 @@ class Day13: # Point of Incidence
         result = patterns
         return result
     
+    def find_reflections(self, pattern, rows, cols):
+        reflections = set()
+        # Find reflected row
+        for line in range(1, rows):
+            height = min(line, rows - line)
+            for i in range(height):
+                top = line - i - 1
+                bottom = line + i
+                top_rocks = set(
+                    col for (row, col) in
+                    pattern if row == top
+                )
+                bottom_rocks = set(
+                    col for (row, col) in
+                    pattern if row == bottom
+                )
+                if top_rocks != bottom_rocks:
+                    break
+            else:
+                reflections.add(('Row', line))
+        # Find reflected column
+        for line in range(1, cols):
+            width = min(line, cols - line)
+            for i in range(width):
+                left = line - i - 1
+                right = line + i
+                left_rocks = set(
+                    row for (row, col) in
+                    pattern if col == left
+                )
+                right_rocks = set(
+                    row for (row, col) in
+                    pattern if col == right
+                )
+                if left_rocks != right_rocks:
+                    break
+            else:
+                reflections.add(('Column', line))
+        result = reflections
+        return result
+    
     def solve(self, patterns):
         reflected_rows = []
         reflected_cols = []
         for (pattern, rows, cols) in patterns:
-            # Find reflected rows
-            for line in range(1, rows):
-                height = min(line, rows - line)
-                for i in range(height):
-                    top = line - i - 1
-                    bottom = line + i
-                    top_rocks = set(
-                        col for (row, col) in
-                        pattern if row == top
-                    )
-                    bottom_rocks = set(
-                        col for (row, col) in
-                        pattern if row == bottom
-                    )
-                    if top_rocks != bottom_rocks:
-                        break
-                else:
-                    reflected_rows.append(line)
-                    break
-            # Find reflected columns
-            for line in range(1, cols):
-                width = min(line, cols - line)
-                for i in range(width):
-                    left = line - i - 1
-                    right = line + i
-                    left_rocks = set(
-                        row for (row, col) in
-                        pattern if col == left
-                    )
-                    right_rocks = set(
-                        row for (row, col) in
-                        pattern if col == right
-                    )
-                    if left_rocks != right_rocks:
-                        break
-                else:
-                    reflected_cols.append(line)
-                    break
+            reflections = self.find_reflections(pattern, rows, cols)
+            (reflection_type, reflection_line) = reflections.pop()
+            if reflection_type == 'Row':
+                reflected_rows.append(reflection_line)
+            elif reflection_type == 'Column':
+                reflected_cols.append(reflection_line)
         result = 100 * sum(reflected_rows) + sum(reflected_cols)
         return result
     
     def solve2(self, patterns):
-        result = len(patterns)
+        reflected_rows = []
+        reflected_cols = []
+        for (pattern, rows, cols) in patterns:
+            # Try all possible smudge locations
+            new_reflection_found = False
+            old_reflections = self.find_reflections(pattern, rows, cols)
+            for row in range(rows):
+                if new_reflection_found:
+                    break
+                for col in range(cols):
+                    smudged_pattern = set(pattern)
+                    if (row, col) in smudged_pattern:
+                        smudged_pattern.remove((row, col))
+                    else:
+                        smudged_pattern.add((row, col))
+                    assert pattern != smudged_pattern
+                    reflections = self.find_reflections(smudged_pattern, rows, cols)
+                    new_reflections = reflections - old_reflections
+                    if len(new_reflections) > 0:
+                        assert len(new_reflections) == 1
+                        (new_reflection_type, new_reflection_line) = new_reflections.pop()
+                        if new_reflection_type == 'Row':
+                            new_reflection_found = True
+                            reflected_rows.append(new_reflection_line)
+                            break
+                        elif new_reflection_type == 'Column':
+                            new_reflection_found = True
+                            reflected_cols.append(new_reflection_line)
+                            break
+        result = 100 * sum(reflected_rows) + sum(reflected_cols)
         return result
     
     def main(self):
