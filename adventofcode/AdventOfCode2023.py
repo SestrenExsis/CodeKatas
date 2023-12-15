@@ -89,9 +89,109 @@ class Day14: # Parabolic Reflector Dish
         )
         result = total_load
         return result
+
+    def cycle(self, rocks, rows, cols):
+        # Tilt north
+        while True:
+            moves = set(
+                (row, col) for (row, col), rock in rocks.items() if
+                rock == 'O' and row > 0 and (row - 1, col) not in rocks
+            )
+            for (row, col) in moves:
+                del rocks[(row, col)]
+                rocks[(row - 1, col)] = 'O'
+            if len(moves) == 0:
+                break
+        # Tilt west
+        while True:
+            moves = set(
+                (row, col) for (row, col), rock in rocks.items() if
+                rock == 'O' and col > 0 and (row, col - 1) not in rocks
+            )
+            for (row, col) in moves:
+                del rocks[(row, col)]
+                rocks[(row, col - 1)] = 'O'
+            if len(moves) == 0:
+                break
+        # Tilt south
+        while True:
+            moves = set(
+                (row, col) for (row, col), rock in rocks.items() if
+                rock == 'O' and (row + 1) < rows and (row + 1, col) not in rocks
+            )
+            for (row, col) in moves:
+                del rocks[(row, col)]
+                rocks[(row + 1, col)] = 'O'
+            if len(moves) == 0:
+                break
+        # Tilt east
+        while True:
+            moves = set(
+                (row, col) for (row, col), rock in rocks.items() if
+                rock == 'O' and (col + 1) < cols and (row, col + 1) not in rocks
+            )
+            for (row, col) in moves:
+                del rocks[(row, col)]
+                rocks[(row, col + 1)] = 'O'
+            if len(moves) == 0:
+                break
+    
+    def get_total_load(self, rocks, rows):
+        total_load = sum(
+            rows - row for (row, col), rock in rocks.items() if
+            rock == 'O'
+        )
+        result = total_load
+        return result
     
     def solve2(self, rocks, rows, cols):
-        result = len(rocks)
+        meta_cycle_key_length = 100
+        cycles_needed = 1_000_000_000
+        total_cycles = 0
+        # Get first meta cycle key
+        recent_loads = collections.deque()
+        for _ in range(meta_cycle_key_length):
+            self.cycle(rocks, rows, cols)
+            total_load = self.get_total_load(rocks, rows)
+            total_cycles += 1
+            recent_loads.append(total_load)
+            if len(recent_loads) > meta_cycle_key_length:
+                recent_loads.popleft()
+        # Compute meta cycle size
+        meta_cycle_key = tuple(recent_loads)
+        cycles = {}
+        while meta_cycle_key not in cycles:
+            cycles[meta_cycle_key] = total_cycles
+            self.cycle(rocks, rows, cols)
+            total_load = self.get_total_load(rocks, rows)
+            total_cycles += 1
+            if len(recent_loads) > meta_cycle_key_length:
+                recent_loads.popleft()
+            meta_cycle_key = tuple(recent_loads)
+            print(total_cycles, 'meta_cycle', meta_cycle_key)
+        meta_cycle_size = total_cycles - cycles[meta_cycle_key]
+        # Skip several meta cycles
+        while total_cycles + 10000 * meta_cycle_size <= cycles_needed:
+            total_cycles += 10000 * meta_cycle_size
+            print(total_cycles, 'load10000', total_load)
+        while total_cycles + 1000 * meta_cycle_size <= cycles_needed:
+            total_cycles += 1000 * meta_cycle_size
+            print(total_cycles, 'load1000 ', total_load)
+        while total_cycles + 100 * meta_cycle_size <= cycles_needed:
+            total_cycles += 100 * meta_cycle_size
+            print(total_cycles, 'load100  ', total_load)
+        while total_cycles + 10 * meta_cycle_size <= cycles_needed:
+            total_cycles += 10 * meta_cycle_size
+            print(total_cycles, 'load10   ', total_load)
+        while total_cycles + meta_cycle_size <= cycles_needed:
+            total_cycles += meta_cycle_size
+            print(total_cycles, 'load1    ', total_load)
+        # Finish the rest of the cycles
+        while total_cycles < cycles_needed:
+            self.cycle(rocks, rows, cols)
+            total_load = self.get_total_load(rocks, rows)
+            total_cycles += 1
+        result = total_load
         return result
     
     def main(self):
