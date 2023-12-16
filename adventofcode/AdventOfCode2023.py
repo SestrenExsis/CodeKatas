@@ -55,6 +55,41 @@ class Template: # Template
         result = solutions
         return result
 
+class Day15: # Lens Library
+    '''
+    https://adventofcode.com/2023/day/15
+    '''
+    def get_sequences(self, raw_input_lines: List[str]):
+        sequences = list(raw_input_lines[0].split(','))
+        result = sequences
+        return result
+    
+    def solve(self, sequences):
+        hashes = []
+        for sequence in sequences:
+            hash = 0
+            for char in sequence:
+                hash += ord(char)
+                hash *= 17
+                hash %= 256
+            hashes.append(hash)
+        result = sum(hashes)
+        return result
+    
+    def solve2(self, sequences):
+        result = len(sequences)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        sequences = self.get_sequences(raw_input_lines)
+        solutions = (
+            self.solve(sequences),
+            self.solve2(sequences),
+            )
+        result = solutions
+        return result
+
 class Day14: # Parabolic Reflector Dish
     '''
     https://adventofcode.com/2023/day/14
@@ -1511,7 +1546,7 @@ if __name__ == '__main__':
        12: (Day12, 'Hot Springs'),
        13: (Day13, 'Point of Incidence'),
        14: (Day14, 'Parabolic Reflector Dish'),
-    #    15: (Day15, 'Unknown'),
+       15: (Day15, 'Lens Library'),
     #    16: (Day16, 'Unknown'),
     #    17: (Day17, 'Unknown'),
     #    18: (Day18, 'Unknown'),
