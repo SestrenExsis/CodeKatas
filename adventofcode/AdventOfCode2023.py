@@ -55,6 +55,345 @@ class Template: # Template
         result = solutions
         return result
 
+class Day16: # The Floor Will Be Lava
+    '''
+    https://adventofcode.com/2023/day/16
+    '''
+    MOVE_UP = 0
+    MOVE_DOWN = 1
+    MOVE_LEFT = 2
+    MOVE_RIGHT = 3
+    MOVES = {
+        MOVE_UP:    (-1,  0),
+        MOVE_DOWN:  ( 1,  0),
+        MOVE_LEFT:  ( 0, -1),
+        MOVE_RIGHT: ( 0,  1),
+    }
+
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, grid, start_row=0, start_col=0, start_move=3):
+        rows = len(grid)
+        cols = len(grid[0])
+        movements = set()
+        beams = collections.deque()
+        beams.append((start_row, start_col, start_move))
+        movements.add((start_row, start_col, start_move))
+        while len(beams) > 0:
+            (row, col, move) = beams.pop()
+            if grid[row][col] == '.':
+                next_move = move
+                next_row = row + self.MOVES[next_move][0]
+                next_col = col + self.MOVES[next_move][1]
+                if (
+                    0 <= next_row < rows and
+                    0 <= next_col < cols and
+                    (next_row, next_col, next_move) not in movements
+                ):
+                    movements.add((next_row, next_col, next_move))
+                    beams.appendleft((next_row, next_col, next_move))
+            elif grid[row][col] == '\\':
+                next_move = move
+                if move == self.MOVE_UP:
+                    next_move = self.MOVE_LEFT
+                elif move == self.MOVE_DOWN:
+                    next_move = self.MOVE_RIGHT
+                elif move == self.MOVE_LEFT:
+                    next_move = self.MOVE_UP
+                elif move == self.MOVE_RIGHT:
+                    next_move = self.MOVE_DOWN
+                next_row = row + self.MOVES[next_move][0]
+                next_col = col + self.MOVES[next_move][1]
+                if (
+                    0 <= next_row < rows and
+                    0 <= next_col < cols and
+                    (next_row, next_col, next_move) not in movements
+                ):
+                    movements.add((next_row, next_col, next_move))
+                    beams.appendleft((next_row, next_col, next_move))
+            elif grid[row][col] == '/':
+                next_move = move
+                if move == self.MOVE_UP:
+                    next_move = self.MOVE_RIGHT
+                elif move == self.MOVE_DOWN:
+                    next_move = self.MOVE_LEFT
+                elif move == self.MOVE_LEFT:
+                    next_move = self.MOVE_DOWN
+                elif move == self.MOVE_RIGHT:
+                    next_move = self.MOVE_UP
+                next_row = row + self.MOVES[next_move][0]
+                next_col = col + self.MOVES[next_move][1]
+                if (
+                    0 <= next_row < rows and
+                    0 <= next_col < cols and
+                    (next_row, next_col, next_move) not in movements
+                ):
+                    movements.add((next_row, next_col, next_move))
+                    beams.appendleft((next_row, next_col, next_move))
+            elif grid[row][col] == '|':
+                if move in (self.MOVE_UP, self.MOVE_DOWN):
+                    next_move = move
+                    next_row = row + self.MOVES[next_move][0]
+                    next_col = col + self.MOVES[next_move][1]
+                    if (
+                        0 <= next_row < rows and
+                        0 <= next_col < cols and
+                        (next_row, next_col, next_move) not in movements
+                    ):
+                        movements.add((next_row, next_col, next_move))
+                        beams.appendleft((next_row, next_col, next_move))
+                elif move in (self.MOVE_LEFT, self.MOVE_RIGHT):
+                    for next_move in (self.MOVE_UP, self.MOVE_DOWN):
+                        next_row = row + self.MOVES[next_move][0]
+                        next_col = col + self.MOVES[next_move][1]
+                        if (
+                            0 <= next_row < rows and
+                            0 <= next_col < cols and
+                            (next_row, next_col, next_move) not in movements
+                        ):
+                            movements.add((next_row, next_col, next_move))
+                            beams.appendleft((next_row, next_col, next_move))
+            elif grid[row][col] == '-':
+                if move in (self.MOVE_LEFT, self.MOVE_RIGHT):
+                    next_move = move
+                    next_row = row + self.MOVES[next_move][0]
+                    next_col = col + self.MOVES[next_move][1]
+                    if (
+                        0 <= next_row < rows and
+                        0 <= next_col < cols and
+                        (next_row, next_col, next_move) not in movements
+                    ):
+                        movements.add((next_row, next_col, next_move))
+                        beams.appendleft((next_row, next_col, next_move))
+                elif move in (self.MOVE_UP, self.MOVE_DOWN):
+                    for next_move in (self.MOVE_LEFT, self.MOVE_RIGHT):
+                        next_row = row + self.MOVES[next_move][0]
+                        next_col = col + self.MOVES[next_move][1]
+                        if (
+                            0 <= next_row < rows and
+                            0 <= next_col < cols and
+                            (next_row, next_col, next_move) not in movements
+                        ):
+                            movements.add((next_row, next_col, next_move))
+                            beams.appendleft((next_row, next_col, next_move))
+        energized_tiles = set((row, col) for (row, col, _) in movements)
+        result = len(energized_tiles)
+        return result
+    
+    def solve2(self, grid):
+        rows = len(grid)
+        cols = len(grid[0])
+        configurations = {}
+        for row in range(rows):
+            configurations[(row, 0, self.MOVE_RIGHT)] = -1
+            configurations[(row, cols - 1, self.MOVE_LEFT)] = -1
+        for col in range(cols):
+            configurations[(0, col, self.MOVE_DOWN)] = -1
+            configurations[(rows - 1, col, self.MOVE_UP)] = -1
+        for (row, col, move) in configurations.keys():
+            energized_tiles = self.solve(grid, row, col, move)
+            configurations[(row, col, move)] = energized_tiles
+        result = max(configurations.values())
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day15: # Lens Library
+    '''
+    https://adventofcode.com/2023/day/15
+    '''
+    def get_sequences(self, raw_input_lines: List[str]):
+        sequences = list(raw_input_lines[0].split(','))
+        result = sequences
+        return result
+    
+    def solve(self, sequences):
+        hashes = []
+        for sequence in sequences:
+            hash = 0
+            for char in sequence:
+                hash += ord(char)
+                hash *= 17
+                hash %= 256
+            hashes.append(hash)
+        result = sum(hashes)
+        return result
+    
+    def solve2(self, sequences):
+        result = len(sequences)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        sequences = self.get_sequences(raw_input_lines)
+        solutions = (
+            self.solve(sequences),
+            self.solve2(sequences),
+            )
+        result = solutions
+        return result
+
+class Day14: # Parabolic Reflector Dish
+    '''
+    https://adventofcode.com/2023/day/14
+    '''
+    def get_rocks(self, raw_input_lines: List[str]):
+        rows = len(raw_input_lines)
+        cols = len(raw_input_lines[0])
+        rocks = {}
+        for row, raw_input_line in enumerate(raw_input_lines):
+            for col, char in enumerate(raw_input_line):
+                if char in 'O#':
+                    rocks[(row, col)] = char
+        result = (rocks, rows, cols)
+        return result
+    
+    def solve(self, rocks, rows, cols):
+        # Tilt north
+        while True:
+            moves = set(
+                (row, col) for (row, col), rock in rocks.items() if
+                rock == 'O' and row > 0 and (row - 1, col) not in rocks
+            )
+            for (row, col) in moves:
+                del rocks[(row, col)]
+                rocks[(row - 1, col)] = 'O'
+            if len(moves) == 0:
+                break
+        # Calculate total load
+        total_load = sum(
+            rows - row for (row, col), rock in rocks.items() if
+            rock == 'O'
+        )
+        result = total_load
+        return result
+
+    def cycle(self, rocks, rows, cols):
+        # Tilt north
+        while True:
+            moves = set(
+                (row, col) for (row, col), rock in rocks.items() if
+                rock == 'O' and row > 0 and (row - 1, col) not in rocks
+            )
+            for (row, col) in moves:
+                del rocks[(row, col)]
+                rocks[(row - 1, col)] = 'O'
+            if len(moves) == 0:
+                break
+        # Tilt west
+        while True:
+            moves = set(
+                (row, col) for (row, col), rock in rocks.items() if
+                rock == 'O' and col > 0 and (row, col - 1) not in rocks
+            )
+            for (row, col) in moves:
+                del rocks[(row, col)]
+                rocks[(row, col - 1)] = 'O'
+            if len(moves) == 0:
+                break
+        # Tilt south
+        while True:
+            moves = set(
+                (row, col) for (row, col), rock in rocks.items() if
+                rock == 'O' and (row + 1) < rows and (row + 1, col) not in rocks
+            )
+            for (row, col) in moves:
+                del rocks[(row, col)]
+                rocks[(row + 1, col)] = 'O'
+            if len(moves) == 0:
+                break
+        # Tilt east
+        while True:
+            moves = set(
+                (row, col) for (row, col), rock in rocks.items() if
+                rock == 'O' and (col + 1) < cols and (row, col + 1) not in rocks
+            )
+            for (row, col) in moves:
+                del rocks[(row, col)]
+                rocks[(row, col + 1)] = 'O'
+            if len(moves) == 0:
+                break
+    
+    def get_total_load(self, rocks, rows):
+        total_load = sum(
+            rows - row for (row, col), rock in rocks.items() if
+            rock == 'O'
+        )
+        result = total_load
+        return result
+    
+    def solve2(self, rocks, rows, cols):
+        meta_cycle_key_length = 100
+        cycles_needed = 1_000_000_000
+        total_cycles = 0
+        # Get first meta cycle key
+        recent_loads = collections.deque()
+        for _ in range(meta_cycle_key_length):
+            self.cycle(rocks, rows, cols)
+            total_load = self.get_total_load(rocks, rows)
+            total_cycles += 1
+            recent_loads.append(total_load)
+            if len(recent_loads) > meta_cycle_key_length:
+                recent_loads.popleft()
+        # Compute meta cycle size
+        meta_cycle_key = tuple(recent_loads)
+        cycles = {}
+        while meta_cycle_key not in cycles:
+            cycles[meta_cycle_key] = total_cycles
+            self.cycle(rocks, rows, cols)
+            total_load = self.get_total_load(rocks, rows)
+            total_cycles += 1
+            if len(recent_loads) > meta_cycle_key_length:
+                recent_loads.popleft()
+            meta_cycle_key = tuple(recent_loads)
+            print(total_cycles, 'meta_cycle', meta_cycle_key)
+        meta_cycle_size = total_cycles - cycles[meta_cycle_key]
+        # Skip several meta cycles
+        while total_cycles + 10000 * meta_cycle_size <= cycles_needed:
+            total_cycles += 10000 * meta_cycle_size
+            print(total_cycles, 'load10000', total_load)
+        while total_cycles + 1000 * meta_cycle_size <= cycles_needed:
+            total_cycles += 1000 * meta_cycle_size
+            print(total_cycles, 'load1000 ', total_load)
+        while total_cycles + 100 * meta_cycle_size <= cycles_needed:
+            total_cycles += 100 * meta_cycle_size
+            print(total_cycles, 'load100  ', total_load)
+        while total_cycles + 10 * meta_cycle_size <= cycles_needed:
+            total_cycles += 10 * meta_cycle_size
+            print(total_cycles, 'load10   ', total_load)
+        while total_cycles + meta_cycle_size <= cycles_needed:
+            total_cycles += meta_cycle_size
+            print(total_cycles, 'load1    ', total_load)
+        # Finish the rest of the cycles
+        while total_cycles < cycles_needed:
+            self.cycle(rocks, rows, cols)
+            total_load = self.get_total_load(rocks, rows)
+            total_cycles += 1
+        result = total_load
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        (rocks, rows, cols) = self.get_rocks(raw_input_lines)
+        solutions = (
+            self.solve(copy.deepcopy(rocks), rows, cols),
+            self.solve2(copy.deepcopy(rocks), rows, cols),
+            )
+        result = solutions
+        return result
+
 class Day13: # Point of Incidence
     '''
     https://adventofcode.com/2023/day/13
@@ -1361,9 +1700,9 @@ if __name__ == '__main__':
        11: (Day11, 'Cosmic Expansion'),
        12: (Day12, 'Hot Springs'),
        13: (Day13, 'Point of Incidence'),
-    #    14: (Day14, 'Unknown'),
-    #    15: (Day15, 'Unknown'),
-    #    16: (Day16, 'Unknown'),
+       14: (Day14, 'Parabolic Reflector Dish'),
+       15: (Day15, 'Lens Library'),
+       16: (Day16, 'The Floor Will Be Lava'),
     #    17: (Day17, 'Unknown'),
     #    18: (Day18, 'Unknown'),
     #    19: (Day19, 'Unknown'),
