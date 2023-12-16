@@ -76,13 +76,13 @@ class Day16: # The Floor Will Be Lava
             result.append(raw_input_line)
         return result
     
-    def solve(self, grid):
+    def solve(self, grid, start_row=0, start_col=0, start_move=3):
         rows = len(grid)
         cols = len(grid[0])
         movements = set()
         beams = collections.deque()
-        beams.append((0, 0, self.MOVE_RIGHT))
-        movements.add((0, 0, self.MOVE_RIGHT))
+        beams.append((start_row, start_col, start_move))
+        movements.add((start_row, start_col, start_move))
         while len(beams) > 0:
             (row, col, move) = beams.pop()
             if grid[row][col] == '.':
@@ -184,8 +184,20 @@ class Day16: # The Floor Will Be Lava
         result = len(energized_tiles)
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, grid):
+        rows = len(grid)
+        cols = len(grid[0])
+        configurations = {}
+        for row in range(rows):
+            configurations[(row, 0, self.MOVE_RIGHT)] = -1
+            configurations[(row, cols - 1, self.MOVE_LEFT)] = -1
+        for col in range(cols):
+            configurations[(0, col, self.MOVE_DOWN)] = -1
+            configurations[(rows - 1, col, self.MOVE_UP)] = -1
+        for (row, col, move) in configurations.keys():
+            energized_tiles = self.solve(grid, row, col, move)
+            configurations[(row, col, move)] = energized_tiles
+        result = max(configurations.values())
         return result
     
     def main(self):
