@@ -218,21 +218,53 @@ class Day15: # Lens Library
         sequences = list(raw_input_lines[0].split(','))
         result = sequences
         return result
+
+    def get_hash(self, string):
+        hash = 0
+        for char in string:
+            hash += ord(char)
+            hash *= 17
+            hash %= 256
+        result = hash
+        return result
     
     def solve(self, sequences):
         hashes = []
         for sequence in sequences:
-            hash = 0
-            for char in sequence:
-                hash += ord(char)
-                hash *= 17
-                hash %= 256
+            hash = self.get_hash(sequence)
             hashes.append(hash)
         result = sum(hashes)
         return result
     
     def solve2(self, sequences):
-        result = len(sequences)
+        boxes = []
+        for _ in range(256):
+            box = []
+            boxes.append(box)
+        for sequence in sequences:
+            if '=' in sequence:
+                label, raw_focal_length = sequence.split('=')
+                focal_length = int(raw_focal_length)
+                hash = self.get_hash(label)
+                for i in range(len(boxes[hash])):
+                    if boxes[hash][i][0] == label:
+                        boxes[hash][i] = (label, focal_length)
+                        break
+                else:
+                    boxes[hash].append((label, focal_length))
+            elif '-' in sequence:
+                label = sequence[:-1]
+                hash = self.get_hash(label)
+                for i in range(len(boxes[hash])):
+                    if boxes[hash][i][0] == label:
+                        boxes[hash] = boxes[hash][:i] + boxes[hash][i + 1:]
+                        break
+        focusing_powers = {}
+        for box_id, box in enumerate(boxes):
+            for lens_id, (label, focal_length) in enumerate(box, start=1):
+                focusing_power = (1 + box_id) * lens_id * focal_length
+                focusing_powers[(box_id, lens_id)] = focusing_power
+        result = sum(focusing_powers.values())
         return result
     
     def main(self):
