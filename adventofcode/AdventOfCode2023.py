@@ -55,6 +55,149 @@ class Template: # Template
         result = solutions
         return result
 
+class Day16: # The Floor Will Be Lava
+    '''
+    https://adventofcode.com/2023/day/16
+    '''
+    MOVE_UP = 0
+    MOVE_DOWN = 1
+    MOVE_LEFT = 2
+    MOVE_RIGHT = 3
+    MOVES = {
+        MOVE_UP:    (-1,  0),
+        MOVE_DOWN:  ( 1,  0),
+        MOVE_LEFT:  ( 0, -1),
+        MOVE_RIGHT: ( 0,  1),
+    }
+
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, grid):
+        rows = len(grid)
+        cols = len(grid[0])
+        movements = set()
+        beams = collections.deque()
+        beams.append((0, 0, self.MOVE_RIGHT))
+        movements.add((0, 0, self.MOVE_RIGHT))
+        while len(beams) > 0:
+            (row, col, move) = beams.pop()
+            if grid[row][col] == '.':
+                next_move = move
+                next_row = row + self.MOVES[next_move][0]
+                next_col = col + self.MOVES[next_move][1]
+                if (
+                    0 <= next_row < rows and
+                    0 <= next_col < cols and
+                    (next_row, next_col, next_move) not in movements
+                ):
+                    movements.add((next_row, next_col, next_move))
+                    beams.appendleft((next_row, next_col, next_move))
+            elif grid[row][col] == '\\':
+                next_move = move
+                if move == self.MOVE_UP:
+                    next_move = self.MOVE_LEFT
+                elif move == self.MOVE_DOWN:
+                    next_move = self.MOVE_RIGHT
+                elif move == self.MOVE_LEFT:
+                    next_move = self.MOVE_UP
+                elif move == self.MOVE_RIGHT:
+                    next_move = self.MOVE_DOWN
+                next_row = row + self.MOVES[next_move][0]
+                next_col = col + self.MOVES[next_move][1]
+                if (
+                    0 <= next_row < rows and
+                    0 <= next_col < cols and
+                    (next_row, next_col, next_move) not in movements
+                ):
+                    movements.add((next_row, next_col, next_move))
+                    beams.appendleft((next_row, next_col, next_move))
+            elif grid[row][col] == '/':
+                next_move = move
+                if move == self.MOVE_UP:
+                    next_move = self.MOVE_RIGHT
+                elif move == self.MOVE_DOWN:
+                    next_move = self.MOVE_LEFT
+                elif move == self.MOVE_LEFT:
+                    next_move = self.MOVE_DOWN
+                elif move == self.MOVE_RIGHT:
+                    next_move = self.MOVE_UP
+                next_row = row + self.MOVES[next_move][0]
+                next_col = col + self.MOVES[next_move][1]
+                if (
+                    0 <= next_row < rows and
+                    0 <= next_col < cols and
+                    (next_row, next_col, next_move) not in movements
+                ):
+                    movements.add((next_row, next_col, next_move))
+                    beams.appendleft((next_row, next_col, next_move))
+            elif grid[row][col] == '|':
+                if move in (self.MOVE_UP, self.MOVE_DOWN):
+                    next_move = move
+                    next_row = row + self.MOVES[next_move][0]
+                    next_col = col + self.MOVES[next_move][1]
+                    if (
+                        0 <= next_row < rows and
+                        0 <= next_col < cols and
+                        (next_row, next_col, next_move) not in movements
+                    ):
+                        movements.add((next_row, next_col, next_move))
+                        beams.appendleft((next_row, next_col, next_move))
+                elif move in (self.MOVE_LEFT, self.MOVE_RIGHT):
+                    for next_move in (self.MOVE_UP, self.MOVE_DOWN):
+                        next_row = row + self.MOVES[next_move][0]
+                        next_col = col + self.MOVES[next_move][1]
+                        if (
+                            0 <= next_row < rows and
+                            0 <= next_col < cols and
+                            (next_row, next_col, next_move) not in movements
+                        ):
+                            movements.add((next_row, next_col, next_move))
+                            beams.appendleft((next_row, next_col, next_move))
+            elif grid[row][col] == '-':
+                if move in (self.MOVE_LEFT, self.MOVE_RIGHT):
+                    next_move = move
+                    next_row = row + self.MOVES[next_move][0]
+                    next_col = col + self.MOVES[next_move][1]
+                    if (
+                        0 <= next_row < rows and
+                        0 <= next_col < cols and
+                        (next_row, next_col, next_move) not in movements
+                    ):
+                        movements.add((next_row, next_col, next_move))
+                        beams.appendleft((next_row, next_col, next_move))
+                elif move in (self.MOVE_UP, self.MOVE_DOWN):
+                    for next_move in (self.MOVE_LEFT, self.MOVE_RIGHT):
+                        next_row = row + self.MOVES[next_move][0]
+                        next_col = col + self.MOVES[next_move][1]
+                        if (
+                            0 <= next_row < rows and
+                            0 <= next_col < cols and
+                            (next_row, next_col, next_move) not in movements
+                        ):
+                            movements.add((next_row, next_col, next_move))
+                            beams.appendleft((next_row, next_col, next_move))
+        energized_tiles = set((row, col) for (row, col, _) in movements)
+        result = len(energized_tiles)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day15: # Lens Library
     '''
     https://adventofcode.com/2023/day/15
@@ -1547,7 +1690,7 @@ if __name__ == '__main__':
        13: (Day13, 'Point of Incidence'),
        14: (Day14, 'Parabolic Reflector Dish'),
        15: (Day15, 'Lens Library'),
-    #    16: (Day16, 'Unknown'),
+       16: (Day16, 'The Floor Will Be Lava'),
     #    17: (Day17, 'Unknown'),
     #    18: (Day18, 'Unknown'),
     #    19: (Day19, 'Unknown'),
