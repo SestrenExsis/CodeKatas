@@ -55,6 +55,142 @@ class Template: # Template
         result = solutions
         return result
 
+class Day18: # Lavaduct Lagoon
+    '''
+    https://adventofcode.com/2023/day/18
+    '''
+    def get_dig_plan(self, raw_input_lines: List[str]):
+        dig_plan = []
+        for raw_input_line in raw_input_lines:
+            direction, b, c = raw_input_line.split(' ')
+            distance = int(b)
+            color = c[1:-1]
+            dig_plan.append((direction, distance, color))
+        result = dig_plan
+        return result
+    
+    def solve_slowly(self, dig_plan):
+        row = 0
+        col = 0
+        edges = set()
+        for (direction, distance, color) in dig_plan:
+            for i in range(distance + 1):
+                next_row = row
+                next_col = col
+                if direction == 'U':
+                    next_row -= i
+                elif direction == 'D':
+                    next_row += i
+                elif direction == 'L':
+                    next_col -= i
+                elif direction == 'R':
+                    next_col += i
+                edges.add((next_row, next_col))
+            if direction == 'U':
+                row -= distance
+            elif direction == 'D':
+                row += distance
+            elif direction == 'L':
+                col -= distance
+            elif direction == 'R':
+                col += distance
+        min_row = min(row for (row, col) in edges)
+        max_row = max(row for (row, col) in edges)
+        min_col = min(col for (row, col) in edges)
+        max_col = max(col for (row, col) in edges)
+        work = set()
+        for (r1, c1) in edges:
+            for (r2, c2) in (
+                (r1 - 1, c1    ),
+                (r1 + 1, c1    ),
+                (r1    , c1 - 1),
+                (r1    , c1 + 1),
+            ):
+                if (r2, c2) in edges:
+                    continue
+                if not(
+                    min_row <= r2 <= max_row and
+                    min_col <= c2 <= max_col
+                ):
+                    continue
+                work.add((r2, c2))
+        fills = set()
+        nonfills = set()
+        while len(work) > 0:
+            (row, col) = work.pop()
+            seen = set()
+            valid_fill = True
+            work2 = [(row, col)]
+            while valid_fill and len(work2) > 0:
+                (row2, col2) = work2.pop()
+                for (row3, col3) in (
+                    (row2 - 1, col2    ),
+                    (row2 + 1, col2    ),
+                    (row2    , col2 - 1),
+                    (row2    , col2 + 1),
+                ):
+                    if not(
+                        min_row <= row3 <= max_row and
+                        min_col <= col3 <= max_col
+                    ):
+                        valid_fill = False
+                        break
+                    if (row3, col3) in edges:
+                        continue
+                    if (row3, col3) in seen:
+                        continue
+                    work2.append((row3, col3))
+                    seen.add((row3, col3))
+            if valid_fill:
+                fills |= seen
+            else:
+                nonfills |= seen
+            print(len(work))
+        result = len(edges) + len(fills)
+        return result
+    
+    def solve2(self, dig_plan):
+        result = len(dig_plan)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        dig_plan = self.get_dig_plan(raw_input_lines)
+        solutions = (
+            self.solve_slowly(dig_plan),
+            self.solve2(dig_plan),
+            )
+        result = solutions
+        return result
+
+class Day17: # Clumsy Crucible
+    '''
+    https://adventofcode.com/2023/day/17
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day16: # The Floor Will Be Lava
     '''
     https://adventofcode.com/2023/day/16
@@ -1735,8 +1871,8 @@ if __name__ == '__main__':
        14: (Day14, 'Parabolic Reflector Dish'),
        15: (Day15, 'Lens Library'),
        16: (Day16, 'The Floor Will Be Lava'),
-    #    17: (Day17, 'Unknown'),
-    #    18: (Day18, 'Unknown'),
+       17: (Day17, 'Clumsy Crucible'),
+       18: (Day18, 'Lavaduct Lagoon'),
     #    19: (Day19, 'Unknown'),
     #    20: (Day20, 'Unknown'),
     #    21: (Day21, 'Unknown'),
