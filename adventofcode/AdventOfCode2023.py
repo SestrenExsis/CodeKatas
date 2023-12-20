@@ -9,6 +9,7 @@ import copy
 import functools
 import heapq
 import itertools
+import operator
 import random
 import time
 from typing import Dict, List, Set, Tuple
@@ -51,6 +52,92 @@ class Template: # Template
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day19: # Aplenty
+    '''
+    https://adventofcode.com/2023/day/19
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        workflows = {}
+        parts = []
+        mode = 'WORKFLOW'
+        for raw_input_line in raw_input_lines:
+            if len(raw_input_line) < 1:
+                mode = 'PART'
+            else:
+                if mode == 'WORKFLOW':
+                    workflow_name, group = raw_input_line.split('{')
+                    raw_rules = group[:-1].split(',')
+                    workflow = []
+                    for raw_rule in raw_rules:
+                        if ':' not in raw_rule:
+                            rule = (raw_rule, )
+                            workflow.append(rule)
+                        else:
+                            left, right = raw_rule.split(':')
+                            if '<' in left:
+                                a, b = left.split('<')
+                                workflow.append((right, a, '<', int(b)))
+                            elif '>' in left:
+                                a, b = left.split('>')
+                                workflow.append((right, a, '>', int(b)))
+                    workflows[workflow_name] = workflow
+                else:
+                    raw_part = ''.join(raw_input_line[1:-1])
+                    raw_ratings = raw_part.split(',')
+                    part = {}
+                    for raw_rating in raw_ratings:
+                        (key, raw_value) = raw_rating.split('=')
+                        part[key] = int(raw_value)
+                    parts.append(part)
+        result = (workflows, parts)
+        return result
+    
+    def accepted(self, part, workflows):
+        workflow_name = 'in'
+        while workflow_name not in ('A', 'R'):
+            rules = workflows[workflow_name]
+            for rule in rules:
+                if len(rule) < 4:
+                    workflow_name = rule[0]
+                    break
+                (next_workflow, rating, comparison, threshold) = rule
+                if comparison == '<' and part[rating] < threshold:
+                    workflow_name = next_workflow
+                    break
+                elif comparison == '>' and part[rating] > threshold:
+                    workflow_name = next_workflow
+                    break
+        result = workflow_name
+        return result
+    
+    def solve(self, workflows, parts):
+        accepted_parts = []
+        for part in parts:
+            if self.accepted(part, workflows) == 'A':
+                x = 0 if 'x' not in part else part['x']
+                m = 0 if 'm' not in part else part['m']
+                a = 0 if 'a' not in part else part['a']
+                s = 0 if 's' not in part else part['s']
+                accepted_parts.append((x, m, a, s))
+        result = sum(
+            sum(part) for part in accepted_parts
+        )
+        return result
+    
+    def solve2(self, workflows, parts):
+        result = len(parts)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        workflows, parts = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(workflows, parts),
+            self.solve2(workflows, parts),
             )
         result = solutions
         return result
@@ -1876,7 +1963,7 @@ if __name__ == '__main__':
        16: (Day16, 'The Floor Will Be Lava'),
        17: (Day17, 'Clumsy Crucible'),
        18: (Day18, 'Lavaduct Lagoon'),
-    #    19: (Day19, 'Unknown'),
+       19: (Day19, 'Aplenty'),
     #    20: (Day20, 'Unknown'),
     #    21: (Day21, 'Unknown'),
     #    22: (Day22, 'Unknown'),
