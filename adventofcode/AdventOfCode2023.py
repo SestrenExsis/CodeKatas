@@ -69,7 +69,7 @@ class Day18: # Lavaduct Lagoon
         result = dig_plan
         return result
     
-    def solve_slowly(self, dig_plan):
+    def solve(self, dig_plan):
         row = 0
         col = 0
         edges = set()
@@ -99,21 +99,25 @@ class Day18: # Lavaduct Lagoon
         min_col = min(col for (row, col) in edges)
         max_col = max(col for (row, col) in edges)
         work = set()
-        for (r1, c1) in edges:
-            for (r2, c2) in (
-                (r1 - 1, c1    ),
-                (r1 + 1, c1    ),
-                (r1    , c1 - 1),
-                (r1    , c1 + 1),
+        for (row, col) in (
+            (-1, -1),
+            (-1,  0),
+            (-1,  1),
+            ( 0, -1),
+            ( 0,  0),
+            ( 0,  1),
+            ( 1, -1),
+            ( 1,  0),
+            ( 1,  1),
+        ):
+            if (row, col) in edges:
+                continue
+            if not(
+                min_row <= row <= max_row and
+                min_col <= col <= max_col
             ):
-                if (r2, c2) in edges:
-                    continue
-                if not(
-                    min_row <= r2 <= max_row and
-                    min_col <= c2 <= max_col
-                ):
-                    continue
-                work.add((r2, c2))
+                continue
+            work.add((row, col))
         fills = set()
         nonfills = set()
         while len(work) > 0:
@@ -145,7 +149,6 @@ class Day18: # Lavaduct Lagoon
                 fills |= seen
             else:
                 nonfills |= seen
-            print(len(work))
         result = len(edges) + len(fills)
         return result
     
@@ -157,7 +160,7 @@ class Day18: # Lavaduct Lagoon
         raw_input_lines = get_raw_input_lines()
         dig_plan = self.get_dig_plan(raw_input_lines)
         solutions = (
-            self.solve_slowly(dig_plan),
+            self.solve(dig_plan),
             self.solve2(dig_plan),
             )
         result = solutions
