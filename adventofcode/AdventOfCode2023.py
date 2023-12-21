@@ -56,6 +56,94 @@ class Template: # Template
         result = solutions
         return result
 
+class Day20: # Pulse Propagation
+    '''
+    https://adventofcode.com/2023/day/20
+    '''
+    def get_modules(self, raw_input_lines: List[str]):
+        modules = {}
+        for raw_input_line in raw_input_lines:
+            raw_module, raw_destinations = raw_input_line.split(' -> ')
+            if raw_module == 'broadcaster':
+                module_name = 'broadcaster'
+                module_type = 'Broadcaster'
+            else:
+                char, module_name = raw_module[0], raw_module[1:]
+                module_type = 'ERROR'
+                if char == '%':
+                    module_type = 'Flip-flop'
+                elif char == '&':
+                    module_type = 'Conjunction'
+            destinations = list(raw_destinations.split(', '))
+            modules[module_name] = (module_type, destinations)
+            for destination in destinations:
+                if destination not in modules:
+                    modules[destination] = ('UNKNOWN', [])
+        result = modules
+        return result
+    
+    def solve(self, modules, pulse_count=1_000):
+        LOW, HIGH = 0, 1
+        TYPE, DESTINATIONS = 0, 1
+        inputs = collections.defaultdict(set)
+        state = {}
+        for module_name, (module_type, destinations) in modules.items():
+            if module_type == 'Flip-flop':
+                state[module_name] = LOW
+            for destination in destinations:
+                if destination in modules and modules[destination][TYPE] == 'Conjunction':
+                    state[module_name] = LOW
+                    inputs[destination].add(module_name)
+        pulse_history = []
+        for _ in range(pulse_count):
+            pulses = collections.deque()
+            pulse_history.append(('button', 'broadcaster', LOW))
+            for destination in modules['broadcaster'][DESTINATIONS]:
+                pulses.appendleft(('broadcaster', destination, LOW))
+            while len(pulses) > 0:
+                (sender, receiver, signal) = pulses.pop()
+                pulse_history.append((sender, receiver, signal))
+                module_type = modules[receiver][TYPE]
+                if module_type == 'Flip-flop':
+                    if signal == LOW:
+                        new_signal = 1 - state[receiver]
+                        state[receiver] = new_signal
+                        for destination in modules[receiver][DESTINATIONS]:
+                            pulses.appendleft((receiver, destination, new_signal))
+                elif module_type == 'Conjunction':
+                    new_signal = LOW
+                    for input_module in inputs[receiver]:
+                        if state[input_module] == LOW:
+                            new_signal = HIGH
+                            break
+                    for destination in modules[receiver][DESTINATIONS]:
+                        pulses.appendleft((receiver, destination, new_signal))
+                elif module_type == 'UNKNOWN':
+                    pass
+                else:
+                    print('ERROR?')
+        low_count = sum(1 for (_, _, signal) in pulse_history if signal == LOW)
+        high_count = sum(1 for (_, _, signal) in pulse_history if signal == HIGH)
+        result = low_count * high_count
+        assert result != 699571950
+        print(result, low_count, high_count)
+        assert result > 699571950
+        return result
+    
+    def solve2(self, modules):
+        result = len(modules)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        modules = self.get_modules(raw_input_lines)
+        solutions = (
+            self.solve(modules),
+            self.solve2(modules),
+            )
+        result = solutions
+        return result
+
 class Day19: # Aplenty
     '''
     https://adventofcode.com/2023/day/19
@@ -2021,7 +2109,7 @@ if __name__ == '__main__':
        17: (Day17, 'Clumsy Crucible'),
        18: (Day18, 'Lavaduct Lagoon'),
        19: (Day19, 'Aplenty'),
-    #    20: (Day20, 'Unknown'),
+       20: (Day20, 'Pulse Propagation'),
     #    21: (Day21, 'Unknown'),
     #    22: (Day22, 'Unknown'),
     #    23: (Day23, 'Unknown'),
