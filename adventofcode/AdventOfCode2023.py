@@ -127,9 +127,66 @@ class Day19: # Aplenty
             sum(part) for part in accepted_parts
         )
         return result
+
+    def get_filter_combinations(self, filter):
+        x = max(0, filter['x'][1] - filter['x'][0])
+        m = max(0, filter['m'][1] - filter['m'][0])
+        a = max(0, filter['a'][1] - filter['a'][0])
+        s = max(0, filter['s'][1] - filter['s'][0])
+        result = x * m * a * s
+        return result
     
-    def solve2(self, workflows, parts):
-        result = len(parts)
+    def combine(self, ratings, rating, operation, threshold):
+        new_ratings = copy.deepcopy(ratings)
+        low = new_ratings[rating][0]
+        if operation == '>':
+            low = max(low, threshold + 1)
+        elif operation == '>=':
+            low = max(low, threshold)
+        high = new_ratings[rating][1]
+        if operation == '<':
+            high = min(high, threshold)
+        elif operation == '<=':
+            high = min(high, threshold + 1)
+        new_ratings[rating] = (low, high)
+        result = new_ratings
+        return result
+    
+    def solve2(self, workflows):
+        accepted_ratings = []
+        work = []
+        work.append(('in', 0, {
+            'x': (1, 4001),
+            'm': (1, 4001),
+            'a': (1, 4001),
+            's': (1, 4001),
+        }))
+        while len(work) > 0:
+            (workflow_name, rule_id, ratings) = work.pop()
+            if workflow_name == 'R':
+                continue
+            elif workflow_name == 'A':
+                accepted_ratings.append(ratings)
+                continue
+            rule = workflows[workflow_name][rule_id]
+            if len(rule) == 1:
+                work.append((rule[0], 0, ratings))
+            elif len(rule) == 4:
+                (next_workflow, rating, comparison, threshold) = rule
+                if comparison == '<':
+                    ratings2 = self.combine(ratings, rating, '<', threshold)
+                    work.append((next_workflow, 0, ratings2))
+                    ratings3 = self.combine(ratings, rating, '>=', threshold)
+                    work.append((workflow_name, rule_id + 1, ratings3))
+                elif comparison == '>':
+                    ratings2 = self.combine(ratings, rating, '>', threshold)
+                    work.append((next_workflow, 0, ratings2))
+                    ratings3 = self.combine(ratings, rating, '<=', threshold)
+                    work.append((workflow_name, rule_id + 1, ratings3))
+        result = sum(
+            self.get_filter_combinations(ratings) for
+            ratings in accepted_ratings
+        )
         return result
     
     def main(self):
@@ -137,7 +194,7 @@ class Day19: # Aplenty
         workflows, parts = self.get_parsed_input(raw_input_lines)
         solutions = (
             self.solve(workflows, parts),
-            self.solve2(workflows, parts),
+            self.solve2(workflows),
             )
         result = solutions
         return result
