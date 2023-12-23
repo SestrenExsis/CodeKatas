@@ -56,6 +56,61 @@ class Template: # Template
         result = solutions
         return result
 
+class DesertMachine:
+    # class Module:
+    #     def __init__(self):
+    #         self.state = 0
+    #         self.inputs = {}
+    #         self.outputs = []
+    #         self.rule = 'RELAY'
+    LOW, HIGH = 0, 1
+    TYPE, DESTINATIONS = 0, 1
+    
+    def __init__(self, modules):
+        self.history = []
+        self.modules = modules
+        self.inputs = collections.defaultdict(set)
+        self.state = {}
+        for module_name, (module_type, destinations) in modules.items():
+            if module_type == 'Flip-flop':
+                self.state[module_name] = self.LOW
+            for destination in destinations:
+                if (
+                    destination in modules and
+                    modules[destination][self.TYPE] == 'Conjunction'
+                ):
+                    self.state[module_name] = self.LOW
+                    self.inputs[destination].add(module_name)
+    
+    def push(self):
+        print(self.state)
+        pulses = collections.deque()
+        self.history.append(('button', 'broadcaster', self.LOW))
+        for destination in self.modules['broadcaster'][self.DESTINATIONS]:
+            pulses.appendleft(('broadcaster', destination, self.LOW))
+        while len(pulses) > 0:
+            (sender, receiver, signal) = pulses.pop()
+            self.history.append((sender, receiver, signal))
+            module_type = self.modules[receiver][self.TYPE]
+            if module_type == 'Flip-flop':
+                if signal == self.LOW:
+                    new_signal = 1 - self.state[receiver]
+                    self.state[receiver] = new_signal
+                    for destination in self.modules[receiver][self.DESTINATIONS]:
+                        pulses.appendleft((receiver, destination, new_signal))
+            elif module_type == 'Conjunction':
+                new_signal = self.LOW
+                for input_module in self.inputs[receiver]:
+                    if self.state[input_module] == self.LOW:
+                        new_signal = self.HIGH
+                        break
+                for destination in self.modules[receiver][self.DESTINATIONS]:
+                    pulses.appendleft((receiver, destination, new_signal))
+            elif module_type == 'UNKNOWN':
+                pass
+            else:
+                print('ERROR?')
+
 class Day20: # Pulse Propagation
     '''
     https://adventofcode.com/2023/day/20
@@ -83,48 +138,17 @@ class Day20: # Pulse Propagation
         return result
     
     def solve(self, modules, pulse_count=1_000):
-        LOW, HIGH = 0, 1
-        TYPE, DESTINATIONS = 0, 1
-        inputs = collections.defaultdict(set)
-        state = {}
-        for module_name, (module_type, destinations) in modules.items():
-            if module_type == 'Flip-flop':
-                state[module_name] = LOW
-            for destination in destinations:
-                if destination in modules and modules[destination][TYPE] == 'Conjunction':
-                    state[module_name] = LOW
-                    inputs[destination].add(module_name)
-        print(state)
-        pulse_history = []
+        machine = DesertMachine(modules)
         for _ in range(pulse_count):
-            pulses = collections.deque()
-            pulse_history.append(('button', 'broadcaster', LOW))
-            for destination in modules['broadcaster'][DESTINATIONS]:
-                pulses.appendleft(('broadcaster', destination, LOW))
-            while len(pulses) > 0:
-                (sender, receiver, signal) = pulses.pop()
-                pulse_history.append((sender, receiver, signal))
-                module_type = modules[receiver][TYPE]
-                if module_type == 'Flip-flop':
-                    if signal == LOW:
-                        new_signal = 1 - state[receiver]
-                        state[receiver] = new_signal
-                        for destination in modules[receiver][DESTINATIONS]:
-                            pulses.appendleft((receiver, destination, new_signal))
-                elif module_type == 'Conjunction':
-                    new_signal = LOW
-                    for input_module in inputs[receiver]:
-                        if state[input_module] == LOW:
-                            new_signal = HIGH
-                            break
-                    for destination in modules[receiver][DESTINATIONS]:
-                        pulses.appendleft((receiver, destination, new_signal))
-                elif module_type == 'UNKNOWN':
-                    pass
-                else:
-                    print('ERROR?')
-        low_count = sum(1 for (_, _, signal) in pulse_history if signal == LOW)
-        high_count = sum(1 for (_, _, signal) in pulse_history if signal == HIGH)
+            machine.push()
+        low_count = sum(
+            1 for (_, _, signal) in machine.history if
+            signal == machine.LOW
+        )
+        high_count = sum(
+            1 for (_, _, signal) in machine.history if
+            signal == machine.HIGH
+        )
         result = low_count * high_count
         assert result != 699571950
         print(result, low_count, high_count)
@@ -2088,7 +2112,7 @@ class Day01: # Trebuchet?!
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2023.py 2 < inputs/2023day02.in
+    python AdventOfCode2023.py 20 < inputs/2023day20.in
     '''
     solvers = {
         1: (Day01, 'Trebuchet?!'),
