@@ -74,6 +74,12 @@ class Module(object):
         self.inputs = {}
         self.signals = {}
         self.outputs = []
+        self.queries = {
+            'low_pulses_sent': 0,
+            'low_pulses_received': 0,
+            'high_pulses_sent': 0,
+            'high_pulses_received': 0,
+        }
     
     def toggle(self):
         self.state = (
@@ -85,6 +91,10 @@ class Module(object):
     def process_signal(self, sender_name, signal):
         pulses = []
         self.signals[sender_name] = signal
+        if signal == Pulse.LOW:
+            self.queries['low_pulses_received'] += 1
+        elif signal == Pulse.HIGH:
+            self.queries['high_pulses_received'] += 1
         if self.behavior == Behavior.FLIP_FLOP:
             if signal == Pulse.LOW:
                 self.toggle()
@@ -102,12 +112,18 @@ class Module(object):
             pass
         else:
             print('ERROR?')
+        for (_, _, signal) in pulses:
+            if signal == Pulse.LOW:
+                self.queries['low_pulses_sent'] += 1
+            elif signal == Pulse.HIGH:
+                self.queries['high_pulses_sent'] += 1
         result = pulses
         return result
 
 class DesertMachine(object):
     def __init__(self, modules):
         self.modules = {}
+        self.debug = False
         for source_name, (module_type, destination_names) in modules.items():
             behavior = Behavior.UNKNOWN
             if module_type == 'Flip-flop':
@@ -127,12 +143,14 @@ class DesertMachine(object):
         self.history = []
     
     def push(self):
-        self.history.append(('button', 'broadcaster', Pulse.LOW))
+        if self.debug:
+            self.history.append(('button', 'broadcaster', Pulse.LOW))
         for destination in self.modules['broadcaster'].outputs:
             self.pulses.append(('broadcaster', destination.name, Pulse.LOW))
         while len(self.pulses) > 0:
             (sender_name, receiver_name, signal) = self.pulses.popleft()
-            self.history.append((sender_name, receiver_name, signal))
+            if self.debug:
+                self.history.append((sender_name, receiver_name, signal))
             receiver = self.modules[receiver_name]
             new_pulses = receiver.process_signal(sender_name, signal)
             for pulse in new_pulses:
@@ -169,18 +187,47 @@ class Day20: # Pulse Propagation
         for _ in range(pulse_count):
             machine.push()
         low_count = sum(
-            1 for (_, _, signal) in machine.history if
-            signal == Pulse.LOW
+            module.queries['low_pulses_sent'] for module in machine.modules.values()
         )
         high_count = sum(
-            1 for (_, _, signal) in machine.history if
-            signal == Pulse.HIGH
+            module.queries['high_pulses_sent'] for module in machine.modules.values()
         )
         result = low_count * high_count
         return result
     
     def solve2(self, modules):
-        result = len(modules)
+        queries = {
+            ('ln', 'high_pulses_sent', 1): 0, # 4003
+            ('ln', 'high_pulses_sent', 2): 0,
+            ('ln', 'high_pulses_sent', 3): 0,
+            ('ln', 'high_pulses_sent', 4): 0,
+            ('dr', 'high_pulses_sent', 1): 0,
+            ('dr', 'high_pulses_sent', 2): 0,
+            ('dr', 'high_pulses_sent', 3): 0,
+            ('dr', 'high_pulses_sent', 4): 0,
+            ('vn', 'high_pulses_sent', 1): 0,
+            ('vn', 'high_pulses_sent', 2): 0,
+            ('vn', 'high_pulses_sent', 3): 0,
+            ('vn', 'high_pulses_sent', 4): 0,
+            ('zx', 'high_pulses_sent', 1): 0,
+            ('zx', 'high_pulses_sent', 2): 0,
+            ('zx', 'high_pulses_sent', 3): 0,
+            ('zx', 'high_pulses_sent', 4): 0,
+        }
+        for (module_name, query_name, threshold) in queries.keys():
+            machine = DesertMachine(modules)
+            push_count = 0
+            while machine.modules[module_name].queries[query_name] < threshold:
+                machine.push()
+                push_count += 1
+            queries[(module_name, query_name, threshold)] = push_count
+            print(module_name, query_name, threshold, push_count)
+        result = (
+            queries[('ln', 'high_pulses_sent', 1)] *
+            queries[('dr', 'high_pulses_sent', 1)] *
+            queries[('vn', 'high_pulses_sent', 1)] *
+            queries[('zx', 'high_pulses_sent', 1)]
+        )
         return result
     
     def main(self):
