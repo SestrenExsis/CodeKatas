@@ -66,7 +66,7 @@ class Day20: # Pulse Propagation
             raw_module, raw_destinations = raw_input_line.split(' -> ')
             if raw_module == 'broadcaster':
                 module_name = 'broadcaster'
-                module_type = 'Broadcaster'
+                module_type = 'Relay'
             else:
                 char, module_name = raw_module[0], raw_module[1:]
                 module_type = 'ERROR'
@@ -94,6 +94,7 @@ class Day20: # Pulse Propagation
                 if destination in modules and modules[destination][TYPE] == 'Conjunction':
                     state[module_name] = LOW
                     inputs[destination].add(module_name)
+        print(state)
         pulse_history = []
         for _ in range(pulse_count):
             pulses = collections.deque()
