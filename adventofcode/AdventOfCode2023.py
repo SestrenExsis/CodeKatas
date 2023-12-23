@@ -12,6 +12,7 @@ import itertools
 import operator
 import random
 import time
+from enum import Enum
 from typing import Dict, List, Set, Tuple
     
 def get_raw_input_lines() -> list:
@@ -56,57 +57,69 @@ class Template: # Template
         result = solutions
         return result
 
-class DesertMachine:
-    PULSE_LOW, PULSE_HIGH = 0, 1
-    BEHAVIOR_UNKNOWN, BEHAVIOR_FLIP_FLOP, BEHAVIOR_CONJUNCTION = 0, 1, 2
-    class Module:
+class DesertMachine(object):
+    class Pulse(Enum):
+        LOW = 0
+        HIGH = 1
+    class Behavior(Enum):
+        UNKNOWN = 'Unknown'
+        FLIP_FLOP = 'Flip-flop'
+        CONJUNCTION = 'Conjunction'
+    class Module(object):
         def __init__(self, name, behavior):
             self.name = name
             self.behavior = behavior
-            self.state = 0
-            self.inputs = set()
+            self.state = DesertMachine.Pulse.LOW
+            self.inputs = {}
             self.outputs = []
+        
+        def toggle(self):
+            self.state = (
+                DesertMachine.Pulse.LOW if
+                self.state == DesertMachine.Pulse.HIGH else
+                DesertMachine.Pulse.HIGH
+            )
     
     def __init__(self, modules):
         self.modules = {}
         for source, (module_type, destinations) in modules.items():
-            behavior = self.BEHAVIOR_UNKNOWN
+            behavior = self.Behavior.UNKNOWN
             if module_type == 'Flip-flop':
-                behavior = self.BEHAVIOR_FLIP_FLOP
+                behavior = self.Behavior.FLIP_FLOP
             elif module_type == 'Conjunction':
-                behavior = self.BEHAVIOR_CONJUNCTION
+                behavior = self.Behavior.CONJUNCTION
             module = self.Module(source, behavior)
             self.modules[source] = module
         for source, (module_type, destinations) in modules.items():
             for destination in destinations:
                 self.modules[source].outputs.append(destination)
-                self.modules[destination].inputs.add(source)
+                self.modules[destination].inputs[source] = DesertMachine.Pulse.LOW
         self.pulses = collections.deque()
         self.history = []
     
     def push(self):
         # print(self.state)
-        self.history.append(('button', 'broadcaster', self.PULSE_LOW))
+        self.history.append(('button', 'broadcaster', DesertMachine.Pulse.LOW))
         for destination in self.modules['broadcaster'].outputs:
-            self.pulses.appendleft(('broadcaster', destination, self.PULSE_LOW))
+            self.pulses.appendleft(('broadcaster', destination, DesertMachine.Pulse.LOW))
         while len(self.pulses) > 0:
             (sender_name, receiver_name, signal) = self.pulses.pop()
             self.history.append((sender_name, receiver_name, signal))
             receiver = self.modules[receiver_name]
-            if receiver.behavior == self.BEHAVIOR_FLIP_FLOP:
-                if signal == self.PULSE_LOW:
-                    receiver.state = 1 - receiver.state
+            if receiver.behavior == self.Behavior.FLIP_FLOP:
+                if signal == DesertMachine.Pulse.LOW:
+                    receiver.toggle()
                     for destination in receiver.outputs:
                         self.pulses.appendleft((receiver, destination, receiver.state))
-            elif receiver.behavior == self.BEHAVIOR_CONJUNCTION:
-                new_signal = self.PULSE_LOW
+            elif receiver.behavior == self.Behavior.CONJUNCTION:
+                new_signal = DesertMachine.Pulse.LOW
                 for input_name in receiver.inputs:
-                    if self.modules[input_name].state == self.PULSE_LOW:
-                        new_signal = self.PULSE_HIGH
+                    if self.modules[input_name].state == DesertMachine.Pulse.LOW:
+                        new_signal = DesertMachine.Pulse.HIGH
                         break
                 for destination_name in receiver.outputs:
                     self.pulses.appendleft((receiver_name, destination_name, new_signal))
-            elif receiver.behavior == self.BEHAVIOR_UNKNOWN:
+            elif receiver.behavior == self.Behavior.UNKNOWN:
                 pass
             else:
                 print('ERROR?')
@@ -143,11 +156,11 @@ class Day20: # Pulse Propagation
             machine.push()
         low_count = sum(
             1 for (_, _, signal) in machine.history if
-            signal == machine.PULSE_LOW
+            signal == machine.Pulse.LOW
         )
         high_count = sum(
             1 for (_, _, signal) in machine.history if
-            signal == machine.PULSE_HIGH
+            signal == machine.Pulse.HIGH
         )
         result = low_count * high_count
         assert result != 699571950
