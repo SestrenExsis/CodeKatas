@@ -156,6 +156,74 @@ class DesertMachine(object):
             for pulse in new_pulses:
                 self.pulses.append(pulse)
 
+class Day21: # Step Counter
+    '''
+    https://adventofcode.com/2023/day/21
+    '''
+    def get_garden_info(self, raw_input_lines: List[str]):
+        start_row = 0
+        start_col = 0
+        rocks = set()
+        for row, raw_input_line in enumerate(raw_input_lines):
+            for col, char in enumerate(raw_input_line):
+                if char == 'S':
+                    start_row = row
+                    start_col = col
+                elif char == '#':
+                    rocks.add((row, col))
+        rows = len(raw_input_lines)
+        cols = len(raw_input_lines[0])
+        garden_info = {
+            'dimensions': (rows, cols),
+            'start': (start_row, start_col),
+            'rocks': rocks,
+        }
+        result = garden_info
+        return result
+    
+    def solve(self, garden_info, max_distance=64):
+        (rows, cols) = garden_info['dimensions']
+        (start_row, start_col) = garden_info['start']
+        rocks = garden_info['rocks']
+        visited = set()
+        garden_plots = set()
+        work = [(start_row, start_col, 0)]
+        while len(work) > 0:
+            (row, col, distance) = work.pop()
+            visited.add((row, col, distance))
+            if distance == max_distance:
+                garden_plots.add((row, col))
+            for (next_row, next_col) in (
+                (row - 1, col    ),
+                (row + 1, col    ),
+                (row    , col - 1),
+                (row    , col + 1),
+            ):
+                if (
+                    distance < max_distance and
+                    0 <= next_row < rows and
+                    0 <= next_col < cols and
+                    (next_row, next_col, distance + 1) not in visited and
+                    (next_row, next_col) not in rocks
+                ):
+                    work.append((next_row, next_col, distance + 1))
+        result = len(garden_plots)
+        return result
+    
+    def solve2(self, garden_info):
+        result = len(garden_info)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        garden_info = self.get_garden_info(raw_input_lines)
+        solutions = (
+            self.solve(garden_info),
+            self.solve2(garden_info),
+            )
+        result = solutions
+        return result
+
 class Day20: # Pulse Propagation
     '''
     https://adventofcode.com/2023/day/20
@@ -2206,7 +2274,7 @@ if __name__ == '__main__':
        18: (Day18, 'Lavaduct Lagoon'),
        19: (Day19, 'Aplenty'),
        20: (Day20, 'Pulse Propagation'),
-    #    21: (Day21, 'Unknown'),
+       21: (Day21, 'Step Counter'),
     #    22: (Day22, 'Unknown'),
     #    23: (Day23, 'Unknown'),
     #    24: (Day24, 'Unknown'),
