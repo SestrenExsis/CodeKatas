@@ -120,17 +120,39 @@ class Day24: # Never Tell Me The Odds
                 line_a = self.get_line(hailstones[i])
                 line_b = self.get_line(hailstones[j])
                 intersection = self.intersect(line_a, line_b)
-                print(intersection)
-                # TODO(sestren): Do not consider intersections "in the past"
                 if intersection is None:
                     continue
+                # Do not consider intersections "in the past"
+                if line_a['x0'] < line_a['x1']:
+                    if intersection['x'] < line_a['x0']:
+                        continue
+                elif line_a['x0'] > line_a['x1']:
+                    if intersection['x'] > line_a['x0']:
+                        continue
+                if line_b['x0'] < line_b['x1']:
+                    if intersection['x'] < line_b['x0']:
+                        continue
+                elif line_b['x0'] > line_b['x1']:
+                    if intersection['x'] > line_b['x0']:
+                        continue
+                if line_a['y0'] < line_a['y1']:
+                    if intersection['y'] < line_a['y0']:
+                        continue
+                elif line_a['y0'] > line_a['y1']:
+                    if intersection['y'] > line_a['y0']:
+                        continue
+                if line_b['y0'] < line_b['y1']:
+                    if intersection['y'] < line_b['y0']:
+                        continue
+                elif line_b['y0'] > line_b['y1']:
+                    if intersection['y'] > line_b['y0']:
+                        continue
                 if (
                     min_pos <= intersection['x'] <= max_pos and
                     min_pos <= intersection['y'] <= max_pos
                 ):
                     valid_intersections.append(intersection)
         result = len(valid_intersections)
-        assert result < 34648
         return result
     
     def solve2(self, hailstones):
@@ -141,7 +163,7 @@ class Day24: # Never Tell Me The Odds
         raw_input_lines = get_raw_input_lines()
         hailstones = self.get_hailstones(raw_input_lines)
         solutions = (
-            self.solve(hailstones, 7, 27),
+            self.solve(hailstones),
             self.solve2(hailstones),
             )
         result = solutions
