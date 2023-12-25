@@ -57,6 +57,96 @@ class Template: # Template
         result = solutions
         return result
 
+class Day24: # Never Tell Me The Odds
+    '''
+    https://adventofcode.com/2023/day/24
+    '''
+    def get_hailstones(self, raw_input_lines: List[str]):
+        hailstones = []
+        for raw_input_line in raw_input_lines:
+            (raw_position, raw_velocity) = raw_input_line.split(' @ ')
+            (px, py, pz) = tuple(map(int, raw_position.split(', ')))
+            (vx, vy, vz) = tuple(map(int, raw_velocity.split(', ')))
+            hailstone = ((px, py, pz), (vx, vy, vz))
+            hailstones.append(hailstone)
+        result = hailstones
+        return result
+    
+    def get_determinant(self, a, b):
+        result = a[0] * b[1] - a[1] * b[0]
+        return result
+    
+    def get_line(self, hailstone):
+        line = {
+            'x0': hailstone[0][0],
+            'y0': hailstone[0][1],
+            'x1': hailstone[0][0] + hailstone[1][0],
+            'y1': hailstone[0][1] + hailstone[1][1],
+        }
+        result = line
+        return result
+    
+    # From https://stackoverflow.com/questions/20677795/how-do-i-compute-the-intersection-point-of-two-lines
+    def intersect(self, line_a, line_b):
+        ax0 = line_a['x0']
+        ax1 = line_a['x1']
+        ay0 = line_a['y0']
+        ay1 = line_a['y1']
+        bx0 = line_b['x0']
+        bx1 = line_b['x1']
+        by0 = line_b['y0']
+        by1 = line_b['y1']
+        delta_x = (ax0 - ax1, bx0 - bx1)
+        delta_y = (ay0 - ay1, by0 - by1)
+        intersection = None
+        determinant = self.get_determinant(delta_x, delta_y)
+        if determinant != 0:
+            a0 = (ax0, ay0)
+            a1 = (ax1, ay1)
+            b0 = (bx0, by0)
+            b1 = (bx1, by1)
+            D = (self.get_determinant(a0, a1), self.get_determinant(b0, b1))
+            intersection = {
+                'x': self.get_determinant(D, delta_x) / determinant,
+                'y': self.get_determinant(D, delta_y) / determinant,
+            }
+        result = intersection
+        return result
+    
+    def solve(self, hailstones, min_pos=200_000_000_000_000, max_pos=400_000_000_000_000):
+        valid_intersections = []
+        for i in range(len(hailstones)):
+            for j in range(i + 1, len(hailstones)):
+                line_a = self.get_line(hailstones[i])
+                line_b = self.get_line(hailstones[j])
+                intersection = self.intersect(line_a, line_b)
+                print(intersection)
+                # TODO(sestren): Do not consider intersections "in the past"
+                if intersection is None:
+                    continue
+                if (
+                    min_pos <= intersection['x'] <= max_pos and
+                    min_pos <= intersection['y'] <= max_pos
+                ):
+                    valid_intersections.append(intersection)
+        result = len(valid_intersections)
+        assert result < 34648
+        return result
+    
+    def solve2(self, hailstones):
+        result = len(hailstones)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        hailstones = self.get_hailstones(raw_input_lines)
+        solutions = (
+            self.solve(hailstones, 7, 27),
+            self.solve2(hailstones),
+            )
+        result = solutions
+        return result
+
 class Pulse(Enum):
     LOW = 0
     HIGH = 1
@@ -2251,7 +2341,7 @@ class Day01: # Trebuchet?!
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2023.py 20 < inputs/2023day20.in
+    python AdventOfCode2023.py 24 < inputs/2023day24.in
     '''
     solvers = {
         1: (Day01, 'Trebuchet?!'),
@@ -2277,7 +2367,7 @@ if __name__ == '__main__':
        21: (Day21, 'Step Counter'),
     #    22: (Day22, 'Unknown'),
     #    23: (Day23, 'Unknown'),
-    #    24: (Day24, 'Unknown'),
+       24: (Day24, 'Never Tell Me The Odds'),
     #    25: (Day25, 'Unknown'),
         }
     parser = argparse.ArgumentParser()
