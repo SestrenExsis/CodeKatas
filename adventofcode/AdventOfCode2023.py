@@ -1253,12 +1253,60 @@ class Day12: # Hot Springs
                 if new_summary == summary:
                     valid_arrangement_count += 1
             valid_arrangement_counts.append(valid_arrangement_count)
-            print(valid_arrangement_count, condition, summary)
         result = sum(valid_arrangement_counts)
         return result
     
+    def validate(self, temp, condition):
+        assert len(temp) == len(condition)
+        for i in range(len(temp)):
+            if temp[i] == '#' and condition[i] == '.':
+                return False
+            elif temp[i] == '.' and condition[i] == '#':
+                return False
+        return True
+    
+    @functools.lru_cache(maxsize=256)
+    def F(self, condition, summary):
+        assert len(condition) > 0
+        assert len(summary) > 0
+        min_size = sum(summary) + len(summary) - 1
+        if min_size > len(condition):
+            return 0
+        M = len(condition)
+        if len(summary) == 1:
+            N = summary[0]
+            result = 0
+            if N == 0:
+                temp = '.' * M
+                if self.validate(temp, condition):
+                    result = 1
+                else:
+                    result = 0
+            else:
+                for i in range(M - N + 1):
+                    temp = '.' * i + '#' * N + '.' * (M - N - i)
+                    if self.validate(temp, condition):
+                        result += 1
+            return result
+        else:
+            N = sum(summary) + len(summary) - 1
+            result = 0
+            for i in range(M - N + 1):
+                left = '.' * i + '#' * summary[0] + '.'
+                right = condition[len(left):]
+                if self.validate(left, condition[:len(left)]):
+                    result += self.F(right, tuple(summary[1:]))
+            return result
+        return 0
+    
     def solve2(self, records):
-        result = len(records)
+        valid_arrangement_counts = []
+        for (condition, summary) in records:
+            condition2 = '?'.join((condition, condition, condition, condition, condition))
+            summary2 = summary * 5
+            valid_arrangement_count = self.F(condition2, summary2)
+            valid_arrangement_counts.append(valid_arrangement_count)
+        result = sum(valid_arrangement_counts)
         return result
     
     def main(self):
