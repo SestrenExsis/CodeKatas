@@ -9,8 +9,10 @@ import copy
 import functools
 import heapq
 import itertools
+import operator
 import random
 import time
+from enum import Enum
 from typing import Dict, List, Set, Tuple
     
 def get_raw_input_lines() -> list:
@@ -30,6 +32,651 @@ def get_raw_input_lines() -> list:
 class Template: # Template
     '''
     https://adventofcode.com/2023/day/?
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
+class Day24: # Never Tell Me The Odds
+    '''
+    https://adventofcode.com/2023/day/24
+    '''
+    def get_hailstones(self, raw_input_lines: List[str]):
+        hailstones = []
+        for raw_input_line in raw_input_lines:
+            (raw_position, raw_velocity) = raw_input_line.split(' @ ')
+            (px, py, pz) = tuple(map(int, raw_position.split(', ')))
+            (vx, vy, vz) = tuple(map(int, raw_velocity.split(', ')))
+            hailstone = ((px, py, pz), (vx, vy, vz))
+            hailstones.append(hailstone)
+        result = hailstones
+        return result
+    
+    def get_determinant(self, a, b):
+        result = a[0] * b[1] - a[1] * b[0]
+        return result
+    
+    def get_line(self, hailstone):
+        line = {
+            'x0': hailstone[0][0],
+            'y0': hailstone[0][1],
+            'x1': hailstone[0][0] + hailstone[1][0],
+            'y1': hailstone[0][1] + hailstone[1][1],
+        }
+        result = line
+        return result
+    
+    # From https://stackoverflow.com/questions/20677795/how-do-i-compute-the-intersection-point-of-two-lines
+    def intersect(self, line_a, line_b):
+        ax0 = line_a['x0']
+        ax1 = line_a['x1']
+        ay0 = line_a['y0']
+        ay1 = line_a['y1']
+        bx0 = line_b['x0']
+        bx1 = line_b['x1']
+        by0 = line_b['y0']
+        by1 = line_b['y1']
+        delta_x = (ax0 - ax1, bx0 - bx1)
+        delta_y = (ay0 - ay1, by0 - by1)
+        intersection = None
+        determinant = self.get_determinant(delta_x, delta_y)
+        if determinant != 0:
+            a0 = (ax0, ay0)
+            a1 = (ax1, ay1)
+            b0 = (bx0, by0)
+            b1 = (bx1, by1)
+            D = (self.get_determinant(a0, a1), self.get_determinant(b0, b1))
+            intersection = {
+                'x': self.get_determinant(D, delta_x) / determinant,
+                'y': self.get_determinant(D, delta_y) / determinant,
+            }
+        result = intersection
+        return result
+    
+    def solve(self, hailstones, min_pos=200_000_000_000_000, max_pos=400_000_000_000_000):
+        valid_intersections = []
+        for i in range(len(hailstones)):
+            for j in range(i + 1, len(hailstones)):
+                line_a = self.get_line(hailstones[i])
+                line_b = self.get_line(hailstones[j])
+                intersection = self.intersect(line_a, line_b)
+                if intersection is None:
+                    continue
+                # Do not consider intersections "in the past"
+                if line_a['x0'] < line_a['x1']:
+                    if intersection['x'] < line_a['x0']:
+                        continue
+                elif line_a['x0'] > line_a['x1']:
+                    if intersection['x'] > line_a['x0']:
+                        continue
+                if line_b['x0'] < line_b['x1']:
+                    if intersection['x'] < line_b['x0']:
+                        continue
+                elif line_b['x0'] > line_b['x1']:
+                    if intersection['x'] > line_b['x0']:
+                        continue
+                if line_a['y0'] < line_a['y1']:
+                    if intersection['y'] < line_a['y0']:
+                        continue
+                elif line_a['y0'] > line_a['y1']:
+                    if intersection['y'] > line_a['y0']:
+                        continue
+                if line_b['y0'] < line_b['y1']:
+                    if intersection['y'] < line_b['y0']:
+                        continue
+                elif line_b['y0'] > line_b['y1']:
+                    if intersection['y'] > line_b['y0']:
+                        continue
+                if (
+                    min_pos <= intersection['x'] <= max_pos and
+                    min_pos <= intersection['y'] <= max_pos
+                ):
+                    valid_intersections.append(intersection)
+        result = len(valid_intersections)
+        return result
+    
+    def solve2(self, hailstones):
+        result = len(hailstones)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        hailstones = self.get_hailstones(raw_input_lines)
+        solutions = (
+            self.solve(hailstones),
+            self.solve2(hailstones),
+            )
+        result = solutions
+        return result
+
+class Pulse(Enum):
+    LOW = 0
+    HIGH = 1
+
+class Behavior(Enum):
+    UNKNOWN = 'Unknown'
+    FLIP_FLOP = 'Flip-flop'
+    CONJUNCTION = 'Conjunction'
+
+class Module(object):
+    def __init__(self, name, behavior):
+        self.name = name
+        self.behavior = behavior
+        self.state = Pulse.LOW
+        self.inputs = {}
+        self.signals = {}
+        self.outputs = []
+        self.queries = {
+            'low_pulses_sent': 0,
+            'low_pulses_received': 0,
+            'high_pulses_sent': 0,
+            'high_pulses_received': 0,
+        }
+    
+    def toggle(self):
+        self.state = (
+            Pulse.LOW if
+            self.state == Pulse.HIGH else
+            Pulse.HIGH
+        )
+    
+    def process_signal(self, sender_name, signal):
+        pulses = []
+        self.signals[sender_name] = signal
+        if signal == Pulse.LOW:
+            self.queries['low_pulses_received'] += 1
+        elif signal == Pulse.HIGH:
+            self.queries['high_pulses_received'] += 1
+        if self.behavior == Behavior.FLIP_FLOP:
+            if signal == Pulse.LOW:
+                self.toggle()
+                for destination in self.outputs:
+                    pulses.append((self.name, destination.name, self.state))
+        elif self.behavior == Behavior.CONJUNCTION:
+            new_signal = Pulse.LOW
+            for input_name in self.signals:
+                if self.signals[input_name] == Pulse.LOW:
+                    new_signal = Pulse.HIGH
+            self.state = new_signal
+            for destination in self.outputs:
+                pulses.append((self.name, destination.name, self.state))
+        elif self.behavior == Behavior.UNKNOWN:
+            pass
+        else:
+            print('ERROR?')
+        for (_, _, signal) in pulses:
+            if signal == Pulse.LOW:
+                self.queries['low_pulses_sent'] += 1
+            elif signal == Pulse.HIGH:
+                self.queries['high_pulses_sent'] += 1
+        result = pulses
+        return result
+
+class DesertMachine(object):
+    def __init__(self, modules):
+        self.modules = {}
+        self.debug = False
+        for source_name, (module_type, destination_names) in modules.items():
+            behavior = Behavior.UNKNOWN
+            if module_type == 'Flip-flop':
+                behavior = Behavior.FLIP_FLOP
+            elif module_type == 'Conjunction':
+                behavior = Behavior.CONJUNCTION
+            module = Module(source_name, behavior)
+            self.modules[source_name] = module
+        for source_name, (module_type, destination_names) in modules.items():
+            for destination_name in destination_names:
+                source = self.modules[source_name]
+                destination = self.modules[destination_name]
+                source.outputs.append(destination)
+                destination.inputs[source_name] = source
+                destination.signals[source_name] = Pulse.LOW
+        self.pulses = collections.deque()
+        self.history = []
+    
+    def push(self):
+        if self.debug:
+            self.history.append(('button', 'broadcaster', Pulse.LOW))
+        for destination in self.modules['broadcaster'].outputs:
+            self.pulses.append(('broadcaster', destination.name, Pulse.LOW))
+        while len(self.pulses) > 0:
+            (sender_name, receiver_name, signal) = self.pulses.popleft()
+            if self.debug:
+                self.history.append((sender_name, receiver_name, signal))
+            receiver = self.modules[receiver_name]
+            new_pulses = receiver.process_signal(sender_name, signal)
+            for pulse in new_pulses:
+                self.pulses.append(pulse)
+
+class Day21: # Step Counter
+    '''
+    https://adventofcode.com/2023/day/21
+    '''
+    def get_garden_info(self, raw_input_lines: List[str]):
+        start_row = 0
+        start_col = 0
+        rocks = set()
+        for row, raw_input_line in enumerate(raw_input_lines):
+            for col, char in enumerate(raw_input_line):
+                if char == 'S':
+                    start_row = row
+                    start_col = col
+                elif char == '#':
+                    rocks.add((row, col))
+        rows = len(raw_input_lines)
+        cols = len(raw_input_lines[0])
+        garden_info = {
+            'dimensions': (rows, cols),
+            'start': (start_row, start_col),
+            'rocks': rocks,
+        }
+        result = garden_info
+        return result
+    
+    def solve(self, garden_info, max_distance=64):
+        (rows, cols) = garden_info['dimensions']
+        (start_row, start_col) = garden_info['start']
+        rocks = garden_info['rocks']
+        visited = set()
+        garden_plots = set()
+        work = [(start_row, start_col, 0)]
+        while len(work) > 0:
+            (row, col, distance) = work.pop()
+            visited.add((row, col, distance))
+            if distance == max_distance:
+                garden_plots.add((row, col))
+            for (next_row, next_col) in (
+                (row - 1, col    ),
+                (row + 1, col    ),
+                (row    , col - 1),
+                (row    , col + 1),
+            ):
+                if (
+                    distance < max_distance and
+                    0 <= next_row < rows and
+                    0 <= next_col < cols and
+                    (next_row, next_col, distance + 1) not in visited and
+                    (next_row, next_col) not in rocks
+                ):
+                    work.append((next_row, next_col, distance + 1))
+        result = len(garden_plots)
+        return result
+    
+    def solve2(self, garden_info):
+        result = len(garden_info)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        garden_info = self.get_garden_info(raw_input_lines)
+        solutions = (
+            self.solve(garden_info),
+            self.solve2(garden_info),
+            )
+        result = solutions
+        return result
+
+class Day20: # Pulse Propagation
+    '''
+    https://adventofcode.com/2023/day/20
+    '''
+    def get_modules(self, raw_input_lines: List[str]):
+        modules = {}
+        for raw_input_line in raw_input_lines:
+            raw_module, raw_destinations = raw_input_line.split(' -> ')
+            if raw_module == 'broadcaster':
+                module_name = 'broadcaster'
+                module_type = 'Relay'
+            else:
+                char, module_name = raw_module[0], raw_module[1:]
+                module_type = 'ERROR'
+                if char == '%':
+                    module_type = 'Flip-flop'
+                elif char == '&':
+                    module_type = 'Conjunction'
+            destinations = list(raw_destinations.split(', '))
+            modules[module_name] = (module_type, destinations)
+            for destination in destinations:
+                if destination not in modules:
+                    modules[destination] = ('UNKNOWN', [])
+        result = modules
+        return result
+    
+    def solve(self, modules, pulse_count=1_000):
+        machine = DesertMachine(modules)
+        for _ in range(pulse_count):
+            machine.push()
+        low_count = sum(
+            module.queries['low_pulses_sent'] for module in machine.modules.values()
+        )
+        high_count = sum(
+            module.queries['high_pulses_sent'] for module in machine.modules.values()
+        )
+        result = low_count * high_count
+        return result
+    
+    def solve2(self, modules):
+        queries = {
+            ('ln', 'high_pulses_sent', 1): 0, # 4003
+            ('ln', 'high_pulses_sent', 2): 0,
+            ('ln', 'high_pulses_sent', 3): 0,
+            ('ln', 'high_pulses_sent', 4): 0,
+            ('dr', 'high_pulses_sent', 1): 0,
+            ('dr', 'high_pulses_sent', 2): 0,
+            ('dr', 'high_pulses_sent', 3): 0,
+            ('dr', 'high_pulses_sent', 4): 0,
+            ('vn', 'high_pulses_sent', 1): 0,
+            ('vn', 'high_pulses_sent', 2): 0,
+            ('vn', 'high_pulses_sent', 3): 0,
+            ('vn', 'high_pulses_sent', 4): 0,
+            ('zx', 'high_pulses_sent', 1): 0,
+            ('zx', 'high_pulses_sent', 2): 0,
+            ('zx', 'high_pulses_sent', 3): 0,
+            ('zx', 'high_pulses_sent', 4): 0,
+        }
+        for (module_name, query_name, threshold) in queries.keys():
+            machine = DesertMachine(modules)
+            push_count = 0
+            while machine.modules[module_name].queries[query_name] < threshold:
+                machine.push()
+                push_count += 1
+            queries[(module_name, query_name, threshold)] = push_count
+            print(module_name, query_name, threshold, push_count)
+        result = (
+            queries[('ln', 'high_pulses_sent', 1)] *
+            queries[('dr', 'high_pulses_sent', 1)] *
+            queries[('vn', 'high_pulses_sent', 1)] *
+            queries[('zx', 'high_pulses_sent', 1)]
+        )
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        modules = self.get_modules(raw_input_lines)
+        solutions = (
+            self.solve(modules),
+            self.solve2(modules),
+            )
+        result = solutions
+        return result
+
+class Day19: # Aplenty
+    '''
+    https://adventofcode.com/2023/day/19
+    '''
+    def get_parsed_input(self, raw_input_lines: List[str]):
+        workflows = {}
+        parts = []
+        mode = 'WORKFLOW'
+        for raw_input_line in raw_input_lines:
+            if len(raw_input_line) < 1:
+                mode = 'PART'
+            else:
+                if mode == 'WORKFLOW':
+                    workflow_name, group = raw_input_line.split('{')
+                    raw_rules = group[:-1].split(',')
+                    workflow = []
+                    for raw_rule in raw_rules:
+                        if ':' not in raw_rule:
+                            rule = (raw_rule, )
+                            workflow.append(rule)
+                        else:
+                            left, right = raw_rule.split(':')
+                            if '<' in left:
+                                a, b = left.split('<')
+                                workflow.append((right, a, '<', int(b)))
+                            elif '>' in left:
+                                a, b = left.split('>')
+                                workflow.append((right, a, '>', int(b)))
+                    workflows[workflow_name] = workflow
+                else:
+                    raw_part = ''.join(raw_input_line[1:-1])
+                    raw_ratings = raw_part.split(',')
+                    part = {}
+                    for raw_rating in raw_ratings:
+                        (key, raw_value) = raw_rating.split('=')
+                        part[key] = int(raw_value)
+                    parts.append(part)
+        result = (workflows, parts)
+        return result
+    
+    def accepted(self, part, workflows):
+        workflow_name = 'in'
+        while workflow_name not in ('A', 'R'):
+            rules = workflows[workflow_name]
+            for rule in rules:
+                if len(rule) < 4:
+                    workflow_name = rule[0]
+                    break
+                (next_workflow, rating, comparison, threshold) = rule
+                if comparison == '<' and part[rating] < threshold:
+                    workflow_name = next_workflow
+                    break
+                elif comparison == '>' and part[rating] > threshold:
+                    workflow_name = next_workflow
+                    break
+        result = workflow_name
+        return result
+    
+    def solve(self, workflows, parts):
+        accepted_parts = []
+        for part in parts:
+            if self.accepted(part, workflows) == 'A':
+                x = 0 if 'x' not in part else part['x']
+                m = 0 if 'm' not in part else part['m']
+                a = 0 if 'a' not in part else part['a']
+                s = 0 if 's' not in part else part['s']
+                accepted_parts.append((x, m, a, s))
+        result = sum(
+            sum(part) for part in accepted_parts
+        )
+        return result
+
+    def get_filter_combinations(self, filter):
+        x = max(0, filter['x'][1] - filter['x'][0])
+        m = max(0, filter['m'][1] - filter['m'][0])
+        a = max(0, filter['a'][1] - filter['a'][0])
+        s = max(0, filter['s'][1] - filter['s'][0])
+        result = x * m * a * s
+        return result
+    
+    def combine(self, ratings, rating, operation, threshold):
+        new_ratings = copy.deepcopy(ratings)
+        low = new_ratings[rating][0]
+        if operation == '>':
+            low = max(low, threshold + 1)
+        elif operation == '>=':
+            low = max(low, threshold)
+        high = new_ratings[rating][1]
+        if operation == '<':
+            high = min(high, threshold)
+        elif operation == '<=':
+            high = min(high, threshold + 1)
+        new_ratings[rating] = (low, high)
+        result = new_ratings
+        return result
+    
+    def solve2(self, workflows):
+        accepted_ratings = []
+        work = []
+        work.append(('in', 0, {
+            'x': (1, 4001),
+            'm': (1, 4001),
+            'a': (1, 4001),
+            's': (1, 4001),
+        }))
+        while len(work) > 0:
+            (workflow_name, rule_id, ratings) = work.pop()
+            if workflow_name == 'R':
+                continue
+            elif workflow_name == 'A':
+                accepted_ratings.append(ratings)
+                continue
+            rule = workflows[workflow_name][rule_id]
+            if len(rule) == 1:
+                work.append((rule[0], 0, ratings))
+            elif len(rule) == 4:
+                (next_workflow, rating, comparison, threshold) = rule
+                if comparison == '<':
+                    ratings2 = self.combine(ratings, rating, '<', threshold)
+                    work.append((next_workflow, 0, ratings2))
+                    ratings3 = self.combine(ratings, rating, '>=', threshold)
+                    work.append((workflow_name, rule_id + 1, ratings3))
+                elif comparison == '>':
+                    ratings2 = self.combine(ratings, rating, '>', threshold)
+                    work.append((next_workflow, 0, ratings2))
+                    ratings3 = self.combine(ratings, rating, '<=', threshold)
+                    work.append((workflow_name, rule_id + 1, ratings3))
+        result = sum(
+            self.get_filter_combinations(ratings) for
+            ratings in accepted_ratings
+        )
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        workflows, parts = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(workflows, parts),
+            self.solve2(workflows),
+            )
+        result = solutions
+        return result
+
+class Day18: # Lavaduct Lagoon
+    '''
+    https://adventofcode.com/2023/day/18
+    '''
+    def get_dig_plan(self, raw_input_lines: List[str]):
+        dig_plan = []
+        for raw_input_line in raw_input_lines:
+            direction, b, c = raw_input_line.split(' ')
+            distance = int(b)
+            color = c[1:-1]
+            dig_plan.append((direction, distance, color))
+        result = dig_plan
+        return result
+    
+    def solve(self, dig_plan):
+        row = 0
+        col = 0
+        edges = set()
+        for (direction, distance, color) in dig_plan:
+            for i in range(distance + 1):
+                next_row = row
+                next_col = col
+                if direction == 'U':
+                    next_row -= i
+                elif direction == 'D':
+                    next_row += i
+                elif direction == 'L':
+                    next_col -= i
+                elif direction == 'R':
+                    next_col += i
+                edges.add((next_row, next_col))
+            if direction == 'U':
+                row -= distance
+            elif direction == 'D':
+                row += distance
+            elif direction == 'L':
+                col -= distance
+            elif direction == 'R':
+                col += distance
+        min_row = min(row for (row, col) in edges)
+        max_row = max(row for (row, col) in edges)
+        min_col = min(col for (row, col) in edges)
+        max_col = max(col for (row, col) in edges)
+        work = set()
+        for (row, col) in (
+            (-1, -1),
+            (-1,  0),
+            (-1,  1),
+            ( 0, -1),
+            ( 0,  0),
+            ( 0,  1),
+            ( 1, -1),
+            ( 1,  0),
+            ( 1,  1),
+        ):
+            if (row, col) in edges:
+                continue
+            if not(
+                min_row <= row <= max_row and
+                min_col <= col <= max_col
+            ):
+                continue
+            work.add((row, col))
+        fills = set()
+        nonfills = set()
+        while len(work) > 0:
+            (row, col) = work.pop()
+            seen = set()
+            valid_fill = True
+            work2 = [(row, col)]
+            while valid_fill and len(work2) > 0:
+                (row2, col2) = work2.pop()
+                for (row3, col3) in (
+                    (row2 - 1, col2    ),
+                    (row2 + 1, col2    ),
+                    (row2    , col2 - 1),
+                    (row2    , col2 + 1),
+                ):
+                    if not(
+                        min_row <= row3 <= max_row and
+                        min_col <= col3 <= max_col
+                    ):
+                        valid_fill = False
+                        break
+                    if (row3, col3) in edges:
+                        continue
+                    if (row3, col3) in seen:
+                        continue
+                    work2.append((row3, col3))
+                    seen.add((row3, col3))
+            if valid_fill:
+                fills |= seen
+            else:
+                nonfills |= seen
+        result = len(edges) + len(fills)
+        return result
+    
+    def solve2(self, dig_plan):
+        result = len(dig_plan)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        dig_plan = self.get_dig_plan(raw_input_lines)
+        solutions = (
+            self.solve(dig_plan),
+            self.solve2(dig_plan),
+            )
+        result = solutions
+        return result
+
+class Day17: # Clumsy Crucible
+    '''
+    https://adventofcode.com/2023/day/17
     '''
     def get_parsed_input(self, raw_input_lines: List[str]):
         result = []
@@ -606,12 +1253,60 @@ class Day12: # Hot Springs
                 if new_summary == summary:
                     valid_arrangement_count += 1
             valid_arrangement_counts.append(valid_arrangement_count)
-            print(valid_arrangement_count, condition, summary)
         result = sum(valid_arrangement_counts)
         return result
     
+    def validate(self, temp, condition):
+        assert len(temp) == len(condition)
+        for i in range(len(temp)):
+            if temp[i] == '#' and condition[i] == '.':
+                return False
+            elif temp[i] == '.' and condition[i] == '#':
+                return False
+        return True
+    
+    @functools.lru_cache(maxsize=256)
+    def F(self, condition, summary):
+        assert len(condition) > 0
+        assert len(summary) > 0
+        min_size = sum(summary) + len(summary) - 1
+        if min_size > len(condition):
+            return 0
+        M = len(condition)
+        if len(summary) == 1:
+            N = summary[0]
+            result = 0
+            if N == 0:
+                temp = '.' * M
+                if self.validate(temp, condition):
+                    result = 1
+                else:
+                    result = 0
+            else:
+                for i in range(M - N + 1):
+                    temp = '.' * i + '#' * N + '.' * (M - N - i)
+                    if self.validate(temp, condition):
+                        result += 1
+            return result
+        else:
+            N = sum(summary) + len(summary) - 1
+            result = 0
+            for i in range(M - N + 1):
+                left = '.' * i + '#' * summary[0] + '.'
+                right = condition[len(left):]
+                if self.validate(left, condition[:len(left)]):
+                    result += self.F(right, tuple(summary[1:]))
+            return result
+        return 0
+    
     def solve2(self, records):
-        result = len(records)
+        valid_arrangement_counts = []
+        for (condition, summary) in records:
+            condition2 = '?'.join((condition, condition, condition, condition, condition))
+            summary2 = summary * 5
+            valid_arrangement_count = self.F(condition2, summary2)
+            valid_arrangement_counts.append(valid_arrangement_count)
+        result = sum(valid_arrangement_counts)
         return result
     
     def main(self):
@@ -1716,7 +2411,7 @@ class Day01: # Trebuchet?!
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2023.py 2 < inputs/2023day02.in
+    python AdventOfCode2023.py 24 < inputs/2023day24.in
     '''
     solvers = {
         1: (Day01, 'Trebuchet?!'),
@@ -1735,14 +2430,14 @@ if __name__ == '__main__':
        14: (Day14, 'Parabolic Reflector Dish'),
        15: (Day15, 'Lens Library'),
        16: (Day16, 'The Floor Will Be Lava'),
-    #    17: (Day17, 'Unknown'),
-    #    18: (Day18, 'Unknown'),
-    #    19: (Day19, 'Unknown'),
-    #    20: (Day20, 'Unknown'),
-    #    21: (Day21, 'Unknown'),
+       17: (Day17, 'Clumsy Crucible'),
+       18: (Day18, 'Lavaduct Lagoon'),
+       19: (Day19, 'Aplenty'),
+       20: (Day20, 'Pulse Propagation'),
+       21: (Day21, 'Step Counter'),
     #    22: (Day22, 'Unknown'),
     #    23: (Day23, 'Unknown'),
-    #    24: (Day24, 'Unknown'),
+       24: (Day24, 'Never Tell Me The Odds'),
     #    25: (Day25, 'Unknown'),
         }
     parser = argparse.ArgumentParser()
