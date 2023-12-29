@@ -674,21 +674,6 @@ class Day18: # Lavaduct Lagoon
         result = solutions
         return result
 
-'''
-__.2 __.4 __.1 __.3 __.4 __.3 __.2 __.3 __.1 __.1 __.3 __.2 __.3
-__.3 __.2 __.1 __.5 __.4 __.5 __.3 __.5 __.3 __.5 __.6 __.2 __.3
-__.3 __.2 __.5 __.5 __.2 __.4 __.5 __.6 __.5 __.4 __.2 __.5 __.4
-__.3 __.4 __.4 __.6 __.5 __.8 __.5 __.8 __.4 __.5 __.4 __.5 __.2
-__.4 __.5 __.4 __.6 __.6 __.5 __.7 __.8 __.6 __.7 __.5 __.3 __.6
-__.1 __.4 __.3 __.8 __.5 __.9 __.8 __.7 __.9 __.8 __.4 __.5 __.4
-__.4 __.4 __.5 __.7 __.8 __.7 __.6 __.9 __.8 __.7 __.7 __.6 __.6
-__.3 __.6 __.3 __.7 __.8 __.7 __.7 __.9 __.7 __.9 __.6 __.5 __.3
-__.4 __.6 __.5 __.4 __.9 __.6 __.7 __.9 __.8 __.6 __.8 __.8 __.7
-__.4 __.5 __.6 __.4 __.6 __.7 __.9 __.9 __.8 __.6 __.4 __.5 __.3
-__.1 __.2 __.2 __.4 __.6 __.8 __.6 __.8 __.6 __.5 __.5 __.6 __.3
-__.2 __.5 __.4 __.6 __.5 __.4 __.8 __.8 __.8 __.7 __.7 06.3 03.5
-__.4 __.3 __.2 __.2 __.6 __.7 __.4 __.6 __.5 13.5 08.5 03.3 00.3
-'''
 class Day17: # Clumsy Crucible
     '''
     https://adventofcode.com/2023/day/17
@@ -721,6 +706,8 @@ class Day17: # Clumsy Crucible
                     (min_heat_loss, 0, 0, 0, 'R', next_move_count, 'R' * next_move_count)
                 )
         while len(work) > 0:
+            while len(work) > 1 and work[0][1] >= min_heat_loss:
+                heapq.heappop(work)
             (prev_cost_estimate, prev_heat_loss, prev_row, prev_col, prev_direction, move_count, solution) = heapq.heappop(work)
             row = prev_row + move_count * self.DIRECTIONS[prev_direction][0]
             col = prev_col + move_count * self.DIRECTIONS[prev_direction][1]
@@ -751,7 +738,7 @@ class Day17: # Clumsy Crucible
                 continue
             if (row == (rows - 1) and col == (cols - 1)):
                 min_heat_loss = min(min_heat_loss, heat_loss)
-                # print(heat_loss, len(work), len(visited))
+                print(heat_loss, len(work), len(visited))
                 # print(solution)
                 continue
             cost_estimate = heat_loss + 9 * (rows + cols - row - col - 2)
