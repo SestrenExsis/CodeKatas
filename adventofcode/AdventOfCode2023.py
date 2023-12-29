@@ -678,26 +678,176 @@ class Day17: # Clumsy Crucible
     '''
     https://adventofcode.com/2023/day/17
     '''
+    DIRECTIONS = {
+        'U': (-1,  0),
+        'D': ( 1,  0),
+        'L': ( 0, -1),
+        'R': ( 0,  1),
+    }
     def get_parsed_input(self, raw_input_lines: List[str]):
         result = []
         for raw_input_line in raw_input_lines:
             result.append(raw_input_line)
         return result
     
-    def solve(self, parsed_input):
-        result = len(parsed_input)
+    def solve(self, grid, min_moves=1, max_moves=3):
+        rows = len(grid)
+        cols = len(grid[0])
+        min_heat_loss = 9 * (rows + cols - 2)
+        visited = {}
+        work = []
+        for next_move_count in range(min_moves, max_moves + 1):
+            if next_move_count < rows:
+                heapq.heappush(work,
+                    (min_heat_loss, 0, 0, 0, 'D', next_move_count, 'D' * next_move_count)
+                )
+            if next_move_count < cols:
+                heapq.heappush(work,
+                    (min_heat_loss, 0, 0, 0, 'R', next_move_count, 'R' * next_move_count)
+                )
+        while len(work) > 0:
+            while len(work) > 1 and work[0][1] >= min_heat_loss:
+                heapq.heappop(work)
+            (prev_cost_estimate, prev_heat_loss, prev_row, prev_col, prev_direction, move_count, solution) = heapq.heappop(work)
+            row = prev_row + move_count * self.DIRECTIONS[prev_direction][0]
+            col = prev_col + move_count * self.DIRECTIONS[prev_direction][1]
+            assert 0 <= row < rows
+            assert 0 <= col < cols
+            heat_loss = prev_heat_loss
+            if prev_row < row:
+                for next_row in range(prev_row + 1, row + 1):
+                    heat_loss += int(grid[next_row][col])
+            elif prev_row > row:
+                for next_row in range(row, prev_row):
+                    heat_loss += int(grid[next_row][col])
+            elif prev_col < col:
+                for next_col in range(prev_col + 1, col + 1):
+                    heat_loss += int(grid[row][next_col])
+            elif prev_col > col:
+                for next_col in range(col, prev_col):
+                    heat_loss += int(grid[row][next_col])
+            else:
+                assert 1 == 2
+            if (
+                (row, col, prev_direction) in visited and
+                heat_loss >= visited[(row, col, prev_direction)]
+            ):
+                continue
+            visited[(row, col, prev_direction)] = heat_loss
+            if heat_loss >= min_heat_loss:
+                continue
+            if (row == (rows - 1) and col == (cols - 1)):
+                min_heat_loss = min(min_heat_loss, heat_loss)
+                print(heat_loss, len(work), len(visited))
+                # print(solution)
+                continue
+            cost_estimate = heat_loss + 9 * (rows + cols - row - col - 2)
+            for next_move_count in range(min_moves, max_moves + 1):
+                # Move up or down
+                if prev_direction in 'LR':
+                    if (row - next_move_count) >= 0:
+                        next_solution = solution + 'U' * next_move_count
+                        heapq.heappush(work,
+                            (cost_estimate, heat_loss, row, col, 'U', next_move_count, next_solution)
+                        )
+                    if (row + next_move_count) < rows:
+                        next_solution = solution + 'D' * next_move_count
+                        heapq.heappush(work,
+                            (cost_estimate, heat_loss, row, col, 'D', next_move_count, next_solution)
+                        )
+                # Move left or right
+                if prev_direction in 'UD':
+                    if (col - next_move_count) >= 0:
+                        next_solution = solution + 'L' * next_move_count
+                        heapq.heappush(work,
+                            (cost_estimate, heat_loss, row, col, 'L', next_move_count, next_solution)
+                        )
+                    if (col + next_move_count) < cols:
+                        next_solution = solution + 'R' * next_move_count
+                        heapq.heappush(work,
+                            (cost_estimate, heat_loss, row, col, 'R', next_move_count, next_solution)
+                        )
+        result = min_heat_loss
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve_slowly(self, grid):
+        rows = len(grid)
+        cols = len(grid[0])
+        min_heat_loss = 9 * (rows - 1 + cols - 1)
+        visited = {}
+        work = [(0, 0, '***', 0, '')]
+        while len(work) > 0:
+            # if random.random() < 0.000001:
+            #     print(len(work), len(visited))
+            (row, col, moves, heat_loss, solution) = work.pop()
+            key = (row, col, moves)
+            if (
+                not(0 <= row < rows) or
+                not(0 <= col < cols) or
+                (key in visited and visited[key] <= heat_loss)
+            ):
+                continue
+            if heat_loss > min_heat_loss:
+                continue
+            visited[key] = heat_loss
+            if (row == (rows - 1) and col == (cols - 1)):
+                min_heat_loss = min(min_heat_loss, heat_loss)
+                # print(heat_loss, len(work), len(visited))
+                # print(solution)
+                continue
+            if row > 0 and moves != 'UUU' and moves[-1] != 'D':
+                next_moves = (moves + 'U')[-3:]
+                cost = int(grid[row - 1][col])
+                next_heat_loss = heat_loss + cost
+                if next_heat_loss > min_heat_loss:
+                    continue
+                next_solution = solution + 'U' + str(cost) + ' '
+                if next_moves[-1] != next_moves[-2]:
+                    next_moves = '**U'
+                work.append((row - 1, col, next_moves, next_heat_loss, next_solution))
+            if row < rows - 1 and moves != 'DDD' and moves[-1] != 'U':
+                next_moves = (moves + 'D')[-3:]
+                cost = int(grid[row + 1][col])
+                next_heat_loss = heat_loss + cost
+                if next_heat_loss > min_heat_loss:
+                    continue
+                next_solution = solution + 'D' + str(cost) + ' '
+                if next_moves[-1] != next_moves[-2]:
+                    next_moves = '**D'
+                work.append((row + 1, col, next_moves, next_heat_loss, next_solution))
+            if col > 0 and moves != 'LLL' and moves[-1] != 'R':
+                next_moves = (moves + 'L')[-3:]
+                cost = int(grid[row][col - 1])
+                next_heat_loss = heat_loss + cost
+                if next_heat_loss > min_heat_loss:
+                    continue
+                next_solution = solution + 'L' + str(cost) + ' '
+                if next_moves[-1] != next_moves[-2]:
+                    next_moves = '**L'
+                work.append((row, col - 1, next_moves, next_heat_loss, next_solution))
+            if col < cols - 1 and moves != 'RRR' and moves[-1] != 'L':
+                next_moves = (moves + 'R')[-3:]
+                cost = int(grid[row][col + 1])
+                next_heat_loss = heat_loss + cost
+                if next_heat_loss > min_heat_loss:
+                    continue
+                next_solution = solution + 'R' + str(cost) + ' '
+                if next_moves[-1] != next_moves[-2]:
+                    next_moves = '**R'
+                work.append((row, col + 1, next_moves, next_heat_loss, next_solution))
+        result = min_heat_loss
+        return result
+    
+    def solve2(self, grid):
+        result = len(grid)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         parsed_input = self.get_parsed_input(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(parsed_input, 1, 3),
+            self.solve(parsed_input, 4, 10),
             )
         result = solutions
         return result
@@ -2411,7 +2561,7 @@ class Day01: # Trebuchet?!
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2023.py 24 < inputs/2023day24.in
+    python AdventOfCode2023.py 17 < inputs/2023day17.in
     '''
     solvers = {
         1: (Day01, 'Trebuchet?!'),
