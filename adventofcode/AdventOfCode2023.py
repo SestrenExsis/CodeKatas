@@ -674,6 +674,21 @@ class Day18: # Lavaduct Lagoon
         result = solutions
         return result
 
+'''
+__.2 __.4 __.1 __.3 __.4 __.3 __.2 __.3 __.1 __.1 __.3 __.2 __.3
+__.3 __.2 __.1 __.5 __.4 __.5 __.3 __.5 __.3 __.5 __.6 __.2 __.3
+__.3 __.2 __.5 __.5 __.2 __.4 __.5 __.6 __.5 __.4 __.2 __.5 __.4
+__.3 __.4 __.4 __.6 __.5 __.8 __.5 __.8 __.4 __.5 __.4 __.5 __.2
+__.4 __.5 __.4 __.6 __.6 __.5 __.7 __.8 __.6 __.7 __.5 __.3 __.6
+__.1 __.4 __.3 __.8 __.5 __.9 __.8 __.7 __.9 __.8 __.4 __.5 __.4
+__.4 __.4 __.5 __.7 __.8 __.7 __.6 __.9 __.8 __.7 __.7 __.6 __.6
+__.3 __.6 __.3 __.7 __.8 __.7 __.7 __.9 __.7 __.9 __.6 __.5 __.3
+__.4 __.6 __.5 __.4 __.9 __.6 __.7 __.9 __.8 __.6 __.8 __.8 __.7
+__.4 __.5 __.6 __.4 __.6 __.7 __.9 __.9 __.8 __.6 __.4 __.5 __.3
+__.1 __.2 __.2 __.4 __.6 __.8 __.6 __.8 __.6 __.5 __.5 __.6 __.3
+__.2 __.5 __.4 __.6 __.5 __.4 __.8 __.8 __.8 __.7 __.7 06.3 03.5
+__.4 __.3 __.2 __.2 __.6 __.7 __.4 __.6 __.5 13.5 08.5 03.3 00.3
+'''
 class Day17: # Clumsy Crucible
     '''
     https://adventofcode.com/2023/day/17
@@ -684,19 +699,83 @@ class Day17: # Clumsy Crucible
             result.append(raw_input_line)
         return result
     
-    def solve(self, parsed_input):
-        result = len(parsed_input)
+    def solve_slowly(self, grid):
+        rows = len(grid)
+        cols = len(grid[0])
+        min_heat_loss = 9 * (rows - 1 + cols - 1)
+        visited = {}
+        work = [(0, 0, '***', 0, '')]
+        while len(work) > 0:
+            # if random.random() < 0.000001:
+            #     print(len(work), len(visited))
+            (row, col, moves, heat_loss, solution) = work.pop()
+            key = (row, col, moves)
+            if (
+                not(0 <= row < rows) or
+                not(0 <= col < cols) or
+                (key in visited and visited[key] <= heat_loss)
+            ):
+                continue
+            if heat_loss > min_heat_loss:
+                continue
+            visited[key] = heat_loss
+            if (row == (rows - 1) and col == (cols - 1)):
+                min_heat_loss = min(min_heat_loss, heat_loss)
+                # print(heat_loss, len(work), len(visited))
+                # print(solution)
+                continue
+            if row > 0 and moves != 'UUU' and moves[-1] != 'D':
+                next_moves = (moves + 'U')[-3:]
+                cost = int(grid[row - 1][col])
+                next_heat_loss = heat_loss + cost
+                if next_heat_loss > min_heat_loss:
+                    continue
+                next_solution = solution + 'U' + str(cost) + ' '
+                if next_moves[-1] != next_moves[-2]:
+                    next_moves = '**U'
+                work.append((row - 1, col, next_moves, next_heat_loss, next_solution))
+            if row < rows - 1 and moves != 'DDD' and moves[-1] != 'U':
+                next_moves = (moves + 'D')[-3:]
+                cost = int(grid[row + 1][col])
+                next_heat_loss = heat_loss + cost
+                if next_heat_loss > min_heat_loss:
+                    continue
+                next_solution = solution + 'D' + str(cost) + ' '
+                if next_moves[-1] != next_moves[-2]:
+                    next_moves = '**D'
+                work.append((row + 1, col, next_moves, next_heat_loss, next_solution))
+            if col > 0 and moves != 'LLL' and moves[-1] != 'R':
+                next_moves = (moves + 'L')[-3:]
+                cost = int(grid[row][col - 1])
+                next_heat_loss = heat_loss + cost
+                if next_heat_loss > min_heat_loss:
+                    continue
+                next_solution = solution + 'L' + str(cost) + ' '
+                if next_moves[-1] != next_moves[-2]:
+                    next_moves = '**L'
+                work.append((row, col - 1, next_moves, next_heat_loss, next_solution))
+            if col < cols - 1 and moves != 'RRR' and moves[-1] != 'L':
+                next_moves = (moves + 'R')[-3:]
+                cost = int(grid[row][col + 1])
+                next_heat_loss = heat_loss + cost
+                if next_heat_loss > min_heat_loss:
+                    continue
+                next_solution = solution + 'R' + str(cost) + ' '
+                if next_moves[-1] != next_moves[-2]:
+                    next_moves = '**R'
+                work.append((row, col + 1, next_moves, next_heat_loss, next_solution))
+        result = min_heat_loss
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, grid):
+        result = len(grid)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         parsed_input = self.get_parsed_input(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
+            self.solve_slowly(parsed_input),
             self.solve2(parsed_input),
             )
         result = solutions
@@ -2411,7 +2490,7 @@ class Day01: # Trebuchet?!
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2023.py 24 < inputs/2023day24.in
+    python AdventOfCode2023.py 17 < inputs/2023day17.in
     '''
     solvers = {
         1: (Day01, 'Trebuchet?!'),
