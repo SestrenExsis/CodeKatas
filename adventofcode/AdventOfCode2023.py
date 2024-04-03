@@ -169,6 +169,170 @@ class Day24: # Never Tell Me The Odds
         result = solutions
         return result
 
+class Day22: # Sand Slabs
+    '''
+    https://adventofcode.com/2023/day/22
+    '''
+    def get_bricks(self, raw_input_lines: List[str]):
+        bricks = []
+        for raw_input_line in raw_input_lines:
+            (raw0, raw1) = raw_input_line.split('~')
+            (x0, y0, z0) = tuple(map(int, raw0.split(',')))
+            (x1, y1, z1) = tuple(map(int, raw1.split(',')))
+            brick = {
+                'x0': x0,
+                'y0': y0,
+                'z0': z0,
+                'x1': x1,
+                'y1': y1,
+                'z1': z1,
+            }
+            # Assume input contains bricks that extend in at most 1 dimension
+            assert (
+                (x0 == x1 and y0 == y1) or
+                (y0 == y1 and z0 == z1) or
+                (z0 == z1 and x0 == x1)
+            )
+            # Assume order of endpoints is non-decreasing
+            assert x0 <= x1
+            assert y0 <= y1
+            assert z0 <= z1
+            bricks.append(brick)
+        result = bricks
+        return result
+    
+    def display_bricks(self, bricks):
+        result = []
+        for brick_id, brick in enumerate(bricks):
+            result.append(str(brick_id) + ' ' + str(self.display_brick(brick)))
+        return result
+    
+    def display_brick(self, brick):
+        x0 = str(brick['x0'])
+        y0 = str(brick['y0'])
+        z0 = str(brick['z0'])
+        x1 = str(brick['x1'])
+        y1 = str(brick['y1'])
+        z1 = str(brick['z1'])
+        result = ((x0, y0, z0), (x1, y1, z1))
+        return result
+    
+    def settle_slowly(self, bricks, mode='TEST'):
+        settling_ind = False
+        for a in range(len(bricks)):
+            ax0 = bricks[a]['x0']
+            ax1 = bricks[a]['x1']
+            ay0 = bricks[a]['y0']
+            ay1 = bricks[a]['y1']
+            az0 = bricks[a]['z0'] - 1
+            az1 = bricks[a]['z1'] - 1
+            supported_ind = False
+            if az0 < 1:
+                supported_ind = True
+                # print(a, 'is on the ground')
+            else:
+                for b in range(len(bricks)):
+                    if b == a:
+                        continue
+                    bx0 = bricks[b]['x0']
+                    bx1 = bricks[b]['x1']
+                    by0 = bricks[b]['y0']
+                    by1 = bricks[b]['y1']
+                    bz0 = bricks[b]['z0']
+                    bz1 = bricks[b]['z1']
+                    if (
+                        (ax0 <= bx1 and ax1 >= bx0) and
+                        (ay0 <= by1 and ay1 >= by0) and
+                        (az0 <= bz1 and az1 >= bz0)
+                    ):
+                        supported_ind = True
+                        # print(a, 'is supported by', b)
+                        break
+            if not supported_ind:
+                settling_ind = True
+                if mode == 'EDIT':
+                    bricks[a]['z0'] -= 1
+                    bricks[a]['z1'] -= 1
+                print(a, 'settles one level to ', self.display_brick(bricks[a]))
+                break
+        result = settling_ind
+        return result
+    
+    def settle(self, bricks, starting_index, mode='TEST'):
+        falling_bricks = set()
+        for a in range(starting_index, len(bricks)):
+            ax0 = bricks[a]['x0']
+            ax1 = bricks[a]['x1']
+            ay0 = bricks[a]['y0']
+            ay1 = bricks[a]['y1']
+            az0 = bricks[a]['z0']
+            highest_z = 1
+            if az0 <= 1:
+                # print(a, 'is on the ground')
+                pass
+            else:
+                # Find the highest Z that intersects on X and Y
+                for b in range(len(bricks)):
+                    if b == a:
+                        continue
+                    bx0 = bricks[b]['x0']
+                    bx1 = bricks[b]['x1']
+                    by0 = bricks[b]['y0']
+                    by1 = bricks[b]['y1']
+                    bz1 = bricks[b]['z1']
+                    if (
+                        (ax0 <= bx1 and ax1 >= bx0) and
+                        (ay0 <= by1 and ay1 >= by0) and
+                        (bz1 <= az0)
+                    ):
+                        highest_z = max(highest_z, bz1 + 1)
+                        # print(a, 'is supported by', b)
+            if highest_z < bricks[a]['z0']:
+                distance = bricks[a]['z0'] - highest_z
+                if mode == 'EDIT':
+                    bricks[a]['z0'] -= distance
+                    bricks[a]['z1'] -= distance
+                falling_bricks.add(a)
+                # print(a, 'settles', settling_amount, 'level(s) to', self.display_brick(bricks[a]))
+                # break
+        result = len(falling_bricks)
+        return result
+    
+    def solve(self, bricks):
+        bricks.sort(key=lambda brick: brick['z0'])
+        for i in range(len(bricks)):
+            self.settle(bricks, i, 'EDIT')
+        safe_bricks = set()
+        for brick_id in range(len(bricks)):
+            falling_bricks = self.settle(bricks[:brick_id] + bricks[brick_id + 1:], brick_id, 'TEST')
+            if falling_bricks == 0:
+                safe_bricks.add(brick_id)
+            print(brick_id, falling_bricks)
+        result = len(safe_bricks)
+        return result
+    
+    def solve2(self, bricks):
+        bricks.sort(key=lambda brick: brick['z0'])
+        for i in range(len(bricks)):
+            falling_bricks = self.settle(bricks, i, 'EDIT')
+        total_falling_bricks = []
+        for brick_id in range(len(bricks)):
+            falling_bricks = self.settle(bricks[:brick_id] + bricks[brick_id + 1:], brick_id, 'TEST')
+            total_falling_bricks.append(falling_bricks)
+            print(brick_id, falling_bricks)
+        result = sum(total_falling_bricks)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        bricks = self.get_bricks(raw_input_lines)
+        solutions = (
+            self.solve(copy.deepcopy(bricks)),
+            self.solve2(copy.deepcopy(bricks)),
+            )
+        result = solutions
+        return result
+
 class Pulse(Enum):
     LOW = 0
     HIGH = 1
@@ -577,7 +741,7 @@ class Day18: # Lavaduct Lagoon
         result = dig_plan
         return result
     
-    def solve(self, dig_plan):
+    def solve_slowly(self, dig_plan):
         row = 0
         col = 0
         edges = set()
@@ -661,14 +825,46 @@ class Day18: # Lavaduct Lagoon
         return result
     
     def solve2(self, dig_plan):
-        result = len(dig_plan)
+        # Modify the dig plan according to Part 2
+        for i in range(len(dig_plan)):
+            (direction, distance, color) = dig_plan[i]
+            distance = int(color[1:-1], 16)
+            direction = 'RDLU'[int(color[-1])]
+            dig_plan[i] = (direction, distance, color)
+        coordinates = []
+        coordinates.append((0, 0))
+        (row, col) = (0, 0)
+        for (direction, distance, color) in dig_plan:
+            (next_row, next_col) = (row, col)
+            if direction == 'U':
+                next_row -= distance
+            elif direction == 'D':
+                next_row += distance
+            elif direction == 'L':
+                next_col -= distance
+            elif direction == 'R':
+                next_col += distance
+            coordinates.append((next_row, next_col))
+            row = next_row
+            col = next_col
+        # Shoelace formula: https://www.themathdoctors.org/polygon-coordinates-and-areas/
+        S1 = []
+        S2 = []
+        for i in range(len(coordinates) - 1):
+            s1 = coordinates[i][1] * coordinates[i + 1][0]
+            S1.append(s1)
+            s2 = coordinates[i][0] * coordinates[i + 1][1]
+            S2.append(s2)
+        result = abs(sum(S1) - sum(S2)) // 2
+        # Add the perimeter of the trench itself back in
+        result += 1 + sum(distance for (_, distance, _) in dig_plan) // 2
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         dig_plan = self.get_dig_plan(raw_input_lines)
         solutions = (
-            self.solve(dig_plan),
+            self.solve_slowly(dig_plan),
             self.solve2(dig_plan),
             )
         result = solutions
@@ -2561,7 +2757,7 @@ class Day01: # Trebuchet?!
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2023.py 17 < inputs/2023day17.in
+    python AdventOfCode2023.py 18 < inputs/2023day18.in
     '''
     solvers = {
         1: (Day01, 'Trebuchet?!'),
@@ -2585,7 +2781,7 @@ if __name__ == '__main__':
        19: (Day19, 'Aplenty'),
        20: (Day20, 'Pulse Propagation'),
        21: (Day21, 'Step Counter'),
-    #    22: (Day22, 'Unknown'),
+       22: (Day22, 'Sand Slabs'),
     #    23: (Day23, 'Unknown'),
        24: (Day24, 'Never Tell Me The Odds'),
     #    25: (Day25, 'Unknown'),
