@@ -73,7 +73,18 @@ class Day01: # Historian Hysteria
         return result
     
     def solve2(self, left, right):
-        result = len(right)
+        right_counts = {}
+        for num in right:
+            if num not in right_counts:
+                right_counts[num] = 0
+            right_counts[num] += 1
+        similarity_scores = []
+        for num in left:
+            if num not in right_counts:
+                right_counts[num] = 0
+            similarity_score = num * right_counts[num]
+            similarity_scores.append(similarity_score)
+        result = sum(similarity_scores)
         return result
     
     def main(self):
