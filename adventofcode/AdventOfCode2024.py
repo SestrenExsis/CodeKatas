@@ -47,30 +47,41 @@ class Template: # Template
         result = solutions
         return result
 
-class Day01: # XXX
+class Day01: # Historian Hysteria
     '''
     https://adventofcode.com/2024/day/1
     '''
-    def get_parsed_input(self, raw_input_lines: list[str]):
-        result = []
+    def get_list_pairs(self, raw_input_lines: list[str]):
+        left = []
+        right = []
         for raw_input_line in raw_input_lines:
-            result.append(raw_input_line)
+            (a, b) = map(int, raw_input_line.split())
+            left.append(a)
+            right.append(b)
+        result = (left, right)
         return result
     
-    def solve(self, parsed_input):
-        result = len(parsed_input)
+    def solve(self, left, right):
+        sorted_left = sorted(left)
+        sorted_right = sorted(right)
+        assert len(sorted_left) == len(sorted_right)
+        diffs = []
+        for i in range(len(sorted_left)):
+            diff = abs(sorted_left[i] - sorted_right[i])
+            diffs.append(diff)
+        result = sum(diffs)
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, left, right):
+        result = len(right)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        (left, right) = self.get_list_pairs(raw_input_lines)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(left, right),
+            self.solve2(left, right),
             )
         result = solutions
         return result
@@ -81,7 +92,7 @@ if __name__ == '__main__':
     python AdventOfCode2024.py 1 < inputs/2024day01.in
     '''
     solvers = {
-        1: (Day01, 'XXX'),
+        1: (Day01, 'Historian Hysteria'),
     #     2: (Day02, 'XXX'),
     #     3: (Day03, 'XXX'),
     #     4: (Day04, 'XXX'),
