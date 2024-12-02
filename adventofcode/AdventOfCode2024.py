@@ -47,6 +47,71 @@ class Template: # Template
         result = solutions
         return result
 
+class Day02: # Red-Nosed Reports
+    '''
+    https://adventofcode.com/2024/day/2
+    '''
+    def get_reports(self, raw_input_lines: list[str]):
+        reports = []
+        for raw_input_line in raw_input_lines:
+            report = tuple(map(int, raw_input_line.split()))
+            reports.append(report)
+        result = reports
+        return result
+    
+    def check_report(self, report):
+        safe_ind = True
+        prev_diff = 0
+        for i in range(1, len(report)):
+            diff = report[i] - report[i - 1]
+            if not(1 <= abs(diff) <= 3):
+                safe_ind = False
+                break
+            if (
+                (prev_diff < 0 and diff > 0) or
+                (prev_diff > 0 and diff < 0)
+            ):
+                safe_ind = False
+                break
+            prev_diff = diff
+        result = safe_ind
+        return result
+    
+    def solve(self, reports):
+        safe_count = 0
+        for report in reports:
+            if self.check_report(report):
+                safe_count += 1
+        result = safe_count
+        return result
+    
+    def solve2(self, reports):
+        safe_count = 0
+        for report in reports:
+            safe_ind = False
+            if self.check_report(report):
+                safe_ind = True
+            else:
+                for i in range(len(report)):
+                    modified_report = tuple(report[:i] + report[i + 1:])
+                    if self.check_report(modified_report):
+                        safe_ind = True
+                        break
+            if safe_ind:
+                safe_count += 1
+        result = safe_count
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        reports = self.get_reports(raw_input_lines)
+        solutions = (
+            self.solve(reports),
+            self.solve2(reports),
+            )
+        result = solutions
+        return result
+
 class Day01: # Historian Hysteria
     '''
     https://adventofcode.com/2024/day/1
@@ -104,7 +169,7 @@ if __name__ == '__main__':
     '''
     solvers = {
         1: (Day01, 'Historian Hysteria'),
-    #     2: (Day02, 'XXX'),
+        2: (Day02, 'Red-Nosed Reports'),
     #     3: (Day03, 'XXX'),
     #     4: (Day04, 'XXX'),
     #     5: (Day05, 'XXX'),
