@@ -59,27 +59,47 @@ class Day02: # Red-Nosed Reports
         result = reports
         return result
     
+    def check_report(self, report):
+        safe_ind = True
+        prev_diff = 0
+        for i in range(1, len(report)):
+            diff = report[i] - report[i - 1]
+            if not(1 <= abs(diff) <= 3):
+                safe_ind = False
+                break
+            if (
+                (prev_diff < 0 and diff > 0) or
+                (prev_diff > 0 and diff < 0)
+            ):
+                safe_ind = False
+                break
+            prev_diff = diff
+        result = safe_ind
+        return result
+    
     def solve(self, reports):
         safe_count = 0
         for report in reports:
-            prev_diff = 0
-            for i in range(1, len(report)):
-                diff = report[i] - report[i - 1]
-                if not(1 <= abs(diff) <= 3):
-                    break
-                if (
-                    (prev_diff < 0 and diff > 0) or
-                    (prev_diff > 0 and diff < 0)
-                ):
-                    break
-                prev_diff = diff
-            else:
+            if self.check_report(report):
                 safe_count += 1
         result = safe_count
         return result
     
     def solve2(self, reports):
-        result = len(reports)
+        safe_count = 0
+        for report in reports:
+            safe_ind = False
+            if self.check_report(report):
+                safe_ind = True
+            else:
+                for i in range(len(report)):
+                    modified_report = tuple(report[:i] + report[i + 1:])
+                    if self.check_report(modified_report):
+                        safe_ind = True
+                        break
+            if safe_ind:
+                safe_count += 1
+        result = safe_count
         return result
     
     def main(self):
