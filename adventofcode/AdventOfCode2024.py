@@ -74,7 +74,35 @@ class Day03: # Mull It Over
         return result
     
     def solve2(self, parsed_input):
-        result = len(parsed_input)
+        instructions = []
+        for line in parsed_input:
+            for i in range(len(line)):
+                if line[i:].startswith('mul('):
+                    length = line[i:i + 12].find(')')
+                    if length >= 0:
+                        segment = line[i:i + length + 1]
+                        try:
+                            (a, b) = tuple(map(int, segment[4:-1].split(',')))
+                            instructions.append(('MUL', a, b))
+                        except ValueError:
+                            pass
+                elif line[i:].startswith('do()'):
+                    instructions.append(('DO', ))
+                elif line[i:].startswith('don\'t()'):
+                    instructions.append(('DONT', ))
+        result = 0
+        do = True
+        for instruction in instructions:
+            print(instruction)
+            op = instruction[0]
+            if op == 'MUL':
+                (a, b) = instruction[1:]
+                if do:
+                    result += a * b
+            elif op == 'DO':
+                do = True
+            elif op == 'DONT':
+                do = False
         return result
     
     def main(self):
