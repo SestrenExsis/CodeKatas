@@ -47,6 +47,74 @@ class Template: # Template
         result = solutions
         return result
 
+class Day03: # Mull It Over
+    '''
+    https://adventofcode.com/2024/day/3
+    '''
+    def get_parsed_input(self, raw_input_lines: list[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        multiplications = []
+        for line in parsed_input:
+            for i in range(len(line)):
+                if line[i:].startswith('mul('):
+                    length = line[i:i + 12].find(')')
+                    if length >= 0:
+                        segment = line[i:i + length + 1]
+                        try:
+                            multiplication = tuple(map(int, segment[4:-1].split(',')))
+                            multiplications.append(multiplication)
+                        except ValueError:
+                            pass
+        result = sum((a * b for (a, b) in multiplications))
+        return result
+    
+    def solve2(self, parsed_input):
+        instructions = []
+        for line in parsed_input:
+            for i in range(len(line)):
+                if line[i:].startswith('mul('):
+                    length = line[i:i + 12].find(')')
+                    if length >= 0:
+                        segment = line[i:i + length + 1]
+                        try:
+                            (a, b) = tuple(map(int, segment[4:-1].split(',')))
+                            instructions.append(('MUL', a, b))
+                        except ValueError:
+                            pass
+                elif line[i:].startswith('do()'):
+                    instructions.append(('DO', ))
+                elif line[i:].startswith('don\'t()'):
+                    instructions.append(('DONT', ))
+        result = 0
+        do = True
+        for instruction in instructions:
+            print(instruction)
+            op = instruction[0]
+            if op == 'MUL':
+                (a, b) = instruction[1:]
+                if do:
+                    result += a * b
+            elif op == 'DO':
+                do = True
+            elif op == 'DONT':
+                do = False
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day02: # Red-Nosed Reports
     '''
     https://adventofcode.com/2024/day/2
@@ -170,7 +238,7 @@ if __name__ == '__main__':
     solvers = {
         1: (Day01, 'Historian Hysteria'),
         2: (Day02, 'Red-Nosed Reports'),
-    #     3: (Day03, 'XXX'),
+        3: (Day03, 'Mull It Over'),
     #     4: (Day04, 'XXX'),
     #     5: (Day05, 'XXX'),
     #     6: (Day06, 'XXX'),
