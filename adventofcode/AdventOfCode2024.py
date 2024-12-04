@@ -47,6 +47,90 @@ class Template: # Template
         result = solutions
         return result
 
+class Day04: # Ceres Search
+    '''
+    https://adventofcode.com/2024/day/4
+    '''
+    def get_parsed_input(self, raw_input_lines: list[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, parsed_input):
+        word = 'XMAS'
+        word_count = 0
+        for start_row in range(len(parsed_input)):
+            for start_col in range(len(parsed_input[start_row])):
+                if parsed_input[start_row][start_col] == word[0]:
+                    for (row_mul, col_mul) in (
+                        (-1, -1),
+                        (-1,  0),
+                        (-1,  1),
+                        ( 0, -1),
+                        ( 0,  1),
+                        ( 1, -1),
+                        ( 1,  0),
+                        ( 1,  1),
+                    ):
+                        for i in range(len(word)):
+                            row = start_row + row_mul * i
+                            col = start_col + col_mul * i
+                            if not(0 <= row < len(parsed_input)):
+                                break
+                            if not(0 <= col < len(parsed_input[row])):
+                                break
+                            if parsed_input[row][col] != word[i]:
+                                break
+                        else:
+                            word_count += 1
+        result = word_count
+        return result
+    
+    def solve2(self, parsed_input):
+        word_count = 0
+        for start_row in range(len(parsed_input)):
+            for start_col in range(len(parsed_input[start_row])):
+                if parsed_input[start_row][start_col] == 'A':
+                    corners = []
+                    for (row_offset, col_offset) in (
+                        (-1, -1),
+                        (-1,  1),
+                        ( 1, -1),
+                        ( 1,  1),
+                    ):
+                        corners.append('')
+                        row = start_row + row_offset
+                        col = start_col + col_offset
+                        if not(0 <= row < len(parsed_input)):
+                            continue
+                        if not(0 <= col < len(parsed_input[row])):
+                            continue
+                        corners[-1] = parsed_input[row][col]
+                    if (
+                        (
+                            corners[0] + 'A' + corners[3] == 'MAS' or
+                            corners[0] + 'A' + corners[3] == 'SAM'
+                        ) and
+                        (
+                            corners[1] + 'A' + corners[2] == 'MAS' or
+                            corners[1] + 'A' + corners[2] == 'SAM'
+                        )
+                    ):
+                        word_count += 1
+        result = word_count
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+            )
+        result = solutions
+        return result
+
 class Day03: # Mull It Over
     '''
     https://adventofcode.com/2024/day/3
@@ -93,7 +177,6 @@ class Day03: # Mull It Over
         result = 0
         do = True
         for instruction in instructions:
-            print(instruction)
             op = instruction[0]
             if op == 'MUL':
                 (a, b) = instruction[1:]
@@ -239,7 +322,7 @@ if __name__ == '__main__':
         1: (Day01, 'Historian Hysteria'),
         2: (Day02, 'Red-Nosed Reports'),
         3: (Day03, 'Mull It Over'),
-    #     4: (Day04, 'XXX'),
+        4: (Day04, 'Ceres Search'),
     #     5: (Day05, 'XXX'),
     #     6: (Day06, 'XXX'),
     #     7: (Day07, 'XXX'),
