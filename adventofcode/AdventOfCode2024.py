@@ -80,10 +80,7 @@ class Day04: # Ceres Search
                                 break
                             if not(0 <= col < len(parsed_input[row])):
                                 break
-                            try:
-                                if parsed_input[row][col] != word[i]:
-                                    break
-                            except IndexError:
+                            if parsed_input[row][col] != word[i]:
                                 break
                         else:
                             word_count += 1
@@ -91,7 +88,37 @@ class Day04: # Ceres Search
         return result
     
     def solve2(self, parsed_input):
-        result = len(parsed_input)
+        word_count = 0
+        for start_row in range(len(parsed_input)):
+            for start_col in range(len(parsed_input[start_row])):
+                if parsed_input[start_row][start_col] == 'A':
+                    corners = []
+                    for (row_offset, col_offset) in (
+                        (-1, -1),
+                        (-1,  1),
+                        ( 1, -1),
+                        ( 1,  1),
+                    ):
+                        corners.append('')
+                        row = start_row + row_offset
+                        col = start_col + col_offset
+                        if not(0 <= row < len(parsed_input)):
+                            continue
+                        if not(0 <= col < len(parsed_input[row])):
+                            continue
+                        corners[-1] = parsed_input[row][col]
+                    if (
+                        (
+                            corners[0] + 'A' + corners[3] == 'MAS' or
+                            corners[0] + 'A' + corners[3] == 'SAM'
+                        ) and
+                        (
+                            corners[1] + 'A' + corners[2] == 'MAS' or
+                            corners[1] + 'A' + corners[2] == 'SAM'
+                        )
+                    ):
+                        word_count += 1
+        result = word_count
         return result
     
     def main(self):
