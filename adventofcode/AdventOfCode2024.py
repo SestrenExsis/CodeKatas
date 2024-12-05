@@ -47,6 +47,61 @@ class Template: # Template
         result = solutions
         return result
 
+class Day05: # Print Queue
+    '''
+    https://adventofcode.com/2024/day/5
+    '''
+    def get_parsed_input(self, raw_input_lines: list[str]):
+        rules = []
+        updates = []
+        mode = 'RULES'
+        for raw_input_line in raw_input_lines:
+            if len(raw_input_line) == 0:
+                mode = 'UPDATES'
+            else:
+                if mode == 'RULES':
+                    rules.append(tuple(map(int, raw_input_line.split('|'))))
+                elif mode == 'UPDATES':
+                    updates.append(list(map(int, raw_input_line.split(','))))
+                else:
+                    raise Exception('Unknown mode')
+        result = (rules, updates)
+        return result
+    
+    def solve(self, rules, updates):
+        # Return the sum of the middle page number of all properly-sorted updates
+        valid_updates = []
+        for update in updates:
+            indexes = {}
+            for (i, num) in enumerate(update):
+                assert num not in indexes
+                indexes[num] = i
+            for (a, b) in rules:
+                if a in indexes and b in indexes:
+                    if indexes[a] >= indexes[b]:
+                        break
+            else:
+                valid_updates.append(update)
+        result = 0
+        for update in valid_updates:
+            n = len(update) // 2
+            result += update[n]
+        return result
+    
+    def solve2(self, rules, updates):
+        result = len(updates)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        (rules, updates) = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(rules, updates),
+            self.solve2(rules, updates),
+            )
+        result = solutions
+        return result
+
 class Day04: # Ceres Search
     '''
     https://adventofcode.com/2024/day/4
@@ -316,14 +371,14 @@ class Day01: # Historian Hysteria
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2024.py 1 < inputs/2024day01.in
+    python AdventOfCode2024.py 5 < inputs/2024day05.in
     '''
     solvers = {
         1: (Day01, 'Historian Hysteria'),
         2: (Day02, 'Red-Nosed Reports'),
         3: (Day03, 'Mull It Over'),
         4: (Day04, 'Ceres Search'),
-    #     5: (Day05, 'XXX'),
+        5: (Day05, 'Print Queue'),
     #     6: (Day06, 'XXX'),
     #     7: (Day07, 'XXX'),
     #     8: (Day08, 'XXX'),
