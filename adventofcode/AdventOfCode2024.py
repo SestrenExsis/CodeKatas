@@ -4,6 +4,7 @@ Created on 2024-11-30
 @author: Sestren
 '''
 import argparse
+import functools
 
 def get_raw_input_lines() -> list:
     raw_input_lines = []
@@ -52,7 +53,7 @@ class Day05: # Print Queue
     https://adventofcode.com/2024/day/5
     '''
     def get_parsed_input(self, raw_input_lines: list[str]):
-        rules = []
+        rules = set()
         updates = []
         mode = 'RULES'
         for raw_input_line in raw_input_lines:
@@ -60,7 +61,7 @@ class Day05: # Print Queue
                 mode = 'UPDATES'
             else:
                 if mode == 'RULES':
-                    rules.append(tuple(map(int, raw_input_line.split('|'))))
+                    rules.add(tuple(map(int, raw_input_line.split('|'))))
                 elif mode == 'UPDATES':
                     updates.append(list(map(int, raw_input_line.split(','))))
                 else:
@@ -88,8 +89,24 @@ class Day05: # Print Queue
             result += update[n]
         return result
     
+    def collated(self, rules, update):
+        def lt(a, b):
+            result = 0
+            if (a, b) in rules:
+                result = -1
+            elif (b, a) in rules:
+                result = 1
+            return result
+        result = sorted(update, key=functools.cmp_to_key(lt))
+        return result
+    
     def solve2(self, rules, updates):
-        result = len(updates)
+        result = 0
+        for update in updates:
+            collated_update = self.collated(rules, update)
+            if collated_update != update:
+                n = len(collated_update) // 2
+                result += collated_update[n]
         return result
     
     def main(self):
