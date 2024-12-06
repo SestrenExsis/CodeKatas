@@ -100,8 +100,37 @@ class Day06: # Guard Gallivant
         result = len(visits)
         return result
     
-    def solve2(self, rows: int, cols: int, obstacles: set, guard: tuple):
-        result = len(obstacles)
+    def solve2(self, rows: int, cols: int, original_obstacles: set, original_guard: tuple):
+        positions = set()
+        for obstacle_row in range(rows):
+            for obstacle_col in range(cols):
+                if (obstacle_row, obstacle_col) in original_obstacles:
+                    continue
+                if (obstacle_row, obstacle_col) == (original_guard[0], original_guard[1]):
+                    continue
+                obstacles = set(original_obstacles)
+                obstacles.add((obstacle_row, obstacle_col))
+                guard = original_guard
+                visits = set()
+                while True:
+                    (row, col, direction) = guard
+                    if not (0 <= row < rows and 0 <= col < cols):
+                        break
+                    if (row, col, direction) in visits:
+                        positions.add((obstacle_row, obstacle_col))
+                        break
+                    visits.add((row, col, direction))
+                    while True:
+                        facing_row = row + self.directions[direction][0]
+                        facing_col = col + self.directions[direction][1]
+                        if (facing_row, facing_col) in obstacles:
+                            # Turn 90 degrees
+                            direction = self.directions[direction][2]
+                        else:
+                            # Take a step forward
+                            guard = (facing_row, facing_col, direction)
+                            break
+        result = len(positions)
         return result
     
     def main(self):
