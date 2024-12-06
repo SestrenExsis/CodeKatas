@@ -69,26 +69,6 @@ class Day05: # Print Queue
         result = (rules, updates)
         return result
     
-    def solve(self, rules, updates):
-        # Return the sum of the middle page number of all properly-sorted updates
-        valid_updates = []
-        for update in updates:
-            indexes = {}
-            for (i, num) in enumerate(update):
-                assert num not in indexes
-                indexes[num] = i
-            for (a, b) in rules:
-                if a in indexes and b in indexes:
-                    if indexes[a] >= indexes[b]:
-                        break
-            else:
-                valid_updates.append(update)
-        result = 0
-        for update in valid_updates:
-            n = len(update) // 2
-            result += update[n]
-        return result
-    
     def collated(self, rules, update):
         def lt(a, b):
             result = 0
@@ -98,6 +78,15 @@ class Day05: # Print Queue
                 result = 1
             return result
         result = sorted(update, key=functools.cmp_to_key(lt))
+        return result
+    
+    def solve(self, rules, updates):
+        result = 0
+        for update in updates:
+            collated_update = self.collated(rules, update)
+            if collated_update == update:
+                n = len(collated_update) // 2
+                result += collated_update[n]
         return result
     
     def solve2(self, rules, updates):
