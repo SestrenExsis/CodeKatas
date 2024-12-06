@@ -111,20 +111,20 @@ class Day06: # Guard Gallivant
                 obstacles = set(original_obstacles)
                 obstacles.add((obstacle_row, obstacle_col))
                 guard = original_guard
-                visits = set()
+                pivots = set()
                 while True:
                     (row, col, direction) = guard
                     if not (0 <= row < rows and 0 <= col < cols):
                         break
-                    if (row, col, direction) in visits:
+                    if (row, col, direction) in pivots:
                         positions.add((obstacle_row, obstacle_col))
                         break
-                    visits.add((row, col, direction))
                     while True:
                         facing_row = row + self.directions[direction][0]
                         facing_col = col + self.directions[direction][1]
                         if (facing_row, facing_col) in obstacles:
                             # Turn 90 degrees
+                            pivots.add((row, col, direction))
                             direction = self.directions[direction][2]
                         else:
                             # Take a step forward
