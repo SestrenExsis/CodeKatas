@@ -44,7 +44,102 @@ class Template: # Template
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
-            )
+        )
+        result = solutions
+        return result
+
+class Day06: # Guard Gallivant
+    '''
+    https://adventofcode.com/2024/day/6
+    '''
+    directions = {
+        'UP'   : (-1,  0, 'RIGHT'),
+        'RIGHT': ( 0,  1, 'DOWN'),
+        'DOWN' : ( 1,  0, 'LEFT'),
+        'LEFT' : ( 0, -1, 'UP'),
+    }
+    def get_parsed_input(self, raw_input_lines: list[str]):
+        rows = len(raw_input_lines)
+        cols = len(raw_input_lines[0])
+        obstacles = set()
+        guard = (0, 0, 'UNKNOWN')
+        result = []
+        for (row, raw_input_line) in enumerate(raw_input_lines):
+            for (col, char) in enumerate(raw_input_line):
+                if char == '#':
+                    obstacles.add((row, col))
+                elif char in '>^v<':
+                    directions = {
+                        '>': 'RIGHT',
+                        '^': 'UP',
+                        'v': 'DOWN',
+                        '<': 'LEFT',
+                    }
+                    guard = (row, col, directions[char])
+            result.append(raw_input_line)
+        result = (rows, cols, obstacles, guard)
+        return result
+    
+    def solve(self, rows: int, cols: int, obstacles: set, guard: tuple):
+        visits = set()
+        while True:
+            (row, col, direction) = guard
+            if not (0 <= row < rows and 0 <= col < cols):
+                break
+            visits.add((row, col))
+            while True:
+                facing_row = row + self.directions[direction][0]
+                facing_col = col + self.directions[direction][1]
+                if (facing_row, facing_col) in obstacles:
+                    # Turn 90 degrees
+                    direction = self.directions[direction][2]
+                else:
+                    # Take a step forward
+                    guard = (facing_row, facing_col, direction)
+                    break
+        result = len(visits)
+        return result
+    
+    def solve2(self, rows: int, cols: int, original_obstacles: set, original_guard: tuple):
+        positions = set()
+        for obstacle_row in range(rows):
+            for obstacle_col in range(cols):
+                if (obstacle_row, obstacle_col) in original_obstacles:
+                    continue
+                if (obstacle_row, obstacle_col) == (original_guard[0], original_guard[1]):
+                    continue
+                obstacles = set(original_obstacles)
+                obstacles.add((obstacle_row, obstacle_col))
+                guard = original_guard
+                visits = set()
+                while True:
+                    (row, col, direction) = guard
+                    if not (0 <= row < rows and 0 <= col < cols):
+                        break
+                    if (row, col, direction) in visits:
+                        positions.add((obstacle_row, obstacle_col))
+                        break
+                    visits.add((row, col, direction))
+                    while True:
+                        facing_row = row + self.directions[direction][0]
+                        facing_col = col + self.directions[direction][1]
+                        if (facing_row, facing_col) in obstacles:
+                            # Turn 90 degrees
+                            direction = self.directions[direction][2]
+                        else:
+                            # Take a step forward
+                            guard = (facing_row, facing_col, direction)
+                            break
+        result = len(positions)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        (rows, cols, obstacles, guard) = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(rows, cols, obstacles, guard),
+            self.solve2(rows, cols, obstacles, guard),
+        )
         result = solutions
         return result
 
@@ -69,26 +164,6 @@ class Day05: # Print Queue
         result = (rules, updates)
         return result
     
-    def solve(self, rules, updates):
-        # Return the sum of the middle page number of all properly-sorted updates
-        valid_updates = []
-        for update in updates:
-            indexes = {}
-            for (i, num) in enumerate(update):
-                assert num not in indexes
-                indexes[num] = i
-            for (a, b) in rules:
-                if a in indexes and b in indexes:
-                    if indexes[a] >= indexes[b]:
-                        break
-            else:
-                valid_updates.append(update)
-        result = 0
-        for update in valid_updates:
-            n = len(update) // 2
-            result += update[n]
-        return result
-    
     def collated(self, rules, update):
         def lt(a, b):
             result = 0
@@ -98,6 +173,15 @@ class Day05: # Print Queue
                 result = 1
             return result
         result = sorted(update, key=functools.cmp_to_key(lt))
+        return result
+    
+    def solve(self, rules, updates):
+        result = 0
+        for update in updates:
+            collated_update = self.collated(rules, update)
+            if collated_update == update:
+                n = len(collated_update) // 2
+                result += collated_update[n]
         return result
     
     def solve2(self, rules, updates):
@@ -115,7 +199,7 @@ class Day05: # Print Queue
         solutions = (
             self.solve(rules, updates),
             self.solve2(rules, updates),
-            )
+        )
         result = solutions
         return result
 
@@ -199,7 +283,7 @@ class Day04: # Ceres Search
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
-            )
+        )
         result = solutions
         return result
 
@@ -266,7 +350,7 @@ class Day03: # Mull It Over
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
-            )
+        )
         result = solutions
         return result
 
@@ -331,7 +415,7 @@ class Day02: # Red-Nosed Reports
         solutions = (
             self.solve(reports),
             self.solve2(reports),
-            )
+        )
         result = solutions
         return result
 
@@ -381,7 +465,7 @@ class Day01: # Historian Hysteria
         solutions = (
             self.solve(left, right),
             self.solve2(left, right),
-            )
+        )
         result = solutions
         return result
 
@@ -396,7 +480,7 @@ if __name__ == '__main__':
         3: (Day03, 'Mull It Over'),
         4: (Day04, 'Ceres Search'),
         5: (Day05, 'Print Queue'),
-    #     6: (Day06, 'XXX'),
+        6: (Day06, 'Guard Gallivant'),
     #     7: (Day07, 'XXX'),
     #     8: (Day08, 'XXX'),
     #     9: (Day09, 'XXX'),
