@@ -105,7 +105,6 @@ class Day07: # Bridge Repair
                 if len(values) == 1:
                     if values[0] == test_value:
                         valid_ind = True
-                        # print(' --------------')
                         break
                 else:
                     (head, mid, tail) = values[0], values[1], values[2:]
