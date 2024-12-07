@@ -96,13 +96,11 @@ class Day07: # Bridge Repair
     def solve2(self, equations):
         valid_test_values = []
         for (test_value, numbers) in equations:
-            print(test_value, numbers)
             valid_ind = False
             work = set()
             work.add((tuple(numbers)))
             while len(work) > 0:
                 values = work.pop()
-                # print(' ', values)
                 assert len(values) >= 1
                 if len(values) == 1:
                     if values[0] == test_value:
@@ -114,16 +112,13 @@ class Day07: # Bridge Repair
                     # Try addition
                     addition = (head + mid, ) + tail
                     work.add((addition))
-                    # print('   addition:', addition)
                     # Try multiplication
                     multiplication = (head * mid, ) + tail
                     work.add((multiplication))
-                    # print('   multiplication:', multiplication)
                     # Try concatenation
                     new_head = int(str(head) + str(mid))
                     concatenation = (new_head, ) + tail
                     work.add(concatenation)
-                    # print('   concatenation:', concatenation)
             if valid_ind:
                 valid_test_values.append(test_value)
         result = sum(valid_test_values)
