@@ -48,6 +48,65 @@ class Template: # Template
         result = solutions
         return result
 
+class Day07: # Bridge Repair
+    '''
+    https://adventofcode.com/2024/day/7
+    '''
+    def get_equations(self, raw_input_lines: list[str]):
+        equations = []
+        for raw_input_line in raw_input_lines:
+            left, right = raw_input_line.split(': ')
+            test_value = int(left)
+            numbers = tuple(map(int, right.split()))
+            assert len(numbers) > 1
+            for num in numbers:
+                assert num > 0
+            equations.append((test_value, numbers))
+        result = equations
+        return result
+    
+    def solve(self, equations):
+        valid_test_values = []
+        for (test_value, numbers) in equations:
+            valid_ind = False
+            work = set()
+            work.add((test_value, *numbers))
+            while len(work) > 0:
+                values = work.pop()
+                assert len(values) >= 2
+                if len(values) == 2:
+                    if values[0] == values[1]:
+                        valid_ind = True
+                        break
+                else:
+                    (head, mid, tail) = values[0], values[1:-1], values[-1]
+                    # Try addition
+                    addition = (head - tail, ) + mid
+                    if addition[0] >= 0:
+                        work.add((addition))
+                    # Try multiplication
+                    multiplication = (head / tail, ) + mid
+                    if multiplication[0] == int(multiplication[0]):
+                        work.add((multiplication))
+            if valid_ind:
+                valid_test_values.append(test_value)
+        result = sum(valid_test_values)
+        return result
+    
+    def solve2(self, equations):
+        result = len(equations)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        equations = self.get_equations(raw_input_lines)
+        solutions = (
+            self.solve(equations),
+            self.solve2(equations),
+        )
+        result = solutions
+        return result
+
 class Day06: # Guard Gallivant
     '''
     https://adventofcode.com/2024/day/6
@@ -481,7 +540,7 @@ if __name__ == '__main__':
         4: (Day04, 'Ceres Search'),
         5: (Day05, 'Print Queue'),
         6: (Day06, 'Guard Gallivant'),
-    #     7: (Day07, 'XXX'),
+        7: (Day07, 'Bridge Repair'),
     #     8: (Day08, 'XXX'),
     #     9: (Day09, 'XXX'),
     #    10: (Day10, 'XXX'),
