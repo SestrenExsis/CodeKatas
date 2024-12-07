@@ -81,12 +81,12 @@ class Day07: # Bridge Repair
                 else:
                     (head, mid, tail) = values[0], values[1:-1], values[-1]
                     # Try addition
-                    addition = (head - tail, ) + mid
-                    if addition[0] >= 0:
+                    if (head - tail) >= 0:
+                        addition = (head - tail, ) + mid
                         work.add((addition))
                     # Try multiplication
-                    multiplication = (head / tail, ) + mid
-                    if multiplication[0] == int(multiplication[0]):
+                    if (head / tail).is_integer():
+                        multiplication = (head // tail, ) + mid
                         work.add((multiplication))
             if valid_ind:
                 valid_test_values.append(test_value)
@@ -94,7 +94,39 @@ class Day07: # Bridge Repair
         return result
     
     def solve2(self, equations):
-        result = len(equations)
+        valid_test_values = []
+        for (test_value, numbers) in equations:
+            print(test_value, numbers)
+            valid_ind = False
+            work = set()
+            work.add((tuple(numbers)))
+            while len(work) > 0:
+                values = work.pop()
+                # print(' ', values)
+                assert len(values) >= 1
+                if len(values) == 1:
+                    if values[0] == test_value:
+                        valid_ind = True
+                        # print(' --------------')
+                        break
+                else:
+                    (head, mid, tail) = values[0], values[1], values[2:]
+                    # Try addition
+                    addition = (head + mid, ) + tail
+                    work.add((addition))
+                    # print('   addition:', addition)
+                    # Try multiplication
+                    multiplication = (head * mid, ) + tail
+                    work.add((multiplication))
+                    # print('   multiplication:', multiplication)
+                    # Try concatenation
+                    new_head = int(str(head) + str(mid))
+                    concatenation = (new_head, ) + tail
+                    work.add(concatenation)
+                    # print('   concatenation:', concatenation)
+            if valid_ind:
+                valid_test_values.append(test_value)
+        result = sum(valid_test_values)
         return result
     
     def main(self):
