@@ -48,6 +48,91 @@ class Template: # Template
         result = solutions
         return result
 
+class Day07: # Bridge Repair
+    '''
+    https://adventofcode.com/2024/day/7
+    '''
+    def get_equations(self, raw_input_lines: list[str]):
+        equations = []
+        for raw_input_line in raw_input_lines:
+            left, right = raw_input_line.split(': ')
+            test_value = int(left)
+            numbers = tuple(map(int, right.split()))
+            assert len(numbers) > 1
+            for num in numbers:
+                assert num > 0
+            equations.append((test_value, numbers))
+        result = equations
+        return result
+    
+    def solve(self, equations):
+        valid_test_values = []
+        for (test_value, numbers) in equations:
+            valid_ind = False
+            work = set()
+            work.add((test_value, *numbers))
+            while len(work) > 0:
+                values = work.pop()
+                assert len(values) >= 2
+                if len(values) == 2:
+                    if values[0] == values[1]:
+                        valid_ind = True
+                        break
+                else:
+                    (head, mid, tail) = values[0], values[1:-1], values[-1]
+                    # Try addition
+                    if (head - tail) >= 0:
+                        addition = (head - tail, ) + mid
+                        work.add((addition))
+                    # Try multiplication
+                    if (head / tail).is_integer():
+                        multiplication = (head // tail, ) + mid
+                        work.add((multiplication))
+            if valid_ind:
+                valid_test_values.append(test_value)
+        result = sum(valid_test_values)
+        return result
+    
+    def solve2(self, equations):
+        valid_test_values = []
+        for (test_value, numbers) in equations:
+            valid_ind = False
+            work = set()
+            work.add((tuple(numbers)))
+            while len(work) > 0:
+                values = work.pop()
+                assert len(values) >= 1
+                if len(values) == 1:
+                    if values[0] == test_value:
+                        valid_ind = True
+                        break
+                else:
+                    (head, mid, tail) = values[0], values[1], values[2:]
+                    # Try addition
+                    addition = (head + mid, ) + tail
+                    work.add((addition))
+                    # Try multiplication
+                    multiplication = (head * mid, ) + tail
+                    work.add((multiplication))
+                    # Try concatenation
+                    new_head = int(str(head) + str(mid))
+                    concatenation = (new_head, ) + tail
+                    work.add(concatenation)
+            if valid_ind:
+                valid_test_values.append(test_value)
+        result = sum(valid_test_values)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        equations = self.get_equations(raw_input_lines)
+        solutions = (
+            self.solve(equations),
+            self.solve2(equations),
+        )
+        result = solutions
+        return result
+
 class Day06: # Guard Gallivant
     '''
     https://adventofcode.com/2024/day/6
@@ -111,20 +196,20 @@ class Day06: # Guard Gallivant
                 obstacles = set(original_obstacles)
                 obstacles.add((obstacle_row, obstacle_col))
                 guard = original_guard
-                visits = set()
+                pivots = set()
                 while True:
                     (row, col, direction) = guard
                     if not (0 <= row < rows and 0 <= col < cols):
                         break
-                    if (row, col, direction) in visits:
+                    if (row, col, direction) in pivots:
                         positions.add((obstacle_row, obstacle_col))
                         break
-                    visits.add((row, col, direction))
                     while True:
                         facing_row = row + self.directions[direction][0]
                         facing_col = col + self.directions[direction][1]
                         if (facing_row, facing_col) in obstacles:
                             # Turn 90 degrees
+                            pivots.add((row, col, direction))
                             direction = self.directions[direction][2]
                         else:
                             # Take a step forward
@@ -481,7 +566,7 @@ if __name__ == '__main__':
         4: (Day04, 'Ceres Search'),
         5: (Day05, 'Print Queue'),
         6: (Day06, 'Guard Gallivant'),
-    #     7: (Day07, 'XXX'),
+        7: (Day07, 'Bridge Repair'),
     #     8: (Day08, 'XXX'),
     #     9: (Day09, 'XXX'),
     #    10: (Day10, 'XXX'),
