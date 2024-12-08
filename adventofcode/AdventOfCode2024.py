@@ -85,7 +85,26 @@ class Day08: # Resonant Collinearity
         return result
     
     def solve2(self, antennas, rows, cols):
-        result = len(antennas)
+        antinodes = set()
+        for (frequency, positions) in antennas.items():
+            for (row1, col1) in positions:
+                for (row2, col2) in positions:
+                    if (row2, col2) == (row1, col1):
+                        continue
+                    (row_diff, col_diff) = (row2 - row1, col2 - col1)
+                    step = 1
+                    while True:
+                        (ar, ac) = (row1 + step * row_diff, col1 + step * col_diff)
+                        if 0 <= ar < rows and 0 <= ac < cols:
+                            antinodes.add((ar, ac))
+                        else:
+                            break
+                        step += 1
+        result = sum((
+            1 for (row, col) in antinodes if
+            0 <= row < rows and
+            0 <= col < cols
+        ))
         return result
     
     def main(self):
