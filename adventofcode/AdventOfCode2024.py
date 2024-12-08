@@ -48,6 +48,56 @@ class Template: # Template
         result = solutions
         return result
 
+class Day08: # Resonant Collinearity
+    '''
+    https://adventofcode.com/2024/day/8
+    '''
+    def get_parsed_input(self, raw_input_lines: list[str]):
+        rows = len(raw_input_lines)
+        cols = len(raw_input_lines[0])
+        antennas = {}
+        for (row, raw_input_line) in enumerate(raw_input_lines):
+            for (col, char) in enumerate(raw_input_line):
+                if char == '.':
+                    continue
+                if char not in antennas:
+                    antennas[char] = set()
+                antennas[char].add((row, col))
+        result = (antennas, rows, cols)
+        return result
+    
+    def solve(self, antennas, rows, cols):
+        antinodes = set()
+        for (frequency, positions) in antennas.items():
+            for (row1, col1) in positions:
+                for (row2, col2) in positions:
+                    if (row2, col2) == (row1, col1):
+                        continue
+                    antinode1 = (row2 + (row2 - row1), col2 + (col2 - col1))
+                    antinodes.add(antinode1)
+                    antinode2 = (row1 + (row1 - row2), col1 + (col1 - col2))
+                    antinodes.add(antinode2)
+        result = sum((
+            1 for (row, col) in antinodes if
+            0 <= row < rows and
+            0 <= col < cols
+        ))
+        return result
+    
+    def solve2(self, antennas, rows, cols):
+        result = len(antennas)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        (antennas, rows, cols) = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(antennas, rows, cols),
+            self.solve2(antennas, rows, cols),
+        )
+        result = solutions
+        return result
+
 class Day07: # Bridge Repair
     '''
     https://adventofcode.com/2024/day/7
@@ -567,7 +617,7 @@ if __name__ == '__main__':
         5: (Day05, 'Print Queue'),
         6: (Day06, 'Guard Gallivant'),
         7: (Day07, 'Bridge Repair'),
-    #     8: (Day08, 'XXX'),
+        8: (Day08, 'Resonant Collinearity'),
     #     9: (Day09, 'XXX'),
     #    10: (Day10, 'XXX'),
     #    11: (Day11, 'XXX'),
