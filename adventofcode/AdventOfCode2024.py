@@ -48,6 +48,54 @@ class Template: # Template
         result = solutions
         return result
 
+class Day09: # Disk Fragmenter
+    '''
+    https://adventofcode.com/2024/day/9
+    '''
+    def get_parsed_input(self, raw_input_lines: list[str]):
+        result = list(map(int, raw_input_lines[0]))
+        return result
+    
+    def solve(self, parsed_input):
+        disk = []
+        mode = 'FILE'
+        file_index = 0
+        for num in parsed_input:
+            if mode == 'FILE':
+                disk += [file_index] * num
+                file_index += 1
+            else:
+                disk += ['.'] * num
+            mode = 'FREE' if mode == 'FILE' else 'FILE'
+        (left, right) = (0, len(disk) - 1)
+        while left < right:
+            if disk[left] == '.':
+                while disk[right] == '.':
+                    right -= 1
+                if left < right:
+                    (disk[left], disk[right]) = (disk[right], disk[left])
+            left += 1
+        checksum = 0
+        for (i, char) in enumerate(disk):
+            if type(char) == int:
+                checksum += i * char
+        result = checksum
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+        )
+        result = solutions
+        return result
+
 class Day08: # Resonant Collinearity
     '''
     https://adventofcode.com/2024/day/8
@@ -637,7 +685,7 @@ if __name__ == '__main__':
         6: (Day06, 'Guard Gallivant'),
         7: (Day07, 'Bridge Repair'),
         8: (Day08, 'Resonant Collinearity'),
-    #     9: (Day09, 'XXX'),
+        9: (Day09, 'Disk Fragmenter'),
     #    10: (Day10, 'XXX'),
     #    11: (Day11, 'XXX'),
     #    12: (Day12, 'XXX'),
