@@ -59,26 +59,26 @@ class Day09: # Disk Fragmenter
     def solve(self, parsed_input):
         disk = []
         mode = 'FILE'
-        file_index = 0
+        file_id = 0
         for num in parsed_input:
             if mode == 'FILE':
-                disk += [file_index] * num
-                file_index += 1
+                disk += [file_id] * num
+                file_id += 1
             else:
-                disk += ['.'] * num
+                disk += [None] * num
             mode = 'FREE' if mode == 'FILE' else 'FILE'
         (left, right) = (0, len(disk) - 1)
         while left < right:
-            if disk[left] == '.':
-                while disk[right] == '.':
+            if disk[left] is None:
+                while disk[right] is None:
                     right -= 1
                 if left < right:
                     (disk[left], disk[right]) = (disk[right], disk[left])
             left += 1
         checksum = 0
-        for (i, char) in enumerate(disk):
-            if type(char) == int:
-                checksum += i * char
+        for (position, file_id) in enumerate(disk):
+            if file_id is not None:
+                checksum += position * file_id
         result = checksum
         return result
     
