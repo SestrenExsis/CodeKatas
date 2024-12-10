@@ -48,6 +48,99 @@ class Template: # Template
         result = solutions
         return result
 
+class Day09: # Disk Fragmenter
+    '''
+    https://adventofcode.com/2024/day/9
+    '''
+    def get_parsed_input(self, raw_input_lines: list[str]):
+        result = list(map(int, raw_input_lines[0]))
+        return result
+    
+    def solve(self, parsed_input):
+        # Create disk
+        disk = []
+        mode = 'FILE'
+        file_id = 0
+        for num in parsed_input:
+            if mode == 'FILE':
+                disk += [file_id] * num
+                file_id += 1
+            else:
+                disk += [None] * num
+            mode = 'FREE' if mode == 'FILE' else 'FILE'
+        # Defrag disk
+        (left, right) = (0, len(disk) - 1)
+        while left < right:
+            if disk[left] is None:
+                while disk[right] is None:
+                    right -= 1
+                if left < right:
+                    (disk[left], disk[right]) = (disk[right], disk[left])
+            left += 1
+        # Calculate checksum
+        checksum = 0
+        for (position, file_id) in enumerate(disk):
+            if file_id is not None:
+                checksum += position * file_id
+        result = checksum
+        return result
+
+    def disk2str(self, disk) -> str:
+        result = ''.join('.' if char is None else str(char) for char in disk)
+        return result
+    
+    def solve2(self, parsed_input):
+        # Create disk
+        files = {}
+        disk = []
+        mode = 'FILE'
+        file_count = 0
+        for num in parsed_input:
+            if mode == 'FILE':
+                files[file_count] = num
+                disk += [file_count] * num
+                file_count += 1
+            else:
+                disk += [None] * num
+            mode = 'FREE' if mode == 'FILE' else 'FILE'
+        # Defrag disk
+        for target_file_id in reversed(range(file_count)):
+            file_size = files[target_file_id]
+            # Find right-most position of target file
+            right = len(disk) - 1
+            while disk[right] != target_file_id:
+                right -= 1
+            # Find left-most position of valid empty space
+            left = 0
+            while left < right:
+                if disk[left] is None:
+                    empty_space = 1
+                    while disk[left + 1] == None and empty_space < file_size:
+                        left += 1
+                        empty_space += 1
+                    if empty_space >= file_size:
+                        for i in range(file_size):
+                            (disk[left - i], disk[right - i]) = (disk[right - i], disk[left - i])
+                        break
+                left += 1
+        # Calculate checksum
+        checksum = 0
+        for (position, file_id) in enumerate(disk):
+            if file_id is not None:
+                checksum += position * file_id
+        result = checksum
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+        )
+        result = solutions
+        return result
+
 class Day08: # Resonant Collinearity
     '''
     https://adventofcode.com/2024/day/8
@@ -637,7 +730,7 @@ if __name__ == '__main__':
         6: (Day06, 'Guard Gallivant'),
         7: (Day07, 'Bridge Repair'),
         8: (Day08, 'Resonant Collinearity'),
-    #     9: (Day09, 'XXX'),
+        9: (Day09, 'Disk Fragmenter'),
     #    10: (Day10, 'XXX'),
     #    11: (Day11, 'XXX'),
     #    12: (Day12, 'XXX'),
