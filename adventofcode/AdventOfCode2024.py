@@ -94,7 +94,37 @@ class Day10: # Hoof It
         return result
     
     def solve2(self, grid):
-        result = len(grid)
+        trailheads = {}
+        rows = len(grid)
+        cols = len(grid[0])
+        work = []
+        for row in range(rows):
+            for col in range(cols):
+                if grid[row][col] == 0:
+                    work.append(((row, col), (row, col)))
+        while len(work) > 0:
+            (head_row, head_col), (row, col) = work.pop()
+            height = grid[row][col]
+            if height == 9:
+                if (head_row, head_col) not in trailheads:
+                    trailheads[(head_row, head_col)] = 0
+                trailheads[(head_row, head_col)] += 1
+                continue
+            for (next_row, next_col) in (
+                (row - 1, col + 0),
+                (row + 0, col - 1),
+                (row + 0, col + 1),
+                (row + 1, col + 0),
+            ):
+                if not (0 <= next_row < rows and 0 <= next_col < cols):
+                    continue
+                next_height = grid[next_row][next_col]
+                if next_height != (height + 1):
+                    continue
+                if next_height <= 9:
+                    work.append(((head_row, head_col), (next_row, next_col)))
+        # Sum of scores of all trailheads
+        result = sum(trailheads.values())
         return result
     
     def main(self):
