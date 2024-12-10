@@ -48,6 +48,95 @@ class Template: # Template
         result = solutions
         return result
 
+class Day10: # Hoof It
+    '''
+    https://adventofcode.com/2024/day/10
+    '''
+    def get_grid(self, raw_input_lines: list[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            line = (-1 if char == '.' else char for char in raw_input_line)
+            result.append(list(map(int, line)))
+        return result
+    
+    def solve(self, grid):
+        trailheads = {}
+        rows = len(grid)
+        cols = len(grid[0])
+        work = []
+        for row in range(rows):
+            for col in range(cols):
+                if grid[row][col] == 0:
+                    work.append(((row, col), (row, col)))
+        while len(work) > 0:
+            (head_row, head_col), (row, col) = work.pop()
+            height = grid[row][col]
+            if height == 9:
+                if (head_row, head_col) not in trailheads:
+                    trailheads[(head_row, head_col)] = set()
+                trailheads[(head_row, head_col)].add((row, col))
+                continue
+            for (next_row, next_col) in (
+                (row - 1, col + 0),
+                (row + 0, col - 1),
+                (row + 0, col + 1),
+                (row + 1, col + 0),
+            ):
+                if not (0 <= next_row < rows and 0 <= next_col < cols):
+                    continue
+                next_height = grid[next_row][next_col]
+                if next_height != (height + 1):
+                    continue
+                if next_height <= 9:
+                    work.append(((head_row, head_col), (next_row, next_col)))
+        # Sum of scores of all trailheads
+        result = sum(len(tails) for tails in trailheads.values())
+        return result
+    
+    def solve2(self, grid):
+        trailheads = {}
+        rows = len(grid)
+        cols = len(grid[0])
+        work = []
+        for row in range(rows):
+            for col in range(cols):
+                if grid[row][col] == 0:
+                    work.append(((row, col), (row, col)))
+        while len(work) > 0:
+            (head_row, head_col), (row, col) = work.pop()
+            height = grid[row][col]
+            if height == 9:
+                if (head_row, head_col) not in trailheads:
+                    trailheads[(head_row, head_col)] = 0
+                trailheads[(head_row, head_col)] += 1
+                continue
+            for (next_row, next_col) in (
+                (row - 1, col + 0),
+                (row + 0, col - 1),
+                (row + 0, col + 1),
+                (row + 1, col + 0),
+            ):
+                if not (0 <= next_row < rows and 0 <= next_col < cols):
+                    continue
+                next_height = grid[next_row][next_col]
+                if next_height != (height + 1):
+                    continue
+                if next_height <= 9:
+                    work.append(((head_row, head_col), (next_row, next_col)))
+        # Sum of scores of all trailheads
+        result = sum(trailheads.values())
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        grid = self.get_grid(raw_input_lines)
+        solutions = (
+            self.solve(grid),
+            self.solve2(grid),
+        )
+        result = solutions
+        return result
+
 class Day09: # Disk Fragmenter
     '''
     https://adventofcode.com/2024/day/9
@@ -731,7 +820,7 @@ if __name__ == '__main__':
         7: (Day07, 'Bridge Repair'),
         8: (Day08, 'Resonant Collinearity'),
         9: (Day09, 'Disk Fragmenter'),
-    #    10: (Day10, 'XXX'),
+       10: (Day10, 'Hoof It'),
     #    11: (Day11, 'XXX'),
     #    12: (Day12, 'XXX'),
     #    13: (Day13, 'XXX'),
