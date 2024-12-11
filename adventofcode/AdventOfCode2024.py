@@ -57,26 +57,61 @@ class Day11: # Plutonian Pebbles
         result = stones
         return result
     
+    def blink(self, stone):
+        next_stones = []
+        if stone == 0:
+            next_stones.append(1)
+        elif len(str(stone)) % 2 == 0:
+            stone_str = str(stone)
+            N = len(stone_str) // 2
+            (left, right) = tuple(map(int, (stone_str[:N], stone_str[N:])))
+            next_stones.append(left)
+            next_stones.append(right)
+        else:
+            next_stones.append(2024 * stone)
+        result = next_stones
+        return result
+    
     def solve(self, stones):
         for _ in range(25):
             next_stones = []
             for stone in stones:
-                if stone == 0:
-                    next_stones.append(1)
-                elif len(str(stone)) % 2 == 0:
-                    stone_str = str(stone)
-                    N = len(stone_str) // 2
-                    (left, right) = tuple(map(int, (stone_str[:N], stone_str[N:])))
-                    next_stones.append(left)
-                    next_stones.append(right)
-                else:
-                    next_stones.append(2024 * stone)
+                next_stones += self.blink(stone)
             stones = next_stones
         result = len(stones)
         return result
     
     def solve2(self, stones):
-        result = len(stones)
+        memo = {}
+        def F(a, b) -> int:
+            result = None
+            if a < 1:
+                result = 1
+            elif a == 1:
+                if len(str(b)) % 2 == 0:
+                    result = 2
+                else:
+                    result = 1
+            elif (a, b) in memo:
+                # Pull from cache if possible
+                result = memo[(a, b)]
+            else:
+                # Cache the result after calculating it recursively
+                if b == 0:
+                    result = F(a - 1, 1)
+                else:
+                    B = str(b)
+                    if (len(B) % 2) == 0:
+                        N = len(B) // 2
+                        (b1, b2) = tuple(map(int, (B[:N], B[N:])))
+                        result = F(a - 1, b1) + F(a - 1, b2)
+                    else:
+                        result = F(a - 1, 2024 * b)
+                memo[(a, b)] = result
+            return result
+        result = 0
+        for stone in stones:
+            result += F(75, stone)
         return result
     
     def main(self):
