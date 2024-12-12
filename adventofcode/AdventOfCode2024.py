@@ -120,7 +120,7 @@ class Day12: # Garden Groups
             # Calculate unique edges by giving each edge a canonical key
             # The canonical key of an edge is equal to:
             # - Its direction (e.g., 'TOP', 'BOTTOM', 'LEFT', 'RIGHT')
-            # - The left-most plot that abuts that edge
+            # - The top-left-most plot that abuts that edge
             edges = set()
             for (row, col) in region:
                 # Check for TOP edge
@@ -169,8 +169,8 @@ class Day12: # Garden Groups
                     edges.add(('RIGHT', inside))
             fences[(start_row, start_col)] = (area, len(edges))
         result = sum(
-            (area * perimeter) for
-            (area, perimeter) in fences.values()
+            (area * edge_count) for
+            (area, edge_count) in fences.values()
         )
         return result
     
