@@ -58,27 +58,26 @@ class Day12: # Garden Groups
             result.append(raw_input_line)
         return result
     
-    def solve(self, grid):
+    def get_regions(self, grid):
+        # A region's key is equal to the (row, col) of its top-left plot
         rows = len(grid)
         cols = len(grid[0])
-        fences = {}
+        regions = {}
         seen = set()
         for start_row in range(rows):
             for start_col in range(cols):
                 if (start_row, start_col) in seen:
                     continue
+                region = set()
                 plant = grid[start_row][start_col]
-                area = 0
-                perimeter = 0
                 work = set()
                 work.add((start_row, start_col))
                 while len(work) > 0:
                     (row, col) = work.pop()
+                    region.add((row, col))
                     if (row, col) in seen:
                         continue
                     seen.add((row, col))
-                    area += 1
-                    perimeter += 4
                     for (n_row, n_col) in (
                         (row - 1, col),
                         (row    , col - 1),
@@ -87,26 +86,101 @@ class Day12: # Garden Groups
                     ):
                         if 0 <= n_row < rows and 0 <= n_col < cols:
                             if grid[n_row][n_col] == plant:
-                                perimeter -= 1
                                 if (n_row, n_col) not in seen:
                                     work.add((n_row, n_col))
-                fences[(start_row, start_col, plant)] = (area, perimeter)
+                regions[(start_row, start_col)] = region
+        result = regions
+        return result
+    
+    def solve(self, regions):
+        fences = {}
+        for ((start_row, start_col), region) in regions.items():
+            area = len(region)
+            perimeter = 0
+            for (row, col) in region:
+                for (n_row, n_col) in (
+                    (row - 1, col),
+                    (row    , col - 1),
+                    (row + 1, col),
+                    (row    , col + 1),
+                ):
+                    if (n_row, n_col) not in region:
+                        perimeter += 1
+            fences[(start_row, start_col)] = (area, perimeter)
         result = sum(
             (area * perimeter) for
             (area, perimeter) in fences.values()
         )
         return result
     
-    def solve2(self, parsed_input):
-        result = len(parsed_input)
+    def solve2(self, regions):
+        fences = {}
+        for ((start_row, start_col), region) in regions.items():
+            area = len(region)
+            # Calculate unique edges by giving each edge a canonical key
+            # The canonical key of an edge is equal to:
+            # - Its direction (e.g., 'TOP', 'BOTTOM', 'LEFT', 'RIGHT')
+            # - The left-most plot that abuts that edge
+            edges = set()
+            for (row, col) in region:
+                # Check for TOP edge
+                if (row - 1, col) not in region:
+                    outside = (row - 1, col)
+                    inside = (row, col)
+                    # Go LEFT until no longer on the same edge
+                    while outside not in region and inside in region:
+                        outside = (outside[0], outside[1] - 1)
+                        inside = (inside[0], inside[1] - 1)
+                    # Retreat one step to return to the same edge
+                    inside = (inside[0], inside[1] + 1)
+                    edges.add(('TOP', inside))
+                # Check for BOTTOM edge
+                if (row + 1, col) not in region:
+                    outside = (row + 1, col)
+                    inside = (row, col)
+                    # Go LEFT until no longer on the same edge
+                    while outside not in region and inside in region:
+                        outside = (outside[0], outside[1] - 1)
+                        inside = (inside[0], inside[1] - 1)
+                    # Retreat one step to return to the same edge
+                    inside = (inside[0], inside[1] + 1)
+                    edges.add(('BOTTOM', inside))
+                # Check for LEFT edge
+                if (row, col - 1) not in region:
+                    outside = (row, col - 1)
+                    inside = (row, col)
+                    # Go UP until no longer on the same edge
+                    while outside not in region and inside in region:
+                        outside = (outside[0] - 1, outside[1])
+                        inside = (inside[0] - 1, inside[1])
+                    # Retreat one step to return to the same edge
+                    inside = (inside[0] + 1, inside[1])
+                    edges.add(('LEFT', inside))
+                # Check for RIGHT edge
+                if (row, col + 1) not in region:
+                    outside = (row, col + 1)
+                    inside = (row, col)
+                    # Go UP until no longer on the same edge
+                    while outside not in region and inside in region:
+                        outside = (outside[0] - 1, outside[1])
+                        inside = (inside[0] - 1, inside[1])
+                    # Retreat one step to return to the same edge
+                    inside = (inside[0] + 1, inside[1])
+                    edges.add(('RIGHT', inside))
+            fences[(start_row, start_col)] = (area, len(edges))
+        result = sum(
+            (area * perimeter) for
+            (area, perimeter) in fences.values()
+        )
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        parsed_input = self.get_parsed_input(raw_input_lines)
+        grid = self.get_parsed_input(raw_input_lines)
+        regions = self.get_regions(grid)
         solutions = (
-            self.solve(parsed_input),
-            self.solve2(parsed_input),
+            self.solve(regions),
+            self.solve2(regions),
         )
         result = solutions
         return result
