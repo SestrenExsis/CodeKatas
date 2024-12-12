@@ -48,6 +48,69 @@ class Template: # Template
         result = solutions
         return result
 
+class Day12: # Garden Groups
+    '''
+    https://adventofcode.com/2024/day/12
+    '''
+    def get_parsed_input(self, raw_input_lines: list[str]):
+        result = []
+        for raw_input_line in raw_input_lines:
+            result.append(raw_input_line)
+        return result
+    
+    def solve(self, grid):
+        rows = len(grid)
+        cols = len(grid[0])
+        fences = {}
+        seen = set()
+        for start_row in range(rows):
+            for start_col in range(cols):
+                if (start_row, start_col) in seen:
+                    continue
+                plant = grid[start_row][start_col]
+                area = 0
+                perimeter = 0
+                work = set()
+                work.add((start_row, start_col))
+                while len(work) > 0:
+                    (row, col) = work.pop()
+                    if (row, col) in seen:
+                        continue
+                    seen.add((row, col))
+                    area += 1
+                    perimeter += 4
+                    for (n_row, n_col) in (
+                        (row - 1, col),
+                        (row    , col - 1),
+                        (row + 1, col),
+                        (row    , col + 1),
+                    ):
+                        if 0 <= n_row < rows and 0 <= n_col < cols:
+                            if grid[n_row][n_col] == plant:
+                                perimeter -= 1
+                                if (n_row, n_col) not in seen:
+                                    work.add((n_row, n_col))
+                fences[(start_row, start_col, plant)] = (area, perimeter)
+        result = sum(
+            (area * perimeter) for
+            (area, perimeter) in fences.values()
+        )
+        return result
+    
+    def solve2(self, parsed_input):
+        result = len(parsed_input)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        parsed_input = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(parsed_input),
+            self.solve2(parsed_input),
+        )
+        result = solutions
+        return result
+
 class Day11: # Plutonian Pebbles
     '''
     https://adventofcode.com/2024/day/11
@@ -884,7 +947,7 @@ class Day01: # Historian Hysteria
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2024.py 5 < inputs/2024day05.in
+    python AdventOfCode2024.py 12 < inputs/2024day12.in
     '''
     solvers = {
         1: (Day01, 'Historian Hysteria'),
@@ -898,7 +961,7 @@ if __name__ == '__main__':
         9: (Day09, 'Disk Fragmenter'),
        10: (Day10, 'Hoof It'),
        11: (Day11, 'Plutonian Pebbles'),
-    #    12: (Day12, 'XXX'),
+       12: (Day12, 'Garden Groups'),
     #    13: (Day13, 'XXX'),
     #    14: (Day14, 'XXX'),
     #    15: (Day15, 'XXX'),
