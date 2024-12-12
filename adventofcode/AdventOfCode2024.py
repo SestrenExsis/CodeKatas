@@ -169,8 +169,8 @@ class Day12: # Garden Groups
                     edges.add(('RIGHT', inside))
             fences[(start_row, start_col)] = (area, len(edges))
         result = sum(
-            (area * perimeter) for
-            (area, perimeter) in fences.values()
+            (area * edge_count) for
+            (area, edge_count) in fences.values()
         )
         return result
     
