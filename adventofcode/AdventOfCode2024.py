@@ -48,6 +48,71 @@ class Template: # Template
         result = solutions
         return result
 
+class Day13: # Claw Contraption
+    '''
+    https://adventofcode.com/2024/day/13
+    '''
+    def get_claw_machines(self, raw_input_lines: list[str]):
+        claw_machines = []
+        claw_machine = {}
+        mode = None
+        for raw_input_line in raw_input_lines:
+            if len(raw_input_line) > 0:
+                (mode, data) = raw_input_line.split(': ')
+                (raw_x, raw_y) = data.split(', ')
+                if mode == 'Prize':
+                    x = int(raw_x[2:])
+                    y = int(raw_y[2:])
+                    claw_machine[mode] = {
+                        'X': x,
+                        'Y': y,
+                    }
+                    claw_machines.append(claw_machine)
+                    claw_machine = {}
+                else:
+                    x = int(raw_x[1:])
+                    y = int(raw_y[1:])
+                    claw_machine[mode] = {
+                        'X': x,
+                        'Y': y,
+                    }
+        result = claw_machines
+        return result
+    
+    def solve(self, claw_machines):
+        MAX_PRESSES = 100
+        tokens_needed = []
+        for claw_machine in claw_machines:
+            target_xy = (claw_machine['Prize']['X'], claw_machine['Prize']['Y'])
+            possible_tokens_used = set()
+            for a_presses in range(MAX_PRESSES + 1):
+                for b_presses in range(MAX_PRESSES + 1):
+                    (x, y) = (0, 0)
+                    x += a_presses * claw_machine['Button A']['X']
+                    y += a_presses * claw_machine['Button A']['Y']
+                    x += b_presses * claw_machine['Button B']['X']
+                    y += b_presses * claw_machine['Button B']['Y']
+                    if (x, y) == target_xy:
+                        tokens_used = 3 * a_presses + b_presses
+                        possible_tokens_used.add(tokens_used)
+            tokens_needed.append(min(possible_tokens_used, default=0))
+        result = sum(tokens_needed)
+        return result
+    
+    def solve2(self, claw_machines):
+        result = len(claw_machines)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        claw_machines = self.get_claw_machines(raw_input_lines)
+        solutions = (
+            self.solve(claw_machines),
+            self.solve2(claw_machines),
+        )
+        result = solutions
+        return result
+
 class Day12: # Garden Groups
     '''
     https://adventofcode.com/2024/day/12
@@ -1036,7 +1101,7 @@ if __name__ == '__main__':
        10: (Day10, 'Hoof It'),
        11: (Day11, 'Plutonian Pebbles'),
        12: (Day12, 'Garden Groups'),
-    #    13: (Day13, 'XXX'),
+       13: (Day13, 'Claw Contraption'),
     #    14: (Day14, 'XXX'),
     #    15: (Day15, 'XXX'),
     #    16: (Day16, 'XXX'),
