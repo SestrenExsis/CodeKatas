@@ -63,6 +63,8 @@ class Day13: # Claw Contraption
                 if mode == 'Prize':
                     x = int(raw_x[2:])
                     y = int(raw_y[2:])
+                    assert x > 0
+                    assert y > 0
                     claw_machine[mode] = {
                         'X': x,
                         'Y': y,
@@ -72,6 +74,8 @@ class Day13: # Claw Contraption
                 else:
                     x = int(raw_x[1:])
                     y = int(raw_y[1:])
+                    assert x > 0
+                    assert y > 0
                     claw_machine[mode] = {
                         'X': x,
                         'Y': y,
@@ -99,8 +103,79 @@ class Day13: # Claw Contraption
         result = sum(tokens_needed)
         return result
     
-    def solve2(self, claw_machines):
-        result = len(claw_machines)
+    def solve2(self, claw_machines, mod: int=10_000_000_000_000):
+        '''
+        Solve an example equation
+          94 * A + 22 * B = 8400
+          34 * A + 67 * B = 5400
+        Solve for A in first equation
+          94 * A + 22 * B = 8400
+          94 * A = 8400 - 22 * B
+          A = ((8400 - 22 * B) / 94)
+        Solve for B in second equation
+          34 * A + 67 * B = 5400
+          67 * B = 5400 - 34 * A
+          B = ((5400 - 34 * A) / 67)
+        Substitute B
+          94 * A + 22 * B = 8400
+          94 * A + 22 * ((5400 - 34 * A) / 67) = 8400
+          67 * 94 * A + 22 * (5400 - 34 * A) = 67 * 8400
+          6298 * A + 118800 - 748 * A = 562800
+          (6298 - 748) * A + 118800 = 562800
+          5550 * A = 562800 - 118800
+          A = 444000 / 5550
+          A = 80
+        Substitute A
+          B = (5400 - 34 * 80) / 67
+          B = (5400 - 2720) / 67
+          B = 2680 / 67
+          B = 40
+        -----------------------
+        Rewrite in general form
+          ax * A + bx * B = px
+          ay * A + by * B = py
+        Solve for A in first equation
+          ax * A + bx * B = px
+          ax * A = px - bx * B
+          A = (px - bx * B) / ax
+        Solve for B in second equation
+          ay * A + by * B = py
+          by * B = py - ay * A
+          B = (py - ay * A) / by
+        Substitute B
+          A = (px - bx * ((py - ay * A) / by)) / ax
+          ax * A = px - bx * (py - ay * A) / by
+          by * ax * A = by * px - bx * (py - ay * A)
+          by * ax * A = by * px - bx * py + bx * ay * A
+          by * ax * A - bx * ay * A = by * px - bx * py
+          A * (by * ax - bx * ay) = by * px - bx * py
+          A = (by * px - bx * py) / (by * ax - bx * ay)
+        -----------------------
+        Test general equation
+          A = (by * px - bx * py) / (by * ax - bx * ay)
+          ax = 94, ay = 34, bx = 22, by = 67, px = 8400, py = 5400
+          A = (67 * 8400 - 22 * 5400) / (67 * 94 - 22 * 34)
+          A = 80
+          B = (py - ay * A) / by
+          B = (5400 - 34 * 80) / 67
+          B = 40
+        '''
+        tokens_needed = []
+        for claw_machine in claw_machines:
+            # A = (by * px - bx * py) / (by * ax - bx * ay)
+            # B = (py - ay * A) / by
+            ax = claw_machine['Button A']['X']
+            ay = claw_machine['Button A']['Y']
+            bx = claw_machine['Button B']['X']
+            by = claw_machine['Button B']['Y']
+            px = mod + claw_machine['Prize']['X']
+            py = mod + claw_machine['Prize']['Y']
+            A = (by * px - bx * py) / (by * ax - bx * ay)
+            if A.is_integer():
+                B = (py - ay * A) / by
+                if B.is_integer():
+                    tokens_needed.append(int(3 * A + B))
+        result = sum(tokens_needed)
         return result
     
     def main(self):
