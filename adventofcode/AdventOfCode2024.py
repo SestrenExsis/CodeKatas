@@ -49,6 +49,91 @@ class Template: # Template
         result = solutions
         return result
 
+class Day15: # Warehouse Woes
+    '''
+    https://adventofcode.com/2024/day/15
+    '''
+    def get_parsed_input(self, raw_input_lines: list[str]):
+        robot = (0, 0)
+        warehouse = {}
+        moves = []
+        mode = 'WAREHOUSE'
+        for (row, raw_input_line) in enumerate(raw_input_lines):
+            if len(raw_input_line) < 1:
+                mode = 'MOVES'
+                continue
+            if mode == 'WAREHOUSE':
+                for (col, char) in enumerate(raw_input_line):
+                    if char in '#O':
+                        warehouse[(row, col)] = char
+                    elif char == '@':
+                        robot = (row, col)
+            else:
+                moves.append(raw_input_line)
+        result = (warehouse, tuple(robot + tuple(moves)))
+        return result
+    
+    def solve(self, warehouse, robot):
+        (robot_row, robot_col) = robot[:2]
+        moves = []
+        for move in robot[2:]:
+            for char in move:
+                if char == '^':
+                    moves.append((-1,  0))
+                elif char == 'v':
+                    moves.append(( 1,  0))
+                elif char == '<':
+                    moves.append(( 0, -1))
+                elif char == '>':
+                    moves.append(( 0,  1))
+        for move in moves:
+            (row_offset, col_offset) = move
+            # Find first open square in the move direction
+            distance = 1
+            wall_found = False
+            boxes_to_move = set()
+            while True:
+                (robot_row, robot_col)
+                row = robot_row + distance * row_offset
+                col = robot_col + distance * col_offset
+                if (row, col) in warehouse and warehouse[(row, col)] == '#':
+                    wall_found = True
+                    break
+                if (row, col) in warehouse and warehouse[(row, col)] == 'O':
+                    boxes_to_move.add((row, col))
+                if (row, col) not in warehouse:
+                    break
+                distance += 1
+            # If a wall is involved in the chain, we can't move anything
+            if wall_found:
+                continue
+            # Move all boxes encountered in the given direction
+            for (row, col) in boxes_to_move:
+                warehouse.pop((row, col))
+            for (row, col) in boxes_to_move:
+                warehouse[(row + row_offset , col + col_offset)] = 'O'
+            robot_row += row_offset
+            robot_col += col_offset
+        result = sum(
+            (100 * row + col) for (row, col) in warehouse if 
+            warehouse[(row, col)] == 'O'
+        )
+        return result
+    
+    def solve2(self, warehouse, robot):
+        result = len(robot)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        warehouse, robot = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(copy.deepcopy(warehouse), robot),
+            self.solve2(copy.deepcopy(warehouse), robot),
+        )
+        result = solutions
+        return result
+
 class Day14: # Restroom Redoubt
     '''
     https://adventofcode.com/2024/day/14
@@ -1309,7 +1394,7 @@ if __name__ == '__main__':
        12: (Day12, 'Garden Groups'),
        13: (Day13, 'Claw Contraption'),
        14: (Day14, 'Restroom Redoubt'),
-    #    15: (Day15, 'XXX'),
+       15: (Day15, 'Warehouse Woes'),
     #    16: (Day16, 'XXX'),
     #    17: (Day17, 'XXX'),
     #    18: (Day18, 'XXX'),
