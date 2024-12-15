@@ -4,6 +4,7 @@ Created on 2024-11-30
 @author: Sestren
 '''
 import argparse
+import copy
 import functools
 
 def get_raw_input_lines() -> list:
@@ -45,6 +46,136 @@ class Template: # Template
             self.solve(parsed_input),
             self.solve2(parsed_input),
         )
+        result = solutions
+        return result
+
+class Day14: # Restroom Redoubt
+    '''
+    https://adventofcode.com/2024/day/14
+    '''
+    def get_robots(self, raw_input_lines: list[str]):
+        robots = []
+        rows = 7
+        cols = 11
+        for raw_input_line in raw_input_lines:
+            (raw_pos, raw_vel) = raw_input_line.split(' ')
+            (pos_x, pos_y) = tuple(map(int, raw_pos[2:].split(',')))
+            (vel_x, vel_y) = tuple(map(int, raw_vel[2:].split(',')))
+            robots.append(((pos_y, pos_x), (vel_y, vel_x)))
+            if pos_y > rows:
+                rows = 103
+            if pos_x > cols:
+                cols = 101
+        result = (robots, rows, cols)
+        return result
+    
+    def show(self, robots, rows, cols):
+        error = 0
+        canvas = []
+        midlines = (rows // 2, cols // 2)
+        for row in range(rows):
+            row_data = []
+            for col in range(cols):
+                robot_count = 0
+                for ((pos_y, pos_x), (vel_y, vel_x)) in robots:
+                    if pos_y == row and pos_x == col:
+                        robot_count += 1
+                char = ' '
+                if row == midlines[0] or col == midlines[1]:
+                    char = ' '
+                if robot_count > 0:
+                    char = str(robot_count % 10)
+                row_data.append(char)
+            canvas.append(''.join(row_data))
+            error = max(error, sum(-1 for char in row_data if char != ' '))
+        result = (error, canvas)
+        return result
+    
+    def solve(self, robots, rows, cols):
+        # self.show(robots, rows, cols)
+        for _ in range(100):
+            for i in range(len(robots)):
+                ((pos_y, pos_x), (vel_y, vel_x)) = robots[i]
+                new_pos_y = (pos_y + vel_y) % rows
+                new_pos_x = (pos_x + vel_x) % cols
+                robots[i] = ((new_pos_y, new_pos_x), (vel_y, vel_x))
+        # self.show(robots, rows, cols)
+        midlines = (rows // 2, cols // 2)
+        upper_left = sum(
+            1 for ((pos_y, pos_x), (_, _)) in robots if 
+            (
+                pos_y < midlines[0] and
+                pos_x < midlines[1]
+            )
+        )
+        upper_right = sum(
+            1 for ((pos_y, pos_x), (_, _)) in robots if 
+            (
+                pos_y < midlines[0] and
+                pos_x > midlines[1]
+            )
+        )
+        lower_left = sum(
+            1 for ((pos_y, pos_x), (_, _)) in robots if 
+            (
+                pos_y > midlines[0] and
+                pos_x < midlines[1]
+            )
+        )
+        lower_right = sum(
+            1 for ((pos_y, pos_x), (_, _)) in robots if 
+            (
+                pos_y > midlines[0] and
+                pos_x > midlines[1]
+            )
+        )
+        result = upper_left * upper_right * lower_left * lower_right
+        return result
+    
+    def solve2(self, robots, rows, cols):
+        pixels = {}
+        for ((pos_y, pos_x), (vel_y, vel_x)) in robots:
+            if (pos_y, pos_x) not in pixels:
+                pixels[(pos_y, pos_x)] = []
+            pixels[(pos_y, pos_x)].append((vel_y, vel_x))
+        max_symmetry = (0, None, None)
+        for seconds_elapsed in range(1, 10_000 + 1):
+            next_pixels = {}
+            for ((pos_y, pos_x), velocities) in pixels.items():
+                for (vel_y, vel_x) in velocities:
+                    new_pos_y = (pos_y + vel_y) % rows
+                    new_pos_x = (pos_x + vel_x) % cols
+                    if (new_pos_y, new_pos_x) not in next_pixels:
+                        next_pixels[(new_pos_y, new_pos_x)] = []
+                    next_pixels[(new_pos_y, new_pos_x)].append((vel_y, vel_x))
+            pixels = next_pixels
+            # Test for symmetry
+            symmetry = 0
+            for (row, col) in pixels:
+                if (row, cols - col - 1) in pixels:
+                    symmetry += 0.5
+            if symmetry > max_symmetry[0]:
+                max_symmetry = (symmetry, seconds_elapsed, pixels)
+        # Display the Easter egg, because it's cute!
+        for row in range(rows):
+            row_data = []
+            for col in range(cols):
+                char = '.'
+                if (row, col) in max_symmetry[2]:
+                    char = '#'
+                row_data.append(char)
+            print(''.join(row_data))
+        result = max_symmetry[1]
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        (robots, rows, cols) = self.get_robots(raw_input_lines)
+        solutions = (
+            self.solve(copy.deepcopy(robots), rows, cols),
+            self.solve2(copy.deepcopy(robots), rows, cols),
+        )
+        assert solutions[0] < 225509760
         result = solutions
         return result
 
@@ -1161,7 +1292,7 @@ class Day01: # Historian Hysteria
 if __name__ == '__main__':
     '''
     Usage
-    python AdventOfCode2024.py 12 < inputs/2024day12.in
+    python AdventOfCode2024.py 14 < inputs/2024day14.in
     '''
     solvers = {
         1: (Day01, 'Historian Hysteria'),
@@ -1177,7 +1308,7 @@ if __name__ == '__main__':
        11: (Day11, 'Plutonian Pebbles'),
        12: (Day12, 'Garden Groups'),
        13: (Day13, 'Claw Contraption'),
-    #    14: (Day14, 'XXX'),
+       14: (Day14, 'Restroom Redoubt'),
     #    15: (Day15, 'XXX'),
     #    16: (Day16, 'XXX'),
     #    17: (Day17, 'XXX'),
