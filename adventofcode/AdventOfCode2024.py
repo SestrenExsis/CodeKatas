@@ -70,7 +70,8 @@ class Day14: # Restroom Redoubt
         return result
     
     def show(self, robots, rows, cols):
-        print('-' * cols)
+        error = 0
+        canvas = []
         midlines = (rows // 2, cols // 2)
         for row in range(rows):
             row_data = []
@@ -79,18 +80,20 @@ class Day14: # Restroom Redoubt
                 for ((pos_y, pos_x), (vel_y, vel_x)) in robots:
                     if pos_y == row and pos_x == col:
                         robot_count += 1
-                char = '.'
+                char = ' '
                 if row == midlines[0] or col == midlines[1]:
                     char = ' '
                 if robot_count > 0:
                     char = str(robot_count % 10)
                 row_data.append(char)
-            print(''.join(row_data))
-        print('-' * cols)
+            canvas.append(''.join(row_data))
+            error = max(error, sum(-1 for char in row_data if char != ' '))
+        result = (error, canvas)
+        return result
     
     def solve(self, robots, rows, cols):
         # self.show(robots, rows, cols)
-        for i in range(100):
+        for _ in range(100):
             for i in range(len(robots)):
                 ((pos_y, pos_x), (vel_y, vel_x)) = robots[i]
                 new_pos_y = (pos_y + vel_y) % rows
@@ -130,7 +133,39 @@ class Day14: # Restroom Redoubt
         return result
     
     def solve2(self, robots, rows, cols):
-        result = len(robots)
+        pixels = {}
+        for ((pos_y, pos_x), (vel_y, vel_x)) in robots:
+            if (pos_y, pos_x) not in pixels:
+                pixels[(pos_y, pos_x)] = []
+            pixels[(pos_y, pos_x)].append((vel_y, vel_x))
+        max_symmetry = (0, None, None)
+        for seconds_elapsed in range(1, 10_000 + 1):
+            next_pixels = {}
+            for ((pos_y, pos_x), velocities) in pixels.items():
+                for (vel_y, vel_x) in velocities:
+                    new_pos_y = (pos_y + vel_y) % rows
+                    new_pos_x = (pos_x + vel_x) % cols
+                    if (new_pos_y, new_pos_x) not in next_pixels:
+                        next_pixels[(new_pos_y, new_pos_x)] = []
+                    next_pixels[(new_pos_y, new_pos_x)].append((vel_y, vel_x))
+            pixels = next_pixels
+            # Test for symmetry
+            symmetry = 0
+            for (row, col) in pixels:
+                if (row, cols - col - 1) in pixels:
+                    symmetry += 0.5
+            if symmetry > max_symmetry[0]:
+                max_symmetry = (symmetry, seconds_elapsed, pixels)
+        # Display the Easter egg, because it's cute!
+        for row in range(rows):
+            row_data = []
+            for col in range(cols):
+                char = '.'
+                if (row, col) in max_symmetry[2]:
+                    char = '#'
+                row_data.append(char)
+            print(''.join(row_data))
+        result = max_symmetry[1]
         return result
     
     def main(self):
