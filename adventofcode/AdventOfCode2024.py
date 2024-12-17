@@ -5,6 +5,7 @@ Created on 2024-11-30
 '''
 import argparse
 import copy
+import heapq
 import functools
 
 def get_raw_input_lines() -> list:
@@ -45,6 +46,70 @@ class Template: # Template
         solutions = (
             self.solve(parsed_input),
             self.solve2(parsed_input),
+        )
+        result = solutions
+        return result
+
+class Day16: # Reindeer Maze
+    DIRECTIONS = {
+        'NORTH': (-1,  0, 'WEST', 'EAST'),
+        'EAST':  ( 0,  1, 'NORTH', 'SOUTH'),
+        'SOUTH': ( 1,  0, 'EAST', 'WEST'),
+        'WEST':  ( 0, -1, 'SOUTH', 'NORTH'),
+    }
+    '''
+    https://adventofcode.com/2024/day/16
+    '''
+    def get_parsed_input(self, raw_input_lines: list[str]):
+        walls = set()
+        result = []
+        start = None
+        end = None
+        for (row, raw_input_line) in enumerate(raw_input_lines):
+            for (col, char) in enumerate(raw_input_line):
+                if char == 'S':
+                    start = (row, col, 'EAST')
+                elif char == 'E':
+                    end = (row, col)
+                elif char == '#':
+                    walls.add((row, col))
+        result = (walls, start, end)
+        return result
+    
+    def solve(self, walls, start, end):
+        best_score = float('inf')
+        seen = {}
+        work = []
+        heapq.heappush(work, (0, start))
+        while len(work) > 0:
+            (score, (row, col, facing)) = heapq.heappop(work)
+            if (row, col) == end:
+                best_score = score
+                break
+            elif (row, col, facing) in seen and seen[(row, col, facing)] <= score:
+                continue
+            else:
+                seen[(row, col, facing)] = score
+                (offset_row, offset_col, turn_left, turn_right) = self.DIRECTIONS[facing]
+                (next_row, next_col) = (row + offset_row, col + offset_col)
+                if (next_row, next_col) not in walls:
+                    heapq.heappush(work, (score + 1, (next_row, next_col, facing)))
+                heapq.heappush(work, (score + 1000, (row, col, turn_left)))
+                heapq.heappush(work, (score + 1000, (row, col, turn_right)))
+        # score = 1000 * rotations + moves
+        result = best_score
+        return result
+    
+    def solve2(self, walls, start, end):
+        result = (start, end)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        (walls, start, end) = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(walls, start, end),
+            self.solve2(walls, start, end),
         )
         result = solutions
         return result
@@ -1467,7 +1532,7 @@ if __name__ == '__main__':
        13: (Day13, 'Claw Contraption'),
        14: (Day14, 'Restroom Redoubt'),
        15: (Day15, 'Warehouse Woes'),
-    #    16: (Day16, 'XXX'),
+       16: (Day16, 'Reindeer Maze'),
     #    17: (Day17, 'XXX'),
     #    18: (Day18, 'XXX'),
     #    19: (Day19, 'XXX'),
