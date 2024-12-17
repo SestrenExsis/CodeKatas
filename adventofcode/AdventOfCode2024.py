@@ -54,8 +54,8 @@ class Day15: # Warehouse Woes
     https://adventofcode.com/2024/day/15
     '''
     def get_parsed_input(self, raw_input_lines: list[str]):
-        robot = (0, 0)
         warehouse = {}
+        robot = (0, 0)
         moves = []
         mode = 'WAREHOUSE'
         for (row, raw_input_line) in enumerate(raw_input_lines):
@@ -69,23 +69,20 @@ class Day15: # Warehouse Woes
                     elif char == '@':
                         robot = (row, col)
             else:
-                moves.append(raw_input_line)
-        result = (warehouse, tuple(robot + tuple(moves)))
+                for char in raw_input_line:
+                    if char == '^':
+                        moves.append((-1,  0))
+                    elif char == 'v':
+                        moves.append(( 1,  0))
+                    elif char == '<':
+                        moves.append(( 0, -1))
+                    elif char == '>':
+                        moves.append(( 0,  1))
+        result = (warehouse, robot, moves)
         return result
     
-    def solve(self, warehouse, robot):
-        (robot_row, robot_col) = robot[:2]
-        moves = []
-        for move in robot[2:]:
-            for char in move:
-                if char == '^':
-                    moves.append((-1,  0))
-                elif char == 'v':
-                    moves.append(( 1,  0))
-                elif char == '<':
-                    moves.append(( 0, -1))
-                elif char == '>':
-                    moves.append(( 0,  1))
+    def solve(self, warehouse, robot, moves):
+        (robot_row, robot_col) = robot
         for move in moves:
             (row_offset, col_offset) = move
             # Find first open square in the move direction
@@ -93,7 +90,6 @@ class Day15: # Warehouse Woes
             wall_found = False
             boxes_to_move = set()
             while True:
-                (robot_row, robot_col)
                 row = robot_row + distance * row_offset
                 col = robot_col + distance * col_offset
                 if (row, col) in warehouse and warehouse[(row, col)] == '#':
@@ -119,17 +115,93 @@ class Day15: # Warehouse Woes
             warehouse[(row, col)] == 'O'
         )
         return result
+
+    def show(self, warehouse, robot):
+        cols = 0
+        while (0, cols) in warehouse:
+            cols += 1
+        result = []
+        row = 0
+        while True:
+            cell_count = 0
+            row_data = []
+            for col in range(cols):
+                char = '.'
+                if (row, col) in warehouse:
+                    char = warehouse[(row, col)]
+                    cell_count += 1
+                if (row, col) == robot:
+                    char = '@'
+                row_data.append(char)
+            result.append(''.join(row_data))
+            row += 1
+            if cell_count < 1:
+                break
+        return result
     
-    def solve2(self, warehouse, robot):
-        result = len(robot)
+    def solve2(self, warehouse, robot, moves):
+        # Double the width of the warehouse and boxes in it
+        new_warehouse = {}
+        for ((row, col), char) in warehouse.items():
+            left = char
+            right = char
+            if char == 'O':
+                left = '['
+                right = ']'
+            new_warehouse[(row, 2 * col)] = left
+            new_warehouse[(row, 2 * col + 1)] = right
+        warehouse = new_warehouse
+        (robot_row, robot_col) = robot
+        robot_col *= 2
+        # Process robot's moves
+        for (row_offset, col_offset) in moves:
+            # Try to move in the given direction
+            work = []
+            work.append((robot_row, robot_col))
+            valid_ind = True
+            pushed = {}
+            while len(work) > 0:
+                (row, col) = work.pop()
+                (next_row, next_col) = (row + row_offset, col + col_offset)
+                if (next_row, next_col) in warehouse:
+                    if warehouse[(next_row, next_col)] == '#':
+                        valid_ind = False
+                        break
+                    elif warehouse[(next_row, next_col)] == '[':
+                        if (next_row, next_col) not in pushed:
+                            work.append((next_row, next_col))
+                            pushed[(next_row, next_col)] = '['
+                        if (next_row, next_col + 1) not in pushed:
+                            work.append((next_row, next_col + 1))
+                            pushed[(next_row, next_col + 1)] = ']'
+                    elif warehouse[(next_row, next_col)] == ']':
+                        if (next_row, next_col - 1) not in pushed:
+                            work.append((next_row, next_col - 1))
+                            pushed[(next_row, next_col - 1)] = '['
+                        if (next_row, next_col) not in pushed:
+                            work.append((next_row, next_col))
+                            pushed[(next_row, next_col)] = ']'
+            # Only move everything if it is valid
+            if not valid_ind:
+                continue
+            robot_row += row_offset
+            robot_col += col_offset
+            for ((row, col), char) in pushed.items():
+                warehouse.pop((row, col))
+            for ((row, col), char) in pushed.items():
+                warehouse[(row + row_offset, col + col_offset)] = char
+        result = sum(
+            (100 * row + col) for (row, col) in warehouse if 
+            warehouse[(row, col)] == '['
+        )
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
-        warehouse, robot = self.get_parsed_input(raw_input_lines)
+        (warehouse, robot, moves) = self.get_parsed_input(raw_input_lines)
         solutions = (
-            self.solve(copy.deepcopy(warehouse), robot),
-            self.solve2(copy.deepcopy(warehouse), robot),
+            self.solve(copy.deepcopy(warehouse), robot, moves),
+            self.solve2(copy.deepcopy(warehouse), robot, moves),
         )
         result = solutions
         return result
