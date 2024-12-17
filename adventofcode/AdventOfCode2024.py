@@ -96,20 +96,76 @@ class Day16: # Reindeer Maze
                     heapq.heappush(work, (score + 1, (next_row, next_col, facing)))
                 heapq.heappush(work, (score + 1000, (row, col, turn_left)))
                 heapq.heappush(work, (score + 1000, (row, col, turn_right)))
-        # score = 1000 * rotations + moves
         result = best_score
         return result
     
-    def solve2(self, walls, start, end):
-        result = (start, end)
+    def show(self, walls, path_tiles):
+        cols = 0
+        while (0, cols) in walls:
+            cols += 1
+        result = []
+        row = 0
+        while True:
+            cell_count = 0
+            row_data = []
+            for col in range(cols):
+                char = '.'
+                if (row, col) in walls:
+                    char = '#'
+                    cell_count += 1
+                if (row, col) in path_tiles:
+                    assert (row, col) not in walls
+                    char = 'O'
+                    cell_count += 1
+                row_data.append(char)
+            result.append(''.join(row_data))
+            row += 1
+            if cell_count < 1:
+                break
+        for (row, col) in path_tiles:
+            if 0 <= row <= len(result) and 0 <= col <= cols:
+                continue
+            result.append('bad tile:', (row, col))
+        return result
+    
+    def solve2(self, walls, start, end, best_score):
+        best_path_tiles = set()
+        seen = {}
+        work = []
+        heapq.heappush(work, (0, start, set()))
+        while len(work) > 0:
+            (score, (row, col, facing), tiles) = heapq.heappop(work)
+            tiles.add((row, col))
+            if (row, col) == end:
+                if score == best_score:
+                    best_path_tiles |= tiles
+                    continue
+            elif score > best_score:
+                continue
+            elif (row, col, facing) in seen and seen[(row, col, facing)] < score:
+                continue
+            else:
+                seen[(row, col, facing)] = score
+                (offset_row, offset_col, turn_left, turn_right) = self.DIRECTIONS[facing]
+                (next_row, next_col) = (row + offset_row, col + offset_col)
+                if (next_row, next_col) not in walls:
+                    next_tiles = set(tiles)
+                    next_tiles.add((next_row, next_col))
+                    heapq.heappush(work, (score + 1, (next_row, next_col, facing), next_tiles))
+                heapq.heappush(work, (score + 1000, (row, col, turn_left), tiles))
+                heapq.heappush(work, (score + 1000, (row, col, turn_right), tiles))
+        result = len(best_path_tiles)
+        # for line in self.show(walls, best_path_tiles):
+        #     print(line)
         return result
     
     def main(self):
         raw_input_lines = get_raw_input_lines()
         (walls, start, end) = self.get_parsed_input(raw_input_lines)
+        best_score = self.solve(walls, start, end)
         solutions = (
-            self.solve(walls, start, end),
-            self.solve2(walls, start, end),
+            best_score,
+            self.solve2(walls, start, end, best_score),
         )
         result = solutions
         return result
