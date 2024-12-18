@@ -50,6 +50,140 @@ class Template: # Template
         result = solutions
         return result
 
+class ChronospatialComputer:
+    def __init__(self, registers, program):
+        self.registers = registers
+        self.program = program
+        self.pc = 0
+        self.outputs = []
+        self.debug = []
+
+    def __str__(self):
+        pc = self.pc
+        r = tuple(map(str, (self.registers['A'], self.registers['B'], self.registers['C'])))
+        registers = 'A: ' + r[0] + ', B: ' + r[1] + ', C: ' + r[2]
+        outputs = ','.join(map(str, self.outputs))
+        result = str((pc, registers, outputs))
+        return result
+    
+    def clone(self):
+        clone = ChronospatialComputer(self.registers, self.program)
+        clone.pc = self.pc
+        result = clone
+        return result
+    
+    def combo(self, operand) -> int:
+        assert 0 <= operand <= 6
+        values = [
+            0,
+            1,
+            2,
+            3,
+            self.registers['A'],
+            self.registers['B'],
+            self.registers['C'],
+        ]
+        result = values[operand]
+        return result
+    
+    def step(self):
+        if self.pc >= len(self.program):
+            self.debug.append(('HALT', '-', str(self)))
+            return -1
+        (opcode, operand) = (self.program[self.pc], self.program[self.pc + 1])
+        if opcode == 0: # ADV: division A
+            value = 2 ** self.combo(operand)
+            self.registers['A'] = self.registers['A'] // value
+            self.pc += 2
+            self.debug.append(('ADV', operand, str(self)))
+        elif opcode == 1: # BXL: bitwise XOR literal
+            value = operand
+            self.registers['B'] = self.registers['B'] ^ operand
+            self.pc += 2
+            self.debug.append(('BXL', operand, str(self)))
+        elif opcode == 2: # BST: ???
+            value = self.combo(operand) % 8
+            self.registers['B'] = value
+            self.pc += 2
+            self.debug.append(('BST', operand, str(self)))
+        elif opcode == 3: # JNZ: jump if not zero
+            if self.registers['A'] != 0:
+                value = operand
+                self.pc = value
+            else:
+                self.pc += 2
+            self.debug.append(('JNZ', operand, str(self)))
+        elif opcode == 4: # BXC: bitwise XOR C
+            _ = operand # Ignored
+            self.registers['B'] = self.registers['B'] ^ self.registers['C']
+            self.pc += 2
+            self.debug.append(('BXC', operand, str(self)))
+        elif opcode == 5: # OUT: output
+            value = self.combo(operand) % 8
+            self.outputs.append(value)
+            self.pc += 2
+            self.debug.append(('OUT', operand, str(self)))
+        elif opcode == 6: # BDV: division B
+            value = 2 ** self.combo(operand)
+            self.registers['B'] = self.registers['A'] // value
+            self.pc += 2
+            self.debug.append(('BDV', operand, str(self)))
+        elif opcode == 7: # CDV: division C
+            value = 2 ** self.combo(operand)
+            self.registers['C'] = self.registers['A'] // value
+            self.pc += 2
+            self.debug.append(('CDV', operand, str(self)))
+        return 0
+
+    def run(self):
+        return_code = 0
+        while True:
+            return_code = self.step()
+            if return_code != 0:
+                break
+        result = return_code
+        return result
+
+class Day17: # Chronospatial Computer
+    '''
+    https://adventofcode.com/2024/day/?
+    '''
+    def get_computer(self, raw_input_lines: list[str]):
+        registers = {}
+        program = []
+        for raw_input_line in raw_input_lines:
+            if raw_input_line.startswith('Register'):
+                (left, right) = raw_input_line.split(': ')
+                register_key = left[-1]
+                register_value = int(right)
+                registers[register_key] = register_value
+            elif raw_input_line.startswith('Program'):
+                (left, right) = raw_input_line.split(': ')
+                program = list(map(int, right.split(',')))
+        result = ChronospatialComputer(registers, program)
+        return result
+    
+    def solve(self, computer):
+        computer.run()
+        result = ','.join(map(str, computer.outputs))
+        # for line in computer.debug:
+        #     print(line)
+        return result
+    
+    def solve2(self, computer):
+        result = len(computer.program)
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        computer = self.get_computer(raw_input_lines)
+        solutions = (
+            self.solve(computer.clone()),
+            self.solve2(computer.clone()),
+        )
+        result = solutions
+        return result
+
 class Day16: # Reindeer Maze
     DIRECTIONS = {
         'NORTH': (-1,  0, 'WEST', 'EAST'),
@@ -1589,7 +1723,7 @@ if __name__ == '__main__':
        14: (Day14, 'Restroom Redoubt'),
        15: (Day15, 'Warehouse Woes'),
        16: (Day16, 'Reindeer Maze'),
-    #    17: (Day17, 'XXX'),
+       17: (Day17, 'Chronospatial Computer'),
     #    18: (Day18, 'XXX'),
     #    19: (Day19, 'XXX'),
     #    20: (Day20, 'XXX'),
