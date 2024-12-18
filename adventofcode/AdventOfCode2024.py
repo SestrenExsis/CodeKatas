@@ -134,6 +134,19 @@ class ChronospatialComputer:
             self.pc += 2
             self.debug.append(('CDV', operand, str(self)))
         return 0
+    
+    def next(self):
+        result = None
+        count = len(self.outputs)
+        while True:
+            return_code = self.step()
+            if return_code != 0:
+                break
+            if len(self.outputs) > count:
+                result = self.outputs[-1]
+                assert len(self.outputs) == (count + 1)
+                break
+        return result
 
     def run(self):
         return_code = 0
@@ -170,8 +183,60 @@ class Day17: # Chronospatial Computer
         #     print(line)
         return result
     
+    def solve2_slowly(self, computer):
+        a = 0
+        while True:
+            if a % 10_000 == 0:
+                print(a)
+            clone = computer.clone()
+            clone.registers['A'] = a
+            for num in clone.program:
+                if clone.next() != num:
+                    # print(num, clone.outputs)
+                    break
+            else:
+                clone.run()
+                if clone.outputs == clone.program:
+                    break
+            # print(','.join(map(str, computer.outputs)))
+            a += 1
+        result = a
+        return result
+
     def solve2(self, computer):
-        result = len(computer.program)
+        '''
+        while True:
+            B = A % 8
+            B = B ^ 5
+            C = A // (2 ** B)
+            B = B ^ 6
+            A = A // 8
+            B = B ^ C
+            OUT = B % 8
+            if A == 0:
+                break
+                
+        equivalent to:
+        OUT = ((((A // 8) % 8) ^ 5) ^ (A // (2 ** ((A % 8) ^ 5)))) % 8
+        2,4,1,5,7,5,1,6,0,3,4,1,5,5,3,0
+        '''
+        total = 0
+        nums = []
+        for target in reversed(computer.program):
+            for num in range(8):
+                A = 8 * total + num
+                OUT = ((((A // 8) % 8) ^ 5) ^ (A // (2 ** ((A % 8) ^ 5)))) % 8
+                if OUT == target:
+                    print(A)
+                    total = A
+                    nums.append(num)
+                    break
+            else:
+                print(total, nums)
+                raise Exception('Wrong answer!')
+        # 12657315325186140483 is too high
+        # 11346389251 is too low
+        result = total
         return result
     
     def main(self):
