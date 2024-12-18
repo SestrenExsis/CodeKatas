@@ -202,41 +202,44 @@ class Day17: # Chronospatial Computer
             a += 1
         result = a
         return result
-
-    def solve2(self, computer):
+    
+    def solve2_in_reverse(self, computer):
         '''
-        while True:
-            B = A % 8
-            B = B ^ 5
-            C = A // (2 ** B)
-            B = B ^ 6
-            A = A // 8
-            B = B ^ C
-            OUT = B % 8
-            if A == 0:
+        From observing the inputs given, the following appears to be true:
+        - The program is always in a while loop structure that ends when A is 0
+        - The output is always going to be equivalent to the values when you
+          iteratively divide A by 8 and output the modulo 8 of A
+        - The values of B and C are never carried over between loop iterations
+        
+        As a result, this means that we can use a reversed approach to find the
+        correct value of A by computing possible values for, in order:
+        - A % 8
+        - (A // 8) % 8
+        - (A // 64) % 8
+        - and so on
+        '''
+        result = None
+        targets = computer.program
+        work = [] # (negative_progress, A)
+        heapq.heappush(work, (0, 0))
+        while len(work) > 0:
+            (negative_progress, A) = heapq.heappop(work)
+            progress = -negative_progress
+            if progress == len(targets):
+                result = A
                 break
-                
-        equivalent to:
-        OUT = ((((A // 8) % 8) ^ 5) ^ (A // (2 ** ((A % 8) ^ 5)))) % 8
-        2,4,1,5,7,5,1,6,0,3,4,1,5,5,3,0
-        '''
-        total = 0
-        nums = []
-        for target in reversed(computer.program):
             for num in range(8):
-                A = 8 * total + num
-                OUT = ((((A // 8) % 8) ^ 5) ^ (A // (2 ** ((A % 8) ^ 5)))) % 8
-                if OUT == target:
-                    print(A)
-                    total = A
-                    nums.append(num)
-                    break
-            else:
-                print(total, nums)
-                raise Exception('Wrong answer!')
-        # 12657315325186140483 is too high
-        # 11346389251 is too low
-        result = total
+                clone = computer.clone()
+                clone.registers['A'] = 8 * A + num
+                clone.run()
+                if clone.outputs == targets[-progress - 1:]:
+                    heapq.heappush(work, (-progress - 1, 8 * A + num))
+        # Confirm the correct answer has been found
+        clone = computer.clone()
+        clone.registers['A'] = result
+        clone.run()
+        if clone.outputs != targets:
+            raise Exception('Wrong answer!')
         return result
     
     def main(self):
@@ -244,7 +247,7 @@ class Day17: # Chronospatial Computer
         computer = self.get_computer(raw_input_lines)
         solutions = (
             self.solve(computer.clone()),
-            self.solve2(computer.clone()),
+            self.solve2_in_reverse(computer.clone()),
         )
         result = solutions
         return result
