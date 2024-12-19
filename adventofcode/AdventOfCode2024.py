@@ -5,8 +5,8 @@ Created on 2024-11-30
 '''
 import argparse
 import copy
-import heapq
 import functools
+import heapq
 
 def get_raw_input_lines() -> list:
     raw_input_lines = []
@@ -157,9 +157,130 @@ class ChronospatialComputer:
         result = return_code
         return result
 
+class Day18: # RAM Run
+    '''
+    https://adventofcode.com/2024/day/18
+    '''
+    def get_parsed_input(self, raw_input_lines: list[str]):
+        falling_bytes = []
+        (rows, cols) = (7, 7)
+        for raw_input_line in raw_input_lines:
+            (col, row) = tuple(map(int, raw_input_line.split(',')))
+            if col >= 7 or row >= 7:
+                rows = 71
+                cols = 71
+            falling_bytes.append((row, col))
+        result = (rows, cols, falling_bytes)
+        return result
+    
+    def show(self, rows, cols, step_count, falling_bytes, steps):
+        result = []
+        for row in range(rows):
+            row_data = []
+            for col in range(cols):
+                char = '.'
+                if (row, col) in falling_bytes[:step_count]:
+                    char = '#'
+                if (row, col) in steps:
+                    if char == '#':
+                        char = 'X'
+                    else:
+                        char = 'O'
+                row_data.append(char)
+            result.append(''.join(row_data))
+        return result
+    
+    def solve(self, rows, cols, falling_bytes):
+        falling_bytes_set = set(falling_bytes)
+        assert (rows - 1, cols -1) not in falling_bytes_set
+        min_step_count = None
+        seen = set()
+        work = [] # (step_count, (row, col))
+        heapq.heappush(work, (0, (0, 0), set()))
+        while len(work) > 0:
+            (step_count, (row, col), steps) = heapq.heappop(work)
+            steps.add((row, col))
+            # print(step_count, (row, col))
+            if (row, col) == (rows - 1, cols -1):
+                min_step_count = step_count
+                # for line in self.show(rows, cols, step_count, falling_bytes, steps):
+                #     print(line)
+                break
+            if (row, col) in falling_bytes_set:
+                N = min(len(falling_bytes), 1024)
+                if (row, col) in set(falling_bytes[:N]):
+                    # print('blocked:', N, (row, col))
+                    continue
+            if (row, col) in seen:
+                continue
+            seen.add((row, col))
+            for (next_row, next_col) in (
+                (row - 1, col    ),
+                (row    , col - 1),
+                (row + 1, col    ),
+                (row    , col + 1),
+            ):
+                if not ((0 <= next_row < rows) and (0 <= next_col < cols)):
+                    continue
+                safe_ind = True
+                if safe_ind and (next_row, next_col) not in steps:
+                    heapq.heappush(work,
+                        (step_count + 1, (next_row, next_col), set(steps))
+                    )
+        result = min_step_count
+        return result
+    
+    def solve2_slowly(self, rows, cols, falling_bytes):
+        falling_bytes_set = set(falling_bytes)
+        delay = 1024
+        exit_reachable = True
+        while exit_reachable:
+            print(delay)
+            exit_reachable = False
+            seen = set()
+            work = []
+            heapq.heappush(work, (0, (0, 0)))
+            while len(work) > 0:
+                (step_count, (row, col)) = heapq.heappop(work)
+                if (row, col) == (rows - 1, cols -1):
+                    exit_reachable = True
+                    break
+                if (row, col) in falling_bytes_set:
+                    N = min(len(falling_bytes), delay + 2)
+                    if (row, col) in set(falling_bytes[:N]):
+                        continue
+                if (row, col) in seen:
+                    continue
+                seen.add((row, col))
+                for (next_row, next_col) in (
+                    (row - 1, col    ),
+                    (row    , col - 1),
+                    (row + 1, col    ),
+                    (row    , col + 1),
+                ):
+                    if not ((0 <= next_row < rows) and (0 <= next_col < cols)):
+                        continue
+                    safe_ind = True
+                    if safe_ind:
+                        heapq.heappush(work, (step_count + 1, (next_row, next_col)))
+            delay += 1
+        (block_row, block_col) = falling_bytes[delay]
+        result = ','.join(map(str, (block_col, block_row)))
+        return result
+    
+    def main(self):
+        raw_input_lines = get_raw_input_lines()
+        (rows, cols, falling_bytes) = self.get_parsed_input(raw_input_lines)
+        solutions = (
+            self.solve(rows, cols, falling_bytes),
+            self.solve2_slowly(rows, cols, falling_bytes),
+        )
+        result = solutions
+        return result
+
 class Day17: # Chronospatial Computer
     '''
-    https://adventofcode.com/2024/day/?
+    https://adventofcode.com/2024/day/17
     '''
     def get_computer(self, raw_input_lines: list[str]):
         registers = {}
@@ -1792,7 +1913,7 @@ if __name__ == '__main__':
        15: (Day15, 'Warehouse Woes'),
        16: (Day16, 'Reindeer Maze'),
        17: (Day17, 'Chronospatial Computer'),
-    #    18: (Day18, 'XXX'),
+       18: (Day18, 'RAM Run'),
     #    19: (Day19, 'XXX'),
     #    20: (Day20, 'XXX'),
     #    21: (Day21, 'XXX'),
