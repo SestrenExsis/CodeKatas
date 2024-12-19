@@ -230,8 +230,42 @@ class Day18: # RAM Run
         result = min_step_count
         return result
     
-    def solve2(self, rows, cols, falling_bytes):
-        result = (rows, cols)
+    def solve2_slowly(self, rows, cols, falling_bytes):
+        falling_bytes_set = set(falling_bytes)
+        delay = 1024
+        exit_reachable = True
+        while exit_reachable:
+            print(delay)
+            exit_reachable = False
+            seen = set()
+            work = []
+            heapq.heappush(work, (0, (0, 0)))
+            while len(work) > 0:
+                (step_count, (row, col)) = heapq.heappop(work)
+                if (row, col) == (rows - 1, cols -1):
+                    exit_reachable = True
+                    break
+                if (row, col) in falling_bytes_set:
+                    N = min(len(falling_bytes), delay + 2)
+                    if (row, col) in set(falling_bytes[:N]):
+                        continue
+                if (row, col) in seen:
+                    continue
+                seen.add((row, col))
+                for (next_row, next_col) in (
+                    (row - 1, col    ),
+                    (row    , col - 1),
+                    (row + 1, col    ),
+                    (row    , col + 1),
+                ):
+                    if not ((0 <= next_row < rows) and (0 <= next_col < cols)):
+                        continue
+                    safe_ind = True
+                    if safe_ind:
+                        heapq.heappush(work, (step_count + 1, (next_row, next_col)))
+            delay += 1
+        (block_row, block_col) = falling_bytes[delay]
+        result = ','.join(map(str, (block_col, block_row)))
         return result
     
     def main(self):
