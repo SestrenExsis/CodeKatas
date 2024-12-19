@@ -273,7 +273,7 @@ class Day18: # RAM Run
         (rows, cols, falling_bytes) = self.get_parsed_input(raw_input_lines)
         solutions = (
             self.solve(rows, cols, falling_bytes),
-            self.solve2(rows, cols, falling_bytes),
+            self.solve2_slowly(rows, cols, falling_bytes),
         )
         result = solutions
         return result
